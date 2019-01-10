@@ -1,6 +1,25 @@
 # UG_Remote
 UofT UG Lab Remote
 
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+There are some potential problems with the script.
+
+I am working on a fix.
+
+脚本存在潜在问题导致连接失败
+
+正在解决中
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+
+
+
+
+
+
+
 This setup is possible thanks to the following tools:
 1. TightVNC: https://www.tightvnc.com/
 2. KiTTY: http://www.9bis.net/kitty/
