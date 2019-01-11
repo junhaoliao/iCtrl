@@ -5,7 +5,7 @@ This setup is possible thanks to the following tools:
 1. TightVNC: https://www.tightvnc.com/
 2. KiTTY: http://www.9bis.net/kitty/
 
-Microsoft Windows Compatible Only. Mac/Linux users please see https://github.com/Louis-He/ug_connection Credit to: @Louis-He
+Microsoft Windows Compatible Only. Mac/Linux users please see https://github.com/Louis-He/ug_connection Credits to: @Louis-He
 
 Double click FirstTime_Setup.bat to initiate the scripts
 
