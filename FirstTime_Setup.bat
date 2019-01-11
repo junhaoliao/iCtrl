@@ -59,6 +59,12 @@ set finish_prompt1= Initialization finished! For further connections, you just n
 set finish_prompt2= Double click on "Remote.bat" to connect
 set finish_prompt3= Press any key to show main menu
 
+
+set enterMachineCode1= When the connection is established, the number after "ugXXX.eecg.toronto.edu :"
+set enterMachineCode2= suggests how many people are using this remote machine. If you see any number other than 1,
+set enterMachineCode3=  close all scripts and choose a different machine. (It's hard to set up even manually in this situation)
+set enterMachineCode4= Please choose a machine from 132-180 or 201-249:
+
 goto MENU
 
 :SCHINESE
@@ -98,6 +104,11 @@ set finish_prompt1= 初始化完成! 以后连接时只需
 set finish_prompt2= 双击"远程连接.bat" 即可
 set finish_prompt3= 按任意键返回主菜单
 
+set enterMachineCode1= 连接完成后，终端窗口中"ugXXX.eecg.toronto.edu :"后的数字
+set enterMachineCode2= 意味着有多少人正在使用该远程服务器。如果多于一人使用该服务器，
+set enterMachineCode3=  请关闭所有脚本并重新选择另一台服务器（这奇葩连接方式，扯着头发能让自己飞起来吗）
+set enterMachineCode4= 请在 132-180 或 201-249 选个服务器并按回车确定：
+
 goto MENU
 
 :MENU
@@ -135,6 +146,7 @@ echo. %install_prompt3%
 echo. 
 set /p "reply=%install_prompt4%? [y|n]: "
 if /i not "%reply%" == "y" goto :eof
+
 CLS
 echo. %profile_prompt1%
 set /P userName=: 
@@ -160,13 +172,19 @@ PAUSE >nul
 set /a ranMachine=132+(%random%*49/32768)
 kitty_portable.exe -ssh -L 5901:127.0.0.1:5901 %userName%@ug%ranMachine%.eecg.toronto.edu -pw %realPassword% -cmd "ece297vnc password\n\p\p\p\p%fakePassword%\n\p\p\p\p%fakePassword%\n\p\p\p\pn\n"
 
-@echo @echo on > %fileName1%.bat
-@echo set /a ranMachine=132+(%%random%%*49/32768) >> %fileName1%.bat
-@echo kitty_portable.exe -ssh -L 5901:127.0.0.1:5901 %userName%@ug%%ranMachine%%.eecg.toronto.edu -pw %realPassword% -cmd "ece297vnc stop all \n \p \p  ece297vnc start" >> %fileName1%.bat
+@echo @echo off > %fileName2%.bat
+@echo echo. %enterMachineCode1% >> %fileName2%.bat
+@echo echo. %enterMachineCode2% >> %fileName2%.bat
+@echo echo. %enterMachineCode3% >> %fileName2%.bat
+@echo echo. %enterMachineCode4% >> %fileName2%.bat
+@echo set /P machineCode=: >> %fileName2%.bat
 
-@echo start %fileName1%.bat > %fileName2%.bat
+@echo @echo kitty_portable.exe -ssh -L 5901:127.0.0.1:5901 %userName%@ug%%machineCode%%.eecg.toronto.edu -pw %realPassword% -cmd "ece297vnc stop all \n \p \p  ece297vnc start"  ^> %fileName1%.bat >> %fileName2%.bat
+
+@echo start %fileName1%.bat>> %fileName2%.bat
 @echo TIMEOUT 8 >> %fileName2%.bat
-@echo "C:\Program Files\TightVNC\tvnviewer.exe" 127.0.0.1:1 -password=%fakePassword% >> %fileName2%.bat
+@echo "C:\Program Files\TightVNC\tvnviewer.exe" 127.0.0.1:1 -password=%fakePassword%>> %fileName2%.bat
+
 CLS
 echo. %finish_prompt1%
 echo. %finish_prompt2%
@@ -214,13 +232,19 @@ PAUSE >nul
 set /a ranMachine=132+(%random%*49/32768)
 kitty_portable.exe -ssh -L 5901:127.0.0.1:5901 %userName%@ug%ranMachine%.eecg.toronto.edu -pw %realPassword% -cmd "ece297vnc password\n\p\p\p\p%fakePassword%\n\p\p\p\p%fakePassword%\n\p\p\p\pn\n"
 
-@echo @echo on > %fileName1%.bat
-@echo set /a ranMachine=132+(%%random%%*49/32768) >> %fileName1%.bat
-@echo kitty_portable.exe -ssh -L 5901:127.0.0.1:5901 %userName%@ug%%ranMachine%%.eecg.toronto.edu -pw %realPassword% -cmd "ece297vnc stop all \n \p \p  ece297vnc start" >> %fileName1%.bat
+@echo @echo off > %fileName2%.bat
+@echo echo. %enterMachineCode1% >> %fileName2%.bat
+@echo echo. %enterMachineCode2% >> %fileName2%.bat
+@echo echo. %enterMachineCode3% >> %fileName2%.bat
+@echo echo. %enterMachineCode4% >> %fileName2%.bat
+@echo set /P machineCode=: >> %fileName2%.bat
 
-@echo start %fileName1%.bat > %fileName2%.bat
+@echo @echo kitty_portable.exe -ssh -L 5901:127.0.0.1:5901 %userName%@ug%%machineCode%%.eecg.toronto.edu -pw %realPassword% -cmd "ece297vnc stop all \n \p \p  ece297vnc start"  ^> %fileName1%.bat >> %fileName2%.bat
+
+@echo start %fileName1%.bat>> %fileName2%.bat
 @echo TIMEOUT 8 >> %fileName2%.bat
-@echo "C:\Program Files\TightVNC\tvnviewer.exe" 127.0.0.1:1 -password=%fakePassword% >> %fileName2%.bat
+@echo "C:\Program Files\TightVNC\tvnviewer.exe" 127.0.0.1:1 -password=%fakePassword%>> %fileName2%.bat
+
 CLS
 echo. %finish_prompt1%
 echo. %finish_prompt2%
