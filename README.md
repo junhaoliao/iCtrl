@@ -1,6 +1,10 @@
 # UG_Remote
 UofT UG Lab Remote
 
+2019.01.16更新：
+即使本脚本支持中英双语，但因Unicode/GB2312兼容问题（尤其是Windows 10最近更新的那个beta的Unicode模式），如出现乱码，还是用英文版吧
+
+
 This setup is possible thanks to the following tools:
 1. TightVNC: https://www.tightvnc.com/
 2. KiTTY: http://www.9bis.net/kitty/
@@ -20,3 +24,4 @@ After the initialization, user can run Remote.bat  without setting up the argume
 双击 FirstTime_Setup.bat 进行初始化设置
 
 完成初始化后，日后只需运行 远程连接.bat 即可远程连接。
+
