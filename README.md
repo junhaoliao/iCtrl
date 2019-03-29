@@ -2,7 +2,7 @@
 UofT UG Lab Remote
 
 Disclaimer: 
-Your password, in plain-text, will be stored locally in the folder where you initiate the script. Please understand the risk and do not use it on any public computers. If in doubts, please email junhao.liao@mail.utoronto.ca or junhao@junhao.ca
+Your password, in plain-text, will be stored locally in the folder where you initiate the script. Please understand the risk and do not use it on any public computers. If you have any concerns, please email junhao.liao@mail.utoronto.ca or junhao@junhao.ca
 
 声明：
 你的明文密码将本地存储于你启用脚本的文件夹。请明晰风险并不要在公共电脑上使用。如有疑问欢迎来邮junhao.liao@mail.utoronto.ca 或 junhao@junhao.ca
