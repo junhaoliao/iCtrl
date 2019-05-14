@@ -1,5 +1,5 @@
 # UG_Remote
-UofT UG Lab Remote
+UofT Undergrad Lab Remote
 
 Disclaimer: 
 Your password, in plain-text, will be stored locally in the folder where you initiate the script. Please understand the risk and do not use it on any public computers. If you have any concerns, please email junhao.liao@mail.utoronto.ca or junhao@junhao.ca
