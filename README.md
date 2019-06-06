@@ -7,6 +7,10 @@ Your password, in plain-text, will be stored locally in the folder where you ini
 声明：
 你的明文密码将本地存储于你启用脚本的文件夹。请明晰风险并不要在公共电脑上使用。如有疑问欢迎来邮junhao.liao@mail.utoronto.ca 或 junhao@junhao.ca
 
+Updated June 5, 2019:
+Updates of this script has been suspended. However, you are always welcome to leave any comments on my website http://junhao.ca
+I did find the TigerVNC Client, which is a GNU project, displayed and responded way better than the TightVNC client I implemented in this project. However I haven't found a way to enter the password automatically. Anyone who is interested in using other clients can modify the scipt generated to suit your needs.
+
 Updated March 2, 2019:
 Uploaded new SSH certificates to accelerate log-in process.
 
