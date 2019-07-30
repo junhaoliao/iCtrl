@@ -1,6 +1,7 @@
 @echo off
 TITLE First Time Setup
 color 30
+del passwd
 
 :CHOOSE_LAN
 CLS
@@ -52,6 +53,8 @@ set profile_prompt5= You don't need to enter anything in the upcoming window.
 set profile_prompt6= Remember to close the upcoming BLACK Terminal when you see the the prompt
 set profile_prompt7= “Would you like to enter a view-only password (y/n)? n”
 set profile_prompt8= Now you can press any key to continue
+set profile_prompt9= Copying encryted password file from the server. It usually take 5s-30s depending on your network speed.
+
 set fileName1= Tunnel
 set fileName2= Remote
 
@@ -96,6 +99,7 @@ set profile_prompt5= 在即将弹出的窗口中不需进行任何输入
 set profile_prompt6= 在出现“Would you like to enter a view-only password (y/n)? n”后
 set profile_prompt7= 将该黑色弹窗关闭}
 set profile_prompt8= 现在，按任意键继续
+set profile_prompt9= 正在从远程机器生成密码文件到本地，取决于网络速度将需要5s-30s
 
 set fileName1= 隧道
 set fileName2= 远程连接
@@ -171,6 +175,9 @@ echo. %profile_prompt8%
 PAUSE >nul
 set /a ranMachine=132+(%random%*49/32768)
 kitty_portable.exe -ssh -L 5901:127.0.0.1:5901 %userName%@ug%ranMachine%.eecg.toronto.edu -pw %realPassword% -cmd "ece297vnc password\n\p\p\p\p%fakePassword%\n\p\p\p\p%fakePassword%\n\p\p\p\pn\n"
+CLS
+echo. %profile_prompt9%
+pscp.exe -pw %realPassword% %userName%@ug251.eecg.toronto.edu:./.vnc/passwd passwd
 
 @echo @echo off > %fileName2%.bat
 @echo echo. %enterMachineCode1% >> %fileName2%.bat
@@ -183,7 +190,7 @@ kitty_portable.exe -ssh -L 5901:127.0.0.1:5901 %userName%@ug%ranMachine%.eecg.to
 
 @echo start %fileName1%.bat>> %fileName2%.bat
 @echo TIMEOUT 8 >> %fileName2%.bat
-@echo "C:\Program Files\TightVNC\tvnviewer.exe" 127.0.0.1:1 -password=%fakePassword%>> %fileName2%.bat
+@echo vncviewer64-1.9.0.exe -passwd passwd 127.0.0.1:1>> %fileName2%.bat
 
 CLS
 echo. %finish_prompt1%
@@ -231,6 +238,9 @@ echo. %profile_prompt8%
 PAUSE >nul
 set /a ranMachine=132+(%random%*49/32768)
 kitty_portable.exe -ssh -L 5901:127.0.0.1:5901 %userName%@ug%ranMachine%.eecg.toronto.edu -pw %realPassword% -cmd "ece297vnc password\n\p\p\p\p%fakePassword%\n\p\p\p\p%fakePassword%\n\p\p\p\pn\n"
+CLS
+echo. %profile_prompt9%
+pscp.exe -pw %realPassword% %userName%@ug251.eecg.toronto.edu:./.vnc/passwd passwd
 
 @echo @echo off > %fileName2%.bat
 @echo echo. %enterMachineCode1% >> %fileName2%.bat
@@ -243,7 +253,7 @@ kitty_portable.exe -ssh -L 5901:127.0.0.1:5901 %userName%@ug%ranMachine%.eecg.to
 
 @echo start %fileName1%.bat>> %fileName2%.bat
 @echo TIMEOUT 8 >> %fileName2%.bat
-@echo "C:\Program Files\TightVNC\tvnviewer.exe" 127.0.0.1:1 -password=%fakePassword%>> %fileName2%.bat
+@echo vncviewer64-1.9.0.exe -passwd passwd 127.0.0.1:1>> %fileName2%.bat
 
 CLS
 echo. %finish_prompt1%
