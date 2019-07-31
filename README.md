@@ -7,6 +7,7 @@ Scorll down to see the Chinese README.
 ## Disclaimer
 
  Your remote password, in plain-text, will be stored locally in the folder where you initiate the script. Please understand the risk and do not use it on any public computers. If you have any concerns, please email to junhao@junhao.ca or junhao.liao@mail.utoronto.ca
+ You are also welcome to visit my personal website: https://junhao.ca
 
 This scipt is updated on July 31, 2019 to utilise TigerVNC, a more versatile substitute of TightVNC that existed in the previous versions.
 
@@ -27,6 +28,7 @@ Microsoft Windows Compatible Only. Mac/Linux users please see https://github.com
 ## 声明
 
 你的明文密码将本地存储于你启用脚本的文件夹。请明晰风险并不要在公共电脑上使用。如有疑问欢迎来邮junhao.liao@mail.utoronto.ca 或 junhao@junhao.ca
+同时你也可以来我的个人网站逛逛：https://junhao.ca
 
 本脚本于2019年7月31日更新为使用TigerVNC客户端，比原先的TightVNC更加稳定好用。
 
