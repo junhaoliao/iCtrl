@@ -27,8 +27,8 @@ Microsoft Windows Compatible Only. Mac/Linux users please see https://github.com
 
 ## 声明
 
-你的明文密码将本地存储于你启用脚本的文件夹。请明晰风险并不要在公共电脑上使用。如有疑问欢迎来邮junhao.liao@mail.utoronto.ca 或 junhao@junhao.ca
-同时你也可以来我的个人网站逛逛：https://junhao.ca
+你的密码将以明文方式本地存储于你启用脚本的文件夹。请明晰风险并不要在公共电脑上使用。如有疑问欢迎来邮junhao.liao@mail.utoronto.ca 或 junhao@junhao.ca
+欢迎来我的个人网站逛逛：https://junhao.ca
 
 本脚本于2019年7月31日更新为使用TigerVNC客户端，比原先的TightVNC更加稳定好用。
 
