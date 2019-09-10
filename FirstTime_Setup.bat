@@ -57,8 +57,10 @@ set finish_prompt3= Press any key to show main menu
 
 set enterMachineCode1= When the connection is established, the number after "ugXXX.eecg.toronto.edu :"
 set enterMachineCode2= suggests how many people are using this remote machine. If you see any number other than 1,
-set enterMachineCode3=  close all scripts and choose a different machine. (It's hard to set up even manually in this situation)
+set enterMachineCode3=  close all scripts and choose a different port or machine.
 set enterMachineCode4= Please choose a machine from 132-180 or 201-249:
+
+set enterMachinePort= Please choose a port from 2-8 only if the default port (1) is in use: 
 
 goto MENU
 
@@ -94,8 +96,10 @@ set finish_prompt3= 按任意键返回主菜单
 
 set enterMachineCode1= 连接完成后，终端窗口中"ugXXX.eecg.toronto.edu :"后的数字
 set enterMachineCode2= 意味着有多少人正在使用该远程服务器。如果多于一人使用该服务器，
-set enterMachineCode3=  请关闭所有脚本并重新选择另一台服务器（这奇葩连接方式，扯着头发能让自己飞起来吗）
+set enterMachineCode3=  请关闭所有脚本并重新选择其他 端口 或 服务器
 set enterMachineCode4= 请在 132-180 或 201-249 选个服务器并按回车确定：
+
+set enterMachinePort= 如果端口"1"被占用，请从2-8选择一个端口：
 
 goto MENU
 
@@ -114,7 +118,7 @@ echo. %profile_disclaimer2%
 echo. ----------------------------------------
 echo. 
 set choice=
-set /p choice= %choice_prompt%:
+set /p choice= %choice_prompt%: 
 IF NOT "%Choice%"=="" SET Choice=%Choice:~0,1%
 if /i "%choice%"=="1" goto SETPASSWORD
 if /i "%choice%"=="2" goto EXIT
@@ -155,12 +159,15 @@ pscp.exe -pw %realPassword% %userName%@ug251.eecg.toronto.edu:./.vnc/passwd pass
 @echo echo. %enterMachineCode3% >> %fileName2%.bat
 @echo echo. %enterMachineCode4% >> %fileName2%.bat
 @echo set /P machineCode=: >> %fileName2%.bat
+@echo echo. %enterMachinePort% >> %fileName2%.bat
+@echo set /P port=: >> %fileName2%.bat
+@echo set /a "portForward=%%port%%+5900">> %fileName2%.bat
 
-@echo @echo kitty_portable.exe -ssh -L 5901:127.0.0.1:5901 %userName%@ug%%machineCode%%.eecg.toronto.edu -pw %realPassword% -cmd "ece297vnc stop all \n \p \p  ece297vnc start"  ^> %fileName1%.bat >> %fileName2%.bat
+@echo @echo kitty_portable.exe -ssh -L %%portForward%%:127.0.0.1:%%portForward%% %userName%@ug%%machineCode%%.eecg.toronto.edu -pw %realPassword% -cmd "ece297vnc stop all \n \p \p  ece297vnc start"  ^> %fileName1%.bat >> %fileName2%.bat
 
 @echo start %fileName1%.bat>> %fileName2%.bat
 @echo TIMEOUT 8 >> %fileName2%.bat
-@echo vncviewer64-1.9.0.exe -passwd passwd 127.0.0.1:1>> %fileName2%.bat
+@echo vncviewer64-1.9.0.exe -passwd passwd 127.0.0.1:%%port%%>> %fileName2%.bat
 
 CLS
 echo. %finish_prompt1%
