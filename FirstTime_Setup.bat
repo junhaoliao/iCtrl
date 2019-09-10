@@ -26,10 +26,13 @@ echo.
 goto CHOOSE_LAN
 
 :ENGLISH
-set opt_prompt1= 1. Generate Script
-set opt_prompt2= 2. Exit
+set select297before344= If you want to setup ECE344 but never started any VNC servers on the UG machine(during ECE297), please select ECE297 first. 
 
-set choice_prompt= You can proceed only if you understand the risk
+set opt_prompt1= 1. ECE297
+set opt_prompt2= 2. ECE344(I have setup VNC for ECE297 before)
+set opt_prompt3= 3. Exit
+
+set choice_prompt= You can choose a course then proceed only if you understand the risk
 
 set profile_prompt1= Enter your Utorid
 set profile_prompt2= Enter your UG password. It's your student number by default.
@@ -39,11 +42,16 @@ set profile_disclaimer2= Do not use this script on a public computer!!
 
 set profile_prompt3= Set up a password for remote connection(at least 6 characters)
 
+set ece344machine_prompt= Please select a machine from 130-180 or 201-249
+set ece344port_prompt= Please select a port for your use(a port from 10-100 is recommended). If the port selected is in use, close all the windows and start again with another port or machine
+
 set profile_prompt4= Press any key to connect to the UG server, but plz read the following lines first
 set profile_underline= -----------------------------------------------------------
 set profile_prompt5= You don't need to enter anything in the upcoming window.
-set profile_prompt6= Remember to close the upcoming BLACK Terminal when you see the the prompt
-set profile_prompt7= “Would you like to enter a view-only password (y/n)? n”
+set profile_prompt6= After seeing the prompt “Would you like to enter a view-only password (y/n)? n”
+set ece344_profile_prompt6= After seeing the prompt “...to connect to the VNC server.”
+
+set profile_prompt7= Close the upcoming BLACK Terminal
 set profile_prompt8= Now you can press any key to continue
 set profile_prompt9= Copying encryted password file from the server. It usually take 5s-30s depending on your network speed. If prompted, type "y" and hit "Enter".
 
@@ -66,10 +74,13 @@ goto MENU
 
 :SCHINESE
 TITLE 首次设置
-set opt_prompt1= 1. 生成自动连接文件
-set opt_prompt2= 2. 退出
 
-set choice_prompt= 请在明晰风险后继续
+set select297before344= 如果你想设置ECE344，但从未在ECE297中进行过VNC连接（表示很服气），请先选1，设置好ECE297再来
+set opt_prompt1= 1. ECE297
+set opt_prompt2= 2. ECE344(我曾设置过297的VNC)
+set opt_prompt3= 3. 退出
+
+set choice_prompt= 请选择课程并在在明晰风险后继续
 
 set profile_prompt1=输入远程账户登录名(Utorid)
 set profile_prompt2= 输入ug账户密码，默认为学号
@@ -79,10 +90,15 @@ set profile_disclaimer2= 请不要在公共电脑上使用该脚本!!
 
 set profile_prompt3= 设个远程连接的登录密码，最少6位数
 
+set ece344machine_prompt= 请选择一个远程机器并回车(130-180, 201-249)
+set ece344port_prompt= 请选择你要用的端口(建议从10-100之间选)。如果端口已被占用，关闭所有窗口，换个端口重新再来
+
+
 set profile_prompt4= 按任意键开始连接到UG服务器，并自动完成设置（请先阅读以下操作）
 set profile_underline= -----------------------------------------------------------
 set profile_prompt5= 在即将弹出的窗口中不需进行任何输入
 set profile_prompt6= 在出现“Would you like to enter a view-only password (y/n)? n”后
+set ece344_profile_prompt6= 在出现“...to connect to the VNC server.”后
 set profile_prompt7= 将该黑色弹窗关闭}
 set profile_prompt8= 现在，按任意键继续
 set profile_prompt9= 正在从远程机器生成密码文件到本地，取决于网络速度将需要5s-30s。如果有问是否储存key，输入"y"并回车。
@@ -107,10 +123,11 @@ goto MENU
 CLS
 echo. ----------------------------------------
 echo. 
+echo. %select297before344%
+echo. 
 echo. %opt_prompt1%
 echo. %opt_prompt2%
 echo. %opt_prompt3%
-echo. %opt_prompt4%
 echo. 
 echo. ----------------------------------------
 echo. %profile_disclaimer1%
@@ -120,12 +137,13 @@ echo.
 set choice=
 set /p choice= %choice_prompt%: 
 IF NOT "%Choice%"=="" SET Choice=%Choice:~0,1%
-if /i "%choice%"=="1" goto SETPASSWORD
-if /i "%choice%"=="2" goto EXIT
+if /i "%choice%"=="1" goto ECE297
+if /i "%choice%"=="2" goto ECE344
+if /i "%choice%"=="3" goto EXIT
 echo.
 goto MENU
 
-:SETPASSWORD
+:ECE297
 CLS
 echo. %profile_prompt1%
 set /P userName=: 
@@ -174,6 +192,55 @@ echo. %finish_prompt1%
 echo. %finish_prompt2%
 echo. %finish_prompt3%
 PAUSE >nul
+goto EXIT
+
+:ECE344
+CLS
+echo. %profile_prompt1%
+set /P userName=: 
+
+echo. %profile_prompt2%
+
+set /P realPassword=: 
+
+echo. %ece344machine_prompt%
+set /P ece344machine=: 
+
+echo. %ece344port_prompt%
+set /P ece344port=: 
+
+CLS
+echo. 
+echo. %profile_prompt4%
+echo. 
+echo. %profile_underline% 
+echo. %profile_prompt5%
+echo. %ece344_profile_prompt6%
+echo. %profile_prompt7%
+echo. %profile_underline% 
+echo. 
+echo. %profile_prompt8%
+PAUSE >nul
+set /a ece344forwardPort = %ece344port% + 5900
+kitty_portable.exe -ssh %userName%@ug%ece344machine%.eecg.toronto.edu -pw %realPassword% -cmd "vncserver -geometry 1920x1080 -depth 24 :%ece344port% \n\p\p\p"
+CLS
+echo. %profile_prompt9%
+pscp.exe -pw %realPassword% %userName%@ug%ece344machine%.eecg.toronto.edu:./.vnc/passwd passwd
+
+@echo @echo off > %fileName2%.bat
+
+@echo @echo kitty_portable.exe -ssh -L %ece344forwardPort%:127.0.0.1:%ece344forwardPort% %userName%@ug%ece344machine%.eecg.toronto.edu -pw %realPassword%  ^> %fileName1%.bat >> %fileName2%.bat
+
+@echo start %fileName1%.bat>> %fileName2%.bat
+@echo TIMEOUT 3 >> %fileName2%.bat
+@echo vncviewer64-1.9.0.exe -passwd passwd 127.0.0.1:%ece344port%>> %fileName2%.bat
+
+CLS
+echo. %finish_prompt1%
+echo. %finish_prompt2%
+echo. %finish_prompt3%
+PAUSE >nul
+goto EXIT
 
 :EXIT
 exit
