@@ -26,18 +26,10 @@ echo.
 goto CHOOSE_LAN
 
 :ENGLISH
-set opt_prompt1= 1. Automatic
-set opt_prompt2= 2. Install TightVNC
-set opt_prompt3= 3. Generate Script
-set opt_prompt4= 4. Exit
+set opt_prompt1= 1. Generate Script
+set opt_prompt2= 2. Exit
 
-set choice_prompt= Choose 1 for fresh setup and press Enter
-
-set install_prompt1= Select "Complete" Setup unless you know what you are doing
-set install_prompt2= You will be prompted to set up passwords for Remote Access and Administration
-set install_prompt3= Select "Do not change" for both if you want less trouble
-
-set install_prompt4= Installation Finished?
+set choice_prompt= You can proceed only if you understand the risk
 
 set profile_prompt1= Enter your Utorid
 set profile_prompt2= Enter your UG password. It's your student number by default.
@@ -53,7 +45,7 @@ set profile_prompt5= You don't need to enter anything in the upcoming window.
 set profile_prompt6= Remember to close the upcoming BLACK Terminal when you see the the prompt
 set profile_prompt7= “Would you like to enter a view-only password (y/n)? n”
 set profile_prompt8= Now you can press any key to continue
-set profile_prompt9= Copying encryted password file from the server. It usually take 5s-30s depending on your network speed.
+set profile_prompt9= Copying encryted password file from the server. It usually take 5s-30s depending on your network speed. If prompted, type "y" and hit "Enter".
 
 set fileName1= Tunnel
 set fileName2= Remote
@@ -72,18 +64,10 @@ goto MENU
 
 :SCHINESE
 TITLE 首次设置
-set opt_prompt1= 1. 全自动
-set opt_prompt2= 2. 安装 TightVNC
-set opt_prompt3= 3. 生成自动连接文件
-set opt_prompt4= 4. 退出
+set opt_prompt1= 1. 生成自动连接文件
+set opt_prompt2= 2. 退出
 
-set choice_prompt= 如果你啥都不知道就选1吧
-
-set install_prompt1= 安装选项选“Complete”
-set install_prompt2= 会提示是否设置访问和管理密码，
-set install_prompt3= 建议不设置，即"Do not change"
-
-set install_prompt4= 装好没
+set choice_prompt= 请在明晰风险后继续
 
 set profile_prompt1=输入远程账户登录名(Utorid)
 set profile_prompt2= 输入ug账户密码，默认为学号
@@ -99,7 +83,7 @@ set profile_prompt5= 在即将弹出的窗口中不需进行任何输入
 set profile_prompt6= 在出现“Would you like to enter a view-only password (y/n)? n”后
 set profile_prompt7= 将该黑色弹窗关闭}
 set profile_prompt8= 现在，按任意键继续
-set profile_prompt9= 正在从远程机器生成密码文件到本地，取决于网络速度将需要5s-30s
+set profile_prompt9= 正在从远程机器生成密码文件到本地，取决于网络速度将需要5s-30s。如果有问是否储存key，输入"y"并回车。
 
 set fileName1= 隧道
 set fileName2= 远程连接
@@ -132,85 +116,9 @@ echo.
 set choice=
 set /p choice= %choice_prompt%:
 IF NOT "%Choice%"=="" SET Choice=%Choice:~0,1%
-if /i "%choice%"=="1" goto AUTO
-if /i "%choice%"=="2" goto INSTALL
-if /i "%choice%"=="3" goto SETPASSWORD
-if /i "%choice%"=="4" goto EXIT
+if /i "%choice%"=="1" goto SETPASSWORD
+if /i "%choice%"=="2" goto EXIT
 echo.
-goto MENU
-
-:AUTO
-CLS
-start tightvnc-2.8.11-gpl-setup-64bit.msi
-set "reply=y"
-echo. 
-echo. %install_prompt1%
-echo. %install_prompt2%
-echo. %install_prompt3%
-echo. 
-set /p "reply=%install_prompt4%? [y|n]: "
-if /i not "%reply%" == "y" goto :eof
-
-CLS
-echo. %profile_prompt1%
-set /P userName=: 
-
-echo. %profile_prompt2%
-
-set /P realPassword=: 
-
-echo. %profile_prompt3%
-set /P fakePassword=: 
-CLS
-echo. 
-echo. %profile_prompt4%
-echo. 
-echo. %profile_underline% 
-echo. %profile_prompt5%
-echo. %profile_prompt6%
-echo. %profile_prompt7%
-echo. %profile_underline% 
-echo. 
-echo. %profile_prompt8%
-PAUSE >nul
-set /a ranMachine=132+(%random%*49/32768)
-kitty_portable.exe -ssh -L 5901:127.0.0.1:5901 %userName%@ug%ranMachine%.eecg.toronto.edu -pw %realPassword% -cmd "ece297vnc password\n\p\p\p\p%fakePassword%\n\p\p\p\p%fakePassword%\n\p\p\p\pn\n"
-CLS
-echo. %profile_prompt9%
-pscp.exe -pw %realPassword% %userName%@ug251.eecg.toronto.edu:./.vnc/passwd passwd
-
-@echo @echo off > %fileName2%.bat
-@echo echo. %enterMachineCode1% >> %fileName2%.bat
-@echo echo. %enterMachineCode2% >> %fileName2%.bat
-@echo echo. %enterMachineCode3% >> %fileName2%.bat
-@echo echo. %enterMachineCode4% >> %fileName2%.bat
-@echo set /P machineCode=: >> %fileName2%.bat
-
-@echo @echo kitty_portable.exe -ssh -L 5901:127.0.0.1:5901 %userName%@ug%%machineCode%%.eecg.toronto.edu -pw %realPassword% -cmd "ece297vnc stop all \n \p \p  ece297vnc start"  ^> %fileName1%.bat >> %fileName2%.bat
-
-@echo start %fileName1%.bat>> %fileName2%.bat
-@echo TIMEOUT 8 >> %fileName2%.bat
-@echo vncviewer64-1.9.0.exe -passwd passwd 127.0.0.1:1>> %fileName2%.bat
-
-CLS
-echo. %finish_prompt1%
-echo. %finish_prompt2%
-echo. %finish_prompt3%
-PAUSE >nul
-
-goto MENU
-
-:INSTALL
-CLS
-start tightvnc-2.8.11-gpl-setup-64bit.msi
-set "reply=y"
-echo. 
-echo. %install_prompt1%
-echo. %install_prompt2%
-echo. %install_prompt3%
-echo. 
-set /p "reply=%install_prompt4%? [y|n]: "
-if /i not "%reply%" == "y" goto :eof
 goto MENU
 
 :SETPASSWORD
@@ -236,8 +144,7 @@ echo. %profile_underline%
 echo. 
 echo. %profile_prompt8%
 PAUSE >nul
-set /a ranMachine=132+(%random%*49/32768)
-kitty_portable.exe -ssh -L 5901:127.0.0.1:5901 %userName%@ug%ranMachine%.eecg.toronto.edu -pw %realPassword% -cmd "ece297vnc password\n\p\p\p\p%fakePassword%\n\p\p\p\p%fakePassword%\n\p\p\p\pn\n"
+kitty_portable.exe -ssh -L 5901:127.0.0.1:5901 %userName%@ug251.eecg.toronto.edu -pw %realPassword% -cmd "ece297vnc password\n\p\p\p\p%fakePassword%\n\p\p\p\p%fakePassword%\n\p\p\p\pn\n"
 CLS
 echo. %profile_prompt9%
 pscp.exe -pw %realPassword% %userName%@ug251.eecg.toronto.edu:./.vnc/passwd passwd
@@ -260,7 +167,6 @@ echo. %finish_prompt1%
 echo. %finish_prompt2%
 echo. %finish_prompt3%
 PAUSE >nul
-goto MENU
 
 :EXIT
 exit
