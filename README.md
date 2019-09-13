@@ -4,6 +4,8 @@
 
 New version!! Now ECE344 users can connect as well. 新版本！！ECE344也能连了
 
+Check the "Release" page for the latest version: https://github.com/junhaoliao/UG_Remote/releases
+
 Scorll down to see the Chinese README.
 
 ## Disclaimer
