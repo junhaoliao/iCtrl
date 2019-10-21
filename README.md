@@ -2,6 +2,12 @@
 # UG_Remote
 **UofT Engineering Undergraduate Lab Remote 多伦多大学工程系本科远程自动连接**
 
+## Future Development
+1. Implement the ECE344 connection method as the default
+2. Implement a port scaning tool to confirm the availability of ports. This might not be realized eventually as frequency connections to the server can cause the user's IP to be blocked. (It happened a lot when I lived at CampusOne...)
+
+
+
 New version!! Now ECE344 users can connect as well. 新版本！！ECE344也能连了
 
 Check the "Release" page for the latest version: https://github.com/junhaoliao/UG_Remote/releases
