@@ -151,9 +151,12 @@
   <ItemGroup>
     <ClCompile Include="UG_Remote.cpp">
       <LanguageStandard Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">stdcpp17</LanguageStandard>
+      <MultiProcessorCompilation Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</MultiProcessorCompilation>
+      <MultiProcessorCompilation Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</MultiProcessorCompilation>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="resource.h" />
     <ClInclude Include="showPortStatus.h" />
     <ClInclude Include="ugProfile.h" />
     <ClInclude Include="ugSession.h" />
@@ -163,6 +166,12 @@
     <None Include="kitty_portable.exe" />
     <None Include="pscp.exe" />
     <None Include="vncviewer64-1.9.0.exe" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="UG_Remote.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="icon.ico" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
