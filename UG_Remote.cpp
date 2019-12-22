@@ -16,7 +16,8 @@ int main()
 		system(command_sendPortCheckScript.c_str());
 
 		ugSession newSession(newProfile.getUsername().c_str(), newProfile.getPasswd().c_str(), 251);
-		char scripts[6][256] = {
+		char scripts[7][256] = {
+		"killall Xtigervnc\n\0",
 		"rm -rf .vnc\n\0",
 		"vncpasswd\n\0",
 		"",
@@ -25,10 +26,10 @@ int main()
 		"chmod u+x checkPort.sh\n\0"
 		};
 		std::string vncPasswdScript = newProfile.getVNCPasswd() + "\n\0";
-		strcpy_s(scripts[2], vncPasswdScript.c_str());
 		strcpy_s(scripts[3], vncPasswdScript.c_str());
+		strcpy_s(scripts[4], vncPasswdScript.c_str());
 
-		newSession.automatic_shell_session(scripts, 6);
+		newSession.automatic_shell_session(scripts, 7);
 
 		std::string command_getVncEncryption = "pscp.exe -pw " + newProfile.getPasswd() + " " + newProfile.getUsername() + "@ug251.eecg.toronto.edu:./.vnc/passwd passwd";
 		system(command_getVncEncryption.c_str());
@@ -86,10 +87,11 @@ int main()
 			unsigned machine = std::atoi(selction.c_str());
 			myProfile.changeMachine(machine);
 			ugSession newSession(myProfile.getUsername().c_str(), myProfile.getPasswd().c_str(), machine);
-			char scripts[1][256] = {
-				"./checkPort.sh\0",
+			char scripts[2][256] = {
+				"killall Xtigervnc\n\0",
+				"./checkPort.sh\n\0",
 			};
-			newSession.exec_shell_session(scripts, 1);
+			newSession.automatic_shell_session(scripts, 2);
 			std::string command_getPortStatus = "pscp.exe -pw " + myProfile.getPasswd() + " " + myProfile.getUsername() + "@ug251.eecg.toronto.edu:./portscan.log portscan.log";
 			system(command_getPortStatus.c_str());
 			//system("pause");
