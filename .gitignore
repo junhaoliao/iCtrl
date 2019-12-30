@@ -57,3 +57,10 @@ x64/Debug/UG_Remote.tlog/rc.write.1.tlog
 x64/Debug/UG_Remote.tlog/rc.read.1.tlog
 x64/Debug/UG_Remote.tlog/rc.command.1.tlog
 x64/Debug/UG_Remote.res
+.vs/UG_Remote/v16/ipch/AutoPCH/9a161890a19087bb/UG_REMOTE.ipch
+.vs/UG_Remote/v16/ipch/AutoPCH/a5c517532a0b743b/UG_REMOTE.ipch
+portscan.log
+x64/Debug/UG_Remote.Build.CppClean.log
+x64/Debug/UG_Remote.tlog/unsuccessfulbuild
+x64/Debug/UG_Remote.vcxproj.FileListAbsolute.txt
+x64/Release/UG_Remote.tlog/link.delete.1.tlog

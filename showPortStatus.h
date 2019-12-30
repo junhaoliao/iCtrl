@@ -51,20 +51,20 @@ public:
                     std::cout << "©à ";
                 }*/
                 if (i == 0 && j == 0) {
-                    std::cout << " |¨€¨€";
+                    std::cout << "|";
                 }
                 else {
-                    std::cout << " |" << std::setw(2) << std::setfill(' ') << i * 10 + j;
+                    std::cout << "|" << std::setw(2) << std::setfill(' ') << i * 10 + j;
                 }
 
                 if (i==0&&j==0) {
-                    std::cout << "¨€¨€¨€¨€" << RESET;
+                    std::cout << " ¨€¨€ " << RESET;
                 }
                 else if (ports[i * 10 + j]) {
-                    std::cout << RED << "¨€¨€  " << RESET;
+                    std::cout << RED << " ¨€ " << RESET;
                 }
                 else {
-                    std::cout << GREEN << "¨€¨€  " << RESET;
+                    std::cout << GREEN << " ¨€ " << RESET;
                 }
             }
             std::cout << "|"<< std::endl << std::endl;
