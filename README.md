@@ -19,12 +19,16 @@ Microsoft Windows Only. Mac/Linux users please see https://github.com/Louis-He/u
 Support for Linux/Mac will be added (when I actually found my MacBook useful... Thumbs down for Apple not supporting Linux on their latest models).
 
 ## V4 Change Log
+This script is updated to v4.2 on December 30, 2019.
+1. Change encoding to ASCII to avoid port usage display issues on some machines
+2. Change port scanning method to check ports not occupied by current user
+
 This script is updated to v4.1 on December 22, 2019.
-1. Added icon for the executable. See "Special Thanks to..." for more details.
+1. script icon for the executable. See "Special Thanks to..." for more details.
 2. Fixed a bug where establishing multiple VNC connections on a same machine can cause fatal errors, which is due to the environment of the lab machines.
 
 This script is updated to v4 on December 21, 2019.
-1. Ece297vnc method deprecated. Now establish VNC connections directly by calling "vncserver" on the remote machine.
+1. Ece297vnc method deprecated. Now establish VNC connections directly by calling "vncserver" on the remote maAchine.
 2. Port scanning tool to confirm the availability of selection. 
 3. Password is now encrypted. It is definitely safer than plain text.
 
@@ -58,6 +62,10 @@ Richard Shen from Uoft Architect helped make the icon with Adobe Illustrator for
 日后将增加对Linux/Mac 支持（有空再说，MacBook已经吃灰了...新版Mac不支持Linux，必须给苹果差评）
 
 ## V4 版本说明
+本脚本于2019年12月30日更新v4.2。
+1. 更改编码至ASCII，解决在部分电脑上无法正常显示端口占用情况的问题
+2. 更改端口扫描方法，解决无法扫描其他用户创建的端口的问题
+
 本脚本于2019年12月22日更新v4.1。
 1. 为程序添加了图标。详见“特别感谢”。
 2. 修复了一个严重错误：由于实验室环境的配置，当在同一台实验室机器上建立多个VNC连接时会严重出错。
