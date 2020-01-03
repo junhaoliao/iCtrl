@@ -28,7 +28,7 @@ This script is updated to v4.1 on December 22, 2019.
 2. Fixed a bug where establishing multiple VNC connections on a same machine can cause fatal errors, which is due to the environment of the lab machines.
 
 This script is updated to v4 on December 21, 2019.
-1. Ece297vnc method deprecated. Now establish VNC connections directly by calling "vncserver" on the remote maAchine.
+1. Ece297vnc method deprecated. Now establish VNC connections directly by calling "vncserver" on the remote machine.
 2. Port scanning tool to confirm the availability of selection. 
 3. Password is now encrypted. It is definitely safer than plain text.
 
