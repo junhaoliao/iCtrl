@@ -10,10 +10,12 @@ Your remote password, will be stored locally in the folder where you initiate th
 
 You are also welcome to visit my personal website: https://junhao.ca
 
-## Instructions
-1. Double click on "UG_Remote.exe" to initiate the profile.
-2. After the initialization, run "UG_Remote.exe" again to start a new connection.
-3. If you are disconnected, you can choose to resume the last session also by "UG_Remote.exe". 
+## Instructions (5 steps)
+1. Download and install dependency "Microsoft Visual C++ Redistributable for Visual Studio 2019": https://aka.ms/vs/16/release/vc_redist.x64.exe
+2. Download and extract "UG_Remote_v4_2.zip" from the Release Page: https://github.com/junhaoliao/UG_Remote/releases
+3. Double click on "UG_Remote.exe" to initiate the profile.
+4. After the initialization, run "UG_Remote.exe" again to start a new connection.
+5. If you are disconnected, you can choose to resume the last session also by "UG_Remote.exe". 
 
 Microsoft Windows Only. Mac/Linux users please see https://github.com/Louis-He/ug_connection Credits to: @Louis-He
 Support for Linux/Mac will be added (when I actually found my MacBook useful... Thumbs down for Apple not supporting Linux on their latest models).
@@ -51,11 +53,13 @@ Richard Shen from Uoft Architect helped make the icon with Adobe Illustrator for
 你的密码将本地存储于你启用脚本的文件夹。请明晰风险并不要在公共电脑上使用。如有疑问欢迎来邮junhao.liao@mail.utoronto.ca 或 junhao@junhao.ca
 欢迎来我的个人网站逛逛：https://junhao.ca
 
-## 使用说明
+## 使用说明(5 步)
 
-1. 双击"UG_Remote.exe" 初始化。
-2. 初始化完毕后，再次运行"UG_Remote.exe"以建立新连接。
-3. 如果掉线了，可以运行"UG_Remote.exe"继续上次连接。
+1. 下载并安装依赖库 "Microsoft Visual C++ Redistributable for Visual Studio 2019": https://aka.ms/vs/16/release/vc_redist.x64.exe
+2. 从Release页面，下载并解压"UG_Remote_v4_2.zip": https://github.com/junhaoliao/UG_Remote/releases
+3. 双击"UG_Remote.exe" 初始化。
+4. 初始化完毕后，再次运行"UG_Remote.exe"以建立新连接。
+5. 如果掉线了，可以运行"UG_Remote.exe"继续上次连接。
 
 本脚本暂时只对Windows兼容，Mac/Linux 版本请见@Louis-He 的 https://github.com/Louis-He/ug_connection
 
