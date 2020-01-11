@@ -58,13 +58,13 @@ public:
                 }
 
                 if (i==0&&j==0) {
-                    std::cout << " ¨€¨€ " << RESET;
+                    std::cout << " 000 " << RESET;
                 }
                 else if (ports[i * 10 + j]) {
-                    std::cout << RED << " ¨€ " << RESET;
+                    std::cout << RED << " X " << RESET;
                 }
                 else {
-                    std::cout << GREEN << " ¨€ " << RESET;
+                    std::cout << GREEN << " O " << RESET;
                 }
             }
             std::cout << "|"<< std::endl << std::endl;

@@ -35,7 +35,7 @@ int main()
 		system(command_getVncEncryption.c_str());
 
 		system("CLS");
-		std::cout << "Hey, setup is done!! You can now close this window and launch the program again." << std::endl;
+		std::cout << "Hey, the setup is done!! You can now close this window and launch the program again." << std::endl;
 		system("pause");
 	}
 	else {
@@ -97,7 +97,7 @@ int main()
 			//system("pause");
 			showPortStatus();
 			unsigned port;
-			std::cout << "Please enter the new port # (the red ones are busy)" << std::endl;
+			std::cout << R"(Please enter the new port # (the red "X"s are busy while the green "O"s are free))" << std::endl;
 			std::cin >> port;
 			myProfile.changePort(port);
 			std::string command_setTunnel = "start kitty_portable.exe -ssh -L " + std::to_string(port + 5900) + ":localhost:" + std::to_string(port + 5900)
