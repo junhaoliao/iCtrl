@@ -21,6 +21,9 @@ Microsoft Windows Only. Mac/Linux users please see https://github.com/Louis-He/u
 Support for Linux/Mac will be added (when I actually found my MacBook useful... Thumbs down for Apple not supporting Linux on their latest models).
 
 ## V4 Change Log
+This script is updated to v4.3.1 on January 17, 2020.
+1. Corrected keyword in port scanning method. Now it should work completely.
+
 This script is updated to v4.3 on January 10, 2020.
 1. Changed the block symbol to letters to avoid port usage display issues on some machines
 2. Update the sh script to use UNIX EOL
@@ -70,6 +73,9 @@ Richard Shen from Uoft Architect helped make the icon with Adobe Illustrator for
 日后将增加对Linux/Mac 支持（有空再说，MacBook已经吃灰了...新版Mac不支持Linux，必须给苹果差评）
 
 ## V4 版本说明
+本脚本于2020年1月17日更新v4.3.1。
+1. 更正了端口扫描脚本所用关键词。现在脚本应该完全能用了。
+
 本脚本于2020年1月10日更新v4.3。
 1. 更改方块符号为字母，解决在部分电脑上无法正常显示端口占用情况的问题
 2. 更新sh脚本，使用UNIX的EOL符号
