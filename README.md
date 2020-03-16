@@ -12,7 +12,7 @@ You are also welcome to visit my personal website: https://junhao.ca
 
 ## Instructions (5 steps)
 1. Download and install dependency "Microsoft Visual C++ Redistributable for Visual Studio 2019": https://aka.ms/vs/16/release/vc_redist.x64.exe
-2. Download and extract "UG_Remote_v4_2.zip" from the Release Page: https://github.com/junhaoliao/UG_Remote/releases
+2. Download and extract "UG_Remote_vx_x_x.zip"(the latest version) from the Release Page: https://github.com/junhaoliao/UG_Remote/releases
 3. Double click on "UG_Remote.exe" to initiate the profile.
 4. After the initialization, run "UG_Remote.exe" again to start a new connection.
 5. If you are disconnected, you can choose to resume the last session also by "UG_Remote.exe". 
@@ -63,7 +63,7 @@ Richard Shen from Uoft Architect helped make the icon with Adobe Illustrator for
 ## 使用说明(5 步)
 
 1. 下载并安装依赖库 "Microsoft Visual C++ Redistributable for Visual Studio 2019": https://aka.ms/vs/16/release/vc_redist.x64.exe
-2. 从Release页面，下载并解压"UG_Remote_v4_2.zip": https://github.com/junhaoliao/UG_Remote/releases
+2. 从Release页面，下载并解压"UG_Remote_vx_x_x.zip"(最新版本): https://github.com/junhaoliao/UG_Remote/releases
 3. 双击"UG_Remote.exe" 初始化。
 4. 初始化完毕后，再次运行"UG_Remote.exe"以建立新连接。
 5. 如果掉线了，可以运行"UG_Remote.exe"继续上次连接。
