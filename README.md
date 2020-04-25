@@ -3,7 +3,7 @@
 
 Scroll down to see the Chinese README.中文版在页面下方。
 
-Check the "Release" page for the latest version: https://github.com/junhaoliao/UG_Remote/releases
+Download the latest version here: https://github.com/junhaoliao/UG_Remote/releases
 
 ## Disclaimer
 Your remote password, will be stored locally in the folder where you initiate the script. Please understand the risk and do not use it on any public computers. If you have any concerns, please email to junhao@junhao.ca or junhao.liao@mail.utoronto.ca
