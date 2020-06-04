@@ -1,6 +1,6 @@
 # UG_Remote
 **UofT Engineering Undergraduate Lab Remote 多伦多大学工程系本科远程自动连接**
-
+**This script poses severe security threats if you are not using it on your home computer. I'm working on an update but you are still encouraged to use it only on your personal computer.**
 Scroll down to see the Chinese README.中文版在页面下方。
 
 Download the latest version here: https://github.com/junhaoliao/UG_Remote/releases
