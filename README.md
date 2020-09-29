@@ -65,7 +65,7 @@ Richard Shen from Uoft Architect helped make the icon with Adobe Illustrator for
 你的密码将本地存储于你启用脚本的文件夹。请明晰风险并不要在公共电脑上使用。如有疑问欢迎来邮junhao.liao@mail.utoronto.ca 或 junhao@junhao.ca
 欢迎来我的个人网站逛逛：https://junhao.ca
 
-## 使用说明(5 步)
+## 使用说明(4 步)
 
 1. 下载并安装依赖库 "Microsoft Visual C++ Redistributable for Visual Studio 2019": https://aka.ms/vs/16/release/vc_redist.x64.exe
 2. 从Release页面，下载"UG_Remote_vx_x_x.exe"(最新版本): https://github.com/junhaoliao/UG_Remote/releases
