@@ -10,17 +10,21 @@ Your remote password, will be stored locally in the folder where you initiate th
 
 You are also welcome to visit my personal website: https://junhao.ca
 
-## Instructions (5 steps)
+## Instructions (4 steps)
 1. Download and install dependency "Microsoft Visual C++ Redistributable for Visual Studio 2019": https://aka.ms/vs/16/release/vc_redist.x64.exe
-2. Download and extract "UG_Remote_vx_x_x.zip"(the latest version) from the Release Page: https://github.com/junhaoliao/UG_Remote/releases
-3. Double click on "UG_Remote.exe" to initiate the profile.
-4. After the initialization, run "UG_Remote.exe" again to start a new connection.
-5. If you are disconnected, you can choose to resume the last session also by "UG_Remote.exe". 
+2. Download "UG_Remote_vx_x_x.exe"(the latest version) from the Release Page: https://github.com/junhaoliao/UG_Remote/releases
+3. Double click on "UG_Remote.exe" to initiate the profile. After the initialization, run "UG_Remote.exe" again to start a new connection.
+4. If you are disconnected, you can choose to resume the last session also by "UG_Remote.exe". 
 
 Microsoft Windows Only. Mac/Linux users please see https://github.com/Louis-He/ug_connection Credits to: @Louis-He
 Support for Linux/Mac will be added (when I actually found my MacBook useful... Thumbs down for Apple not supporting Linux on their latest models).
 
 ## V4 Change Log
+This script is updated to v4.5 on September 28, 2020.
+1. Updated SSH host keys as the UG labs performed distribution upgrades during the summer
+2. Updated pscp, kitty, and vncviewer to the latest version
+3. Packed all files into one standalone executable thanks to SerGreen/Appacker
+
 This script is updated to v4.3.1 on January 17, 2020.
 1. Corrected keyword in port scanning method. Now it should work completely.
 
@@ -48,6 +52,7 @@ This script is updated to v4 on December 21, 2019.
 4. TigerVNC: https://tigervnc.org/
 5. KiTTY: http://www.9bis.net/kitty/
 6. PSCP from PuTTY: https://www.chiark.greenend.org.uk/~sgtatham/putty/
+7. SerGreen/Appacker: https://github.com/SerGreen/Appacker
 
 ## Special Thanks to... 
 Richard Shen from Uoft Architect helped make the icon with Adobe Illustrator for this project.
@@ -63,16 +68,20 @@ Richard Shen from Uoft Architect helped make the icon with Adobe Illustrator for
 ## 使用说明(5 步)
 
 1. 下载并安装依赖库 "Microsoft Visual C++ Redistributable for Visual Studio 2019": https://aka.ms/vs/16/release/vc_redist.x64.exe
-2. 从Release页面，下载并解压"UG_Remote_vx_x_x.zip"(最新版本): https://github.com/junhaoliao/UG_Remote/releases
-3. 双击"UG_Remote.exe" 初始化。
-4. 初始化完毕后，再次运行"UG_Remote.exe"以建立新连接。
-5. 如果掉线了，可以运行"UG_Remote.exe"继续上次连接。
+2. 从Release页面，下载"UG_Remote_vx_x_x.exe"(最新版本): https://github.com/junhaoliao/UG_Remote/releases
+3. 双击"UG_Remote.exe" 初始化。初始化完毕后，再次运行"UG_Remote.exe"以建立新连接。
+4. 如果掉线了，可以运行"UG_Remote.exe"继续上次连接。
 
 本脚本暂时只对Windows兼容，Mac/Linux 版本请见@Louis-He 的 https://github.com/Louis-He/ug_connection
 
 日后将增加对Linux/Mac 支持（有空再说，MacBook已经吃灰了...新版Mac不支持Linux，必须给苹果差评）
 
 ## V4 版本说明
+本脚本于2020年9月28日更新v4.5。
+1. 更新 SSH host keys，以匹配在暑假进行了系统升级的机房电脑
+2. 更新 pscp, kitty, and vncviewer 至最新版
+3. 使用 SerGreen/Appacker 将所有文件打包成独立可执行程序
+
 本脚本于2020年1月17日更新v4.3.1。
 1. 更正了端口扫描脚本所用关键词。现在脚本应该完全能用了。
 
@@ -93,7 +102,7 @@ Richard Shen from Uoft Architect helped make the icon with Adobe Illustrator for
 2. 新增端口扫描工具，轻松辨别端口是否可用。
 3. 密码现在为加密保存，比原来的明文密码更为安全。
 
-## 在此感谢以下开源软件开发者
+## 在此感谢以下开源软件/库开发者
 
 1. libssh – The SSH Library!: http://www.libssh.org/
 2. JSON for Modern C++: https://nlohmann.github.io/json/
@@ -101,6 +110,7 @@ Richard Shen from Uoft Architect helped make the icon with Adobe Illustrator for
 4. TigerVNC: https://tigervnc.org/
 5. KiTTY: http://www.9bis.net/kitty/
 6. PSCP from PuTTY: https://www.chiark.greenend.org.uk/~sgtatham/putty/
+7. SerGreen/Appacker: https://github.com/SerGreen/Appacker
 
 ## 特别感谢
 Richard Shen：多伦多大学建筑系，使用Adobe Illustrator制作了本脚本的图标。
