@@ -71,7 +71,7 @@ int main()
 				using namespace std::literals;
 				std::this_thread::sleep_for(2s);// 4 second
 			}
-			std::string command_launchVNC = "vncviewer64-1.9.0.exe -passwd passwd 127.0.0.1:" + std::to_string(port);
+			std::string command_launchVNC = "vncviewer64.exe -passwd passwd 127.0.0.1:" + std::to_string(port);
 			system(command_launchVNC.c_str());
 		}
 		else if (selection.compare("n") == 0 || selection.compare("N") == 0) {
@@ -109,7 +109,7 @@ int main()
 				using namespace std::literals;
 				std::this_thread::sleep_for(4s);// 4 second
 			}
-			std::string command_launchVNC = "vncviewer64-1.9.0.exe -passwd passwd 127.0.0.1:" + std::to_string(port);
+			std::string command_launchVNC = "vncviewer64.exe -passwd passwd 127.0.0.1:" + std::to_string(port);
 			system(command_launchVNC.c_str());
 		}
 		else {
