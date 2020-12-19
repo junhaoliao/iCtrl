@@ -139,8 +139,9 @@ def forward_and_launch(srv_num, port, username, ug_passwd):
         print("C-c: Port forwarding stopped.")
         os._exit(0)
 
-    if os.name == 'posix':
-        os.system("./TigerVNC.app/Contents/MacOS/TigerVNC\ Viewer --passwd=%s localhost:%d" % (VNC_PASSWD_PATH, vnc_port))
+    if os.name == 'posix': # TODO: no way this is not gonna work on other posix systems
+        import subprocess
+        subprocess.Popen([VNC_VIEWER_PATH_MACOS, "--passwd=%s" % VNC_PASSWD_PATH, "localhost:%d" % vnc_port])
     else:
         import subprocess
         subprocess.Popen([VNC_VIEWER_PATH_WIN64, "--passwd=%s"%VNC_PASSWD_PATH, "localhost:%d"%vnc_port])

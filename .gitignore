@@ -1,13 +1,15 @@
 # build directories
 /build
+/dist
 
 # Python virtual env
 /venv
 
 # excutables
-/dist/**.exe
-/dist/**.7z
-/**.exe
+**.exe
+**.7z
+**.dmg
+**.zip
 
 # profiles
 /dist/passwd
