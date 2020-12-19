@@ -1,7 +1,5 @@
 import sys
 import os
-if getattr(sys, 'frozen', False):
-    sys.stdout = open(os.path.join(sys._MEIPASS, "error.log"), 'w')
 
 import base64
 import json
@@ -12,14 +10,10 @@ import paramiko
 
 import forward_and_launch as fl
 
-
-REFRESH_BUTTON_ICON_PATH = "Gnome-view-refresh-20x20.png"
-PROFILE_FILE_PATH = "profile.json"
-if getattr(sys, 'frozen', False):
-    REFRESH_BUTTON_ICON_PATH = os.path.join(sys._MEIPASS, REFRESH_BUTTON_ICON_PATH)
-    PROFILE_FILE_PATH = os.path.join(sys._MEIPASS, PROFILE_FILE_PATH)
+from path_names import *
 
 ssh_authenticated = False
+global_set_vncpasswd = False
 profile_loaded = False
 saved_username = None
 saved_password = None
@@ -31,7 +25,6 @@ def save_profile(username=None, ug_passwd=None, last_srv=None, only_update_srv=F
         with open(PROFILE_FILE_PATH, "r+") as infile:
             json_data = json.load(infile)
             json_data['last_srv'] = last_srv
-            infile.write(json_data)
     else:
         with open(PROFILE_FILE_PATH, 'w') as outfile:
             json_data = json.dumps(
@@ -51,13 +44,14 @@ try:
         saved_password = base64.b64decode(saved_password).decode('ascii')
         last_srv = json_data['last_srv']
         profile_loaded = True
-except FileNotFoundError:
+except (FileNotFoundError, json.decoder.JSONDecodeError):
+    global_set_vncpasswd = True
     profile_loaded = False
 
 global_used_vncports_lst = []
 global_ports_by_me_lst = []
 
-def update_used_ports(window, username, ug_passwd, srv_num):
+def update_used_ports(window, username, ug_passwd, srv_num, vnc_passwd_input=None):
     client = paramiko.SSHClient()
     client.set_missing_host_key_policy(paramiko.WarningPolicy())
     try:
@@ -69,6 +63,25 @@ def update_used_ports(window, username, ug_passwd, srv_num):
     # save username and passwd
     global ssh_authenticated
     ssh_authenticated = True
+    if global_set_vncpasswd:
+        print("trying to reset vnc passwd")
+        reset_cmd_lst = [
+            "killall Xtigervnc",
+            "rm -rf ~/.vnc",
+            "mkdir ~/.vnc",
+            "echo '%s'| vncpasswd -f > ~/.vnc/passwd" % vnc_passwd_input,
+            "chmod 600 ~/.vnc/passwd",
+        ]
+        _,stdout,stderr = client.exec_command(";".join(reset_cmd_lst))
+        print(";".join(reset_cmd_lst))
+        for line in stdout:
+            print(line)
+        for line in stderr:
+            print(line)
+        _,stdout,_ = client.exec_command("echo '%s'| vncpasswd -f"%vnc_passwd_input)
+        with open(VNC_PASSWD_PATH, "wb") as vnc_passwd_file:
+            vnc_passwd_file.write(stdout.read())
+
     save_profile(username=username, ug_passwd=ug_passwd, last_srv=srv_num)
 
     # formulate the vnc port scanning cmd
@@ -125,6 +138,8 @@ def update_used_ports(window, username, ug_passwd, srv_num):
             window[port_but_key].update(button_color=('white', 'green'), disabled=False)
             window[port_but_key].set_tooltip('Free')
 
+    window["-STATUS-"].update("Status: Ports status refreshed. ")
+
     return
 
 MACHINES = list(range(51, 76))
@@ -149,13 +164,13 @@ srv_usrname_passwd_col = [
     ],
     [
         sg.Text("Reset Profile", size=(12, 1), font='Helvetica 20'),
-        sg.Radio('No', "RESET", font='Helvetica 20', default=True, enable_events=True, key="-DONT_RESET-"),
-        sg.Radio('Yes, VNC Password:', "RESET", font='Helvetica 20', enable_events=True, key="-PLZ_RESET-"),
+        sg.Radio('No', "RESET", font='Helvetica 20', default=profile_loaded, enable_events=True, key="-DONT_RESET-"),
+        sg.Radio('Yes, VNC Password:', "RESET", font='Helvetica 20', default=not profile_loaded, enable_events=True, key="-PLZ_RESET-"),
 
     ],
     [
         sg.Input(size=(37, 1), font='Helvetica 20', password_char='*', enable_events=True, key="-VNC_PASSWD-",
-                 visible=False),
+                 visible=not profile_loaded),
     ],
 ]
 
@@ -165,7 +180,7 @@ for i in range(10):
     for j in range(10):
         port_num = i * 10 + j
         if port_num == 0:
-            port_but = sg.Button("", image_filename=REFRESH_BUTTON_ICON_PATH, border_width=0,size=(2, 1), font='Helvetica 16 bold', tooltip="Login and Refresh Ports Status",
+            port_but = sg.Button("", image_filename=REFRESH_BUTTON_ICON_PATH, image_size=(32,32),size=(2, 1), font='Helvetica 16 bold', tooltip="Login and Refresh Ports Status",
                                  button_color=("white","cyan"),enable_events=True, key="-REFRESH-")
         else:
             port_but = sg.Button(str(port_num), size=(2, 1), font='Helvetica 16 bold',
@@ -181,7 +196,7 @@ layout = [
         sg.Column(port_column, key="-PRTCOL-"),
     ],
     [
-        sg.Text("Status: ", size=(78, 1), background_color="light grey", text_color="black", key="-STATUS-")
+        sg.Text("Status: ", size=(130, 1), background_color="light grey", text_color="black", key="-STATUS-")
     ]
 ]
 
@@ -214,12 +229,27 @@ def get_srv_usrname_passwd(sg_values):
     return machine_num, username_str, passwd_str
 
 
-window = sg.Window("UG Remote", layout).finalize()
+window = sg.Window("UG Remote", layout, size=(1080,520)).finalize()
 if profile_loaded:
     update_used_ports(window, saved_username, saved_password, last_srv)
 
 fl_thread = None
 
+# TODO: not fully reliable, should check back later
+def vnc_passwd_usable(vnc_passwd):
+    if "'" in vnc_passwd:
+        return False, "Error: VNC password cannot contain symbol (')"
+    elif len(vnc_passwd) < 6:
+        return False, "Error: VNC password should have length of 6 - 8"
+    elif len(vnc_passwd) > 8:
+        return True, "Warning: VNC password with length longer than 8 will be truncated"
+
+    return True, None
+
+def disable_port_buts(window):
+    for elem_name in window.AllKeysDict:
+        if isinstance(elem_name, str) and "-PORT" in elem_name:
+            window[elem_name].update(disabled=True)
 
 
 # Run the Event Loop
@@ -240,7 +270,14 @@ while True:
             print("user hasn't enter all fields")
         else:
             machine_num, username, passwd = srv_usrname_passwd
-            update_used_ports(window, username, passwd, inquiring_srv_num)
+            input_vnc_passwd, usable = None, True
+            if global_set_vncpasswd:
+                input_vnc_passwd = values["-VNC_PASSWD-"]
+                usable, errmsg = vnc_passwd_usable(input_vnc_passwd)
+            if usable:
+                update_used_ports(window, username, passwd, inquiring_srv_num, input_vnc_passwd)
+            else:
+                window["-STATUS-"].update(errmsg)
 
     elif "-PORT" in event:
         port_str = re.findall(r'\d+', event)
@@ -256,17 +293,16 @@ while True:
             print("user hasn't enter all fields")
         else:
             machine_num, username, passwd = srv_usrname_passwd
-            for elem_name in window.AllKeysDict:
-                if isinstance(elem_name, str) and "-PORT" in elem_name:
-                    window[elem_name].update(disabled=True)
-                else:
-                    pass
+            disable_port_buts(window)
+            window["-REFRESH-"].update(disabled=True)
             window["-MACHINE_NUM-"].update(disabled=True)
             window["-USERNAME-"].update(disabled=True)
             window["-UG_PASSWD-"].update(disabled=True)
             window["-DONT_RESET-"].update(disabled=True)
             window["-PLZ_RESET-"].update(disabled=True)
             window["-VNC_PASSWD-"].update(disabled=True)
+
+            window["-STATUS-"].update("Status: VNC session starting... To terminate, close this window. ")
 
             save_profile(only_update_srv=True, last_srv=machine_num)
             fl_thread = threading.Thread(target=fl.forward_and_launch, args=(machine_num, port_num, username, passwd))
@@ -275,9 +311,20 @@ while True:
 
     elif event == "-DONT_RESET-" or event == "-PLZ_RESET-":
         if values["-DONT_RESET-"]:
-            window["-VNC_PASSWD-"].update(visible=False)
+            if profile_loaded:
+                global_set_vncpasswd = False
+                window["-VNC_PASSWD-"].update(visible=False)
+            else:
+                global_set_vncpasswd = True
+                window["-DONT_RESET-"].update(False)
+                window["-PLZ_RESET-"].update(True)
+                window["-STATUS-"].update("Status: Please reset your vnc password. ")
         else:
+            global_set_vncpasswd = True
+            profile_loaded = False
+            disable_port_buts(window)
             window["-VNC_PASSWD-"].update(visible=True)
+
 
 window.close()
 os._exit(0)

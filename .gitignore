@@ -1,0 +1,16 @@
+# build directories
+/build
+
+# Python virtual env
+/venv
+
+# excutables
+/dist/**.exe
+/dist/**.7z
+/**.exe
+
+# profiles
+/dist/passwd
+/dist/profile.json
+/passwd
+/profile.json

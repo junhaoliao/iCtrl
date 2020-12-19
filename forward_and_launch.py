@@ -6,6 +6,8 @@ import threading
 
 import paramiko
 
+from path_names import *
+
 g_verbose = True
 fsrv = None
 
@@ -83,6 +85,7 @@ def forward_tunnel(local_port, remote_host, remote_port, transport):
         ssh_transport = transport
 
     global fsrv
+    print("localport: " + str(local_port))
     fsrv = ForwardServer(("", local_port), SubHandler)
     fsrv.serve_forever()
 
@@ -137,8 +140,10 @@ def forward_and_launch(srv_num, port, username, ug_passwd):
         os._exit(0)
 
     if os.name == 'posix':
-        os.system("./TigerVNC.app/Contents/MacOS/TigerVNC\ Viewer --passwd=passwd localhost:5988")
+        os.system("./TigerVNC.app/Contents/MacOS/TigerVNC\ Viewer --passwd=%s localhost:%d" % (VNC_PASSWD_PATH, vnc_port))
     else:
-        print("system %s not supported yet" % os.name)
+        import subprocess
+        subprocess.Popen([VNC_VIEWER_PATH_WIN64, "--passwd=%s"%VNC_PASSWD_PATH, "localhost:%d"%vnc_port])
+
     forward_thread.join()
     os._exit(0)
