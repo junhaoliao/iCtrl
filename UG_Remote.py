@@ -1,341 +1,314 @@
-import base64
-import json
 import re
-import threading
 
 import PySimpleGUI as sg
-import paramiko
 
-import forward_and_launch as fl
+import machines
+import exceptions
+import layout
+import ug_connection
+import ug_profile
 from path_names import *
-from ui import *
-
-ssh_authenticated = False
-global_set_vncpasswd = False
-global_profile_loaded = False
-
-global_used_vncports_lst = []
-global_ports_by_me_lst = []
-
-# interface functions
-def disable_port_buts(window):
-    for elem_name in window.AllKeysDict:
-        if isinstance(elem_name, str) and "-PORT" in elem_name:
-            window[elem_name].update(disabled=True)
-
-    window.refresh()
 
 
-def disable_credential_inputs(window):
-    window["-MACHINE_NUM-"].update(disabled=True)
-    window["-USERNAME-"].update(disabled=True)
-    window["-UG_PASSWD-"].update(disabled=True)
-    window["-DONT_RESET-"].update(disabled=True)
-    window["-PLZ_RESET-"].update(disabled=True)
-    window["-VNC_PASSWD-"].update(disabled=True)
+def login():
+    sg.Popup("Logging in...",
+             font=layout.FONT_HELVETICA_16,
+             background_color="light yellow",
+             no_titlebar=True,
+             button_type=sg.POPUP_BUTTONS_NO_BUTTONS,
+             non_blocking=True,
+             auto_close=True,
+             auto_close_duration=3)
 
-
-def enable_credential_inputs(window):
-    window["-MACHINE_NUM-"].update(disabled=False)
-    window["-USERNAME-"].update(disabled=False)
-    window["-UG_PASSWD-"].update(disabled=False)
-    window["-DONT_RESET-"].update(disabled=False)
-    window["-PLZ_RESET-"].update(disabled=False)
-    window["-VNC_PASSWD-"].update(disabled=False)
-
-
-# TODO: interface & data functions: should separate them when possible
-def get_srv_usrname_passwd(sg_window, sg_values):
-    machine_num_str = sg_values["-MACHINE_NUM-"]
-    username_str = sg_values["-USERNAME-"]
-    passwd_str = sg_values["-UG_PASSWD-"]
-
-    if machine_num_str == "":
-        sg_window["-STATUS-"].update("Status: machine number cannot be empty")
-        return None
-    elif username_str == "":
-        sg_window["-STATUS-"].update("Status: username cannot be empty")
-        return None
-    elif passwd_str == "":
-        sg_window["-STATUS-"].update("Status: password cannot be empty")
-        return None
-
-    # ensure the user doesn't input a machine number out of range
+    srv_num = values["-MACHINE_NUM-"]
+    if srv_num not in machines.MACHINES:
+        sg.Popup("User entered Machine # invalid. ",
+                 button_type=sg.POPUP_BUTTONS_OK, button_color=('white', 'red'))
+        return False
+    username = values["-USERNAME-"]
+    ug_passwd = values["-UG_PASSWD-"]
     try:
-        machine_num = int(machine_num_str)
-        if machine_num not in MACHINES:
-            raise ValueError
-    except ValueError:
-        sg_window["-STATUS-"].update("Status: machine number not supported")
-        return None
+        myConn.connect(int(srv_num), username, ug_passwd)
+    except (exceptions.NetworkError, exceptions.SSHAuthError) as e:
+        sg.Popup(e, title=e.__class__.__name__,
+                 button_type=sg.POPUP_BUTTONS_OK, button_color=('white', 'red'))
+        return False
 
-    prompt = "".join(["ssh ", username_str, "@ug", str(machine_num), ".eecg.toronto.edu"])
-    sg_window["-STATUS-"].update(prompt)
-    return machine_num, username_str, passwd_str
+    # if successful login, hide the "logging in" popup
+    window.force_focus()
 
+    myProfile.username = username
+    myProfile.ug_passwd = ug_passwd
+    myProfile.last_srv = srv_num
 
-def update_used_ports(window, username, ug_passwd, srv_num, vnc_passwd_input=None):
-    client = paramiko.SSHClient()
-    client.set_missing_host_key_policy(paramiko.WarningPolicy())
-    try:
-        client.connect('ug%i.eecg.toronto.edu' % srv_num, username=username, password=ug_passwd)
-    except OSError:
-        window["-STATUS-"].update(
-            "Error: UG Server %s unreachable. Please check you network or use another server." % srv_num)
-        return
-    except paramiko.ssh_exception.AuthenticationException:
-        window["-STATUS-"].update(
-            "Error: User Entered Credentials incorrect!!"
-        )
-        return
-    # save username and passwd
-    global ssh_authenticated
-    ssh_authenticated = True
-    if global_set_vncpasswd:
-        print("trying to reset vnc passwd")
-        reset_cmd_lst = [
-            "killall Xtigervnc",
-            "rm -rf ~/.vnc",
-            "mkdir ~/.vnc",
-            "echo '%s'| vncpasswd -f > ~/.vnc/passwd" % vnc_passwd_input,
-            "chmod 600 ~/.vnc/passwd",
-        ]
-        _, stdout, stderr = client.exec_command(";".join(reset_cmd_lst))
-        print(";".join(reset_cmd_lst))
-        for line in stdout:
-            print(line)
-        for line in stderr:
-            print(line)
-        _, stdout, _ = client.exec_command("echo '%s'| vncpasswd -f" % vnc_passwd_input)
-        with open(VNC_PASSWD_PATH, "wb") as vnc_passwd_file:
-            vnc_passwd_file.write(stdout.read())
-
-    save_profile(username=username, ug_passwd=ug_passwd, last_srv=srv_num)
-
-    # formulate the vnc port scanning cmd
-    scan_vncport_cmd_lst = []
-    for port in range(5900, 5999):
-        scan_vncport_cmd_lst.append('sh -c "nc -z -nv 127.0.0.1 ' + str(port) + ' 2>&1" | grep \'open\|succeeded\'')
-    scan_vncport_cmd = ";".join(scan_vncport_cmd_lst)
-
-    # send out the vnc port scanning cmd
-    _, stdout, _ = client.exec_command(scan_vncport_cmd)
-
-    # list containing used vnc ports
-    used_vncports_lst = []
-    for line in stdout:
-        if "open" in line:  # on other machines
-            line = line.replace('(UNKNOWN) [127.0.0.1] ', '')  # remove prefix
-            line = line.replace(' (?) open', '')  # remove suffix
-        elif "succeeded" in line:  # on ug250 and ug251
-            line = line.replace('Connection to 127.0.0.1 ', '')  # remove prefix
-            line = line.replace(' port [tcp/*] succeeded!', '')  # remove suffix
-        else:
-            print("Unexpected output: ", line)
-
-        this_used_port = int(line) - 5900
-        used_vncports_lst.append(this_used_port)
-
-    # use the API by vncserver to see what ports are created by me
-    _, stdout, _ = client.exec_command('vncserver -list')
-
-    ports_by_me_lst = []
-    for line in stdout:
-        x = re.findall(r'\d+', line)
-        if len(x) != 0:
-            ports_by_me_lst.append(int(x[0]))
-
-    client.close()
-
-    global global_used_vncports_lst
-    global global_ports_by_me_lst
-    global_used_vncports_lst = used_vncports_lst
-    global_ports_by_me_lst = ports_by_me_lst
-
-    for port_num in range(1, 100):
-        port_but_key = "-PORT" + str(port_num) + "-"
-        busy = (port_num in used_vncports_lst)
-        by_me = (port_num in ports_by_me_lst)
-        if by_me and busy:
-            window[port_but_key].update(button_color=('black', 'yellow'), disabled=False)
-            window[port_but_key].set_tooltip('Created by Me, Busy')
-        elif busy:
-            window[port_but_key].update(button_color=('white', 'red'), disabled=False)
-            window[port_but_key].set_tooltip('Likely Used by Others, Busy')
-        else:
-            window[port_but_key].update(button_color=('white', 'green'), disabled=False)
-            window[port_but_key].set_tooltip('Free')
-
-    window["-STATUS-"].update("Status: Ports status refreshed. ")
-
-    return
+    return True
 
 
-# data functions
-def read_profile():
-    global global_profile_loaded
-    global global_set_vncpasswd
-
-    try:
-        with open(PROFILE_FILE_PATH, "r") as infile:
-            json_data = json.load(infile)
-            saved_username = json_data['saved_username']
-            saved_password = json_data['saved_password']
-            saved_password = base64.b64decode(saved_password).decode('ascii')
-            last_srv = json_data['last_srv']
-            global_profile_loaded = True
-            return saved_username, saved_password, last_srv
-    except (FileNotFoundError, json.decoder.JSONDecodeError):
-        global_set_vncpasswd = True
-        global_profile_loaded = False
-
-    return None, None, None
+def update_port_buttons(window_ports):
+    for i in range(0, 10):
+        for j in range(0, 10):
+            port_num = i * 10 + j
+            if port_num != 0:
+                if port_num in myConn.ports_by_me_lst:
+                    window_ports["-PORT%d-" % port_num](button_color=layout.COLOR_USED_BY_ME_BUTTON)
+                    window_ports["-PORT%d-" % port_num].set_tooltip("Busy: Created by Me")
+                elif port_num in myConn.used_ports_lst:
+                    window_ports["-PORT%d-" % port_num](button_color=layout.COLOR_BUSY_BUTTON)
+                    window_ports["-PORT%d-" % port_num].set_tooltip("Busy: Likely Used by Others")
+                else:
+                    window_ports["-PORT%d-" % port_num](button_color=layout.COLOR_FREE_BUTTON)
+                    window_ports["-PORT%d-" % port_num].set_tooltip("Free")
 
 
-def save_profile(username=None, ug_passwd=None, last_srv=None, only_update_srv=False):
-    if only_update_srv:
-        with open(PROFILE_FILE_PATH, "r+") as infile:
-            json_data = json.load(infile)
-            json_data['last_srv'] = last_srv
+def launch_vnc(port_num):
+    sg.Popup(f"Launching VNC at Port {port_num:d} ...",
+             font=layout.FONT_HELVETICA_16,
+             background_color="light yellow",
+             no_titlebar=True,
+             button_type=sg.POPUP_BUTTONS_NO_BUTTONS,
+             non_blocking=True,
+             auto_close=True,
+             auto_close_duration=5)
+
+    myConn.create_vnc_tunnel(port_num)
+
+    actual_port = 5900 + port_num
+    import subprocess
+    if platform.system() == 'Darwin':
+        subprocess.Popen([VNC_VIEWER_PATH_MACOS, "--passwd=%s" % VNC_PASSWD_PATH, "localhost:%d" % actual_port])
+    elif platform.system() == 'Windows':
+        subprocess.call(["cmd", "/c", "start", "/max",
+                         VNC_VIEWER_PATH_WIN64, "--passwd=%s" % VNC_PASSWD_PATH, "localhost:%d" % actual_port])
     else:
-        with open(PROFILE_FILE_PATH, 'w') as outfile:
-            json_data = json.dumps(
-                {
-                    'saved_username': username,
-                    'saved_password': base64.b64encode(ug_passwd.encode('ascii')).decode('ascii'),
-                    'last_srv': last_srv,
-                }
-            )
-            outfile.write(json_data)
+        print("System %snot supported" % platform.system())
 
 
-# TODO: not fully reliable, should check back later
-def vnc_passwd_usable(vnc_passwd):
-    if "'" in vnc_passwd:
-        return False, "Error: VNC password cannot contain symbol (')"
-    elif len(vnc_passwd) < 6:
-        return False, "Error: VNC password should have length of 6 - 8"
-    elif len(vnc_passwd) > 8:
-        return True, "Warning: VNC password with length longer than 8 will be truncated"
+def check_and_save_vnc_passwd(vnc_passwd_input):
+    sg.Popup("Resetting VNC Password...",
+             font=layout.FONT_HELVETICA_16,
+             background_color="light yellow",
+             no_titlebar=True,
+             button_type=sg.POPUP_BUTTONS_NO_BUTTONS,
+             non_blocking=True,
+             auto_close=True,
+             auto_close_duration=2)
 
-    return True, None
+    # TODO: not fully reliable, should check back later
+    if "'" in vnc_passwd_input:
+        sg.Popup("Error: VNC password cannot contain symbol (')",
+                 title="VNC Password Criteria Unmet...",
+                 button_type=sg.POPUP_BUTTONS_OK, button_color=('white', 'red'))
+        return False
+    elif len(vnc_passwd_input) < 6:
+        sg.Popup("Error: VNC password should have length of 6 - 8",
+                 title="VNC Password Criteria Unmet...",
+                 button_type=sg.POPUP_BUTTONS_OK, button_color=('white', 'red'))
+        return False
+    elif len(vnc_passwd_input) > 8:
+        sg.Popup("Warning: VNC password with length longer than 8 will be truncated",
+                 title="VNC Password Criteria Warning...",
+                 button_type=sg.POPUP_BUTTONS_OK, button_color=('white', 'orange'))
+        return False
+
+    try:
+        myConn.set_and_save_vnc_passwd(vnc_passwd_input)
+    except Exception as e:
+        sg.Popup(e,
+                 title="Unexpected Error %s" % e.__class__.__name__,
+                 button_type=sg.POPUP_BUTTONS_OK, button_color=('white', 'red'))
+
+    return True
 
 
-def main():
-    global global_profile_loaded
-    global global_set_vncpasswd
-    fl_thread = None
+# callback functions
+def cb_select_port():
+    print("Callback: cb_select_port")
 
-    window = sg.Window("UG Remote", layout).finalize()
+    layout.disable_all_components(window)
+    if not login():
+        layout.enable_all_components(window)
+        window.force_focus()
+        return
 
-    saved_username, saved_password, last_srv = read_profile()
-    if global_profile_loaded:
-        window["-MACHINE_NUM-"].update(last_srv)
-        window["-USERNAME-"].update(saved_username)
-        window["-UG_PASSWD-"].update(saved_password)
-        window["-DONT_RESET-"].update(True)
-        window["-VNC_PASSWD-"].update(visible=False)
-        update_used_ports(window, saved_username, saved_password, last_srv)
-    else:
-        window["-PLZ_RESET-"].update(True)
-        window["-VNC_PASSWD-"].update(visible=True)
+    if values["-RESET_YES-"] and not check_and_save_vnc_passwd(values["-VNC_PASSWD-"]):
+        layout.enable_all_components(window)
+        window.force_focus()
+        return
 
+    myConn.update_ports()
+    layout_port = []
+    for i in range(10):
+        row = []
+        for j in range(10):
+            port_num = i * 10 + j
+            if port_num == 0:
+                port_but = sg.Button("⟳",
+                                     font=layout.FONT_HELVETICA_16_BOLD, size=(3, 1),
+                                     button_color=layout.COLOR_REFRESH_BUTTON,
+                                     tooltip="Kill all VNC servers launched by me",
+                                     key="-REFRESH-")
+            elif port_num in myConn.ports_by_me_lst:
+                port_but = sg.Button(str(port_num).zfill(2),
+                                     font=layout.FONT_HELVETICA_16_BOLD, size=(3, 1),
+                                     button_color=layout.COLOR_USED_BY_ME_BUTTON,
+                                     tooltip="Busy: Created by Me",
+                                     key="-PORT%d-" % port_num)
+            elif port_num in myConn.used_ports_lst:
+                port_but = sg.Button(str(port_num).zfill(2),
+                                     font=layout.FONT_HELVETICA_16_BOLD, size=(3, 1),
+                                     button_color=layout.COLOR_BUSY_BUTTON,
+                                     tooltip="Busy: Likely Used by Others",
+                                     key="-PORT%d-" % port_num)
+            else:
+                port_but = sg.Button(str(port_num).zfill(2),
+                                     font=layout.FONT_HELVETICA_16_BOLD, size=(3, 1),
+                                     button_color=layout.COLOR_FREE_BUTTON,
+                                     tooltip="Free",
+                                     key="-PORT%d-" % port_num)
+            row.append(port_but)
+        layout_port.append(row)
 
-    # Run the Event Loop
+    port_num = None
+
+    window_ports = sg.Window("Select a Port", layout=layout_port)
+    window_ports.finalize()
     while True:
-        event, values = window.read()
-        print(event)
-        if event == "Exit" or event == sg.WIN_CLOSED:
+        event_ports, values_ports = window_ports.read()
+        if event_ports == sg.WIN_CLOSED or event_ports == 'Exit':
             break
-        elif event == "-MACHINE_NUM-":
-            inquiring_srv_num = values["-MACHINE_NUM-"]
-            if ssh_authenticated:
-                update_used_ports(window, saved_username, saved_password, inquiring_srv_num)
-        elif event == "-REFRESH-":
-            disable_port_buts(window)
-            disable_credential_inputs(window)
+        elif event_ports == "-REFRESH-":
+            sg.Popup("Killing all VNC servers launched by me...",
+                     font=layout.FONT_HELVETICA_16,
+                     background_color="light yellow",
+                     no_titlebar=True,
+                     button_type=sg.POPUP_BUTTONS_NO_BUTTONS,
+                     non_blocking=True,
+                     auto_close=True,
+                     auto_close_duration=2)
+            myConn.killall_VNC_servers()
+            myConn.update_ports()
+            update_port_buttons(window_ports)
+            window_ports.force_focus()
+        elif "PORT" in event_ports:
+            port_num = int(re.findall(r'\d+', event_ports)[0])
+            break
 
-            inquiring_srv_num = values["-MACHINE_NUM-"]
-            srv_usrname_passwd = get_srv_usrname_passwd(window, values)
-            if srv_usrname_passwd is None:
-                print("user hasn't enter all fields")
+    window_ports.close()
+
+    if port_num is None:
+        layout.enable_all_components(window)
+        window.force_focus()
+        return
+    else:
+        if len(myConn.ports_by_me_lst) > 0 and port_num not in myConn.ports_by_me_lst:
+            killall = sg.popup_yes_no("You have already had an active VNC server on other ports.\n"
+                                      "Do you want to kill the previous connection? ")
+            if killall == "Yes":
+                myConn.killall_VNC_servers()
             else:
-                machine_num, username, passwd = srv_usrname_passwd
-                input_vnc_passwd, usable = None, True
-                if global_set_vncpasswd:
-                    input_vnc_passwd = values["-VNC_PASSWD-"]
-                    usable, errmsg = vnc_passwd_usable(input_vnc_passwd)
-                if usable:
-                    update_used_ports(window, username, passwd, inquiring_srv_num, input_vnc_passwd)
-                else:
-                    window["-STATUS-"].update(errmsg)
-
-            window["-MACHINE_NUM-"].update(disabled=False)
-            if not ssh_authenticated:
-                window["-USERNAME-"].update(disabled=False)
-                window["-UG_PASSWD-"].update(disabled=False)
-                window["-PLZ_RESET-"].update(disabled=False)
-                window["-VNC_PASSWD-"].update(disabled=False)
-
-        elif "-PORT" in event:
-            port_str = re.findall(r'\d+', event)
-            port_num = None
-
-            if port_str:
-                port_num = int(port_str[0])
-            else:
-                raise IndexError("No such port exist from event: ", event)
-
-            srv_usrname_passwd = get_srv_usrname_passwd(window, values)
-            if srv_usrname_passwd is None:
-                print("user hasn't enter all fields")
-            else:
-                machine_num, username, passwd = srv_usrname_passwd
-                disable_port_buts(window)
-                window["-REFRESH-"].update(disabled=True)
-                window["-MACHINE_NUM-"].update(disabled=True)
-                window["-USERNAME-"].update(disabled=True)
-                window["-UG_PASSWD-"].update(disabled=True)
-                window["-DONT_RESET-"].update(disabled=True)
-                window["-PLZ_RESET-"].update(disabled=True)
-                window["-VNC_PASSWD-"].update(disabled=True)
-
-                window["-STATUS-"].update("Status: VNC session starting... To terminate, close this window. ")
-
-                save_profile(only_update_srv=True, last_srv=machine_num)
-                fl_thread = threading.Thread(target=fl.forward_and_launch,
-                                             args=(machine_num, port_num, username, passwd))
-                fl_thread.start()
-
-        elif event == "-DONT_RESET-" or event == "-PLZ_RESET-":
-            if values["-DONT_RESET-"]:
-                if global_profile_loaded:
-                    global_set_vncpasswd = False
-                    window["-VNC_PASSWD-"].update(visible=False)
-                else:
-                    global_set_vncpasswd = True
-                    window["-DONT_RESET-"].update(False)
-                    window["-PLZ_RESET-"].update(True)
-                    window["-STATUS-"].update("Status: Please reset your vnc password. ")
-            else:
-                global_set_vncpasswd = True
-                global_profile_loaded = False
-                disable_port_buts(window)
-                window["-VNC_PASSWD-"].update(visible=True)
-
-        elif event == "-TVNC_COPYRIGHT-":
-            import webbrowser
-
-            webbrowser.open("https://tigervnc.org/")
-
-        elif event == "-JL_COPYRIGHT-":
-            import webbrowser
-
-            webbrowser.open("https://junhao.ca/")
-
-    window.close()
-    os._exit(0)
+                layout.enable_all_components(window)
+                window.force_focus()
+                return
+        launch_vnc(port_num)
+        myProfile.save_profile()
 
 
-if __name__ == "__main__":
-    main()
+def cb_random_port():
+    print("Callback: cb_random_port")
+
+    layout.disable_all_components(window)
+    if not login():
+        layout.enable_all_components(window)
+        window.force_focus()
+        return
+
+    if values["-RESET_YES-"] and not check_and_save_vnc_passwd(values["-VNC_PASSWD-"]):
+        layout.enable_all_components(window)
+        window.force_focus()
+        return
+
+    myConn.update_ports()
+    if len(myConn.ports_by_me_lst) == 1:
+        port_num = myConn.ports_by_me_lst[0]
+        print("Using the last used port number %d" % port_num)
+    else:
+        myConn.killall_VNC_servers()
+        from random import choice
+        try:
+            port_num = choice([i for i in range(1, 100) if i not in myConn.used_ports_lst])
+            print("Randomly chose a port number %d" % port_num)
+        except IndexError as e:  # hope it never happens...
+            sg.Popup("OMG how come 99 people are using this machine!!\n"
+                     "Change to another one please!! ",
+                     title="Server too busy...",
+                     button_type=sg.POPUP_BUTTONS_OK, button_color=('white', 'red'))
+            return
+
+    launch_vnc(port_num)
+    myProfile.save_profile()
+
+
+def cb_reset_no():
+    window["-RESET_NO-"](myProfile.vnc_passwd_exist)
+    window["-RESET_YES-"](not myProfile.vnc_passwd_exist)
+    window["-VNC_PASSWD_COL-"](visible=not myProfile.vnc_passwd_exist)
+    window["-VNC_PASSWD-"]("", disabled=myProfile.vnc_passwd_exist)
+
+
+def cb_reset_yes():
+    window["-RESET_NO-"](False)
+    window["-RESET_YES-"](True)
+    window["-VNC_PASSWD_COL-"](visible=True)
+    window["-VNC_PASSWD-"](disabled=False)
+
+
+myConn = ug_connection.UG_Connection()
+
+myProfile = ug_profile.UG_Profile()
+myProfile.load_profile()
+
+# enable HiDPI awareness on Windows to fix blurry text
+if platform.system() == "Windows":
+    from ctypes import windll
+
+    windll.shcore.SetProcessDpiAwareness(1)
+
+window = sg.Window("UG Remote", layout.layout, element_padding=(38, 12))
+window.finalize()
+
+dispatch_dictionary = {
+    "-SELECT_PORT-": cb_select_port,
+    "-RANDOM_PORT-": cb_random_port,
+    "-RESET_NO-": cb_reset_no,
+    "-RESET_YES-": cb_reset_yes
+}
+
+if myProfile.loaded:
+    # display srv, username and password if already loaded
+    window["-MACHINE_NUM-"](myProfile.last_srv)
+    window["-USERNAME-"](myProfile.username)
+    window["-UG_PASSWD-"](myProfile.ug_passwd)
+
+    # default not to reset vnc passwd if vnc passwd exist
+    window["-RESET_NO-"](myProfile.vnc_passwd_exist)
+    window["-RESET_YES-"](not myProfile.vnc_passwd_exist)
+    window["-VNC_PASSWD_COL-"](visible=not myProfile.vnc_passwd_exist)
+
+    event, values = window.read(timeout=0.001)
+    login()
+
+while True:
+    event, values = window.read()
+    if event == sg.WIN_CLOSED or event == 'Exit':
+        break
+
+    # Lookup event in function dictionary
+    if event in dispatch_dictionary:
+        func_to_call = dispatch_dictionary[event]  # get function from dispatch dictionary
+        func_to_call()
+    # else:  # should comment this out before publishing
+    #     print(event, values)
+    #     print('Event {} not in dispatch dictionary'.format(event))
+
+window.close()
+os._exit(0)

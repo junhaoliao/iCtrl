@@ -1,3 +1,5 @@
+https://github.com/TigerVNC/tigervnc/blob/master/LICENCE.TXT
+
 		    GNU GENERAL PUBLIC LICENSE
 		       Version 2, June 1991
 

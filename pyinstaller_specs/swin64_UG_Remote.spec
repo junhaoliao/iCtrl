@@ -4,7 +4,7 @@ block_cipher = None
 
 
 a = Analysis(['UG_Remote.py'],
-             pathex=['C:\\Users\\junha\\PycharmProjects\\UG_Remote'],
+             pathex=['.'],
              binaries=[],
              datas=[
                 ('Gnome-view-refresh-20x20.png','.')

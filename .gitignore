@@ -1,6 +1,7 @@
 # build directories
 /build
 /dist
+/packing/Windows/UG_Remote
 
 # Python virtual env
 /venv
@@ -16,3 +17,6 @@
 /dist/profile.json
 /passwd
 /profile.json
+
+# idea
+/.idea
