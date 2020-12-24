@@ -39,8 +39,8 @@ This script is updated to v5.0.0 on December 19, 2020
 3. PySimpleGUI: https://pysimplegui.readthedocs.io/
 
 ## Special Thanks to... 
-Richard Shen from Uoft Architect helped make the icon with Adobe Illustrator for this project.
-
+- Richard Shen: Uoft Architect Undergraduate, helped make the icon with Adobe Illustrator for this project.
+- Olivia Ziting Xu: Uoft Architect Undergraduate, helped with some Mac OS translations in the Chinese README.
 
 # 中文 读我
 前往Release页面获取最新版本：https://github.com/junhaoliao/UG_Remote/releases
@@ -74,4 +74,5 @@ Richard Shen from Uoft Architect helped make the icon with Adobe Illustrator for
 3. PySimpleGUI: https://pysimplegui.readthedocs.io/
 
 ## 特别感谢
-Richard Shen：多伦多大学建筑系，使用Adobe Illustrator制作了本脚本的图标。
+- Richard Shen：多伦多大学建筑系本科，使用Adobe Illustrator制作了本脚本的图标。
+- Olivia Ziting Xu：多伦多大学建筑系本科，协助了中文读我中有关Mac OS部分的翻译。
