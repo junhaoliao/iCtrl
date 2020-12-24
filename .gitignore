@@ -2,6 +2,7 @@
 /build
 /dist
 /packing/Windows/UG_Remote
+/packing/MacOS/UG_Remote.app
 
 # Python virtual env
 /venv

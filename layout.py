@@ -1,6 +1,7 @@
 import PySimpleGUI as sg
 
 import machines
+from path_names import *
 
 FONT_HELVETICA_16 = ("Helvetica", 16)
 FONT_HELVETICA_16_BOLD = ("Helvetica", 16, "bold")
@@ -12,14 +13,17 @@ COLOR_USED_BY_ME_BUTTON = ("#00619F", "#FFE74D")
 COLOR_BUSY_BUTTON = ("white", "#F5577C")
 COLOR_FREE_BUTTON = ("white", "#88B04B")
 
-sg.theme('Default1')
+if platform.system() == "Windows":
+    sg.theme('Default1')
+elif platform.system() == "Darwin":
+    sg.theme('LightGrey1')
 layout = [
     [
         sg.Column(
             [
                 [
                     sg.Image(
-                        'icon.png'
+                        UG_REMOTE_ICON_PATH
                     )
                 ]
             ],

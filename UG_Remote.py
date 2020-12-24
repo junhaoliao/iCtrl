@@ -2,9 +2,9 @@ import re
 
 import PySimpleGUI as sg
 
-import machines
 import exceptions
 import layout
+import machines
 import ug_connection
 import ug_profile
 from path_names import *
@@ -73,15 +73,29 @@ def launch_vnc(port_num):
     myConn.create_vnc_tunnel(port_num)
 
     actual_port = 5900 + port_num
+
     import subprocess
+
+    # flush the outputs before launching TigerVNC Viewer
+    sys.stdout.flush()
+    sys.stderr.flush()
     if platform.system() == 'Darwin':
-        subprocess.Popen([VNC_VIEWER_PATH_MACOS, "--passwd=%s" % VNC_PASSWD_PATH, "localhost:%d" % actual_port])
+        os.system(
+            "open %s --args --passwd=%s localhost:%d" % (
+                VNC_VIEWER_PATH_MACOS, os.path.abspath(VNC_PASSWD_PATH), actual_port))
+
+        # print("open %s --args --passwd=%s localhost:%d" % (VNC_VIEWER_PATH_MACOS, os.path.abspath(VNC_PASSWD_PATH), actual_port))
+
+        # subprocess.Popen([VNC_VIEWER_PATH_MACOS, "--passwd=%s" % VNC_PASSWD_PATH, "localhost:%d" % actual_port])
     elif platform.system() == 'Windows':
         subprocess.call(["cmd", "/c", "start", "/max",
                          VNC_VIEWER_PATH_WIN64, "--passwd=%s" % VNC_PASSWD_PATH, "localhost:%d" % actual_port])
     else:
         print("System %snot supported" % platform.system())
 
+    # flush the outputs before terminating
+    sys.stdout.flush()
+    sys.stderr.flush()
 
 def check_and_save_vnc_passwd(vnc_passwd_input):
     sg.Popup("Resetting VNC Password...",
@@ -272,8 +286,9 @@ if platform.system() == "Windows":
     from ctypes import windll
 
     windll.shcore.SetProcessDpiAwareness(1)
-
-window = sg.Window("UG Remote", layout.layout, element_padding=(38, 12))
+    window = sg.Window("UG Remote", layout.layout, element_padding=(38, 12))
+elif platform.system() == "Darwin":
+    window = sg.Window("UG Remote", layout.layout, element_padding=(16, 10))
 window.finalize()
 
 dispatch_dictionary = {

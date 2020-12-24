@@ -1,11 +1,10 @@
-import os
 import re
 import select
-import sys
+import socketserver
 import threading
 
 import paramiko
-import socketserver
+
 import exceptions
 from path_names import *
 
@@ -179,11 +178,16 @@ class UG_Connection():
                     print("Likely TigerVNC Viewer has been closed, or the network is interrupted, "
                           "shutting down")
 
-                peername = self.request.getpeername()
-                chan.close()
-                self.request.close()
-                print("Tunnel closed from %r" % (peername,))
-                self.server.shutdown()
+                try:
+                    # race might happen when getting peername; use try-block instead
+                    peername = self.request.getpeername()
+                    chan.close()
+                    self.request.close()
+                    print("Tunnel closed from %r" % (peername,))
+                    self.server.shutdown()
+                except Exception as e:
+                    print(e)
+
                 os._exit(0)
 
         class ForwardServer(socketserver.ThreadingTCPServer):
