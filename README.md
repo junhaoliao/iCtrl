@@ -3,7 +3,9 @@
 
 Download the latest version here: https://github.com/junhaoliao/UG_Remote/releases
 
-中文读我见下方
+[中文读我见下方](https://github.com/junhaoliao/UG_Remote#中文-读我)
+
+<img width=512 alt="UG_Remote_Demo" src="https://github.com/junhaoliao/UG_Remote/blob/main/demo/UG_Remote_demo.png?raw=true">
 
 ## Disclaimer
 Your EECG lab remote password, together with your VNC password, will be obfuscated and stored locally. Please understand the risk and do not use it on any public computers. If you have any concerns, please email to junhao@junhao.ca or junhao.liao@mail.utoronto.ca
@@ -11,7 +13,7 @@ Your EECG lab remote password, together with your VNC password, will be obfuscat
 You are welcome to visit my personal website: https://junhao.ca
 
 ## Instructions (MacOS) - 5 Steps
-0. Download UG_Remote.5.x.x.dmg from the **Releases** page and double-click to mount.
+0. Download UG_Remote.5.x.x.dmg from the [**Releases**](https://github.com/junhaoliao/UG_Remote/releases) page and double-click to mount.
 1. From the mounted disk, drag "UG_Remote.app" into your "Applications" directory.
 2. Open the "De-Quarantine" workflow and click the upper-right "Run" button.
 3. If you haven't installed TigerVNC, drag "TigerVNC Viewer x.x.app" into your "Applications" directory.
@@ -49,7 +51,7 @@ Richard Shen from Uoft Architect helped make the icon with Adobe Illustrator for
 欢迎来我的个人网站逛逛：https://junhao.ca
 
 ## 使用说明 (MacOS) - 4 步
-0. 从**Releases**页面下载UG_Remote.5.x.x.dmg，双击以挂载。
+0. 从 [**Releases**](https://github.com/junhaoliao/UG_Remote/releases) 页面下载UG_Remote.5.x.x.dmg，双击以挂载。
 1. 在挂载的镜像里，拖动"UG_Remote.app"到你的"Applications"/"应用程序" 目录
 2. 打开"De-Quarantine"，点击右上角的"Run"/"运行"按钮
 3. 打开**Launchpad**或**Applications**即可看见安装好的"UG_Remote.app"。你可以拖动应用到**Dock**/**坞**上以创建快捷方式。
