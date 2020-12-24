@@ -10,16 +10,24 @@ Your EECG lab remote password, together with your VNC password, will be obfuscat
 
 You are welcome to visit my personal website: https://junhao.ca
 
-## Instructions (MacOS) - 4 Steps
+## Instructions (MacOS) - 5 Steps
 0. Download UG_Remote.5.x.x.dmg from the **Releases** page and double-click to mount.
 1. From the mounted disk, drag "UG_Remote.app" into your "Applications" directory.
 2. Open the "De-Quarantine" workflow and click the upper-right "Run" button.
-3. Open **Launchpad** or **Applications**, you can find the installed "UG_Remote.app". You may drag the app into your dock to create a shortcut. 
+3. If you haven't installed TigerVNC, drag "TigerVNC Viewer x.x.app" into your "Applications" directory.
+4. Open **Launchpad** or **Applications**, you can find the installed "UG_Remote.app". You may drag the app into your dock to create a shortcut. 
 
 ## Instructions (Windows) - 1 Step
+If the "Windows protected your PC" window pops up, click on <ins>More Info</ins> -> [Run anyway] to allow the installer to run.
+
 0. Download and extract UG_Remote_win64.5.x.x.zip from the **Releases** page. Double-click on "UG_Remote.exe".
 
 ## V5 Change Log
+This script is updated to v5.0.1 on December 24, 2020
+1. Added a "random port selection" feature
+2. Redesigned user interface
+3. Added installer for windows
+
 This script is updated to v5.0.0 on December 19, 2020
 1. Now we use Python. Goodbye C++. 
 
@@ -50,6 +58,11 @@ Richard Shen from Uoft Architect helped make the icon with Adobe Illustrator for
 0. 从**Releases**页面下载并解压UG_Remote_win64.5.x.x.zip。双击"UG_Remote.exe"。
 
 ## V5 版本说明
+本脚本于2020年12月24日更新v5.0.1。
+1. 新增"随机选择端口"功能
+2. 重新设计操作界面
+3. 新增Windows安装器
+
 本脚本于2020年12月19日更新v5.0.0。
 1. 再见，C++。你好呀，Python。
 
