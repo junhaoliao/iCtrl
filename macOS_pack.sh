@@ -27,7 +27,8 @@ cd packing/MacOS
 curl -L -o TigerVNC-1.11.0.dmg https://bintray.com/tigervnc/stable/download_file?file_path=TigerVNC-1.11.0.dmg
 
 # create an empty DMG and attach
-hdiutil create -ov --attach -size 100m -fs HFS+ -volname "UG_Remote Installer" "before_conversion.dmg"
+hdiutil create -ov -size 100m -fs HFS+ -volname "UG_Remote Installer" "before_conversion.dmg"
+hdiutil attach "before_conversion.dmg"
 
 # create symlinks for the Applications folder
 ln -s /Applications "/Volumes/UG_Remote Installer/Applications"

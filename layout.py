@@ -8,15 +8,109 @@ FONT_HELVETICA_16_BOLD = ("Helvetica", 16, "bold")
 FONT_ARIAL_12 = ("Arial", 12)
 FONT_ARIAL_12_BOLD = ("Arial", 12, "bold")
 
-COLOR_REFRESH_BUTTON = ("white", "#FF7F1D")
-COLOR_USED_BY_ME_BUTTON = ("#00619F", "#FFE74D")
-COLOR_BUSY_BUTTON = ("white", "#F5577C")
-COLOR_FREE_BUTTON = ("white", "#88B04B")
+COLOR_EECG_REFRESH_BUTTON = ("white", "#FF7F1D")
+COLOR_EECG_USED_BY_ME_BUTTON = ("#00619F", "#FFE74D")
+COLOR_EECG_BUSY_BUTTON = ("white", "#F5577C")
+COLOR_EECG_FREE_BUTTON = ("white", "#88B04B")
+COLOR_EECG_SELECT_PORT_BUTTON = ("#3c4043", "#f8f9fa")
+COLOR_EECG_RANDOM_PORT_BUTTON = ("white", "#4285f4")
+
+COLOR_ECF_CONNECT_BUTTON = ("white", "#4285f4")
 
 if platform.system() == "Windows":
     sg.theme('Default1')
 elif platform.system() == "Darwin":
     sg.theme('LightGrey1')
+
+eecg_layout = [
+    [
+        sg.Text("EECG Machine",
+                font=FONT_HELVETICA_16, size=(14, 1)),
+        sg.Text("ug",
+                font=FONT_HELVETICA_16),
+        sg.Combo(machines.MACHINES,
+                 font=FONT_HELVETICA_16,
+                 key="-EECG_MACHINE_NUM-"),
+        sg.Text(".eecg.toronto.edu",
+                font=FONT_HELVETICA_16),
+    ],
+    [sg.HSeparator(pad=(0, 8), color="white")],
+    [
+        sg.Text("Username",
+                font=FONT_HELVETICA_16, size=(14, 1)),
+        sg.Input(font=FONT_HELVETICA_16, size=(20, 1),
+                 key="-EECG_USERNAME-"),
+    ],
+    [
+        sg.Text("EECG Password",
+                font=FONT_HELVETICA_16, size=(14, 1)),
+        sg.Input(font=FONT_HELVETICA_16, size=(20, 1),
+                 password_char='*',
+                 key="-EECG_PASSWD-"),
+    ],
+    [
+        sg.Text("Reset VNC",
+                font=FONT_HELVETICA_16, size=(14, 1)),
+        sg.Radio('No', "RESET", default=False,
+                 font=FONT_HELVETICA_16,
+                 enable_events=True,
+                 key="-EECG_RESET_NO-"),
+        sg.Radio('Yes', "RESET", default=True,
+                 font=FONT_HELVETICA_16,
+                 enable_events=True,
+                 key="-EECG_RESET_YES-")
+    ],
+    [
+        sg.Column(
+            [
+                [
+                    sg.Text("VNC Password",
+                            font=FONT_HELVETICA_16, size=(14, 1)),
+                    sg.Input(font=FONT_HELVETICA_16, size=(20, 1), password_char='*',
+                             key="-EECG_VNC_PASSWD-"),
+                ]
+            ],
+            pad=(0, 0),
+            key="-EECG_VNC_PASSWD_COL-"
+        )
+    ]
+]
+
+ecf_layout = [
+    [
+        sg.Text("Username",
+                font=FONT_HELVETICA_16, size=(14, 1)),
+        sg.Input(font=FONT_HELVETICA_16, size=(20, 1),
+                 key="-ECF_USERNAME-"),
+    ],
+    [
+        sg.Text("ECF Password",
+                font=FONT_HELVETICA_16, size=(14, 1)),
+        sg.Input(font=FONT_HELVETICA_16, size=(20, 1),
+                 password_char='*',
+                 key="-ECF_PASSWD-"),
+    ],
+    # [sg.HSeparator(pad=(1, 16), color="white")],
+]
+
+eecg_buttons = sg.Column(
+    [
+        [
+            sg.Button("Select Port",
+                      font=FONT_ARIAL_12_BOLD,
+                      button_color=COLOR_EECG_SELECT_PORT_BUTTON,
+                      key="-EECG_SELECT_PORT-"),
+            sg.Button("I'm Feeling Lucky",
+                      font=FONT_ARIAL_12_BOLD,
+                      button_color=COLOR_EECG_RANDOM_PORT_BUTTON,
+                      key="-EECG_RANDOM_PORT-")
+        ]
+    ],
+    pad=(0, 0),
+    justification="center",
+    key="-EECG_BUTTONS-"
+)
+
 layout = [
     [
         sg.Column(
@@ -30,97 +124,65 @@ layout = [
             justification="center"
         )
     ],
-    [sg.HSeparator(pad=(1, 16))],
     [
-        sg.Text("UG Machine #",
-                font=FONT_HELVETICA_16, size=(12, 1)),
-        sg.Text("ug",
-                font=FONT_HELVETICA_16),
-        sg.Combo(machines.MACHINES,
-                 font=FONT_HELVETICA_16,
-                 key="-MACHINE_NUM-"),
-        sg.Text(".eecg.toronto.edu",
-                font=FONT_HELVETICA_16),
-    ],
-    [sg.HSeparator(pad=(1, 16))],
-    [
-        sg.Text("Username",
-                font=FONT_HELVETICA_16, size=(12, 1)),
-        sg.Input(font=FONT_HELVETICA_16, size=(24, 1),
-                 key="-USERNAME-"),
-    ],
-    [
-        sg.Text("UG Password",
-                font=FONT_HELVETICA_16, size=(12, 1)),
-        sg.Input(font=FONT_HELVETICA_16, size=(24, 1),
-                 password_char='*',
-                 key="-UG_PASSWD-"),
-    ],
-    [
-        sg.Text("Reset Profile",
-                font=FONT_HELVETICA_16, size=(12, 1)),
-        sg.Radio('No', "RESET", default=False,
-                 font=FONT_HELVETICA_16,
-                 enable_events=True,
-                 key="-RESET_NO-"),
-        sg.Radio('Yes', "RESET", default=True,
-                 font=FONT_HELVETICA_16,
-                 enable_events=True,
-                 key="-RESET_YES-")
+        sg.TabGroup(
+            [
+                [sg.Tab('EECG', eecg_layout), sg.Tab('ECF', ecf_layout)]
+            ],
+            font=FONT_HELVETICA_16,
+            tab_location="center",
+            enable_events=True,
+            key="-LAB_INTF-"
+        )
     ],
     [
         sg.Column(
             [
                 [
-                    sg.Text("VNC Password",
-                            font=FONT_HELVETICA_16, size=(12, 1)),
-                    sg.Input(size=(24, 1), font=FONT_HELVETICA_16, password_char='*',
-                             key="-VNC_PASSWD-"),
+                    eecg_buttons,
+                    sg.Button("Connect",
+                              visible=False,
+                              font=FONT_ARIAL_12_BOLD,
+                              button_color=COLOR_ECF_CONNECT_BUTTON,
+                              key="-ECF_CONNECT-"),
                 ]
             ],
-            pad=(0,0),
-            key="-VNC_PASSWD_COL-"
+            pad=(0, 0),
+            justification="center"
         )
-    ],
-    [sg.HSeparator(pad=(1, 16))],
-    [
-        sg.Column(
-            [
-                [
-                    sg.Button("Select Port",
-                              font=FONT_ARIAL_12_BOLD,
-                              button_color=("#3c4043", "#f8f9fa"),
-                              key="-SELECT_PORT-"),
-                    sg.Button("I'm Feeling Lucky",
-                              font=FONT_ARIAL_12_BOLD,
-                              button_color=("white", "#4285f4"),
-                              key="-RANDOM_PORT-"),
-                ]
-            ],
-            justification='center'
-        )
-
     ]
 ]
 
 
-def disable_all_components(window):
-    window["-MACHINE_NUM-"](disabled=True)
-    window["-USERNAME-"](disabled=True)
-    window["-UG_PASSWD-"](disabled=True)
-    window["-RESET_NO-"](disabled=True)
-    window["-RESET_YES-"](disabled=True)
-    window["-VNC_PASSWD-"](disabled=True)
-    window["-SELECT_PORT-"](disabled=True)
-    window["-RANDOM_PORT-"](disabled=True)
+def enable_eecg_components(window):
+    window["-EECG_MACHINE_NUM-"](disabled=False)
+    window["-EECG_USERNAME-"](disabled=False)
+    window["-EECG_PASSWD-"](disabled=False)
+    window["-EECG_RESET_NO-"](disabled=False)
+    window["-EECG_RESET_YES-"](disabled=False)
+    window["-EECG_VNC_PASSWD-"](disabled=False)
+    window["-EECG_SELECT_PORT-"](disabled=False)
+    window["-EECG_RANDOM_PORT-"](disabled=False)
 
 
-def enable_all_components(window):
-    window["-MACHINE_NUM-"](disabled=False)
-    window["-USERNAME-"](disabled=False)
-    window["-UG_PASSWD-"](disabled=False)
-    window["-RESET_NO-"](disabled=False)
-    window["-RESET_YES-"](disabled=False)
-    window["-VNC_PASSWD-"](disabled=False)
-    window["-SELECT_PORT-"](disabled=False)
-    window["-RANDOM_PORT-"](disabled=False)
+def disable_eecg_components(window):
+    window["-EECG_MACHINE_NUM-"](disabled=True)
+    window["-EECG_USERNAME-"](disabled=True)
+    window["-EECG_PASSWD-"](disabled=True)
+    window["-EECG_RESET_NO-"](disabled=True)
+    window["-EECG_RESET_YES-"](disabled=True)
+    window["-EECG_VNC_PASSWD-"](disabled=True)
+    window["-EECG_SELECT_PORT-"](disabled=True)
+    window["-EECG_RANDOM_PORT-"](disabled=True)
+
+
+def enable_ecf_components(window):
+    window["-ECF_USERNAME-"](disabled=False)
+    window["-ECF_PASSWD-"](disabled=False)
+    window["-ECF_CONNECT-"](disabled=False)
+
+
+def disable_ecf_components(window):
+    window["-ECF_USERNAME-"](disabled=True)
+    window["-ECF_PASSWD-"](disabled=True)
+    window["-ECF_CONNECT-"](disabled=True)
