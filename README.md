@@ -25,6 +25,9 @@ If the "Windows protected your PC" window pops up, click on <ins>More Info</ins>
 0. Download and extract UG_Remote_win64.5.x.x.zip from the **Releases** page. Double-click on "UG_Remote.exe".
 
 ## V5 Change Log
+This script is updated to v5.0.2 on December 27, 2020
+1. Added support for ECF
+
 This script is updated to v5.0.1 on December 24, 2020
 1. Added a "random port selection" feature
 2. Redesigned user interface
@@ -60,6 +63,9 @@ This script is updated to v5.0.0 on December 19, 2020
 0. 从**Releases**页面下载并解压UG_Remote_win64.5.x.x.zip。双击"UG_Remote.exe"。
 
 ## V5 版本说明
+本脚本于2020年12月24日更新v5.0.1。
+1. 新增ECF支持
+
 本脚本于2020年12月24日更新v5.0.1。
 1. 新增"随机选择端口"功能
 2. 重新设计操作界面
