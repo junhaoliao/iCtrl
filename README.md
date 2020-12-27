@@ -63,7 +63,7 @@ This script is updated to v5.0.0 on December 19, 2020
 0. 从**Releases**页面下载并解压UG_Remote_win64.5.x.x.zip。双击"UG_Remote.exe"。
 
 ## V5 版本说明
-本脚本于2020年12月24日更新v5.0.1。
+本脚本于2020年12月27日更新v5.0.2。
 1. 新增ECF支持
 
 本脚本于2020年12月24日更新v5.0.1。
