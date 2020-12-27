@@ -19,7 +19,7 @@
   Unicode True
 
   ;Set installer icon
-  !define MUI_ICON "${ProjectDir}\icon.ico"
+  !define MUI_ICON "${ProjectDir}\packing\Windows\installer_icon.ico"
 
   ;Set compression method
   SetCompressor /SOLID lzma
@@ -42,7 +42,8 @@
 ;Interface Configuration
 
   !define MUI_HEADERIMAGE
-  !define MUI_HEADERIMAGE_BITMAP "${NSISDIR}\Contrib\Graphics\Header\nsis.bmp" ; optional
+  !define MUI_HEADERIMAGE_BITMAP "${ProjectDir}\packing\Windows\installer_banner.bmp" ; optional
+  !define MUI_WELCOMEFINISHPAGE_BITMAP "${ProjectDir}\packing\Windows\installer_finish_page.bmp" ; optional
   !define MUI_ABORTWARNING
 
 ;--------------------------------
