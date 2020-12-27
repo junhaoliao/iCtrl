@@ -1,5 +1,5 @@
 # UG_Remote
-**UofT EECG Lab Remote for MacOS / Windows**
+**UofT EECG/ECF Lab Remote for macOS / Windows**
 
 Download the latest version here: https://github.com/junhaoliao/UG_Remote/releases
 
@@ -8,11 +8,11 @@ Download the latest version here: https://github.com/junhaoliao/UG_Remote/releas
 <img width=512 alt="UG_Remote_Demo" src="https://github.com/junhaoliao/UG_Remote/blob/main/demo/UG_Remote_demo.png?raw=true">
 
 ## Disclaimer
-Your EECG lab remote password, together with your VNC password, will be obfuscated and stored locally. Please understand the risk and do not use it on any public computers. If you have any concerns, please email to junhao@junhao.ca or junhao.liao@mail.utoronto.ca
+Your EECG/ECF lab remote password, together with your VNC password when applicable, will be obfuscated and stored locally. Please understand the risk and do not use it on any public computers. If you have any concerns, please email to junhao@junhao.ca or junhao.liao@mail.utoronto.ca
 
 You are welcome to visit my personal website: https://junhao.ca
 
-## Instructions (MacOS) - 5 Steps
+## Instructions (macOS) - 5 Steps
 0. Download UG_Remote.5.x.x.dmg from the [**Releases**](https://github.com/junhaoliao/UG_Remote/releases) page and double-click to mount.
 1. From the mounted disk, drag "UG_Remote.app" into your "Applications" directory.
 2. Open the "De-Quarantine" workflow and click the upper-right "Run" button.
@@ -46,7 +46,7 @@ This script is updated to v5.0.0 on December 19, 2020
 前往Release页面获取最新版本：https://github.com/junhaoliao/UG_Remote/releases
 
 ## 声明
-你的EECG和VNC密码将在混淆后本地存储。请明晰风险并不要在公共电脑上使用。如有疑问欢迎来邮junhao.liao@mail.utoronto.ca 或 junhao@junhao.ca
+你的EECG/ECF密码，当适用时及VNC密码，将在混淆后本地存储。请明晰风险并不要在公共电脑上使用。如有疑问欢迎来邮junhao.liao@mail.utoronto.ca 或 junhao@junhao.ca
 
 欢迎来我的个人网站逛逛：https://junhao.ca
 

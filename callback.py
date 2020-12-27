@@ -10,8 +10,8 @@ import machines
 import ug_profile
 from path_names import *
 
-my_ecf_conn = ecf_connection.ECFConnection()
 my_eecg_conn = eecg_connection.EECGConnection()
+my_ecf_conn = ecf_connection.ECFConnection()
 my_profile = ug_profile.UGProfile()
 my_profile.load_profile()
 
@@ -131,7 +131,6 @@ def launch_vnc_eecg(port_num):
 
     actual_port = 5900 + port_num
 
-    # TODO: add support for Windows
     # TODO: support launching with other VNC viewers
     if platform.system() == "Darwin" and VNC_VIEWER_PATH_MACOS is None:
         sg.Popup("Could not find any installed TigerVNC on your computer. \n"
@@ -139,6 +138,17 @@ def launch_vnc_eecg(port_num):
                  "or follow the UG_Remote installer to installer TigerVNC, \n"
                  "or you can download TigerVNC from the official site \n"
                  "and place the .app under /Applications . \n\n"
+                 "The VNC Address is localhost:%d" % actual_port,
+                 title="TigerVNC NOT Found",
+                 keep_on_top=True,
+                 button_type=sg.POPUP_BUTTONS_OK, button_color=('white', 'red'))
+        return
+    elif platform.system() == "Windows" and VNC_VIEWER_PATH_WIN64 is None:
+        sg.Popup("Could not find any installed TigerVNC in UG_Remote's directory. \n"
+                 "You may still launch your favourite VNC viewer if you wish, \n"
+                 "or follow the UG_Remote installer to installer TigerVNC, \n"
+                 "or you can download TigerVNC from the official site \n"
+                 "and place the standalone .exe under UG_Remote's directory. \n\n"
                  "The VNC Address is localhost:%d" % actual_port,
                  title="TigerVNC NOT Found",
                  keep_on_top=True,
@@ -185,6 +195,17 @@ def launch_vnc_ecf():
                  "or follow the UG_Remote installer to installer TigerVNC, \n"
                  "or you can download TigerVNC from the official site \n"
                  "and place the .app under /Applications . \n\n"
+                 "The VNC Address is localhost:2000",
+                 title="TigerVNC NOT Found",
+                 keep_on_top=True,
+                 button_type=sg.POPUP_BUTTONS_OK, button_color=('white', 'red'))
+        return
+    elif platform.system() == "Windows" and VNC_VIEWER_PATH_WIN64 is None:
+        sg.Popup("Could not find any installed TigerVNC in UG_Remote's directory. \n"
+                 "You may still launch your favourite VNC viewer if you wish, \n"
+                 "or follow the UG_Remote installer to installer TigerVNC, \n"
+                 "or you can download TigerVNC from the official site \n"
+                 "and place the standalone .exe under UG_Remote's directory. \n\n"
                  "The VNC Address is localhost:2000",
                  title="TigerVNC NOT Found",
                  keep_on_top=True,

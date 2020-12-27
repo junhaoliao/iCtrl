@@ -46,12 +46,11 @@ while True:
         layout.enable_eecg_components(window)
     elif not callback.my_ecf_conn.connected:
         layout.enable_ecf_components(window)
-        callback.my_ecf_conn.forward_thread.join()
     # else:  # use for debugging only: should comment this out before publishing
     #     print(event, values)
     #     print('Event {} not in dispatch dictionary'.format(event))
 
-# window.close()
-# sys.stdout.flush()
-# sys.stderr.flush()
+window.close()
+sys.stdout.flush()
+sys.stderr.flush()
 os._exit(0)

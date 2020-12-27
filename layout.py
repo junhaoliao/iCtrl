@@ -129,7 +129,12 @@ layout = [
             [
                 [sg.Tab('EECG', eecg_layout), sg.Tab('ECF', ecf_layout)]
             ],
-            font=FONT_HELVETICA_16,
+            font=FONT_HELVETICA_16_BOLD,
+            background_color="#eff0f4",
+            title_color="#6c6c6e",
+            tab_background_color="#eff0f4",
+            selected_title_color="#1a73e8",
+            selected_background_color="#e2e4e7",
             tab_location="center",
             enable_events=True,
             key="-LAB_INTF-"

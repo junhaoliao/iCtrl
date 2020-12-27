@@ -16,7 +16,11 @@ if getattr(sys, 'frozen', False):  # standalone mode
     # noinspection PyUnresolvedReferences
     UG_REMOTE_ICON_PATH = os.path.join(sys._MEIPASS, UG_REMOTE_ICON_PATH)
 
-if platform.system() == 'Windows':
+if platform.system() == "Windows":
+    if not os.path.isfile(VNC_VIEWER_PATH_WIN64):
+        print("Could not find TigerVNC")
+        VNC_VIEWER_PATH_WIN64 = None
+
     WIN_INSTALL_DIR_PATH = os.path.join(os.environ['ProgramFiles'], "UG_Remote")
     if WIN_INSTALL_DIR_PATH == APP_PATH:
         print("App installed in ProgramFiles, using LocalAppData for profile storage. ")
@@ -46,7 +50,6 @@ elif platform.system() == "Darwin":  # Mac OS
     VNC_PASSWD_PATH = os.path.join(MACOS_HOME_UG_REMOTE_DIR_PATH, VNC_PASSWD_PATH)
 
     import glob
-
     available_tigervnc_paths = glob.glob(VNC_VIEWER_PATH_MACOS)
     if len(available_tigervnc_paths) == 0:
         VNC_VIEWER_PATH_MACOS = None
