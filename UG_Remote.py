@@ -1,13 +1,20 @@
+import threading
+import webbrowser
+
 import PySimpleGUI as sg
 
 import callback
 import layout
+import updater
 from path_names import *
-import PySimpleGUI as sg
 
-import callback
-import layout
-from path_names import *
+CURRENT_VER = (5, 0, 3)
+GITHUB_RELEASE_PAGE = "https://github.com/junhaoliao/UG_Remote/releases"
+
+# the version check should be non-blocking to speedup loading process
+needs_update = [False]
+update_thread = threading.Thread(target=updater.compare_version, args=(CURRENT_VER, needs_update))
+update_thread.start()
 
 dispatch_dictionary = {
     "-EECG_SELECT_PORT-": callback.cb_eecg_select_port,
@@ -37,6 +44,17 @@ while True:
     event, values = window.read(timeout=1000)
     if event == sg.WIN_CLOSED or event == 'Exit':
         break
+
+    if needs_update[0]:
+        needs_update[0] = False
+        # inserting the spaces and "LRM" character to expand the window title
+        resp = sg.popup_ok_cancel("Found a new version.         ‎\n"
+                                  "Do you want to update?",
+                                  title="UG_Remote Updater",
+                                  font=layout.FONT_HELVETICA_16,
+                                  keep_on_top=True)
+        if resp == "OK":
+            webbrowser.open(GITHUB_RELEASE_PAGE)
 
     # Lookup event in function dictionary
     if event in dispatch_dictionary:
