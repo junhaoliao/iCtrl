@@ -1,9 +1,9 @@
 # UG_Remote
 **UofT EECG/ECF Lab Remote for macOS / Windows**
 
-Download the latest version here: https://github.com/junhaoliao/UG_Remote/releases
-
 [中文读我见下方](https://github.com/junhaoliao/UG_Remote#中文-读我)
+
+Following the steps in "Instructions" below will install everything you need to connect to U of T Engineering Labs through VNC, and connect with a simple GUI.
 
 <img width=512 alt="UG_Remote_Demo" src="https://github.com/junhaoliao/UG_Remote/blob/main/demo/UG_Remote_demo.png?raw=true">
 
@@ -49,7 +49,7 @@ This script is updated to v5.0.0 on December 19, 2020
 - Olivia Ziting Xu: Uoft Architect Undergraduate, helped with some Mac OS translations in the Chinese README.
 
 # 中文 读我
-前往Release页面获取最新版本：https://github.com/junhaoliao/UG_Remote/releases
+以下 "使用说明" 的步骤将安装远程VNC连接到多大工程系机房你所需的一切，并通过图形界面简易连接。
 
 ## 声明
 你的EECG/ECF密码，当适用时及VNC密码，将在混淆后本地存储。请明晰风险并不要在公共电脑上使用。如有疑问欢迎来邮junhao.liao@mail.utoronto.ca 或 junhao@junhao.ca
@@ -58,9 +58,9 @@ This script is updated to v5.0.0 on December 19, 2020
 
 ## 使用说明 (MacOS) - 4 步
 0. 从 [**Releases**](https://github.com/junhaoliao/UG_Remote/releases) 页面下载UG_Remote.5.x.x.dmg，双击以挂载。
-1. 在挂载的镜像里，拖动"UG_Remote.app"到你的"Applications"/"应用程序" 目录
-2. 打开"De-Quarantine"，点击右上角的"Run"/"运行"按钮
-3. 打开**Launchpad**或**Applications**即可看见安装好的"UG_Remote.app"。你可以拖动应用到**Dock**/**坞**上以创建快捷方式。
+1. 在挂载的镜像里，拖动"UG_Remote.app"到你的 "应用程序" 目录
+2. 打开"De-Quarantine"，点击右上角的 "运行" 按钮
+3. 打开**启动台**或**应用程序**即可看见安装好的"UG_Remote.app"。你可以拖动应用到**坞**上以创建快捷方式。
 
 ## 使用说明 (Windows) - 1 步
 0. 从**Releases**页面下载并解压UG_Remote_win64.5.x.x.zip。双击"UG_Remote.exe"。
