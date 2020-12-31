@@ -59,7 +59,7 @@
 				<key>ActionParameters</key>
 				<dict>
 					<key>COMMAND_STRING</key>
-					<string>xattr -rd com.apple.qurantine /Applications/UG_Remote.app
+					<string>xattr -rd com.apple.quarantine /Applications/UG_Remote.app
 </string>
 					<key>CheckedForUserDefaultShell</key>
 					<true/>
