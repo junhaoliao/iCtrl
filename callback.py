@@ -1,4 +1,5 @@
 import re
+import webbrowser
 
 import PySimpleGUI as sg
 
@@ -246,17 +247,23 @@ def check_and_save_vnc_passwd(vnc_passwd_input):
     if "'" in vnc_passwd_input:
         sg.Popup("Error: VNC password cannot contain symbol (')",
                  title="VNC Password Criteria Unmet...",
-                 button_type=sg.POPUP_BUTTONS_OK, button_color=('white', 'red'))
+                 button_type=sg.POPUP_BUTTONS_OK,
+                 button_color=('white', 'red'),
+                 keep_on_top=True)
         return False
     elif len(vnc_passwd_input) < 6:
         sg.Popup("Error: VNC password should have length of 6 - 8",
                  title="VNC Password Criteria Unmet...",
-                 button_type=sg.POPUP_BUTTONS_OK, button_color=('white', 'red'))
+                 button_type=sg.POPUP_BUTTONS_OK,
+                 button_color=('white', 'red'),
+                 keep_on_top=True)
         return False
     elif len(vnc_passwd_input) > 8:
         sg.Popup("Warning: VNC password with length longer than 8 will be truncated",
                  title="VNC Password Criteria Warning...",
-                 button_type=sg.POPUP_BUTTONS_OK, button_color=('white', 'orange'))
+                 button_type=sg.POPUP_BUTTONS_OK,
+                 button_color=('white', 'orange'),
+                 keep_on_top=True)
         return False
 
     try:
@@ -264,7 +271,9 @@ def check_and_save_vnc_passwd(vnc_passwd_input):
     except Exception as e:
         sg.Popup(e,
                  title="Unexpected Error %s" % e.__class__.__name__,
-                 button_type=sg.POPUP_BUTTONS_OK, button_color=('white', 'red'))
+                 button_type=sg.POPUP_BUTTONS_OK,
+                 button_color=('white', 'red'),
+                 keep_on_top=True)
 
     return True
 
@@ -428,6 +437,23 @@ def cb_switch_intf(window, values):
     if values["-LAB_INTF-"] == "EECG":
         window["-EECG_BUTTONS-"](visible=True)
         window["-ECF_CONNECT-"](visible=False)
-    else:
+    elif values["-LAB_INTF-"] == "ECF":
         window["-EECG_BUTTONS-"](visible=False)
         window["-ECF_CONNECT-"](visible=True)
+    else:
+        window["-EECG_BUTTONS-"](visible=False)
+        window["-ECF_CONNECT-"](visible=False)
+
+
+def cb_delete_all(**kwargs):
+    delete_all = sg.popup_yes_no("Do you want to delete all stored credentials \n"
+                                 "on this device and exit UG_Remote? ",
+                                 title="Reset Confirmation")
+    if delete_all == "Yes":
+        os.remove(VNC_PASSWD_PATH)
+        os.remove(PROFILE_FILE_PATH)
+        os._exit(0)
+
+
+def cb_open_junhao_ca(**kwargs):
+    webbrowser.open("https://junhao.ca")

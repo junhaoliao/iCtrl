@@ -111,12 +111,15 @@ class EECGConnection(ug_connection.UGConnection):
 
     def set_and_save_vnc_passwd(self, vnc_passwd_input):
         reset_cmd_lst = [
-            "killall Xtigervnc",
+            # killall -q: don't complain if no process found
+            # killall -w: wait until the processes to die then continue to the next cmd
+            "killall -q -w Xtigervnc",
             "rm -rf ~/.vnc",
             "mkdir ~/.vnc",
             "echo '%s'| vncpasswd -f > ~/.vnc/passwd" % vnc_passwd_input,
             "chmod 600 ~/.vnc/passwd",
         ]
+
         _, stdout, stderr = self.client.exec_command(";".join(reset_cmd_lst))
         for line in stdout:
             print(line)

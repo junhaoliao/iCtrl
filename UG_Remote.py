@@ -23,6 +23,9 @@ dispatch_dictionary = {
     "-EECG_RESET_YES-": callback.cb_eecg_reset_yes,
     "-ECF_CONNECT-": callback.cb_ecf_connect,
     "-LAB_INTF-": callback.cb_switch_intf,
+    "-DELETE_ALL-": callback.cb_delete_all,
+    "-COPYRIGHT-": callback.cb_open_junhao_ca,
+    "-OPEN_WEBSITE-": callback.cb_open_junhao_ca
 }
 
 window = None

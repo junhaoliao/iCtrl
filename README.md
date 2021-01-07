@@ -13,7 +13,7 @@ Your EECG/ECF lab remote password, together with your VNC password when applicab
 You are welcome to visit my personal website: https://junhao.ca
 
 ## Instructions (macOS) - 5 Steps
-0. Download UG_Remote.5.x.x.dmg from the [**Releases**](https://github.com/junhaoliao/UG_Remote/releases) page and double-click to mount.
+0. Download UG_Remote-5.x.x.dmg from the [**Releases**](https://github.com/junhaoliao/UG_Remote/releases) page and double-click to mount.
 1. From the mounted disk, drag "UG_Remote.app" into your "Applications" directory.
 2. Open the "De-Quarantine" workflow and click the upper-right "Run" button.
 3. If you haven't installed TigerVNC, drag "TigerVNC Viewer x.x.app" into your "Applications" directory.
@@ -22,9 +22,13 @@ You are welcome to visit my personal website: https://junhao.ca
 ## Instructions (Windows) - 1 Step
 If the "Windows protected your PC" window pops up, click on <ins>More Info</ins> -> [Run anyway] to allow the installer to run.
 
-0. Download and extract UG_Remote_win64.5.x.x.zip from the **Releases** page. Double-click on "UG_Remote.exe".
+0. Download and extract UG_Remote_win64-5.x.x.zip from the **Releases** page. Double-click on "UG_Remote.exe".
 
 ## V5 Change Log
+This script is updated to v5.0.4 on January 6, 2021
+1. Added button to remove existing profiles
+2. Added author info
+
 This script is updated to v5.0.3 on December 28, 2020
 1. Added updater
 
@@ -57,15 +61,19 @@ This script is updated to v5.0.0 on December 19, 2020
 欢迎来我的个人网站逛逛：https://junhao.ca
 
 ## 使用说明 (MacOS) - 4 步
-0. 从 [**Releases**](https://github.com/junhaoliao/UG_Remote/releases) 页面下载UG_Remote.5.x.x.dmg，双击以挂载。
+0. 从 [**Releases**](https://github.com/junhaoliao/UG_Remote/releases) 页面下载UG_Remote-5.x.x.dmg，双击以挂载。
 1. 在挂载的镜像里，拖动"UG_Remote.app"到你的 "应用程序" 目录
 2. 打开"De-Quarantine"，点击右上角的 "运行" 按钮
 3. 打开**启动台**或**应用程序**即可看见安装好的"UG_Remote.app"。你可以拖动应用到**坞**上以创建快捷方式。
 
 ## 使用说明 (Windows) - 1 步
-0. 从**Releases**页面下载并解压UG_Remote_win64.5.x.x.zip。双击"UG_Remote.exe"。
+0. 从**Releases**页面下载并解压UG_Remote_win64-5.x.x.zip。双击"UG_Remote.exe"。
 
 ## V5 版本说明
+本脚本于2021年1月6日更新v5.0.4。
+1. 新增按钮以移除账户设置
+2. 新增作者信息
+
 本脚本于2020年12月28日更新v5.0.3。
 1. 新增升级器
 

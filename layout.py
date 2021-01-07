@@ -27,24 +27,26 @@ eecg_layout = [
         sg.Text("EECG Machine",
                 font=FONT_HELVETICA_16, size=(14, 1)),
         sg.Text("ug",
-                font=FONT_HELVETICA_16),
+                font=FONT_HELVETICA_16, pad=(0, 0)
+                ),
         sg.Combo(machines.MACHINES,
-                 font=FONT_HELVETICA_16,
+                 font=FONT_HELVETICA_16, pad=(0, 0),
                  key="-EECG_MACHINE_NUM-"),
         sg.Text(".eecg.toronto.edu",
-                font=FONT_HELVETICA_16),
+                font=FONT_HELVETICA_16, pad=(0, 0)
+                ),
     ],
     [sg.HSeparator(pad=(0, 8), color="white")],
     [
         sg.Text("Username",
                 font=FONT_HELVETICA_16, size=(14, 1)),
-        sg.Input(font=FONT_HELVETICA_16, size=(20, 1),
+        sg.Input(font=FONT_HELVETICA_16, size=(20, 1), pad=(0, 0),
                  key="-EECG_USERNAME-"),
     ],
     [
         sg.Text("EECG Password",
                 font=FONT_HELVETICA_16, size=(14, 1)),
-        sg.Input(font=FONT_HELVETICA_16, size=(20, 1),
+        sg.Input(font=FONT_HELVETICA_16, size=(20, 1), pad=(0, 0),
                  password_char='*',
                  key="-EECG_PASSWD-"),
     ],
@@ -66,7 +68,8 @@ eecg_layout = [
                 [
                     sg.Text("VNC Password",
                             font=FONT_HELVETICA_16, size=(14, 1)),
-                    sg.Input(font=FONT_HELVETICA_16, size=(20, 1), password_char='*',
+                    sg.Input(font=FONT_HELVETICA_16, size=(20, 1), pad=(0, 0),
+                             password_char='*',
                              key="-EECG_VNC_PASSWD-"),
                 ]
             ],
@@ -111,6 +114,59 @@ eecg_buttons = sg.Column(
     key="-EECG_BUTTONS-"
 )
 
+misc_layout = [
+    [
+        sg.Frame(
+            " Reset ",
+            [
+                [
+                    sg.Text(
+                        "To lear all stored credentials",
+                        font=FONT_HELVETICA_16,
+                    )
+                ],
+                [
+                    sg.Button("Delete all profiles",
+                              font=FONT_ARIAL_12_BOLD,
+                              button_color=("white", "red"),
+                              key="-DELETE_ALL-"
+                              )
+                ]
+            ],
+            font=FONT_HELVETICA_16,
+            # border_width=0
+        )
+    ],
+    [
+        sg.Frame(
+            " About ",
+            [
+                [
+                    sg.Text(
+                        "UG_Remote\n"
+                        "Copyright (C) 2020-2021 Junhao Liao",
+                        font=FONT_HELVETICA_16,
+                        enable_events=True,
+                        key="-COPYRIGHT-"
+                    )
+                ],
+                [
+                    sg.Text(
+                        "https://junhao.ca",
+                        font=FONT_HELVETICA_16,
+                        text_color="blue",
+                        enable_events=True,
+                        key="-OPEN_WEBSITE-"
+                    )
+                ]
+            ],
+            font=FONT_HELVETICA_16,
+            size=(200, 200)
+        )
+    ]
+
+]
+
 layout = [
     [
         sg.Column(
@@ -127,7 +183,11 @@ layout = [
     [
         sg.TabGroup(
             [
-                [sg.Tab('EECG', eecg_layout), sg.Tab('ECF', ecf_layout)]
+                [
+                    sg.Tab('EECG', eecg_layout),
+                    sg.Tab('ECF', ecf_layout),
+                    sg.Tab("Misc", misc_layout)
+                ]
             ],
             font=FONT_HELVETICA_16_BOLD,
             background_color="#eff0f4",
@@ -137,6 +197,7 @@ layout = [
             selected_background_color="#e2e4e7",
             tab_location="center",
             enable_events=True,
+            border_width=0,
             key="-LAB_INTF-"
         )
     ],
