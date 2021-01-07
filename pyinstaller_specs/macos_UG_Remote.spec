@@ -40,4 +40,4 @@ app = BUNDLE(coll,
              name='UG_Remote.app',
              icon='../icon.icns',
              bundle_identifier='ca.junhao.ugremote',
-             version='5.0.3')
+             version='5.0.4')

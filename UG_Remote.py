@@ -8,7 +8,7 @@ import layout
 import updater
 from path_names import *
 
-CURRENT_VER = (5, 0, 3)
+CURRENT_VER = (5, 0, 4)
 GITHUB_RELEASE_PAGE = "https://github.com/junhaoliao/UG_Remote/releases"
 
 # the version check should be non-blocking to speedup loading process
@@ -34,9 +34,9 @@ if platform.system() == "Windows":
     from ctypes import windll
 
     windll.shcore.SetProcessDpiAwareness(1)
-    window = sg.Window("UG Remote", layout.layout, element_padding=(38, 12)).finalize()
+    window = sg.Window("UG_Remote", layout.layout, element_padding=(38, 12)).finalize()
 elif platform.system() == "Darwin":
-    window = sg.Window("UG Remote", layout.layout, element_padding=(16, 10)).finalize()
+    window = sg.Window("UG_Remote", layout.layout, element_padding=(16, 10)).finalize()
 else:
     Exception("System %s not supported yet. Please submit an issue on GitHub. " % platform.system())
 
