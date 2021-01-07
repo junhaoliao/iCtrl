@@ -450,8 +450,12 @@ def cb_delete_all(**kwargs):
                                  "on this device and exit UG_Remote? ",
                                  title="Reset Confirmation")
     if delete_all == "Yes":
-        os.remove(VNC_PASSWD_PATH)
-        os.remove(PROFILE_FILE_PATH)
+        try:
+            os.remove(VNC_PASSWD_PATH)
+            os.remove(PROFILE_FILE_PATH)
+        except OSError:
+            pass
+
         os._exit(0)
 
 
