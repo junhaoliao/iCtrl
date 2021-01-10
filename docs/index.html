@@ -49,10 +49,47 @@
             position: fixed;
             right: 1vw;
         }
+
+        #downloaded {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        #downloaded_prompt {
+            font-size: 1.2em;
+            color: black;
+        }
     </style>
 </head>
 <body>
-<div class="ui  vertical masthead center aligned segment">
+<div class="ui page dimmer" id="downloaded_dimmer">
+    <div class="content">
+        <div class="ui active modal" id="downloaded">
+            <div class="header">Your download will start soon...</div>
+            <div class="content">
+                <div id="downloaded_prompt">
+                    <p>If the download hasn't started in a few seconds, here is the link:
+                        <a id="download_link"></a>
+                    </p>
+                    <p>Btw, would you like to give me a star on GitHub? 🥺</p>
+                </div>
+            </div>
+            <div class="actions">
+                <div class="ui black deny button" onclick="downloaded_give_star(false)">
+                    Nope
+                </div>
+                <div class="ui positive right labeled icon button" onclick="downloaded_give_star(true)">
+                    Yep
+                    <i class="star icon"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="ui vertical masthead center aligned segment">
     <div class="github-button-div">
         <a aria-label="Star junhaoliao/UG_Remote on GitHub" class="github-button" data-icon="octicon-star"
            data-show-count="true"
@@ -61,23 +98,56 @@
 
     <div class="ui text container">
         <img alt="UG_Remote-icon" src="icon.png"/>
-        <h1 class="ui  header">
+        <h1 class="ui header">
             UG_Remote
         </h1>
         <h2>Connect to uoft engineering labs in 5 seconds.</h2>
         <div class="ui huge primary button"
-             onclick="location.href='https://github.com/junhaoliao/UG_Remote/releases/download/5.0.5/UG_Remote_win64-5.0.5.zip'">
+             onclick="download('Windows')">
             <i class="windows icon"></i>Download
         </div>
         <div class="ui huge secondary button"
-             onclick="location.href='https://github.com/junhaoliao/UG_Remote/releases/download/5.0.5/UG_Remote-5.0.5.dmg'">
+             onclick="download('Mac')">
             <i class="apple icon"></i>Download
         </div>
     </div>
     <div class="view_source_hyperlink"><a href="https://github.com/junhaoliao/UG_Remote">View on GitHub</a></div>
     <div class="copyright"><a href="https://junhao.ca">Copyright (C) 2020-2021 Junhao Liao - https://junhao.ca</a></div>
-</div>
 
+
+</div>
+<script>
+    let version = "5.0.5"
+
+    function download(system) {
+        let download_link;
+        if (system === "Windows") {
+            download_link = "https://github.com/junhaoliao/UG_Remote/releases/download/" +
+                version + "/UG_Remote_win64-" + version + ".zip"
+        } else if (system === "Mac") {
+            download_link = "https://github.com/junhaoliao/UG_Remote/releases/download/" +
+                version + "/UG_Remote-" + version + ".dmg"
+        } else {
+            // in case somebody is playing with the browser debugger...
+            return
+        }
+        location.href = download_link
+
+        let elem_download_link = document.getElementById("download_link")
+        elem_download_link.innerText = download_link
+        elem_download_link.setAttribute("href", download_link)
+
+        document.getElementById("downloaded_dimmer").classList.add("active")
+    }
+
+    function downloaded_give_star(yesno) {
+        if (yesno === true) {
+            location.href = "https://github.com/junhaoliao/UG_Remote"
+        }
+
+        document.getElementById("downloaded_dimmer").classList.remove("active")
+    }
+</script>
 <script async defer src="https://cdn.jsdelivr.net/npm/semantic-ui/dist/semantic.min.js"></script>
 <script async defer src="https://buttons.github.io/buttons.js"></script>
 </body>
