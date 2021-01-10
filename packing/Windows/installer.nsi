@@ -49,8 +49,8 @@
 ;--------------------------------
 ;Pages
 
-  !insertmacro MUI_PAGE_LICENSE "${ProjectDir}\Docs\UG_Remote_Disclaimer.rtf"
-  !insertmacro MUI_PAGE_LICENSE "${ProjectDir}\Docs\TigerVNC_LICENCE.TXT"
+  !insertmacro MUI_PAGE_LICENSE "${ProjectDir}\docs\UG_Remote_Disclaimer.rtf"
+  !insertmacro MUI_PAGE_LICENSE "${ProjectDir}\docs\TigerVNC_LICENCE.TXT"
   !insertmacro MUI_PAGE_COMPONENTS
   !insertmacro MUI_PAGE_DIRECTORY
   !insertmacro MUI_PAGE_INSTFILES
