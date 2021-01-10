@@ -2,10 +2,12 @@ import json
 from urllib.error import URLError
 from urllib.request import urlopen
 
+CURRENT_VER = (5, 0, 5)
+GITHUB_RELEASE_PAGE = "https://github.com/junhaoliao/UG_Remote/releases"
 LATEST_RELEASE_URL = "https://api.github.com/repos/junhaoliao/UG_Remote/releases/latest"
 
 
-def compare_version(current_ver, result):
+def compare_version(result):
     version_mismatch = False
     try:
         file = urlopen(LATEST_RELEASE_URL)
@@ -13,12 +15,17 @@ def compare_version(current_ver, result):
         latest_ver = json_data["tag_name"].split(".")
 
         for i in range(3):
-            if current_ver[i] < int(latest_ver[i]):
+            if CURRENT_VER[i] < int(latest_ver[i]):
                 version_mismatch = True
                 break
     except URLError:
         print("The updater is unable to access GitHub API for version comparison. ")
     except (IndexError, ValueError):
         version_mismatch = True
+
+    if version_mismatch:
+        print("Updater: detected a new version")
+    else:
+        print("Updater: No updates available")
 
     result[0] = version_mismatch

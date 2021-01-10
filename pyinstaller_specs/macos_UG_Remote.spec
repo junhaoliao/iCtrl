@@ -39,5 +39,4 @@ coll = COLLECT(exe,
 app = BUNDLE(coll,
              name='UG_Remote.app',
              icon='../icon.icns',
-             bundle_identifier='ca.junhao.ugremote',
-             version='5.0.4')
+             bundle_identifier='ca.junhao.ugremote')

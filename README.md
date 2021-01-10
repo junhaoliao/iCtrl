@@ -25,6 +25,9 @@ If the "Windows protected your PC" window pops up, click on <ins>More Info</ins>
 0. Download and extract UG_Remote_win64-5.x.x.zip from the **Releases** page. Double-click on "UG_Remote.exe".
 
 ## V5 Change Log
+This script is updated to v5.0.5 on January 10, 2021
+1. Added "last_lab" filed in the profile so that the script can switch to the last connected lab at launch
+
 This script is updated to v5.0.4 on January 6, 2021
 1. Added button to remove existing profiles
 2. Added author info
@@ -70,6 +73,9 @@ This script is updated to v5.0.0 on December 19, 2020
 0. 从**Releases**页面下载并解压UG_Remote_win64-5.x.x.zip。双击"UG_Remote.exe"。
 
 ## V5 版本说明
+本脚本于2021年1月10日更新v5.0.5。
+1. 在账户设置里新增"last_lab"栏，程序下次开启时会自动切换到上次连的lab
+
 本脚本于2021年1月6日更新v5.0.4。
 1. 新增按钮以移除账户设置
 2. 新增作者信息

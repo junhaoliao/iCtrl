@@ -16,7 +16,7 @@ class UGConnection():
         self.passwd = None
 
         self.client = paramiko.SSHClient()
-        self.client.set_missing_host_key_policy(paramiko.WarningPolicy())
+        self.client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
 
         self.forward_thread = None
 

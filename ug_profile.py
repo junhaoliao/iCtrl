@@ -1,16 +1,19 @@
 import base64
 import copy
 import json
+import datetime
 
 import exceptions
 from path_names import *
 
 
 class UGProfile:
-    version = 1  # in case the schema changes in the future
+    version = 2  # in case the schema changes in the future
     instantiated = False
     _empty_profile = {
         "version": version,
+        "last_checked_update": datetime.datetime.now().isoformat(),
+        "last_lab": "EECG",
         "EECG": {
             "loaded": False,
             "username": "",
@@ -56,6 +59,14 @@ class UGProfile:
                     print("Both EECG and ECF Profile not loaded. ")
                     return
 
+                # make sure the profile file is not modified in an attempt to crash the script
+                #  let the broad exception handler handle the error
+                self["last_checked_update"] = datetime.datetime.fromisoformat(
+                    json_data["last_checked_update"]).isoformat()
+                self["last_lab"] = json_data["last_lab"]
+                if self["last_lab"] not in ("EECG", "ECF"):
+                    raise KeyError
+
                 if not json_data["EECG"]["loaded"]:
                     print("EECG Profile not loaded. ")
                 else:
@@ -75,7 +86,7 @@ class UGProfile:
                     self["ECF"]["loaded"] = True
                     print("ECF Profile loaded with username: ", self["ECF"]["username"])
 
-        except (FileNotFoundError, json.decoder.JSONDecodeError, KeyError, UnicodeDecodeError):
+        except Exception:
             self._profile = copy.deepcopy(UGProfile._empty_profile)
             print("Both EECG and ECF Profile not loaded. ")
 
@@ -92,15 +103,20 @@ class UGProfile:
 
         self["ECF"]["loaded"] = True
 
-    def save_profile(self):
+    def save_profile(self, last_lab):
+        if type(last_lab) is not str or last_lab not in ("EECG", "ECF"):
+            raise exceptions.MisuseError("last_lab should be one of 'EECG' or 'ECF'")
+
+        self["last_lab"] = last_lab
         try:
             with open(PROFILE_FILE_PATH, 'w') as outfile:
                 profile_dict = copy.deepcopy(self._profile)
+                profile_dict["last_checked_update"] = datetime.datetime.now().isoformat()
                 profile_dict["EECG"]["passwd"] = base64.b64encode(self["EECG"]["passwd"].encode('ascii')).decode(
                     'ascii')
                 profile_dict["ECF"]["passwd"] = base64.b64encode(self["ECF"]["passwd"].encode('ascii')).decode('ascii')
 
-                json_data = json.dumps(profile_dict)
+                json_data = json.dumps(profile_dict, indent=4)
                 outfile.write(json_data)
         except Exception:
             # need to handle any write permission issues, once observed

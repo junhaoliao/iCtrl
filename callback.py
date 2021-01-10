@@ -76,6 +76,11 @@ def login_ecf(window, values):
     return True
 
 
+def preselect_lab(window):
+    if my_profile["last_lab"] == "ECF":
+        window["ECF"].Select()
+
+
 def prefill_eecg_profile(window):
     if my_profile["EECG"]["loaded"]:
         # display srv, username and password if already loaded
@@ -368,7 +373,7 @@ def cb_eecg_select_port(window, values):
                 window.force_focus()
                 return
         launch_vnc_eecg(port_num)
-        my_profile.save_profile()
+        my_profile.save_profile("EECG")
 
 
 def cb_eecg_random_port(window, values):
@@ -403,7 +408,7 @@ def cb_eecg_random_port(window, values):
             return
 
     launch_vnc_eecg(port_num)
-    my_profile.save_profile()
+    my_profile.save_profile("EECG")
 
 
 def cb_ecf_connect(window, values):
@@ -416,7 +421,7 @@ def cb_ecf_connect(window, values):
         return
 
     launch_vnc_ecf()
-    my_profile.save_profile()
+    my_profile.save_profile("ECF")
 
 
 def cb_eecg_reset_no(window, **kwargs):

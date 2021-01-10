@@ -1,3 +1,4 @@
+import datetime
 import threading
 import webbrowser
 
@@ -8,13 +9,16 @@ import layout
 import updater
 from path_names import *
 
-CURRENT_VER = (5, 0, 4)
-GITHUB_RELEASE_PAGE = "https://github.com/junhaoliao/UG_Remote/releases"
-
 # the version check should be non-blocking to speedup loading process
 needs_update = [False]
-update_thread = threading.Thread(target=updater.compare_version, args=(CURRENT_VER, needs_update))
-update_thread.start()
+if (
+        datetime.datetime.now() - datetime.datetime.fromisoformat(callback.my_profile["last_checked_update"])
+).days >= 1:
+    update_thread = threading.Thread(target=updater.compare_version, args=(needs_update,))
+    update_thread.start()
+    print("Checking for updates... ")
+else:
+    print("Have checked for updates within a day. Not checking this time. ")
 
 dispatch_dictionary = {
     "-EECG_SELECT_PORT-": callback.cb_eecg_select_port,
@@ -40,6 +44,7 @@ elif platform.system() == "Darwin":
 else:
     Exception("System %s not supported yet. Please submit an issue on GitHub. " % platform.system())
 
+callback.preselect_lab(window)
 callback.prefill_eecg_profile(window)
 callback.prefill_ecf_profile(window)
 
@@ -57,7 +62,7 @@ while True:
                                   font=layout.FONT_HELVETICA_16,
                                   keep_on_top=True)
         if resp == "OK":
-            webbrowser.open(GITHUB_RELEASE_PAGE)
+            webbrowser.open(updater.GITHUB_RELEASE_PAGE)
 
     # Lookup event in function dictionary
     if event in dispatch_dictionary:
