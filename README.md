@@ -25,6 +25,10 @@ If the "Windows protected your PC" window pops up, click on <ins>More Info</ins>
 0. Download and extract UG_Remote_win64-5.x.x.zip from the **Releases** page. Double-click on "UG_Remote.exe".
 
 ## V5 Change Log
+This script is updated to v5.0.6 on January 18, 2021
+1. Added "check load" feature
+2. Added "Disk Quota Exceeded" prompt
+
 This script is updated to v5.0.5 on January 10, 2021
 1. Added "last_lab" filed in the profile so that the script can switch to the last connected lab at launch
 
@@ -73,6 +77,10 @@ This script is updated to v5.0.0 on December 19, 2020
 0. 从**Releases**页面下载并解压UG_Remote_win64-5.x.x.zip。双击"UG_Remote.exe"。
 
 ## V5 版本说明
+本脚本于2021年1月18日更新v5.0.6。
+1. 新增“检查负载”功能
+2. 新增“限额已超”提示
+
 本脚本于2021年1月10日更新v5.0.5。
 1. 在账户设置里新增"last_lab"栏，程序下次开启时会自动切换到上次连的lab
 
