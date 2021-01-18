@@ -124,6 +124,10 @@ class EECGConnection(ug_connection.UGConnection):
         for line in stdout:
             print(line)
         for line in stderr:
+            if "Disk quota exceeded" in line:
+                raise exceptions.QuotaError("Quota exceeded. \n"
+                                            "Please SSH manually and delete unnecessary files. \n"
+                                            "Use \"quota -s\" to verify if you have enough quota. ")
             print(line)
 
         _, stdout, _ = self.client.exec_command("echo '%s'| vncpasswd -f" % vnc_passwd_input)

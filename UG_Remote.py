@@ -23,6 +23,7 @@ else:
 dispatch_dictionary = {
     "-EECG_SELECT_PORT-": callback.cb_eecg_select_port,
     "-EECG_RANDOM_PORT-": callback.cb_eecg_random_port,
+    "-EECG_CHECK_LOADS-": callback.cb_eecg_check_loads,
     "-EECG_RESET_NO-": callback.cb_eecg_reset_no,
     "-EECG_RESET_YES-": callback.cb_eecg_reset_yes,
     "-ECF_CONNECT-": callback.cb_ecf_connect,
@@ -68,13 +69,14 @@ while True:
     if event in dispatch_dictionary:
         func_to_call = dispatch_dictionary[event]  # get function from dispatch dictionary
         func_to_call(window=window, values=values)
-    elif not callback.my_eecg_conn.connected:
-        layout.enable_eecg_components(window)
-    elif not callback.my_ecf_conn.connected:
-        layout.enable_ecf_components(window)
     # else:  # use for debugging only: should comment this out before publishing
     #     print(event, values)
     #     print('Event {} not in dispatch dictionary'.format(event))
+
+    if not callback.my_eecg_conn.connected:
+        layout.enable_eecg_components(window)
+    if not callback.my_ecf_conn.connected:
+        layout.enable_ecf_components(window)
 
 window.close()
 sys.stdout.flush()

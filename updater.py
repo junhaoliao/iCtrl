@@ -2,7 +2,7 @@ import json
 from urllib.error import URLError
 from urllib.request import urlopen
 
-CURRENT_VER = (5, 0, 5)
+CURRENT_VER = (5, 0, 6)
 GITHUB_RELEASE_PAGE = "https://github.com/junhaoliao/UG_Remote/releases"
 LATEST_RELEASE_URL = "https://api.github.com/repos/junhaoliao/UG_Remote/releases/latest"
 

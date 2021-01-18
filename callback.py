@@ -273,12 +273,13 @@ def check_and_save_vnc_passwd(vnc_passwd_input):
 
     try:
         my_eecg_conn.set_and_save_vnc_passwd(vnc_passwd_input)
-    except Exception as e:
+    except exceptions.QuotaError as e:
         sg.Popup(e,
                  title="Unexpected Error %s" % e.__class__.__name__,
                  button_type=sg.POPUP_BUTTONS_OK,
                  button_color=('white', 'red'),
                  keep_on_top=True)
+        return False
 
     return True
 
@@ -333,8 +334,7 @@ def cb_eecg_select_port(window, values):
 
     port_num = None
 
-    window_ports = sg.Window("Select a Port", layout=layout_port)
-    window_ports.finalize()
+    window_ports = sg.Window("Select a Port", layout=layout_port).finalize()
     while True:
         event_ports, values_ports = window_ports.read()
         if event_ports == sg.WIN_CLOSED or event_ports == 'Exit':
@@ -409,6 +409,78 @@ def cb_eecg_random_port(window, values):
 
     launch_vnc_eecg(port_num)
     my_profile.save_profile("EECG")
+
+
+# callback functions
+def cb_eecg_check_loads(window, values):
+    print("Callback: cb_eecg_check_loads")
+
+    layout.disable_eecg_components(window)
+    if not login_eecg(window, values):
+        layout.enable_eecg_components(window)
+        window.force_focus()
+        return
+
+    loads_by_user_count = []
+
+    _, stdout, stderr = my_eecg_conn.client.exec_command("ruptime -aur")
+    for line in stdout:
+        if "up" in line:
+            numbers = re.findall(r"[-+]?\d*\.\d+|\d+", line)
+            loads_by_user_count.append([numbers[0], numbers[4], numbers[5], numbers[6], numbers[7]])
+
+    layout_eecg_loads = [
+        [
+            sg.Text("Command",
+                    font=layout.FONT_HELVETICA_16),
+            sg.Input(default_text="ruptime -aur",
+                     font=layout.FONT_HELVETICA_16,
+                     disabled=True)
+        ],
+        [
+            sg.Table(loads_by_user_count,
+                     font=layout.FONT_HELVETICA_16,
+                     headings=["Machine #", "User Count", "1-min Avg", "5-min Avg", "15-min Avg"],
+                     select_mode=sg.TABLE_SELECT_MODE_BROWSE,
+                     enable_events=True,
+                     key="-EECG_LOADS_TABLE-")
+        ],
+        [
+            sg.Column(
+                [
+                    [
+                        sg.Button(
+                            "Select",
+                            font=layout.FONT_HELVETICA_16,
+                            button_color=layout.COLOR_EECG_RANDOM_PORT_BUTTON,
+                            key="-EECG_SELECT_MACHINE-"
+                        )
+                    ]
+                ],
+                justification="right"
+            )
+        ]
+    ]
+
+    chosen_machine_num = None
+
+    window_loads = sg.Window("EECG Machine Loads", layout=layout_eecg_loads).finalize()
+    while True:
+        event_loads, values_loads = window_loads.read()
+        if event_loads == sg.WIN_CLOSED or event_loads == 'Exit':
+            break
+        elif event_loads == "-EECG_SELECT_MACHINE-" and values_loads["-EECG_LOADS_TABLE-"]:
+            chosen_machine_num = loads_by_user_count[values_loads["-EECG_LOADS_TABLE-"][0]][0]
+            print(chosen_machine_num)
+            break
+
+    window_loads.close()
+
+    if chosen_machine_num is not None:
+        window["-EECG_MACHINE_NUM-"](chosen_machine_num)
+
+    layout.enable_eecg_components(window)
+    window.force_focus()
 
 
 def cb_ecf_connect(window, values):

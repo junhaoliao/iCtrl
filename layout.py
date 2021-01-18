@@ -13,7 +13,8 @@ COLOR_EECG_REFRESH_BUTTON = ("white", "#FF7F1D")
 COLOR_EECG_USED_BY_ME_BUTTON = ("#00619F", "#FFE74D")
 COLOR_EECG_BUSY_BUTTON = ("white", "#F5577C")
 COLOR_EECG_FREE_BUTTON = ("white", "#88B04B")
-COLOR_EECG_SELECT_PORT_BUTTON = ("#3c4043", "#f8f9fa")
+COLOR_EECG_SELECT_PORT_BUTTON = ("white", "#ef0078")
+COLOR_EECG_CHECK_LOADS_BUTTON = ("white", "#00695C")
 COLOR_EECG_RANDOM_PORT_BUTTON = ("white", "#4285f4")
 
 COLOR_ECF_CONNECT_BUTTON = ("white", "#4285f4")
@@ -121,11 +122,17 @@ eecg_buttons = sg.Column(
                       button_color=COLOR_EECG_SELECT_PORT_BUTTON,
                       tooltip="Pick your favourite port",
                       key="-EECG_SELECT_PORT-"),
-            sg.Button("I'm Feeling Lucky",
+            sg.Button("Check Loads",
+                      font=FONT_ARIAL_12_BOLD,
+                      button_color=COLOR_EECG_CHECK_LOADS_BUTTON,
+                      tooltip="Pick the lightest loaded machine by user count",
+                      key="-EECG_CHECK_LOADS-"),
+            sg.Button("Connect",
                       font=FONT_ARIAL_12_BOLD,
                       button_color=COLOR_EECG_RANDOM_PORT_BUTTON,
                       tooltip="Connect to the last session or create a new one",
-                      key="-EECG_RANDOM_PORT-")
+                      key="-EECG_RANDOM_PORT-"),
+
         ]
     ],
     pad=(0, 0),
@@ -241,6 +248,7 @@ def enable_eecg_components(window):
     window["-EECG_VNC_PASSWD-"](disabled=False)
     window["-EECG_SELECT_PORT-"](disabled=False)
     window["-EECG_RANDOM_PORT-"](disabled=False)
+    window["-EECG_CHECK_LOADS-"](disabled=False)
 
 
 def disable_eecg_components(window):
@@ -252,6 +260,7 @@ def disable_eecg_components(window):
     window["-EECG_VNC_PASSWD-"](disabled=True)
     window["-EECG_SELECT_PORT-"](disabled=True)
     window["-EECG_RANDOM_PORT-"](disabled=True)
+    window["-EECG_CHECK_LOADS-"](disabled=True)
 
 
 def enable_ecf_components(window):
