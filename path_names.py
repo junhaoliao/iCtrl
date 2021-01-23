@@ -9,10 +9,9 @@ VNC_PASSWD_PATH = "passwd"
 
 TIGER_VNC_VIEWER_PATH_WIN64 = "vncviewer64.exe"
 TIGER_VNC_VIEWER_PATH_MACOS = "/Applications/TigerVNC Viewer*.app"
+
 REAL_VNC_VIEWER_PATH_WIN64 = ""
 REAL_VNC_VIEWER_PATH_MACOS = "/Applications/VNC Viewer.app"
-
-APP_PATH = os.path.dirname(sys.executable)
 
 if getattr(sys, 'frozen', False):  # standalone mode
     # noinspection PyUnresolvedReferences
@@ -22,27 +21,31 @@ if platform.system() == "Windows":
     if not os.path.isfile(TIGER_VNC_VIEWER_PATH_WIN64):
         print("Could not find TigerVNC")
         TIGER_VNC_VIEWER_PATH_WIN64 = None
-    if not os.path.isfile(REAL_VNC_VIEWER_PATH_WIN64):
-        print("Could not find RealVNC")
+
+    import winreg
+
+    try:
+        key = winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, r"SOFTWARE\RealVNC\installer\vncviewer")
+        REAL_VNC_VIEWER_PATH_WIN64 = os.path.join(winreg.QueryValueEx(key, "InstallLocation")[0], "vncviewer.exe")
+    except Exception as e:
+        print("Registry key of RealVNC cannot be read. Could not find RealVNC")
         REAL_VNC_VIEWER_PATH_WIN64 = None
 
-    WIN_INSTALL_DIR_PATH = os.path.join(os.environ['ProgramFiles'], "UG_Remote")
-    if WIN_INSTALL_DIR_PATH == APP_PATH:
-        print("App installed in ProgramFiles, using LocalAppData for profile storage. ")
-        WIN_LOCALAPPDATA_PATH = os.path.join(os.environ['LOCALAPPDATA'], "UG_Remote")
-        if not os.path.exists(WIN_LOCALAPPDATA_PATH):
-            os.mkdir(WIN_LOCALAPPDATA_PATH)
-        PROFILE_FILE_PATH = os.path.join(WIN_LOCALAPPDATA_PATH, PROFILE_FILE_PATH)
-        VNC_PASSWD_PATH = os.path.join(WIN_LOCALAPPDATA_PATH, VNC_PASSWD_PATH)
+    print("App installed in ProgramFiles, using LocalAppData for profile storage. ")
+    WIN_LOCALAPPDATA_PATH = os.path.join(os.environ['LOCALAPPDATA'], "UG_Remote")
+    if not os.path.exists(WIN_LOCALAPPDATA_PATH):
+        os.mkdir(WIN_LOCALAPPDATA_PATH)
+    PROFILE_FILE_PATH = os.path.join(WIN_LOCALAPPDATA_PATH, PROFILE_FILE_PATH)
+    VNC_PASSWD_PATH = os.path.join(WIN_LOCALAPPDATA_PATH, VNC_PASSWD_PATH)
 
-        # redirect stdout if enabled
-        stdout_path = os.path.join(WIN_LOCALAPPDATA_PATH, "stdout.log")
-        if os.path.isfile(stdout_path):
-            sys.stdout = open(stdout_path, 'w')
-        # redirect stderr if enabled
-        stderr_path = os.path.join(WIN_LOCALAPPDATA_PATH, "stderr.log")
-        if os.path.isfile(stderr_path):
-            sys.stderr = open(stderr_path, 'w')
+    # redirect stdout if enabled
+    stdout_path = os.path.join(WIN_LOCALAPPDATA_PATH, "stdout.log")
+    if os.path.isfile(stdout_path):
+        sys.stdout = open(stdout_path, 'w')
+    # redirect stderr if enabled
+    stderr_path = os.path.join(WIN_LOCALAPPDATA_PATH, "stderr.log")
+    if os.path.isfile(stderr_path):
+        sys.stderr = open(stderr_path, 'w')
 
 elif platform.system() == "Darwin":  # Mac OS
     print("On Mac OS, using ~/.ug_remote for profile storage. ")

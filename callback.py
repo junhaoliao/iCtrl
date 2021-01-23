@@ -79,9 +79,13 @@ def login_ecf(window, values):
 def preselect_lab(window):
     if my_profile["last_lab"] == "ECF":
         window["ECF"].Select()
+        window["-EECG_BUTTONS-"](visible=False)
+        window["-ECF_CONNECT-"](visible=True)
+
 
 def preselect_viewer(window):
     window["-SELECT_VIEWER-"](my_profile["viewer"])
+
 
 def prefill_eecg_profile(window):
     if my_profile["EECG"]["loaded"]:
@@ -164,7 +168,7 @@ def launch_vnc(viewer, lab, port_num):
                      keep_on_top=True,
                      button_type=sg.POPUP_BUTTONS_OK, button_color=('white', 'red'))
             return
-    elif platform.system() == "Windows" and TIGER_VNC_VIEWER_PATH_WIN64 is None:
+    elif platform.system() == "Windows":
         if viewer == "TigerVNC" and TIGER_VNC_VIEWER_PATH_WIN64 is None:
             sg.Popup(TIGER_VNC_MISSING_PROMPT % actual_port,
                      title="TigerVNC NOT Found",
@@ -203,16 +207,32 @@ def launch_vnc(viewer, lab, port_num):
                 "--passwd=%s localhost:%d" % (
                     REAL_VNC_VIEWER_PATH_MACOS, os.path.abspath(VNC_PASSWD_PATH), actual_port))
     elif platform.system() == 'Windows':
-        # TODO: support launching with other VNC viewers on Windows
-
-        subprocess.call(["cmd", "/c", "start", "/max",
-                         TIGER_VNC_VIEWER_PATH_WIN64, "--passwd=%s" % VNC_PASSWD_PATH, "localhost:%d" % actual_port])
+        if viewer == "TigerVNC":
+            subprocess.call(["cmd", "/c", "start", "/max", "",
+                             TIGER_VNC_VIEWER_PATH_WIN64,
+                             "--passwd=%s" % VNC_PASSWD_PATH,
+                             "localhost:%d" % actual_port])
+        else:
+            # Set more arguments for RealVNC for compatibility issues
+            # -FullColour : solve the distorted colour issue
+            # -SecurityNotificationTimeout=0 : suppress the encryption warning
+            # -WarnUnencrypted : suppress the encryption warning
+            # -Scaling=Fit : scale to fit window
+            subprocess.call(["cmd", "/c", "start", "/max", "",
+                             REAL_VNC_VIEWER_PATH_WIN64,
+                             "-FullColour",
+                             "-SecurityNotificationTimeout=0",
+                             "-WarnUnencrypted=FALSE",
+                             "-Scaling=AspectFit",
+                             "--passwd=%s" % os.path.abspath(VNC_PASSWD_PATH),
+                             "localhost:%d" % actual_port])
     else:
         print("System %snot supported" % platform.system())
 
     # flush the outputs before terminating for easier debugging
     sys.stdout.flush()
     sys.stderr.flush()
+
 
 def check_and_save_vnc_passwd(vnc_passwd_input):
     sg.Popup("Resetting VNC Password...",

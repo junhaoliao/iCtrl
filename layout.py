@@ -29,7 +29,7 @@ eecg_layout = [
     [sg.Text("",font=("Arial", 3))],
     [
         sg.Text("EECG Machine",
-                font=FONT_HELVETICA_16, size=(15, 1),
+                font=FONT_HELVETICA_16, size=(16, 1),
                 tooltip="Please select one with lighter loads. \n"
                         "You may check how many people are using this machine\n"
                         " by entering the credentials and clicking \"Select Port\""),
@@ -45,7 +45,7 @@ eecg_layout = [
     ],
     [
         sg.Text("Username",
-                font=FONT_HELVETICA_16, size=(15, 1),
+                font=FONT_HELVETICA_16, size=(16, 1),
                 tooltip="Same as your UTORid"),
         sg.Input(font=FONT_HELVETICA_16, size=(20, 1), pad=(0, 0),
                  key="-EECG_USERNAME-"),
@@ -53,7 +53,7 @@ eecg_layout = [
     ],
     [
         sg.Text("EECG Password",
-                font=FONT_HELVETICA_16, size=(15, 1),
+                font=FONT_HELVETICA_16, size=(16, 1),
                 tooltip="By default, it is your student number"),
         sg.Input(font=FONT_HELVETICA_16, size=(20, 1), pad=(0, 0),
                  password_char='*',
@@ -61,7 +61,7 @@ eecg_layout = [
     ],
     [
         sg.Text("Reset VNC",
-                font=FONT_HELVETICA_16, size=(15, 1),
+                font=FONT_HELVETICA_16, size=(16, 1),
                 tooltip="You will need to setup a VNC password for initialization.\n"
                         "The password length should be between 6 and 8"),
         sg.Radio('No', "RESET", default=False,
@@ -82,7 +82,7 @@ eecg_layout = [
             [
                 [
                     sg.Text("New VNC Password",
-                            font=FONT_HELVETICA_16, size=(15, 1),
+                            font=FONT_HELVETICA_16, size=(16, 1),
                             tooltip="You will need to setup a VNC password for initialization.\n"
                                     "The password length should be between 6 and 8"),
                     sg.Input(font=FONT_HELVETICA_16, size=(20, 1), pad=(0, 0),
@@ -100,14 +100,14 @@ ecf_layout = [
     [sg.Text("", font=("Arial", 3))],
     [
         sg.Text("Username",
-                font=FONT_HELVETICA_16, size=(15, 1),
+                font=FONT_HELVETICA_16, size=(16, 1),
                 tooltip="Same as your UTORid"),
         sg.Input(font=FONT_HELVETICA_16, size=(20, 1), pad=(0, 0),
                  key="-ECF_USERNAME-"),
     ],
     [
         sg.Text("ECF Password",
-                font=FONT_HELVETICA_16, size=(15, 1),
+                font=FONT_HELVETICA_16, size=(16, 1),
                 tooltip="The one that must be 16 characters or longer"),
         sg.Input(font=FONT_HELVETICA_16, size=(20, 1), pad=(0, 0),
                  password_char='*',
