@@ -7,8 +7,10 @@ UG_REMOTE_ICON_PATH = "icon.png"
 PROFILE_FILE_PATH = "profile.json"
 VNC_PASSWD_PATH = "passwd"
 
-VNC_VIEWER_PATH_WIN64 = "vncviewer64.exe"
-VNC_VIEWER_PATH_MACOS = "/Applications/TigerVNC Viewer*.app"
+TIGER_VNC_VIEWER_PATH_WIN64 = "vncviewer64.exe"
+TIGER_VNC_VIEWER_PATH_MACOS = "/Applications/TigerVNC Viewer*.app"
+REAL_VNC_VIEWER_PATH_WIN64 = ""
+REAL_VNC_VIEWER_PATH_MACOS = "/Applications/VNC Viewer.app"
 
 APP_PATH = os.path.dirname(sys.executable)
 
@@ -17,9 +19,12 @@ if getattr(sys, 'frozen', False):  # standalone mode
     UG_REMOTE_ICON_PATH = os.path.join(sys._MEIPASS, UG_REMOTE_ICON_PATH)
 
 if platform.system() == "Windows":
-    if not os.path.isfile(VNC_VIEWER_PATH_WIN64):
+    if not os.path.isfile(TIGER_VNC_VIEWER_PATH_WIN64):
         print("Could not find TigerVNC")
-        VNC_VIEWER_PATH_WIN64 = None
+        TIGER_VNC_VIEWER_PATH_WIN64 = None
+    if not os.path.isfile(REAL_VNC_VIEWER_PATH_WIN64):
+        print("Could not find RealVNC")
+        REAL_VNC_VIEWER_PATH_WIN64 = None
 
     WIN_INSTALL_DIR_PATH = os.path.join(os.environ['ProgramFiles'], "UG_Remote")
     if WIN_INSTALL_DIR_PATH == APP_PATH:
@@ -50,12 +55,20 @@ elif platform.system() == "Darwin":  # Mac OS
     VNC_PASSWD_PATH = os.path.join(MACOS_HOME_UG_REMOTE_DIR_PATH, VNC_PASSWD_PATH)
 
     import glob
-    available_tigervnc_paths = glob.glob(VNC_VIEWER_PATH_MACOS)
+
+    available_tigervnc_paths = glob.glob(TIGER_VNC_VIEWER_PATH_MACOS)
     if len(available_tigervnc_paths) == 0:
-        VNC_VIEWER_PATH_MACOS = None
+        TIGER_VNC_VIEWER_PATH_MACOS = None
     else:
         # replace " " with "\ " on Unix system paths
-        VNC_VIEWER_PATH_MACOS = available_tigervnc_paths[0].replace(" ", "\ ")
+        TIGER_VNC_VIEWER_PATH_MACOS = available_tigervnc_paths[0].replace(" ", "\ ")
+
+    # check whether RealVNC is installed
+    if not os.path.exists(REAL_VNC_VIEWER_PATH_MACOS):
+        REAL_VNC_VIEWER_PATH_MACOS = None
+    else:
+        # replace " " with "\ " on Unix system paths
+        REAL_VNC_VIEWER_PATH_MACOS = REAL_VNC_VIEWER_PATH_MACOS.replace(" ", "\ ")
 
     # redirect stdout if enabled
     stdout_path = os.path.join(MACOS_HOME_UG_REMOTE_DIR_PATH, "stdout.log")

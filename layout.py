@@ -4,6 +4,7 @@ import machines
 import updater
 from path_names import *
 
+FONT_HELVETICA_12 = ("Helvetica", 12)
 FONT_HELVETICA_16 = ("Helvetica", 16)
 FONT_HELVETICA_16_BOLD = ("Helvetica", 16, "bold")
 FONT_ARIAL_12 = ("Arial", 12)
@@ -28,7 +29,7 @@ eecg_layout = [
     [sg.Text("",font=("Arial", 3))],
     [
         sg.Text("EECG Machine",
-                font=FONT_HELVETICA_16, size=(14, 1),
+                font=FONT_HELVETICA_16, size=(15, 1),
                 tooltip="Please select one with lighter loads. \n"
                         "You may check how many people are using this machine\n"
                         " by entering the credentials and clicking \"Select Port\""),
@@ -44,7 +45,7 @@ eecg_layout = [
     ],
     [
         sg.Text("Username",
-                font=FONT_HELVETICA_16, size=(14, 1),
+                font=FONT_HELVETICA_16, size=(15, 1),
                 tooltip="Same as your UTORid"),
         sg.Input(font=FONT_HELVETICA_16, size=(20, 1), pad=(0, 0),
                  key="-EECG_USERNAME-"),
@@ -52,7 +53,7 @@ eecg_layout = [
     ],
     [
         sg.Text("EECG Password",
-                font=FONT_HELVETICA_16, size=(14, 1),
+                font=FONT_HELVETICA_16, size=(15, 1),
                 tooltip="By default, it is your student number"),
         sg.Input(font=FONT_HELVETICA_16, size=(20, 1), pad=(0, 0),
                  password_char='*',
@@ -60,19 +61,19 @@ eecg_layout = [
     ],
     [
         sg.Text("Reset VNC",
-                font=FONT_HELVETICA_16, size=(14, 1),
-                tooltip="You will need to setup a VNC password for every new account.\n"
+                font=FONT_HELVETICA_16, size=(15, 1),
+                tooltip="You will need to setup a VNC password for initialization.\n"
                         "The password length should be between 6 and 8"),
         sg.Radio('No', "RESET", default=False,
                  font=FONT_HELVETICA_16,
-                tooltip="You will need to setup a VNC password for every new account.\n"
-                        "The password length should be between 6 and 8",
+                 tooltip="You will need to setup a VNC password for initialization.\n"
+                         "The password length should be between 6 and 8",
                  enable_events=True,
                  key="-EECG_RESET_NO-"),
         sg.Radio('Yes', "RESET", default=True,
                  font=FONT_HELVETICA_16,
-                tooltip="You will need to setup a VNC password for every new account.\n"
-                        "The password length should be between 6 and 8",
+                 tooltip="You will need to setup a VNC password for initialization.\n"
+                         "The password length should be between 6 and 8",
                  enable_events=True,
                  key="-EECG_RESET_YES-")
     ],
@@ -80,9 +81,9 @@ eecg_layout = [
         sg.Column(
             [
                 [
-                    sg.Text("VNC Password",
-                            font=FONT_HELVETICA_16, size=(14, 1),
-                            tooltip="You will need to setup a VNC password for every new account.\n"
+                    sg.Text("New VNC Password",
+                            font=FONT_HELVETICA_16, size=(15, 1),
+                            tooltip="You will need to setup a VNC password for initialization.\n"
                                     "The password length should be between 6 and 8"),
                     sg.Input(font=FONT_HELVETICA_16, size=(20, 1), pad=(0, 0),
                              password_char='*',
@@ -99,14 +100,14 @@ ecf_layout = [
     [sg.Text("", font=("Arial", 3))],
     [
         sg.Text("Username",
-                font=FONT_HELVETICA_16, size=(14, 1),
+                font=FONT_HELVETICA_16, size=(15, 1),
                 tooltip="Same as your UTORid"),
         sg.Input(font=FONT_HELVETICA_16, size=(20, 1), pad=(0, 0),
                  key="-ECF_USERNAME-"),
     ],
     [
         sg.Text("ECF Password",
-                font=FONT_HELVETICA_16, size=(14, 1),
+                font=FONT_HELVETICA_16, size=(15, 1),
                 tooltip="The one that must be 16 characters or longer"),
         sg.Input(font=FONT_HELVETICA_16, size=(20, 1), pad=(0, 0),
                  password_char='*',
@@ -151,6 +152,19 @@ misc_layout = [
                               button_color=("white", "red"),
                               key="-DELETE_ALL-"
                               )
+                ]
+            ],
+            font=FONT_HELVETICA_16,
+            element_justification="center",
+        ),
+        sg.Frame(
+            " Viewer ",
+            [
+                [
+                    sg.Combo(["TigerVNC", "RealVNC"],
+                             font=FONT_HELVETICA_16,
+                             readonly=True,
+                             key="-SELECT_VIEWER-")
                 ]
             ],
             font=FONT_HELVETICA_16,

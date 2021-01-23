@@ -1,17 +1,18 @@
 import base64
 import copy
-import json
 import datetime
+import json
 
 import exceptions
 from path_names import *
 
 
 class UGProfile:
-    version = 2  # in case the schema changes in the future
+    version = 3  # in case the schema changes in the future
     instantiated = False
     _empty_profile = {
         "version": version,
+        "viewer": "TigerVNC",
         "last_checked_update": datetime.datetime.now().isoformat(),
         "last_lab": "EECG",
         "EECG": {
@@ -61,6 +62,10 @@ class UGProfile:
 
                 # make sure the profile file is not modified in an attempt to crash the script
                 #  let the broad exception handler handle the error
+                if json_data["viewer"] not in ["TigerVNC", "RealVNC"]:
+                    raise ValueError
+                self["viewer"] = json_data["viewer"]
+
                 self["last_checked_update"] = datetime.datetime.fromisoformat(
                     json_data["last_checked_update"]).isoformat()
                 self["last_lab"] = json_data["last_lab"]
@@ -103,11 +108,12 @@ class UGProfile:
 
         self["ECF"]["loaded"] = True
 
-    def save_profile(self, last_lab):
+    def save_profile(self, last_lab, viewer):
         if type(last_lab) is not str or last_lab not in ("EECG", "ECF"):
             raise exceptions.MisuseError("last_lab should be one of 'EECG' or 'ECF'")
 
         self["last_lab"] = last_lab
+        self["viewer"] = viewer
         try:
             with open(PROFILE_FILE_PATH, 'w') as outfile:
                 profile_dict = copy.deepcopy(self._profile)

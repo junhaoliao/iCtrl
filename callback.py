@@ -80,6 +80,8 @@ def preselect_lab(window):
     if my_profile["last_lab"] == "ECF":
         window["ECF"].Select()
 
+def preselect_viewer(window):
+    window["-SELECT_VIEWER-"](my_profile["viewer"])
 
 def prefill_eecg_profile(window):
     if my_profile["EECG"]["loaded"]:
@@ -123,8 +125,17 @@ def update_port_buttons(window_ports):
                     window_ports["-PORT%d-" % port_num].set_tooltip("Free")
 
 
-def launch_vnc_eecg(port_num):
-    sg.Popup(f"Launching EECG VNC at Port {port_num:d} ...",
+VNC_MISSING_PROMPT = "Could not find any installed %s on your computer. \n" \
+                     "You can follow the UG_Remote installer to install TigerVNC, \n" \
+                     "or try setting %s as the Viewer under Misc before clicking \"Connect\", \n" \
+                     "or you may still launch your favourite VNC viewer manually if you wish. \n\n" \
+                     "The VNC Address is localhost:"
+TIGER_VNC_MISSING_PROMPT = VNC_MISSING_PROMPT % ("TigerVNC", "RealVNC") + "%d"
+REAL_VNC_MISSING_PROMPT = VNC_MISSING_PROMPT % ("RealVNC", "TigerVNC") + "%d"
+
+
+def launch_vnc(viewer, lab, port_num):
+    sg.Popup(f"Launching %s VNC at Port %d ..." % (lab, port_num),
              font=layout.FONT_HELVETICA_16,
              background_color="light yellow",
              no_titlebar=True,
@@ -133,110 +144,75 @@ def launch_vnc_eecg(port_num):
              auto_close=True,
              auto_close_duration=5)
 
-    my_eecg_conn.create_vnc_tunnel(port_num)
+    if lab == "EECG":
+        my_eecg_conn.create_vnc_tunnel(port_num)
+        actual_port = 5900 + port_num
+    else:
+        my_ecf_conn.create_vnc_tunnel()
+        actual_port = 2000
 
-    actual_port = 5900 + port_num
-
-    # TODO: support launching with other VNC viewers
-    if platform.system() == "Darwin" and VNC_VIEWER_PATH_MACOS is None:
-        sg.Popup("Could not find any installed TigerVNC on your computer. \n"
-                 "You may still launch your favourite VNC viewer if you wish, \n"
-                 "or follow the UG_Remote installer to installer TigerVNC, \n"
-                 "or you can download TigerVNC from the official site \n"
-                 "and place the .app under /Applications . \n\n"
-                 "The VNC Address is localhost:%d" % actual_port,
-                 title="TigerVNC NOT Found",
-                 keep_on_top=True,
-                 button_type=sg.POPUP_BUTTONS_OK, button_color=('white', 'red'))
-        return
-    elif platform.system() == "Windows" and VNC_VIEWER_PATH_WIN64 is None:
-        sg.Popup("Could not find any installed TigerVNC in UG_Remote's directory. \n"
-                 "You may still launch your favourite VNC viewer if you wish, \n"
-                 "or follow the UG_Remote installer to installer TigerVNC, \n"
-                 "or you can download TigerVNC from the official site \n"
-                 "and place the standalone .exe under UG_Remote's directory. \n\n"
-                 "The VNC Address is localhost:%d" % actual_port,
-                 title="TigerVNC NOT Found",
-                 keep_on_top=True,
-                 button_type=sg.POPUP_BUTTONS_OK, button_color=('white', 'red'))
-        return
+    if platform.system() == "Darwin":
+        if viewer == "TigerVNC" and TIGER_VNC_VIEWER_PATH_MACOS is None:
+            sg.Popup(TIGER_VNC_MISSING_PROMPT % actual_port,
+                     title="TigerVNC NOT Found",
+                     keep_on_top=True,
+                     button_type=sg.POPUP_BUTTONS_OK, button_color=('white', 'red'))
+            return
+        elif viewer == "RealVNC" and REAL_VNC_VIEWER_PATH_MACOS is None:
+            sg.Popup(REAL_VNC_MISSING_PROMPT % actual_port,
+                     title="RealVNC NOT Found",
+                     keep_on_top=True,
+                     button_type=sg.POPUP_BUTTONS_OK, button_color=('white', 'red'))
+            return
+    elif platform.system() == "Windows" and TIGER_VNC_VIEWER_PATH_WIN64 is None:
+        if viewer == "TigerVNC" and TIGER_VNC_VIEWER_PATH_WIN64 is None:
+            sg.Popup(TIGER_VNC_MISSING_PROMPT % actual_port,
+                     title="TigerVNC NOT Found",
+                     keep_on_top=True,
+                     button_type=sg.POPUP_BUTTONS_OK, button_color=('white', 'red'))
+            return
+        elif viewer == "RealVNC" and REAL_VNC_VIEWER_PATH_WIN64 is None:
+            sg.Popup(REAL_VNC_MISSING_PROMPT % actual_port,
+                     title="RealVNC NOT Found",
+                     keep_on_top=True,
+                     button_type=sg.POPUP_BUTTONS_OK, button_color=('white', 'red'))
+            return
 
     import subprocess
     # flush the outputs before launching TigerVNC Viewer
     sys.stdout.flush()
     sys.stderr.flush()
     if platform.system() == 'Darwin':
-        # not using subprocess for MacOS as TigerVNC has problem supporting HiDPI in some system versions
-        os.system(
-            "open -n %s --args --passwd=%s localhost:%d" % (
-                VNC_VIEWER_PATH_MACOS, os.path.abspath(VNC_PASSWD_PATH), actual_port))
+        if viewer == "TigerVNC":
+            # not using subprocess for MacOS as TigerVNC has problem supporting HiDPI in some system versions
+            os.system(
+                "open -n %s --args --passwd=%s localhost:%d" % (
+                    TIGER_VNC_VIEWER_PATH_MACOS, os.path.abspath(VNC_PASSWD_PATH), actual_port))
+        else:
+            # Set more arguments for RealVNC for compatibility issues
+            # -FullColour : solve the distorted colour issue
+            # -SecurityNotificationTimeout=0 : suppress the encryption warning
+            # -WarnUnencrypted : suppress the encryption warning
+            # -Scaling=Fit : scale to fit window
+            os.system(
+                "open -n %s --args "
+                "-FullColour "
+                "-SecurityNotificationTimeout=0 "
+                "-WarnUnencrypted=FALSE "
+                "-Scaling=AspectFit "
+                "--passwd=%s localhost:%d" % (
+                    REAL_VNC_VIEWER_PATH_MACOS, os.path.abspath(VNC_PASSWD_PATH), actual_port))
     elif platform.system() == 'Windows':
+        # TODO: support launching with other VNC viewers on Windows
+
         subprocess.call(["cmd", "/c", "start", "/max",
-                         VNC_VIEWER_PATH_WIN64, "--passwd=%s" % VNC_PASSWD_PATH, "localhost:%d" % actual_port])
+                         TIGER_VNC_VIEWER_PATH_WIN64, "--passwd=%s" % VNC_PASSWD_PATH, "localhost:%d" % actual_port])
     else:
         print("System %snot supported" % platform.system())
 
     # flush the outputs before terminating for easier debugging
     sys.stdout.flush()
     sys.stderr.flush()
-
-
-def launch_vnc_ecf():
-    sg.Popup(f"Launching ECF VNC ...",
-             font=layout.FONT_HELVETICA_16,
-             background_color="light yellow",
-             no_titlebar=True,
-             button_type=sg.POPUP_BUTTONS_NO_BUTTONS,
-             non_blocking=True,
-             auto_close=True,
-             auto_close_duration=3)
-
-    my_ecf_conn.create_vnc_tunnel()
-
-    # TODO: add support for Windows
-    # TODO: support launching with other VNC viewers
-    if platform.system() == "Darwin" and VNC_VIEWER_PATH_MACOS is None:
-        sg.Popup("Could not find any installed TigerVNC on your computer. \n"
-                 "You may still launch your favourite VNC viewer if you wish, \n"
-                 "or follow the UG_Remote installer to installer TigerVNC, \n"
-                 "or you can download TigerVNC from the official site \n"
-                 "and place the .app under /Applications . \n\n"
-                 "The VNC Address is localhost:2000",
-                 title="TigerVNC NOT Found",
-                 keep_on_top=True,
-                 button_type=sg.POPUP_BUTTONS_OK, button_color=('white', 'red'))
-        return
-    elif platform.system() == "Windows" and VNC_VIEWER_PATH_WIN64 is None:
-        sg.Popup("Could not find any installed TigerVNC in UG_Remote's directory. \n"
-                 "You may still launch your favourite VNC viewer if you wish, \n"
-                 "or follow the UG_Remote installer to installer TigerVNC, \n"
-                 "or you can download TigerVNC from the official site \n"
-                 "and place the standalone .exe under UG_Remote's directory. \n\n"
-                 "The VNC Address is localhost:2000",
-                 title="TigerVNC NOT Found",
-                 keep_on_top=True,
-                 button_type=sg.POPUP_BUTTONS_OK, button_color=('white', 'red'))
-        return
-
-    import subprocess
-    # flush the outputs before launching TigerVNC Viewer
-    sys.stdout.flush()
-    sys.stderr.flush()
-    if platform.system() == 'Darwin':
-        # not using subprocess for MacOS as TigerVNC has problem supporting HiDPI in some system versions
-        os.system(
-            "open -n %s --args localhost:%d" % (
-                VNC_VIEWER_PATH_MACOS, my_ecf_conn.LOCAL_PORT))
-    elif platform.system() == 'Windows':
-        subprocess.call(["cmd", "/c", "start", "/max",
-                         VNC_VIEWER_PATH_WIN64, "localhost:%d" % my_ecf_conn.LOCAL_PORT])
-    else:
-        print("System %snot supported" % platform.system())
-
-    # flush the outputs before terminating for easier debugging
-    sys.stdout.flush()
-    sys.stderr.flush()
-
 
 def check_and_save_vnc_passwd(vnc_passwd_input):
     sg.Popup("Resetting VNC Password...",
@@ -372,8 +348,8 @@ def cb_eecg_select_port(window, values):
                 layout.enable_eecg_components(window)
                 window.force_focus()
                 return
-        launch_vnc_eecg(port_num)
-        my_profile.save_profile("EECG")
+        launch_vnc(values["-SELECT_VIEWER-"], "EECG", port_num)
+        my_profile.save_profile("EECG", values["-SELECT_VIEWER-"])
 
 
 def cb_eecg_random_port(window, values):
@@ -407,8 +383,8 @@ def cb_eecg_random_port(window, values):
                      button_type=sg.POPUP_BUTTONS_OK, button_color=('white', 'red'))
             return
 
-    launch_vnc_eecg(port_num)
-    my_profile.save_profile("EECG")
+    launch_vnc(values["-SELECT_VIEWER-"], "EECG", port_num)
+    my_profile.save_profile("EECG", values["-SELECT_VIEWER-"])
 
 
 # callback functions
@@ -427,7 +403,7 @@ def cb_eecg_check_loads(window, values):
     for line in stdout:
         if "up" in line:
             numbers = re.findall(r"[-+]?\d*\.\d+|\d+", line)
-            loads_by_user_count.append([numbers[0], numbers[4], numbers[5], numbers[6], numbers[7]])
+            loads_by_user_count.append([numbers[0], numbers[-4], numbers[-3], numbers[-2], numbers[-1]])
 
     layout_eecg_loads = [
         [
@@ -492,8 +468,8 @@ def cb_ecf_connect(window, values):
         window.force_focus()
         return
 
-    launch_vnc_ecf()
-    my_profile.save_profile("ECF")
+    launch_vnc(values["-SELECT_VIEWER-"], "ECF", 2000)
+    my_profile.save_profile("ECF", values["-SELECT_VIEWER-"])
 
 
 def cb_eecg_reset_no(window, **kwargs):

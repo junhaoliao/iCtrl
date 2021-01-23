@@ -13,11 +13,12 @@ from path_names import *
 needs_update = [False]
 if (
         datetime.datetime.now() - datetime.datetime.fromisoformat(callback.my_profile["last_checked_update"])
-).days >= 1:
+).days >= 1 or not (callback.my_profile["EECG"]["loaded"] or callback.my_profile["ECF"]["loaded"]):
     update_thread = threading.Thread(target=updater.compare_version, args=(needs_update,))
     update_thread.start()
     print("Checking for updates... ")
 else:
+    print(datetime.datetime.fromisoformat(callback.my_profile["last_checked_update"]))
     print("Have checked for updates within a day. Not checking this time. ")
 
 dispatch_dictionary = {
@@ -46,6 +47,7 @@ else:
     Exception("System %s not supported yet. Please submit an issue on GitHub. " % platform.system())
 
 callback.preselect_lab(window)
+callback.preselect_viewer(window)
 callback.prefill_eecg_profile(window)
 callback.prefill_ecf_profile(window)
 
