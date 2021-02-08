@@ -437,6 +437,7 @@ def cb_eecg_check_loads(window, values):
             sg.Table(loads_by_user_count,
                      font=layout.FONT_HELVETICA_16,
                      headings=["Machine #", "User Count", "1-min Avg", "5-min Avg", "15-min Avg"],
+                     selected_row_colors=layout.COLOR_EECG_RANDOM_PORT_BUTTON,
                      select_mode=sg.TABLE_SELECT_MODE_BROWSE,
                      enable_events=True,
                      key="-EECG_LOADS_TABLE-")
@@ -446,10 +447,10 @@ def cb_eecg_check_loads(window, values):
                 [
                     [
                         sg.Button(
-                            "Select",
-                            font=layout.FONT_HELVETICA_16,
+                            "Connect",
+                            font=layout.FONT_ARIAL_12_BOLD,
                             button_color=layout.COLOR_EECG_RANDOM_PORT_BUTTON,
-                            key="-EECG_SELECT_MACHINE-"
+                            key="-EECG_LOADS_CONNECT-"
                         )
                     ]
                 ],
@@ -465,7 +466,7 @@ def cb_eecg_check_loads(window, values):
         event_loads, values_loads = window_loads.read()
         if event_loads == sg.WIN_CLOSED or event_loads == 'Exit':
             break
-        elif event_loads == "-EECG_SELECT_MACHINE-" and values_loads["-EECG_LOADS_TABLE-"]:
+        elif event_loads == "-EECG_LOADS_CONNECT-" and values_loads["-EECG_LOADS_TABLE-"]:
             chosen_machine_num = loads_by_user_count[values_loads["-EECG_LOADS_TABLE-"][0]][0]
             print(chosen_machine_num)
             break
@@ -474,9 +475,13 @@ def cb_eecg_check_loads(window, values):
 
     if chosen_machine_num is not None:
         window["-EECG_MACHINE_NUM-"](chosen_machine_num)
-
-    layout.enable_eecg_components(window)
-    window.force_focus()
+        # in order to pass latest "values" to cb_eecg_random_port, modify directly
+        print(type(chosen_machine_num))
+        values["-EECG_MACHINE_NUM-"] = int(chosen_machine_num)
+        cb_eecg_random_port(window, values)
+    else:
+        layout.enable_eecg_components(window)
+        window.force_focus()
 
 
 def cb_ecf_connect(window, values):
