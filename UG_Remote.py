@@ -46,10 +46,18 @@ elif platform.system() == "Darwin":
 else:
     Exception("System %s not supported yet. Please submit an issue on GitHub. " % platform.system())
 
+# to prevent the user clicking on the GUI before fully loaded
+layout.disable_eecg_components(window)
+layout.disable_ecf_components(window)
+
 callback.preselect_lab(window)
 callback.preselect_viewer(window)
 callback.prefill_eecg_profile(window)
 callback.prefill_ecf_profile(window)
+
+# now enable clicking on the GUI
+layout.enable_eecg_components(window)
+layout.enable_ecf_components(window)
 
 while True:
     event, values = window.read(timeout=1000)
