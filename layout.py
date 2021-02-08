@@ -26,7 +26,7 @@ elif platform.system() == "Darwin":
     sg.theme('LightGrey1')
 
 eecg_layout = [
-    [sg.Text("",font=("Arial", 3))],
+    [sg.Text("", font=("Arial", 3))],
     [
         sg.Text("EECG Machine",
                 font=FONT_HELVETICA_16, size=(16, 1),
@@ -49,7 +49,7 @@ eecg_layout = [
                 tooltip="Same as your UTORid"),
         sg.Input(font=FONT_HELVETICA_16, size=(20, 1), pad=(0, 0),
                  key="-EECG_USERNAME-"),
-        sg.Text("", pad=(14,0))
+        sg.Text("", pad=(14, 0))
     ],
     [
         sg.Text("EECG Password",
@@ -178,7 +178,7 @@ misc_layout = [
                 [
                     sg.Text(
                         "UG_Remote v%d.%d.%d\n"
-                        "Copyright (C) 2020-2021 Junhao Liao"%updater.CURRENT_VER,
+                        "Copyright (C) 2020-2021 Junhao Liao" % updater.CURRENT_VER,
                         font=FONT_HELVETICA_16,
                         enable_events=True,
                         key="-COPYRIGHT-"

@@ -373,10 +373,21 @@ def cb_eecg_select_port(window, values):
         my_profile.save_profile("EECG", values["-SELECT_VIEWER-"])
 
 
+def generated_random_machine_num(window, values):
+    from random import choice
+    values["-EECG_MACHINE_NUM-"] = choice(machines.MACHINES)
+    window["-EECG_MACHINE_NUM-"](values["-EECG_MACHINE_NUM-"])
+
+
 def cb_eecg_random_port(window, values):
     print("Callback: cb_eecg_random_port")
 
     layout.disable_eecg_components(window)
+    # randomly generates a machine number if user doesn't select one
+    if values["-EECG_MACHINE_NUM-"] == "":
+        print("empty value in -EECG_MACHINE_NUM-, randomly generating one")
+        generated_random_machine_num(window, values)
+
     if not login_eecg(window, values):
         layout.enable_eecg_components(window)
         window.force_focus()
@@ -393,6 +404,7 @@ def cb_eecg_random_port(window, values):
         print("Using the last used port number %d" % port_num)
     else:
         my_eecg_conn.killall_VNC_servers()
+
         from random import choice
         try:
             port_num = choice([i for i in range(1, 100) if i not in my_eecg_conn.used_ports_lst])
@@ -413,6 +425,11 @@ def cb_eecg_check_loads(window, values):
     print("Callback: cb_eecg_check_loads")
 
     layout.disable_eecg_components(window)
+
+    # randomly generates a machine number if user doesn't select one
+    if values["-EECG_MACHINE_NUM-"] == "":
+        print("empty value in -EECG_MACHINE_NUM-, randomly generating one")
+        generated_random_machine_num(window, values)
     if not login_eecg(window, values):
         layout.enable_eecg_components(window)
         window.force_focus()
