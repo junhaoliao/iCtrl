@@ -73,7 +73,7 @@ while True:
                                   font=layout.FONT_HELVETICA_16,
                                   keep_on_top=True)
         if resp == "OK":
-            webbrowser.open(updater.GITHUB_RELEASE_PAGE)
+            webbrowser.open(updater.UGREMOTE_DOWNLOAD_PAGE)
 
     # Lookup event in function dictionary
     if event in dispatch_dictionary:
