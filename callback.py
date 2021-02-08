@@ -265,7 +265,8 @@ def check_and_save_vnc_passwd(vnc_passwd_input):
                  button_type=sg.POPUP_BUTTONS_OK,
                  button_color=('white', 'orange'),
                  keep_on_top=True)
-        return False
+        # should only be a warning: permitted behaviour
+        # return False
 
     try:
         my_eecg_conn.set_and_save_vnc_passwd(vnc_passwd_input)
