@@ -91,7 +91,9 @@ class EECGConnection(ug_connection.UGConnection):
             raise exceptions.MisuseError(
                 "The client is not yet connected. Misuse of function \"killall_VNC_servers()\"")
 
-        _, _, stderr = self.client.exec_command("killall Xtigervnc")
+        # rm -f ~/.vnc/$HOST*
+        # to prevent any "stale" servers showing when we check ports
+        _, _, stderr = self.client.exec_command("killall Xtigervnc; rm -f ~/.vnc/$HOST*")
         for line in stderr:
             print(line)
 
