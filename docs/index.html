@@ -123,16 +123,16 @@
 
 </div>
 <script>
-    let version = "5.0.7"
+    let version = "5.0.8"
 
     function download(system) {
         let download_link;
         if (system === "Windows") {
             download_link = "https://github.com/junhaoliao/UG_Remote/releases/download/" +
-                version + "/UG_Remote_win64-" + version + ".zip"
+                version + "/UG_Remote_win64_" + version + ".zip"
         } else if (system === "Mac") {
             download_link = "https://github.com/junhaoliao/UG_Remote/releases/download/" +
-                version + "/UG_Remote-" + version + ".dmg"
+                version + "/UG_Remote_macOS_" + version + ".7z"
         } else {
             // in case somebody is playing with the browser debugger...
             return
