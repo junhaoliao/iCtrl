@@ -28,7 +28,7 @@ def login_eecg(window, values):
              auto_close_duration=3)
 
     srv_num = values["-EECG_MACHINE_NUM-"]
-    if srv_num not in machines.MACHINES:
+    if srv_num not in machines.MACHINES + ["250", "251"]:
         sg.Popup("User entered an invalid Machine number. ",
                  button_type=sg.POPUP_BUTTONS_OK, button_color=('white', 'red'))
         return False
@@ -495,7 +495,7 @@ def cb_eecg_check_loads(window, values):
         window["-EECG_MACHINE_NUM-"](chosen_machine_num)
         # in order to pass latest "values" to cb_eecg_random_port, modify directly
         print(type(chosen_machine_num))
-        values["-EECG_MACHINE_NUM-"] = int(chosen_machine_num)
+        values["-EECG_MACHINE_NUM-"] = chosen_machine_num
         cb_eecg_random_port(window, values)
     else:
         layout.enable_eecg_components(window)
