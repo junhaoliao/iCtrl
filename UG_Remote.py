@@ -40,15 +40,14 @@ if platform.system() == "Windows":
     from ctypes import windll
 
     windll.shcore.SetProcessDpiAwareness(1)
-    window = sg.Window("UG_Remote", layout.layout, element_padding=(38, 12)).finalize()
-elif platform.system() == "Darwin":
-    window = sg.Window("UG_Remote", layout.layout, element_padding=(16, 10)).finalize()
-else:
+elif platform.system() != "Darwin":
     Exception("System %s not supported yet. Please submit an issue on GitHub. " % platform.system())
 
+sg.set_global_icon(layout.UG_REMOTE_ICON_BASE64)
+window = sg.Window("UG_Remote", layout.layout, element_padding=(16, 10)).finalize()
+
 # to prevent the user clicking on the GUI before fully loaded
-layout.disable_eecg_components(window)
-layout.disable_ecf_components(window)
+window.hide()
 
 callback.preselect_lab(window)
 callback.preselect_viewer(window)
@@ -56,8 +55,7 @@ callback.prefill_eecg_profile(window)
 callback.prefill_ecf_profile(window)
 
 # now enable clicking on the GUI
-layout.enable_eecg_components(window)
-layout.enable_ecf_components(window)
+window.un_hide()
 
 while True:
     event, values = window.read(timeout=1000)
