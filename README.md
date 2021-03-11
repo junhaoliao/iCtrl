@@ -40,6 +40,7 @@ to run.
 2. Remove ug250 and ug251 from EECG recommended list
 3. Fix a bug where incorrect buttons may show under the Misc tab
 4. Ugrade Python toolchain to 3.9.2 and upgrade the libraries
+5. Fix a bug in the udpater where it prompts for an update even if the major/minor version is greater than the API
 
 ### [5.0.8] - 2021-02-08
 1. If user doesn't supply a machine number, randomly generate one
@@ -92,6 +93,7 @@ to run.
 2. 将 ug250 和 ug251 从 EECG 建议列表中移除
 3. 修复了 Misc 选项卡下可能出现的错误按钮
 4. 升级 Python 工具链至 3.9.2 以及更新若干库
+5. 修复了升级器在主/次版本比API高时仍提醒升级的bug
 
 ### [5.0.8] - 2021-02-08
 1. 如果用户没有选择机器号码，随机生成一个
