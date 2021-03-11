@@ -15,7 +15,8 @@ pyinstaller --clean pyinstaller_specs/macos_UG_Remote.spec
 
 # for some reason the Python excutable needs to be signed
 # might be a pyinstaller bug in Python 3.9
-codesign -f -s "Junhao Liao" dist/UG_Remote.app/Contents/MacOS/Python
+# commented out: it seems the bug has been resolved
+#codesign -f -s "Junhao Liao" dist/UG_Remote.app/Contents/MacOS/Python
 
 # move the applicaiton into the packing dir
 mv dist/UG_Remote.app packing/MacOS/UG_Remote.app
@@ -40,6 +41,10 @@ ln -s /Applications "/Volumes/UG_Remote Installer/Applications"
 ln -s /Applications "/Volumes/UG_Remote Installer/Applications "
 cp mac_bg.png "/Volumes/UG_Remote Installer/.mac_bg.png"
 mv UG_Remote.app "/Volumes/UG_Remote Installer/UG_Remote.app"
+
+# some tcl libraries doesn't have write permission by default, which causes the de-quarantine workflow to fail
+echo "    " | sudo -S chmod -R u+w "/Volumes/UG_Remote Installer/UG_Remote.app"
+
 cp -r De-Quarantine.workflow "/Volumes/UG_Remote Installer/De-Quarantine.workflow"
 cp -r "/Volumes/TigerVNC-1.11.0/TigerVNC Viewer 1.11.0.app" "/Volumes/UG_Remote Installer/TigerVNC Viewer 1.11.0.app"
 cp "/Volumes/TigerVNC-1.11.0/LICENCE.TXT" "/Volumes/UG_Remote Installer/LICENCE.txt"

@@ -1,14 +1,4 @@
-altgraph
-bcrypt
-cffi
-cryptography
-future
 paramiko
-pefile
-pycparser
 pyinstaller
-pyinstaller-hooks-contrib
-PyNaCl
 PySimpleGUI
 pywin32-ctypes
-six
