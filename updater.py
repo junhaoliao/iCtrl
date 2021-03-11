@@ -18,14 +18,17 @@ def compare_version(result):
             if CURRENT_VER[i] < int(latest_ver[i]):
                 version_mismatch = True
                 break
+            elif CURRENT_VER[i] > int(latest_ver[i]):
+                break
+
     except URLError:
         print("The updater is unable to access GitHub API for version comparison. ")
     except (IndexError, ValueError):
         version_mismatch = True
 
     if version_mismatch:
-        print("Updater: detected a new version")
+        print("Updater: detected a new version: latest=" + str(latest_ver) + "cur=" + str(CURRENT_VER))
     else:
-        print("Updater: No updates available")
+        print("Updater: No updates available: cur=" + str(CURRENT_VER))
 
     result[0] = version_mismatch
