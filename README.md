@@ -35,52 +35,24 @@ to run.
 0. Download and extract UG_Remote_win64-5.x.x.zip from the **Releases** page. Double-click on "UG_Remote.exe".
 
 ## V5 Change Log
+### [5.1.0] - 2021-03-11
+1. Change app icon
+2. Remove ug250 and ug251 from EECG recommended list
+3. Fix a bug where incorrect buttons may show under the Misc tab
+4. Ugrade Python toolchain to 3.9.2 and upgrade the libraries
 
-This script is updated to v5.0.8 on February 8, 2021
-
+### [5.0.8] - 2021-02-08
 1. If user doesn't supply a machine number, randomly generate one
 2. Remove lock files on the host to avoid "stale" servers
 3. Disable the interface before everything is loaded up
 4. Permit VNC password longer than 8 characters
 5. Instead of only selecting the machine, "Connect" directly in "Check Loads"
 
-This script is updated to v5.0.7 on January 23, 2021
-
+### [5.0.7] - 2021-01-23
 1. Added support for RealVNC: users can switch their viewer under Misc
 2. Fixed a potential index-out-of-range exception in "check loads"
 3. Fixed a bug that the ECF "Connect" button not loaded with ECF as the last lab
 
-This script is updated to v5.0.6 on January 18, 2021
-
-1. Added "check load" feature
-2. Added "Disk Quota Exceeded" prompt
-
-This script is updated to v5.0.5 on January 10, 2021
-
-1. Added "last_lab" filed in the profile so that the script can switch to the last connected lab at launch
-
-This script is updated to v5.0.4 on January 6, 2021
-
-1. Added button to remove existing profiles
-2. Added author info
-
-This script is updated to v5.0.3 on December 28, 2020
-
-1. Added updater
-
-This script is updated to v5.0.2 on December 27, 2020
-
-1. Added support for ECF
-
-This script is updated to v5.0.1 on December 24, 2020
-
-1. Added a "random port selection" feature
-2. Redesigned user interface
-3. Added installer for windows
-
-This script is updated to v5.0.0 on December 19, 2020
-
-1. Now we use Python. Goodbye C++.
 
 ## This setup is possible thanks to the following free libraries/tools
 
@@ -115,52 +87,24 @@ This script is updated to v5.0.0 on December 19, 2020
 0. 从**Releases**页面下载并解压UG_Remote_win64-5.x.x.zip。双击"UG_Remote.exe"。
 
 ## V5 版本说明
+### [5.1.0] - 2021-03-11
+1. 更改应用图标
+2. 将 ug250 和 ug251 从 EECG 建议列表中移除
+3. 修复了 Misc 选项卡下可能出现的错误按钮
+4. 升级 Python 工具链至 3.9.2 以及更新若干库
 
-本脚本于2021年2月8日更新v5.0.8。
-
+### [5.0.8] - 2021-02-08
 1. 如果用户没有选择机器号码，随机生成一个
 2. 在主机上删除lock文件，以防服务器"stale"
 3. 在所有东西加载出来前禁用界面
 4. 允许多于8位的VNC密码
 5. "检查负载"时，"Connect"而不是单单选中
 
-本脚本于2021年1月23日更新v5.0.7。
-
+### [5.0.7] - 2021-01-23
 1. 新增RealVNC支持: 用户可在Misc选项卡下切换Viewer
 2. 解决了"检查负载"中可能出现的 索引超出范围 异常
 3. 解决了ECF "Connect"按钮不与ECF(作为上次连的lab)同时加载的问题
 
-本脚本于2021年1月18日更新v5.0.6。
-
-1. 新增“检查负载”功能
-2. 新增“限额已超”提示
-
-本脚本于2021年1月10日更新v5.0.5。
-
-1. 在账户设置里新增"last_lab"栏，程序下次开启时会自动切换到上次连的lab
-
-本脚本于2021年1月6日更新v5.0.4。
-
-1. 新增按钮以移除账户设置
-2. 新增作者信息
-
-本脚本于2020年12月28日更新v5.0.3。
-
-1. 新增升级器
-
-本脚本于2020年12月27日更新v5.0.2。
-
-1. 新增ECF支持
-
-本脚本于2020年12月24日更新v5.0.1。
-
-1. 新增"随机选择端口"功能
-2. 重新设计操作界面
-3. 新增Windows安装器
-
-本脚本于2020年12月19日更新v5.0.0。
-
-1. 再见，C++。你好呀，Python。
 
 ## 在此感谢以下开源软件/库开发者
 
