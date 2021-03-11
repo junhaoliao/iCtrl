@@ -1,5 +1,5 @@
 ;UG_Remote Windows Installer
-;Copyright (C) Junhao Liao 2020 (https://junhao.ca)
+;Copyright (C) Junhao Liao 2020-2021 (https://junhao.ca)
 
 ;--------------------------------
 ;Include Modern UI
@@ -116,7 +116,7 @@ Section "UG_Remote" SecUGRemote
   SetOutPath "$INSTDIR"
   
   File /r UG_Remote\*.*
-  File "${ProjectDir}\resources\icons\icon_white_bg.ico"
+  File /oname=icon.ico "${ProjectDir}\resources\icons\icon_white_bg.ico"
   File reset.bat
 
   ;Store installation folder
