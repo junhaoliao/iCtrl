@@ -116,7 +116,7 @@ Section "UG_Remote" SecUGRemote
   SetOutPath "$INSTDIR"
   
   File /r UG_Remote\*.*
-  File "${ProjectDir}\icon.ico"
+  File "${ProjectDir}\resources\icons\icon_white_bg.ico"
   File reset.bat
 
   ;Store installation folder

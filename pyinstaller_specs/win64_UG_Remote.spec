@@ -6,9 +6,7 @@ block_cipher = None
 a = Analysis(['..\\UG_Remote.py'],
              pathex=['..'],
              binaries=[],
-             datas=[
-                ('..\icon.png','.')
-             ],
+             datas=[],
              hiddenimports=[],
              hookspath=[],
              runtime_hooks=[],

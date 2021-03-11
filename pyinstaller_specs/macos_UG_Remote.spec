@@ -5,9 +5,7 @@ block_cipher = None
 a = Analysis(['../UG_Remote.py'],
              pathex=['../.'],
              binaries=[],
-             datas=[
-                ('../icon.png','.'),
-             ],
+             datas=[],
              hiddenimports=[],
              hookspath=[],
              runtime_hooks=[],
@@ -38,5 +36,5 @@ coll = COLLECT(exe,
                name='UG_Remote')
 app = BUNDLE(coll,
              name='UG_Remote.app',
-             icon='../icon.icns',
+             icon='../resources/icons/icon_white_bg.icns',
              bundle_identifier='ca.junhao.ugremote')

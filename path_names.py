@@ -2,8 +2,6 @@ import os
 import platform
 import sys
 
-UG_REMOTE_ICON_PATH = "icon.png"
-
 PROFILE_FILE_PATH = "profile.json"
 VNC_PASSWD_PATH = "passwd"
 
@@ -12,10 +10,6 @@ TIGER_VNC_VIEWER_PATH_MACOS = "/Applications/TigerVNC Viewer*.app"
 
 REAL_VNC_VIEWER_PATH_WIN64 = ""
 REAL_VNC_VIEWER_PATH_MACOS = "/Applications/VNC Viewer.app"
-
-if getattr(sys, 'frozen', False):  # standalone mode
-    # noinspection PyUnresolvedReferences
-    UG_REMOTE_ICON_PATH = os.path.join(sys._MEIPASS, UG_REMOTE_ICON_PATH)
 
 if platform.system() == "Windows":
     if not os.path.isfile(TIGER_VNC_VIEWER_PATH_WIN64):
