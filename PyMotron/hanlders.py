@@ -59,10 +59,10 @@ def handle_login(value):
     if passwd is not None:
         try:
             CONN[session].connect(hostname=server, username=username, passwd=passwd)
+            send_msg("login_ack", session)
         except Exception as e:
-            print(e)
+            send_msg("login_ack", "Failed: "+str(e))
 
-        send_msg("login_ack", session)
     else:
         # TODO: support login with keys
         pass
