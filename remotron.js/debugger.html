@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <!-- https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP -->
+<!--    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'">-->
+<!--    <meta http-equiv="X-Content-Security-Policy" content="default-src 'self'; script-src 'self'">-->
+    <link as="style" href="https://cdn.jsdelivr.net/npm/semantic-ui/dist/semantic.min.css"
+          onload="this.onload=null;this.rel='stylesheet'" rel="preload">
+    <link href="https://cdn.jsdelivr.net/npm/semantic-ui/dist/semantic.min.css" rel="stylesheet">
+
+    <link rel="stylesheet" href="node_modules/xterm/css/xterm.css" />
+    <script src="node_modules/xterm/lib/xterm.js"></script>
+    <title>Hello World!</title>
+  </head>
+  <body>
+    <div>
+      <form class="ui form" onsubmit="return debug_submit()">
+        <div class="field">
+          <label for="debug_key">Key</label>
+          <input type="text" id="debug_key" placeholder="key">
+        </div>
+        <div class="field">
+          <label for="debug_value">Value</label>
+          <input type="text" id="debug_value" placeholder="val">
+        </div>
+        <button class="ui button" type="submit">Submit</button>
+      </form>
+    </div>
+
+    <div id="terminal"></div>
+
+    <h1>Logs</h1>
+    <div id="logs"></div>
+
+
+    <!-- You can also require other files to run in this process -->
+    <script async defer src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script async defer src="https://cdn.jsdelivr.net/npm/semantic-ui/dist/semantic.min.js"></script>
+
+    <script src="./renderer.js"></script>
+  </body>
+</html>
