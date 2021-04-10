@@ -4,6 +4,7 @@ from typing import Any
 
 from libugremote.ug_profile.UGConnProfile import *
 
+CONN_PROFILE_PATH = "./profile/"
 
 # TODO: check argument verification and assignment order
 
