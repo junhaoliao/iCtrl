@@ -7,27 +7,32 @@ from globals import *
 # TODO: add a function to send back errors to the client
 #  can catch the exception in handler_main and send the message over
 
+def send_msg(key, value=None):
+    srv_msg_json = json.dumps({
+        key: value
+    })
+    IPC_SEND.send_string(srv_msg_json)
+
+
 def handle_sync(value):
     print("handle_sync:", value)
-    srv_msg = {"sessions": USER_PROFILE.query_sessions()}
-    srv_msg_json = json.dumps(srv_msg)
-    IPC_SEND.send_string(srv_msg_json)
+    send_msg("sessions", USER_PROFILE.query_sessions())
 
 
 def handle_login(value):
     """
     :param value: the value of the message
     e.g.
-    {"session_idx": 0, "server":"", "username": "", "passwd": "", "save_key": false}
+    {"session": "EECG1", "server":"ug250.eecg.toronto.edu", "username": "", "passwd": "", "save_key": false}
     :return: None
     """
     print("handle_login:", value)
 
-    session_idx = value["session_idx"]
-    if type(session_idx) is not int:
-        raise TypeError(f"handle_login: Invalid type({session_idx})={type(session_idx)}")
-    elif session_idx < 0 or session_idx >= len(USER_PROFILE["sessions"]):
-        raise IndexError(f"handle_login: Invalid session_idx={session_idx}")
+    session = value["session"]
+    if type(session) is not str:
+        raise TypeError(f"handle_login: Invalid type({session})={type(session)}")
+    elif session not in CONN:
+        raise ValueError(f"handle_login: Invalid session={session}")
 
     server = value["server"]
     if type(server) is not str:
@@ -52,7 +57,12 @@ def handle_login(value):
     # TODO: check the relation between save_key and passwd
 
     if passwd is not None:
-        SESSION[session_idx].connect(hostname=server, username=username, passwd=passwd)
+        try:
+            CONN[session].connect(hostname=server, username=username, passwd=passwd)
+        except Exception as e:
+            print(e)
+
+        send_msg("login_ack", session)
     else:
         # TODO: support login with keys
         pass
