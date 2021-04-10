@@ -71,8 +71,23 @@ def handle_login(value):
 
 
 def handle_shell(value):
-    SESSION[0].invoke_shell(IPC_SEND)
+    session = value
+    if type(session) is not str:
+        raise TypeError(f"handle_login: Invalid type({session})={type(session)}")
+    elif session not in CONN:
+        raise ValueError(f"handle_login: Invalid session={session}")
+
+    CONN[value].invoke_shell(session, IPC_SEND)
 
 
-def handle_interact(value):
-    SESSION[0].shell_send_data(value)
+def handle_send(value):
+    print(value)
+    session = value["s"]
+    if type(session) is not str:
+        raise TypeError(f"handle_login: Invalid type({session})={type(session)}")
+    elif session not in CONN:
+        raise ValueError(f"handle_login: Invalid session={session}")
+
+    data = value["d"]
+
+    CONN[session].shell_send_data(data)

@@ -5,31 +5,45 @@ const ZMQ_CONTEXT = require("zeromq")
 const IPC_RECV = new ZMQ_CONTEXT.Pull
 const IPC_SEND = new ZMQ_CONTEXT.Push
 
+let SESSIONS = null
+
+function send_msg(key, value=null) {
+    const client_msg_json = {
+        [key]: value
+    }
+    IPC_SEND.send(JSON.stringify(client_msg_json)).then()
+}
+
+
 const TERM = new Terminal();
 TERM.open(document.getElementById('terminal'));
 TERM.onKey(async (e) => {
     const ev = e.domEvent;
-    IPC_SEND.send(JSON.stringify({"0": e.key})).then()
+    send_msg("send", {
+        "s": "EECG1",
+        "d": e.key
+    })
 });
 
 function printLog(text) {
     const log_elem = document.getElementById("logs")
-    now = new Date()
+    const now = new Date()
     text = now.getHours() + ":" + now.getMinutes() + ":" + now.getSeconds() + ": " + text + "\n"
     if (log_elem) log_elem.innerText += text
 }
 
-function msg_generate(key, value = null) {
-    return JSON.stringify({[key]: value})
-}
-
 function handle_sessions(value) {
     // TODO: integrated with GUI
-    printLog(`handle_sessions: ${JSON.stringify(value, null, ' ')}`)
+    // printLog(`handle_sessions: ${JSON.stringify(value, null, ' ')}`)
+    SESSIONS = value
 }
 
 function handle_login_ack(value){
     alert("Login: " + value)
+}
+
+function handle_recv(value){
+    TERM.write(atob(value["d"]))
 }
 
 function handle_terminal(value){
@@ -44,8 +58,8 @@ function handle_main(key, value) {
     else if (key === "login_ack"){
         handle_login_ack(value)
     }
-    else if (key === "0"){
-        handle_terminal(value)
+    else if (key === "recv"){
+        handle_recv(value)
     }
     else {
         printLog(`handle_main: Unknown key=${key}, value=${value}`)
@@ -88,7 +102,7 @@ window.addEventListener('DOMContentLoaded', () => {
                 });
 
             PyMotron.stdout.on("data", data => {
-                // printLog(`\nPyMotron stdout:\n ---\n ${data}---`);
+                printLog(`\nPyMotron stdout:\n ---\n ${data}---`);
             });
 
             PyMotron.stderr.on("data", data => {
@@ -105,7 +119,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
             IPC_SEND.connect("tcp://127.0.0.1:8000")
 
-            IPC_SEND.send(msg_generate("sync")).then()
+            send_msg("sync")
 
             listen().then()
         }
@@ -118,7 +132,7 @@ function debug_submit() {
 
     const debug_value_JSON = (debug_value.value === "")?null:JSON.parse(debug_value.value)
 
-    IPC_SEND.send(msg_generate(debug_key.value, debug_value_JSON)).then()
+    send_msg(debug_key.value, debug_value_JSON)
 
     return false
 }

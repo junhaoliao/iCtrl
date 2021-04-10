@@ -17,8 +17,8 @@ def handle_main(key, value):
         handle_login(value)
     elif key == "shell":
         handle_shell(value)
-    elif key == "0":
-        handle_interact(value)
+    elif key == "send":
+        handle_send(value)
     else:
         raise ValueError(f"Unknown key={key}, value={value}")
 
