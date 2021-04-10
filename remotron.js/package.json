@@ -13,7 +13,7 @@
   "author": "Junhao Liao",
   "license": "",
   "devDependencies": {
-    "electron": "^13.0.0-beta.9",
+    "electron": "^12.0.0",
     "xterm": "^4.11.0",
     "zeromq": "^6.0.0-beta.6"
   }

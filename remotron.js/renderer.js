@@ -1,5 +1,17 @@
 const {spawn} = require("child_process");
 
+const os = require("os")
+const platform = os.platform()
+let PYTHON_PATH = null
+const PYMOTRON_PATH = "../PyMotron/PyMotron.py"
+const CWD_PATH = "../PyMotron/"
+if (platform === "win32"){
+    PYTHON_PATH = "../PyMotron/venv/Scripts/python.exe"
+} else if (platform === "darwin"){
+    PYTHON_PATH = "../PyMotron/venv/bin/python3"
+} else {
+    alert("OS not supported "+ platform)
+}
 
 const ZMQ_CONTEXT = require("zeromq")
 const IPC_RECV = new ZMQ_CONTEXT.Pull
@@ -25,6 +37,7 @@ function msg_generate(key, value = null) {
 
 function handle_sessions(value) {
     // TODO: integrated with GUI
+    window.open('./debugger.html')
     printLog(`handle_sessions: ${JSON.stringify(value, null, ' ')}`)
 }
 
@@ -53,7 +66,7 @@ async function listen() {
     while (running) {
         let recv_data = await IPC_RECV.receive()
         recv_data = recv_data.toString("utf-8")
-        printLog(recv_data)
+        // printLog(recv_data)
         const recv_parsed = JSON.parse(recv_data)
         for (const key in recv_parsed) {
             if (!handle_main(key, recv_parsed[key])) {
@@ -69,19 +82,19 @@ window.addEventListener('DOMContentLoaded', () => {
             printLog("Binding successful")
 
             const PyMotron = spawn(
-                "../PyMotron/venv/bin/python3",
+                PYTHON_PATH,
                 [
                     "-u",
-                    "../PyMotron/PyMotron.py",
+                    PYMOTRON_PATH,
                     8000,
                     8001
                 ],
                 {
-                    cwd: "../PyMotron"
+                    cwd: CWD_PATH
                 });
 
             PyMotron.stdout.on("data", data => {
-                printLog(`\nPyMotron stdout:\n ---\n ${data}---`);
+                // printLog(`\nPyMotron stdout:\n ---\n ${data}---`);
             });
 
             PyMotron.stderr.on("data", data => {
