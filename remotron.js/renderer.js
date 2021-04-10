@@ -29,7 +29,7 @@ function handle_sessions(value) {
 }
 
 function handle_login_ack(value){
-    alert("Login successful: " + value)
+    alert("Login: " + value)
 }
 
 function handle_terminal(value){
