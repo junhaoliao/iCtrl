@@ -28,6 +28,10 @@ function handle_sessions(value) {
     printLog(`handle_sessions: ${JSON.stringify(value, null, ' ')}`)
 }
 
+function handle_login_ack(value){
+    alert("Login successful: " + value)
+}
+
 function handle_terminal(value){
     // TODO: should add a parameter to allow reuse of this function for different terminals
     TERM.write(atob(value))
@@ -36,6 +40,9 @@ function handle_terminal(value){
 function handle_main(key, value) {
     if (key === "sessions") {
         handle_sessions(value)
+    }
+    else if (key === "login_ack"){
+        handle_login_ack(value)
     }
     else if (key === "0"){
         handle_terminal(value)
@@ -53,7 +60,7 @@ async function listen() {
     while (running) {
         let recv_data = await IPC_RECV.receive()
         recv_data = recv_data.toString("utf-8")
-        printLog(recv_data)
+        // printLog(recv_data)
         const recv_parsed = JSON.parse(recv_data)
         for (const key in recv_parsed) {
             if (!handle_main(key, recv_parsed[key])) {
@@ -81,7 +88,7 @@ window.addEventListener('DOMContentLoaded', () => {
                 });
 
             PyMotron.stdout.on("data", data => {
-                printLog(`\nPyMotron stdout:\n ---\n ${data}---`);
+                // printLog(`\nPyMotron stdout:\n ---\n ${data}---`);
             });
 
             PyMotron.stderr.on("data", data => {
