@@ -21,6 +21,7 @@ const IPC_SEND = new ZMQ_CONTEXT.Push
 let SESSIONS = null
 
 function send_msg(key, value=null) {
+  console.log(key, value)
     const client_msg_json = {
         [key]: value
     }
@@ -58,14 +59,18 @@ function handle_new_session(value) {
     EECG.servers.map((item, index) => {
         const id = `server-${index}`
         const dom = document.createElement("div")
-        dom.setAttribute('class', 'item')
-        dom.setAttribute('data-value', index)
-        dom.setAttribute('id', id)
-        dom.setAttribute('onclick', "chooseConnect(id, 'address');")
+        dom.className = 'item'
+        // dom.setAttribute('data-value', index)
+        dom.id = id
+        dom.onclick = () => {
+          chooseConnect(id, 'address')
+        }
+        // dom.setAttribute('id', id)
+        // dom.setAttribute('onclick', "chooseConnect(id, 'address');")
         dom.innerText = item
-        // dom.innerHTML = `<div class="item" data-value={index} id={id} onclick="chooseConnect(id, 'address')">{item}</div>`
+        // const lalala = `<div class="item" data-value="${index}" id="${id}" onclick="chooseConnect('${id}', 'address')">${item}</div>`
         // console.log(dom)
-        log_elem.appendChild(dom)
+        log_elem.appendChild(dom) // += lalala
     })
 }
 
@@ -75,26 +80,27 @@ function handleSubmit() {
     const password = document.getElementById('password').value
 
     const value = {
-        session: 'testing',
-        server,
-        username,
-        password,
-        saved_key: 'false'
+        "session": 'EECG1',
+        "server": server,
+        "username": username,
+        "passwd": password,
+        "save_key": false
     }
 
     console.log(value)
 
-    send_msg(value)
+    send_msg('login', value)
 }
 
 function handle_sessions(value) {
     // TODO: integrated with GUI
     // window.open('./debugger.html')
-    printLog(`handle_sessions: ${JSON.stringify(value, null, ' ')}`)
+    // printLog(`handle_sessions: ${JSON.stringify(value, null, ' ')}`)
     
     // console.log(value)
     const log_elem = document.getElementById("test")
     const dom = document.createElement("div")
+    // const session_name = 'test'
     const a = `<div class="container">
     <div class="ui placeholder segment">
       <div class="ui two column very relaxed stackable grid">
@@ -168,7 +174,7 @@ function handle_sessions(value) {
 
 function chooseConnect(type, selector) {
     const currentSelector = document.getElementById(`pop-up-menu-${selector}`);
-    console.log(type, currentSelector.style.display);
+    // console.log(type, currentSelector.style.display);
     if (type === 'show') {
       if (currentSelector.style.display === 'none') {
         currentSelector.style.display = 'block';
@@ -183,6 +189,7 @@ function chooseConnect(type, selector) {
   }
 
 function handle_login_ack(value){
+    console.log('in login ack', value)
     alert("Login: " + value)
 }
 
