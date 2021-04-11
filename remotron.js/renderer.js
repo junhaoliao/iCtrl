@@ -21,7 +21,6 @@ const IPC_SEND = new ZMQ_CONTEXT.Push
 let SESSIONS = null
 
 function send_msg(key, value=null) {
-  console.log(key, value)
     const client_msg_json = {
         [key]: value
     }
@@ -169,7 +168,7 @@ function handle_sessions(value) {
     log_elem.appendChild(dom)
     handle_new_session(value)
     // printLog(`handle_sessions: ${JSON.stringify(value, null, ' ')}`)
-    SESSIONS = value/*  */
+    SESSIONS = value
 }
 
 function chooseConnect(type, selector) {
@@ -189,7 +188,6 @@ function chooseConnect(type, selector) {
   }
 
 function handle_login_ack(value){
-    console.log('in login ack', value)
     alert("Login: " + value)
 }
 
