@@ -1,4 +1,7 @@
 import base64
+import json
+import threading
+
 import paramiko
 import zmq
 
@@ -204,7 +207,7 @@ class UGConnection:
 
         return exit_status, stdin, stdout, stderr
 
-    def invoke_shell(self, ipc_send):
+    def invoke_shell(self, session, ipc_send):
         if self.shell_chan is not None:
             raise RuntimeError("UGConnection: invoke_shell: shell already invoked.")
         self.shell_chan = self.client.invoke_shell()
@@ -215,7 +218,12 @@ class UGConnection:
                 if not data:
                     print("\r\n*** EOF ***\r\n\r\n")
                     break
-                msg = {"0": base64.b64encode(data).decode("utf-8")}
+                msg = {
+                    "recv": {
+                        "s": session,
+                        "d": base64.b64encode(data).decode("utf-8")
+                    }
+                }
                 ipc_send.send_string(json.dumps(msg))
 
         writer = threading.Thread(target=writeall)
