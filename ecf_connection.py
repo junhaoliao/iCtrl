@@ -33,7 +33,7 @@ class ECFConnection(ug_connection.UGConnection):
         except OSError:
             raise exceptions.NetworkError(
                 "ECF Server remote.ecf.utoronto.ca unreachable. \n"
-                "Please check you network or try again later. ")
+                "Please check your network or try again later. ")
 
         except paramiko.ssh_exception.AuthenticationException:
             raise exceptions.SSHAuthError("SSH Authentication Failed. \n"

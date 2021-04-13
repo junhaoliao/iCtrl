@@ -37,7 +37,7 @@ class EECGConnection(ug_connection.UGConnection):
         except OSError:
             raise exceptions.NetworkError(
                 "EECG Server %s unreachable. \n"
-                "Please check you network or use another server. " % srv_num)
+                "Please check your network or use another server. " % srv_num)
 
         except paramiko.ssh_exception.AuthenticationException:
             raise exceptions.SSHAuthError("SSH Authentication Failed. \n"
