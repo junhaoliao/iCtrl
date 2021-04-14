@@ -240,13 +240,15 @@ class UGConnection:
         self.shell_chan = None
 
     def open_sftp(self):
-        if self.sftp is not None:
-            raise RuntimeError("UGConnection: open_sftp: sftp already opened.")
+        # should only be called if the sftp handle isn't setup (self.sftp is None)
         t = self.client.get_transport()
         self.sftp = paramiko.SFTPClient.from_transport(t)
         self.sftp.chdir(".")
 
     def sftp_ls(self, path):
+        if self.sftp is None:
+            self.open_sftp()
+
         if path != "":
             self.sftp.chdir(path)
         cwd = self.sftp.getcwd()

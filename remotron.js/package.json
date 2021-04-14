@@ -2,7 +2,7 @@
   "name": "remotron.js",
   "version": "1.0.0",
   "description": "",
-  "main": "main.js",
+  "main": "src/main.js",
   "scripts": {
     "start": "electron ."
   },
@@ -13,7 +13,7 @@
   "author": "Junhao Liao",
   "license": "",
   "devDependencies": {
-    "electron": "^12.0.0",
+    "electron": "^13.0.0-beta.14",
     "xterm": "^4.11.0",
     "zeromq": "^6.0.0-beta.6"
   }

@@ -61,7 +61,7 @@ def handle_login(value):
             CONN[session].connect(hostname=server, username=username, passwd=passwd)
             send_msg("login_ack", session)
         except Exception as e:
-            send_msg("login_ack", "Failed: "+str(e))
+            send_msg("login_ack", "Failed: " + str(e))
 
     else:
         # TODO: support login with keys
@@ -73,21 +73,70 @@ def handle_login(value):
 def handle_shell(value):
     session = value
     if type(session) is not str:
-        raise TypeError(f"handle_login: Invalid type({session})={type(session)}")
+        raise TypeError(f"handle_shell: Invalid type({session})={type(session)}")
     elif session not in CONN:
-        raise ValueError(f"handle_login: Invalid session={session}")
+        raise ValueError(f"handle_shell: Invalid session={session}")
 
     CONN[value].invoke_shell(session, IPC_SEND)
 
 
 def handle_send(value):
     print(value)
+
     session = value["s"]
     if type(session) is not str:
-        raise TypeError(f"handle_login: Invalid type({session})={type(session)}")
+        raise TypeError(f"handle_send: Invalid type({session})={type(session)}")
     elif session not in CONN:
-        raise ValueError(f"handle_login: Invalid session={session}")
+        raise ValueError(f"handle_send: Invalid session={session}")
 
     data = value["d"]
 
     CONN[session].shell_send_data(data)
+
+
+def handle_sftp_visit(value):
+    session = value["session"]
+    if type(session) is not str:
+        raise TypeError(f"handle_sftp_visit: Invalid type({session})={type(session)}")
+    elif session not in CONN:
+        raise ValueError(f"handle_sftp_visit: Invalid session={session}")
+
+    remote_path = value["path"]
+    if type(remote_path) is not str:
+        raise TypeError(f"handle_sftp_visit: Invalid type({remote_path})={type(remote_path)}")
+
+    remote_cwd, file_list = CONN[session].sftp_ls(remote_path)
+    send_msg("sftp_cwd", {
+        "session": session,
+        "dir": remote_cwd,
+        "files": file_list
+    })
+
+
+def get_transfer_parameters(value):
+    session = value["session"]
+    if type(session) is not str:
+        raise TypeError(f"get_transfer_parameters: Invalid type({session})={type(session)}")
+    elif session not in CONN:
+        raise ValueError(f"get_transfer_parameters: Invalid session={session}")
+
+    local_path = value["local"]
+    if type(local_path) is not str:
+        raise TypeError(f"get_transfer_parameters: Invalid type({local_path})={type(local_path)}")
+    # TODO: revisit the need to check whether the local path exists or not
+
+    remote_path = value["remote"]
+    if type(remote_path) is not str:
+        raise TypeError(f"get_transfer_parameters: Invalid type({remote_path})={type(remote_path)}")
+
+    return session, local_path, remote_path
+
+
+def handle_sftp_download(value):
+    session, local_path, remote_path = get_transfer_parameters(value)
+    CONN[session].sftp.get(remote_path, local_path)
+
+
+def handle_sftp_upload(value):
+    session, local_path, remote_path = get_transfer_parameters(value)
+    CONN[session].sftp.put(local_path, remote_path)

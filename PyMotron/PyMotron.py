@@ -19,6 +19,12 @@ def handle_main(key, value):
         handle_shell(value)
     elif key == "send":
         handle_send(value)
+    elif key == "sftp_visit":
+        handle_sftp_visit(value)
+    elif key == "sftp_download":
+        handle_sftp_download(value)
+    elif key == "sftp_upload":
+        handle_sftp_upload(value)
     else:
         raise ValueError(f"Unknown key={key}, value={value}")
 
