@@ -13,6 +13,10 @@ def bootstrap():
 def handle_main(key, value):
     if key == "sync":
         handle_sync(value)
+    elif key == "query_profiles":
+        handle_query_profiles(value)
+    elif key == "new_session":
+        handle_new_session(value)
     elif key == "login":
         handle_login(value)
     elif key == "shell":

@@ -4,7 +4,8 @@ from typing import Any
 
 from libugremote.ug_profile.UGConnProfile import *
 
-CONN_PROFILE_PATH = "./profile/"
+CONN_PROFILE_PATH = "./profile/connections/"
+
 
 # TODO: check argument verification and assignment order
 
@@ -282,32 +283,68 @@ class UGUserProfile:
             # need to handle any write permission issues, once observed
             raise Exception
 
-    def query_sessions(self):
+    def query_sync(self):
         """
-        {
-            “name”: “EECG1”,
-            “servers”:[
-                “ug250.eecg.toronto.edu”,
-                “ug251.eecg.toronto.edu”,
+            "sessions":
+            {
+                "session_name":
+                {
+                    "profile": "eecg"
+                    "last_server": "ug250.eecg.toronto.edu",
+                    "username":"",
+                    "private_key":false,
+                    "vnc_passwd": false
+                },
                 ...
-            ],
-            “last_server”:  “ug250.eecg.toronto.edu”,
-            “username”:””,
-            “private_key”:false,
-            “vnc_manual”: true,
-            “vnc_passwd”: false
-        }
+            },
+            "profiles":
+            {
+                ...
+            }
         """
         queried_sessions_dict = {}
         for session_name, session in self["sessions"].items():
             session: Dict
             queried_sessions_dict[session_name] = {
-                "servers": self._conn_profiles[session["conn_profile"]]["servers"],
+                "profile": session["conn_profile"],
                 "last_server": session["last_server"],
                 "username": session["username"],
                 "private_key": (session["private_key_path"] != ""),
-                "vnc_manual": self._conn_profiles[session["conn_profile"]]["vnc_manual"],
                 "vnc_passwd": (session["vnc_passwd_path"] != "")
             }
 
-        return queried_sessions_dict
+        return {
+            "sessions": queried_sessions_dict,
+            "profiles": self.query_profiles()
+        }
+
+    def query_profiles(self):
+        """
+        {
+            "eecg":
+            {
+                "vnc_manual": false
+                "servers":[
+                    "ug250.eecg.toronto.edu",
+                    "ug251.eecg.toronto.edu",
+                    ...
+                ],
+            },
+            "ecf":
+            {
+                "vnc_manual": true,
+                "servers": [...]
+            }
+        }
+        """
+        # TODO: add test cases
+        queried_profiles_dict = {}
+        for conn_profile_name, conn_profile in self._conn_profiles.items():
+            print(conn_profile_name, conn_profile)
+            queried_profiles_dict[conn_profile_name] = {
+                "vnc_manual": conn_profile["vnc_manual"],
+                "servers": conn_profile["servers"]
+            }
+
+        return queried_profiles_dict
+

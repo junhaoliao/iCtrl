@@ -1,0 +1,37 @@
+.unselectable{
+    -webkit-user-select: none;
+}
+
+.undraggable{
+    -webkit-user-drag: none;
+}
+.rmt_tab {
+    width: 150px;
+}
+
+.rmt_tab_close_button {
+    margin-left: auto !important;
+    margin-right: 0 !important;
+    width: 20px;
+    height: 20px;
+}
+
+.rmt_tab_close_icon {
+    transform: translate3d(-7px, -7px, 0);
+}
+
+.rmt_feature_menu {
+    margin-top: 64px !important;
+}
+
+.rmt_page {
+    /*margin-top: 64px !important;*/
+}
+
+.rmt_session_name_input{
+    width: 292px;
+}
+
+#pages_container {
+    margin-left: 96px;
+}

@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <script>window.$ = window.jQuery = require('jquery');</script>
+    <link href="semantic/semantic.min.css" rel="stylesheet" type="text/css">
+    <link href="styles.css" rel="stylesheet" type="text/css">
+    <script src="semantic/semantic.min.js"></script>
+    <link href="../node_modules/xterm/css/xterm.css" rel="stylesheet"/>
+<!--    <script src="../node_modules/xterm/lib/xterm.js"></script>-->
+    <title>UG_Remote</title>
+</head>
+<body>
+<div class="ui top attached tabular menu" id="tab_bar" style="height: 64px">
+    <div class="item" data-tab="INIT">
+        <img class="undraggable" alt="icon" src="../resources/icon.png" style="width: 43px">
+    </div>
+    <div class="right item" id="new_tab_button" onclick="actOpenNewTab()"><i class="large plus icon"
+                                                                          style="margin-left: auto;margin-right: auto;"></i>
+    </div>
+</div>
+<div id="pages_container">
+    <div class="ui bottom attached tab" data-tab="INIT" id="init_page">
+        <form class="ui form" onsubmit="return debug_submit()">
+        <div class="field">
+            <label for="debug_key">Key</label>
+            <input id="debug_key" placeholder="key" type="text">
+        </div>
+        <div class="field">
+            <label for="debug_value">Value</label>
+            <input id="debug_value" placeholder="val" type="text">
+        </div>
+        <button class="ui button" type="submit">Submit</button>
+        </form>
+        <h1>Logs</h1>
+        <div id="logs"></div>
+    </div>
+</div>
+<script src="debugger.js"></script>
+<script src="ipc.js"></script>
+<script src="handlers.js"></script>
+<script src="builder.js"></script>
+<script src="actions.js"></script>
+<script src="login.js"></script>
+<script src="tf.js"></script>
+</body>
+</html>

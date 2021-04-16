@@ -16,8 +16,26 @@ def send_msg(key, value=None):
 
 def handle_sync(value):
     print("handle_sync:", value)
-    send_msg("sessions", USER_PROFILE.query_sessions())
+    send_msg("sync_ack", USER_PROFILE.query_sync())
 
+
+def handle_query_profiles(value):
+    print("handle_query_profiles:", value)
+    send_msg("profiles", USER_PROFILE.query_profiles())
+
+
+def handle_new_session(value):
+    print("handle_new_session:", value)
+    session = value["session"]
+    if type(session) is not str:
+        raise TypeError(f"handle_login: Invalid type({session})={type(session)}")
+
+    profile = value["profile"]
+    if type(profile) is not str:
+        raise TypeError(f"handle_login: Invalid type({profile})={type(profile)}")
+
+    USER_PROFILE.add_new_session(session_name=session, conn_profile=profile)
+    CONN[session] = UGConnection()
 
 def handle_login(value):
     """
