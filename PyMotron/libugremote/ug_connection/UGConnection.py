@@ -234,6 +234,11 @@ class UGConnection:
             raise RuntimeError("UGConnection: shell_send_data: shell used before invoke.")
         self.shell_chan.send(data)
 
+    def shell_change_size(self, width, height):
+        if self.shell_chan is None:
+            raise RuntimeError("UGConnection: shell_send_data: shell used before invoke.")
+        self.shell_chan.resize_pty(width, height)
+
     def disconnect_shell(self):
         if self.shell_chan is not None:
             self.shell_chan.close()
@@ -271,3 +276,80 @@ class UGConnection:
     def close_sftp(self):
         if self.sftp is not None:
             self.sftp.close()
+
+    def create_forward_tunnel(self, local_port, remote_port):
+        import socketserver
+
+        class Handler(socketserver.BaseRequestHandler):
+            # TODO: revisit the need to override setup() and finish() instead of
+            #  putting everything in handle()
+            chain_host = "localhost"
+            chain_port = remote_port
+            ssh_transport = self.client.get_transport()
+
+            def handle(handler_self):
+                try:
+                    chan = handler_self.ssh_transport.open_channel(
+                        "direct-tcpip",
+                        (handler_self.chain_host, handler_self.chain_port),
+                        handler_self.request.getpeername(),
+                    )
+                except Exception as e:
+                    raise exceptions.NetworkError(
+                        "Incoming request to %s:%d failed: %s"
+                        % (handler_self.chain_host, handler_self.chain_port, repr(e))
+                    )
+                if chan is None:
+                    raise exceptions.NetworkError(
+                        "Incoming request to %s:%d was rejected by the SSH server."
+                        % (handler_self.chain_host, handler_self.chain_port)
+                    )
+
+                print(
+                    "Connected!  Tunnel open %r -> %r -> %r"
+                    % (
+                        handler_self.request.getpeername(),
+                        chan.getpeername(),
+                        (handler_self.chain_host, handler_self.chain_port),
+                    )
+                )
+
+                import select
+                try:
+                    while True:
+                        r, _, _ = select.select([handler_self.request, chan], [], [])
+                        if handler_self.request in r:
+                            data = handler_self.request.recv(1024)
+                            if len(data) == 0:
+                                break
+                            chan.send(data)
+                        if chan in r:
+                            data = chan.recv(1024)
+                            if len(data) == 0:
+                                break
+                            handler_self.request.send(data)
+                except (ConnectionResetError, BrokenPipeError):
+                    print("Likely TigerVNC Viewer has been closed, or the network is interrupted, "
+                          "shutting down")
+                    return
+
+                try:
+                    peername = handler_self.request.getpeername()
+                    chan.close()
+                    handler_self.request.close()
+                    print("Tunnel closed from %r" % (peername,))
+                except Exception as e:
+                    print(e)
+
+                handler_self.server.shutdown()
+                handler_self.server.server_close()
+                print("successfully disconnected")
+
+        class ForwardServer(socketserver.ThreadingTCPServer):
+            daemon_threads = True
+            allow_reuse_address = True
+
+        forward_srv = ForwardServer(("", local_port), Handler)
+
+        forward_thread = threading.Thread(target=forward_srv.serve_forever)
+        forward_thread.start()

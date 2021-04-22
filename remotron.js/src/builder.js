@@ -1,6 +1,7 @@
 // TODO: add a Placeholder to signal the sessions are loading
 
-const {Terminal} = require("xterm")
+const {Session} = require("./session.js")
+
 const tab_bar = document.getElementById("tab_bar")
 const new_tab_button = document.getElementById("new_tab_button")
 
@@ -58,7 +59,6 @@ function test() {
 function buildLoadedTab(session_name, profile_name, last_server, username, has_private_key, has_vnc_passwd) {
     // servers: Array(125), last_server: "ug250.eecg.toronto.edu", username: "liaojunh", private_key: false, vnc_manual: true
     const server_list = PROFILES["servers"]
-    // TODO: modify here
 
     const loaded_tab_values = _buildTab()
     loaded_tab_values[0].firstChild.data = session_name
@@ -82,23 +82,11 @@ function buildLoadedTab(session_name, profile_name, last_server, username, has_p
     </a>
 </div>
 <div id="${session_name}-login" class="ui active tab" data-tab="${session_name}-login"></div>
-<div id="${session_name}-terminal" class="ui tab" data-tab="${session_name}-terminal"></div>
+<div id="${session_name}-terminal" class="ui tab rmt_terminal" data-tab="${session_name}-terminal"></div>
 <div id="${session_name}-tf" class="ui tab" data-tab="${session_name}-transfer"></div>
 `
-    // TODO: refactor those components into a class for easy init and destroy
-    LOGINS[session_name] = new LoginPage(session_name, profile_name)
-    LOGINS[session_name].loadFields(last_server, username, has_private_key, has_vnc_passwd)
-
-    TERMS[session_name] = new Terminal()
-    TERMS[session_name].open(document.getElementById(`${session_name}-terminal`))
-
-    TERMS[session_name].onKey(async (e) => {
-        send_msg("send", {
-            "s": session_name,
-            "d": e.key
-        })
-    });
-    TFS[session_name] = new TransferManager(session_name)
+    SESSIONS[session_name] = new Session(session_name, profile_name)
+    SESSIONS[session_name].loadFields(last_server, username, has_private_key, has_vnc_passwd)
 }
 
 function buildNewTab(connection_profiles) {

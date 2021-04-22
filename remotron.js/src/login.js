@@ -121,3 +121,4 @@ class LoginPage{
         
     }
 }
+module.exports.LoginPage = LoginPage

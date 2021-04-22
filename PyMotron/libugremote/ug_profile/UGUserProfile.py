@@ -89,8 +89,6 @@ class UGUserProfile:
 'last_server': 'remote.ecf.utoronto.ca', 'username': 'liaojunh', 'private_key': False, 'vnc_manual': False, \
 'vnc_passwd': False}}
     """
-    # TODO: may think again: all the sessions should support indexing by names
-    #  therefore self["session"] can be a dictionary instead
     version = 1  # in case the schema changes in the future
     instantiated = False
 

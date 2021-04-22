@@ -26,12 +26,24 @@
 
 .rmt_page {
     /*margin-top: 64px !important;*/
+    height: 100%;
 }
 
 .rmt_session_name_input{
     width: 292px;
 }
 
+html, body {
+    margin: 0;
+    height: 100%;
+    width: 100%;
+}
+
 #pages_container {
-    margin-left: 96px;
+    margin-left: 88px;
+    height: 100%;
+}
+
+.rmt_terminal{
+    height: 100%;
 }

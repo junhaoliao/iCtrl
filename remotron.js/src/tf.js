@@ -23,8 +23,8 @@ class TransferManager {
     local_checked_files = new Set()
     remote_checked_files = new Set()
 
-    constructor(session) {
-        this.session = session
+    constructor(session_name) {
+        this.session = session_name
 
         this.local_cwd = local_homedir
         this.remote_cwd = null
@@ -32,7 +32,7 @@ class TransferManager {
         this.local_checked_files = new Set()
         this.remote_checked_files = new Set()
 
-        const tf_page = document.getElementById(`${session}-tf`)
+        const tf_page = document.getElementById(`${session_name}-tf`)
         const tf_div = document.createElement("div")
         tf_page.appendChild(tf_div)
         tf_div.className = "ui grid"
@@ -41,11 +41,11 @@ class TransferManager {
         tf_toolbar.className = "row"
         tf_toolbar.innerHTML = `
 <div style="width: 300px; margin: auto" class="two ui buttons">
-<button style="margin-right: 8px" id="${session}-tf-upload" class="ui right labeled icon green button">
+<button style="margin-right: 8px" id="${session_name}-tf-upload" class="ui right labeled icon green button">
   <i class="right arrow icon"></i>
   Upload
 </button>
-<button style="margin-left: 8px" id="${session}-tf-download" class="ui labeled icon blue button">
+<button style="margin-left: 8px" id="${session_name}-tf-download" class="ui labeled icon blue button">
   <i class="left arrow icon"></i>
   Download
 </button>
@@ -70,39 +70,39 @@ class TransferManager {
         tf_div.appendChild(remote_div)
 
         // setup the callbacks on the toolbar
-        const tf_download_button = document.getElementById(`${session}-tf-download`)
+        const tf_download_button = document.getElementById(`${session_name}-tf-download`)
         tf_download_button.onclick = ()=>{
             this.tfDownload()
         }
-        const tf_upload_button = document.getElementById(`${session}-tf-upload`)
+        const tf_upload_button = document.getElementById(`${session_name}-tf-upload`)
         tf_upload_button.onclick = ()=>{
             this.tfUpload()
         }
 
         // setup the callbacks on the local side
-        const local_fm_addrbar_form = document.getElementById(`${session}-local-fm_addrbar_form`)
+        const local_fm_addrbar_form = document.getElementById(`${session_name}-local-fm_addrbar_form`)
         local_fm_addrbar_form.onsubmit = () => {
             return this.localVisit()
         }
-        const local_fm_up_button = document.getElementById(`${session}-local-fm_up_button`)
+        const local_fm_up_button = document.getElementById(`${session_name}-local-fm_up_button`)
         local_fm_up_button.onclick = () => {
             this.localUp()
         }
-        const local_fm_checkall_box = document.getElementById(`${session}-local-fm_checkall_box`)
+        const local_fm_checkall_box = document.getElementById(`${session_name}-local-fm_checkall_box`)
         local_fm_checkall_box.onclick = () => {
             this.fmCheckAll("local")
         }
 
         // setup the callbacks on the remote side
-        const remote_fm_addrbar_form = document.getElementById(`${session}-remote-fm_addrbar_form`)
+        const remote_fm_addrbar_form = document.getElementById(`${session_name}-remote-fm_addrbar_form`)
         remote_fm_addrbar_form.onsubmit = () => {
             return this.remoteVisit()
         }
-        const remote_fm_up_button = document.getElementById(`${session}-remote-fm_up_button`)
+        const remote_fm_up_button = document.getElementById(`${session_name}-remote-fm_up_button`)
         remote_fm_up_button.onclick = () => {
             this.remoteUp()
         }
-        const remote_fm_checkall_box = document.getElementById(`${session}-remote-fm_checkall_box`)
+        const remote_fm_checkall_box = document.getElementById(`${session_name}-remote-fm_checkall_box`)
         remote_fm_checkall_box.onclick = () => {
             this.fmCheckAll("remote")
         }
@@ -156,7 +156,6 @@ class TransferManager {
     fmUpdateAddrBar(side) {
         this.fmUncheckCheckAll(side)
         if (side === "local"){
-            // TODO: check whether we should refactor this into a function
             this.local_checked_files = new Set()
         } else {
             this.remote_checked_files = new Set()

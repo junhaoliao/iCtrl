@@ -85,7 +85,6 @@ def handle_login(value):
         # TODO: support login with keys
         pass
 
-    # TODO: send back login_ack
 
 
 def handle_shell(value):
@@ -110,6 +109,18 @@ def handle_send(value):
     data = value["d"]
 
     CONN[session].shell_send_data(data)
+
+def handle_resize(value):
+    session = value["s"]
+    if type(session) is not str:
+        raise TypeError(f"handle_send: Invalid type({session})={type(session)}")
+    elif session not in CONN:
+        raise ValueError(f"handle_send: Invalid session={session}")
+
+    height = value["r"]
+    width = value["c"]
+
+    CONN[session].shell_change_size(width, height)
 
 
 def handle_sftp_visit(value):
@@ -141,7 +152,6 @@ def get_transfer_parameters(value):
     local_path = value["local"]
     if type(local_path) is not str:
         raise TypeError(f"get_transfer_parameters: Invalid type({local_path})={type(local_path)}")
-    # TODO: revisit the need to check whether the local path exists or not
 
     remote_path = value["remote"]
     if type(remote_path) is not str:
