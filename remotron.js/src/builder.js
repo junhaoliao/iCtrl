@@ -198,7 +198,7 @@ if (process.platform === "darwin"){
     rmt_tab_bar.appendChild(rmt_window_ctrl)
 }
 rmt_window_ctrl.id = "rmt_window_ctrl"
-rmt_window_ctrl.className = "item"
+rmt_window_ctrl.className = "unselectable"
 const close_button_html = `
 <div id="win_close_button" class="win_button">
     <a id="win_close_text" class="win_text">×</a>
@@ -211,7 +211,7 @@ init_tab.innerHTML = `<img id="rmt_icon" class="undraggable" alt="icon" src="../
 
 if (process.platform === "darwin"){
     init_tab.className = "right item"
-    rmt_window_ctrl.style.minWidth = "85.5px"
+    rmt_window_ctrl.style.minWidth = "85px"
     rmt_window_ctrl.innerHTML = close_button_html
 }
 else {
@@ -263,17 +263,20 @@ win_max_button.onclick = ()=>{
 }
 
 rmt_tab_bar.ondblclick = ()=>{
-    max_button_state = !max_button_state
     if (process.platform === "darwin"){
         electron_ipc.send("max")
     }
-    else if (max_button_state){
-        electron_ipc.send("restore")
-    } else {
-        electron_ipc.send("max")
+    else {
+        max_button_state = !max_button_state
+        if (max_button_state){
+            electron_ipc.send("restore")
+        } else {
+            electron_ipc.send("max")
+        }
     }
 }
 
+// TODO: launch the "NEW_TAB" if no sessions can be loaded
 // FIXME: only uncomment this if the tabs are not able to load
 //  at least the logs can be displayed if things have been wrong at the handshaking stage
 semantic_flush_tabs()

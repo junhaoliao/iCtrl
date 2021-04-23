@@ -3,8 +3,10 @@ const {spawn} = require("child_process")
 const {Pull, Push} = require("zeromq")
 
 const platform = require("os").platform()
-let PYTHON_PATH = "../PyMotron/venv/bin/python3"
-if (platform === "win32"){
+let PYTHON_PATH = null
+if (platform === "darwin"){
+    PYTHON_PATH = "../PyMotron/venv/bin/python3"
+} else if (platform === "win32"){
     PYTHON_PATH = "../PyMotron/venv/Scripts/python.exe"
 } else {
     alert("OS not supported "+ platform)

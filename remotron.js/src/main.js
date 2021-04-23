@@ -7,6 +7,7 @@ function createWindow() {
     const mainWindow = new BrowserWindow({
         width: 1440,
         height: 768,
+        minWidth: 100,
         frame: false,
         webPreferences: {
             // preload: path.join(__dirname, 'preload.js'),
@@ -38,7 +39,7 @@ function createWindow() {
         mainWindow.restore()
     })
     // Open the DevTools.
-    // mainWindow.webContents.openDevTools()
+    mainWindow.webContents.openDevTools()
 }
 
 // This method will be called when Electron has finished
