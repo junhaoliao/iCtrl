@@ -1,12 +1,13 @@
 // TODO: add a Placeholder to signal the sessions are loading
 
+const electron_ipc = require('electron').ipcRenderer
 const {Session} = require("./session.js")
 
 const rmt_tab_bar = document.getElementById("rmt_tab_bar")
 const new_tab_button = document.getElementById("new_tab_button")
 
 const pages_container = document.getElementById("pages_container")
-const init_page = document.getElementById("init_page")
+const init_tab = document.getElementById("init_tab")
 
 function semantic_toast(type, msg) {
     $("body")
@@ -188,6 +189,50 @@ function selectTab(tab_name) {
         }
     }
 }
+
+// FIXME: revisit the need to put below code into a new file
+
+const rmt_window_ctrl = document.createElement("div")
+if (process.platform === "darwin"){
+    rmt_tab_bar.insertBefore(rmt_window_ctrl, new_tab_button)
+} else {
+    rmt_tab_bar.appendChild(rmt_window_ctrl)
+    rmt_window_ctrl.style.flexDirection = "row-reverse"
+}
+rmt_window_ctrl.id = "rmt_window_ctrl"
+rmt_window_ctrl.className = "unselectable"
+rmt_window_ctrl.innerHTML =
+`
+<div id="win_close_button" class="win_button">
+    <a id="win_close_text" class="win_text">×</a>
+</div>
+<div id="win_min_button" class="win_button">
+    <a id="win_min_text" class="win_text">－</a>
+</div>
+<div id="win_max_button" class="win_button">
+    <a id="win_max_text" class="win_text">＋</a>
+</div>
+`
+
+const win_close_button = document.getElementById("win_close_button")
+win_close_button.onclick = ()=>{
+    electron_ipc.send("close")
+}
+const win_min_button = document.getElementById("win_min_button")
+win_min_button.onclick = ()=>{
+    electron_ipc.send("min")
+}
+let fullscreen = false
+const win_max_button = document.getElementById("win_max_button")
+win_max_button.onclick = ()=>{
+    if (process.platform === "darwin"){
+        // in fullscreen mode, hide the min button on Mac
+        fullscreen = !fullscreen
+        win_min_button.style.visibility = fullscreen?"hidden":""
+    }
+    electron_ipc.send("max")
+}
+
 
 // FIXME: only uncomment this if the tabs are not able to load
 //  at least the logs can be displayed if things have been wrong at the handshaking stage

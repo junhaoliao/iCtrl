@@ -6,12 +6,63 @@
     -webkit-user-drag: none;
 }
 
+#rmt_window_ctrl{
+    min-width: 85px;
+    margin-top: auto;
+    margin-bottom: auto;
+    display: flex;
+    justify-content: center;
+}
+
+.win_button{
+    margin-left: 3px;
+    margin-right: 3px;
+    border-radius: 12px;
+    text-align: center;
+    width: 14px;
+    height: 14px;
+    display: inline-block;
+    line-height: 14px;
+    vertical-align: middle;
+}
+
+.win_text{
+    font-size: 14px;
+    font-weight: bold;
+    display: none;
+}
+
+#rmt_window_ctrl:hover .win_text{
+    display:inline-block;
+}
+
+#win_close_button{
+    background-color: #ff5f57;
+}
+#win_close_text{
+    color: #7c0605;
+}
+
+#win_min_button{
+    background-color: #febc2e;
+}
+#win_min_text{
+    color: #cb8917;
+}
+
+#win_max_button{
+    background-color: #28c63f;
+}
+#win_max_text{
+    color: #006000;
+}
+
 #rmt_tab_bar {
-    height: 64px;
+    height: 40px;
 }
 
 #rmt_icon {
-    width: 43px;
+    width: 28px;
 }
 
 #new_tab_button_icon {
@@ -35,7 +86,7 @@
 }
 
 .rmt_feature_menu {
-    margin-top: 64px !important;
+    margin-top: 40px !important;
 }
 
 .rmt_page {
@@ -61,3 +112,4 @@ html, body {
 .rmt_terminal {
     height: 100%;
 }
+

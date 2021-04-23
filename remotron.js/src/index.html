@@ -11,11 +11,11 @@
 </head>
 <body>
 <div class="ui top attached tabular menu" id="rmt_tab_bar">
-    <div class="item" data-tab="INIT">
-        <img id="rmt_icon" class="undraggable" alt="icon" src="../resources/icon.png">
+    <div class="item" id="new_tab_button" onclick="actOpenNewTab()">
+        <i id="new_tab_button_icon" class="plus icon"></i>
     </div>
-    <div class="right item" id="new_tab_button" onclick="actOpenNewTab()">
-        <i id="new_tab_button_icon" class="large plus icon"></i>
+    <div id="init_tab" class="right item" data-tab="INIT">
+        <img id="rmt_icon" class="undraggable" alt="icon" src="../resources/icon.png">
     </div>
 </div>
 <div id="pages_container">
