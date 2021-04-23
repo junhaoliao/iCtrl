@@ -33,6 +33,7 @@ function handle_sync_ack(value) {
             session["vnc_passwd"]
         )
     }
+    selectTab(value["last_session"])
     semantic_flush_tabs()
     // console.log(SESSIONS)
 }

@@ -298,7 +298,8 @@ class UGUserProfile:
             "profiles":
             {
                 ...
-            }
+            },
+            "last_session": "session_name"
         """
         queried_sessions_dict = {}
         for session_name, session in self["sessions"].items():
@@ -313,7 +314,8 @@ class UGUserProfile:
 
         return {
             "sessions": queried_sessions_dict,
-            "profiles": self.query_profiles()
+            "profiles": self.query_profiles(),
+            "last_session": self["last_session"]
         }
 
     def query_profiles(self):

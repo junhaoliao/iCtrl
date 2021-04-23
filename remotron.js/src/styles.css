@@ -1,10 +1,24 @@
-.unselectable{
+.unselectable {
     -webkit-user-select: none;
 }
 
-.undraggable{
+.undraggable {
     -webkit-user-drag: none;
 }
+
+#rmt_tab_bar {
+    height: 64px;
+}
+
+#rmt_icon {
+    width: 43px;
+}
+
+#new_tab_button_icon {
+    margin-left: auto;
+    margin-right: auto;
+}
+
 .rmt_tab {
     width: 150px;
 }
@@ -29,7 +43,7 @@
     height: 100%;
 }
 
-.rmt_session_name_input{
+.rmt_session_name_input {
     width: 292px;
 }
 
@@ -44,6 +58,6 @@ html, body {
     height: 100%;
 }
 
-.rmt_terminal{
+.rmt_terminal {
     height: 100%;
 }

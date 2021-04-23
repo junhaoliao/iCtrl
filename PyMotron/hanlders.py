@@ -37,6 +37,7 @@ def handle_new_session(value):
     USER_PROFILE.add_new_session(session_name=session, conn_profile=profile)
     CONN[session] = UGConnection()
 
+
 def handle_login(value):
     """
     :param value: the value of the message
@@ -86,7 +87,6 @@ def handle_login(value):
         pass
 
 
-
 def handle_shell(value):
     session = value
     if type(session) is not str:
@@ -109,6 +109,7 @@ def handle_send(value):
     data = value["d"]
 
     CONN[session].shell_send_data(data)
+
 
 def handle_resize(value):
     session = value["s"]

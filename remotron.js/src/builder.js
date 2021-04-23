@@ -2,7 +2,7 @@
 
 const {Session} = require("./session.js")
 
-const tab_bar = document.getElementById("tab_bar")
+const rmt_tab_bar = document.getElementById("rmt_tab_bar")
 const new_tab_button = document.getElementById("new_tab_button")
 
 const pages_container = document.getElementById("pages_container")
@@ -18,7 +18,7 @@ function semantic_flush_tabs() {
 
 function _buildTab() {
     // remove the active tab's "active" class
-    for (const tab of tab_bar.children) {
+    for (const tab of rmt_tab_bar.children) {
         tab.classList.remove("active")
     }
     for (const page of pages_container.children) {
@@ -27,7 +27,7 @@ function _buildTab() {
 
     // create new tab
     const new_tab = document.createElement("div")
-    tab_bar.insertBefore(new_tab, new_tab_button)
+    rmt_tab_bar.insertBefore(new_tab, new_tab_button)
     new_tab.innerText = "New Tab"
     new_tab.className = "active item rmt_tab"
     new_tab.setAttribute("data-tab", "NEW_TAB")
@@ -164,4 +164,22 @@ function destroyTab(tab, page) {
     semantic_flush_tabs()
 }
 
-semantic_flush_tabs()
+function selectTab(tab_name) {
+    // remove the active tab's "active" class
+    for (const tab of rmt_tab_bar.children) {
+        if (tab.getAttribute("data-tab") === tab_name){
+            tab.classList.add("active")
+        }
+        else {
+            tab.classList.remove("active")
+        }
+    }
+    for (const page of pages_container.children) {
+        if (page.getAttribute("data-tab") === tab_name){
+            page.classList.add("active")
+        }
+        else {
+            page.classList.remove("active")
+        }
+    }
+}

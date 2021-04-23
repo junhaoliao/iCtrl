@@ -7,20 +7,19 @@
     <link href="styles.css" rel="stylesheet" type="text/css">
     <script src="semantic/semantic.min.js"></script>
     <link href="../node_modules/xterm/css/xterm.css" rel="stylesheet"/>
-<!--    <script src="../node_modules/xterm/lib/xterm.js"></script>-->
     <title>UG_Remote</title>
 </head>
 <body>
-<div class="ui top attached tabular menu" id="tab_bar" style="height: 64px">
+<div class="ui top attached tabular menu" id="rmt_tab_bar">
     <div class="item" data-tab="INIT">
-        <img class="undraggable" alt="icon" src="../resources/icon.png" style="width: 43px">
+        <img id="rmt_icon" class="undraggable" alt="icon" src="../resources/icon.png">
     </div>
-    <div class="right item" id="new_tab_button" onclick="actOpenNewTab()"><i class="large plus icon"
-                                                                          style="margin-left: auto;margin-right: auto;"></i>
+    <div class="right item" id="new_tab_button" onclick="actOpenNewTab()">
+        <i id="new_tab_button_icon" class="large plus icon"></i>
     </div>
 </div>
 <div id="pages_container">
-    <div style="overflow: scroll; height: 100vh" class="ui bottom attached tab" data-tab="INIT" id="init_page">
+    <div class="ui bottom attached tab" data-tab="INIT" id="init_page">
         <form class="ui form" onsubmit="return debug_submit()">
         <div class="field">
             <label for="debug_key">Key</label>
