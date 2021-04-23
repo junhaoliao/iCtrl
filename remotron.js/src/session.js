@@ -2,8 +2,6 @@ const {LoginPage} = require("./login.js")
 const {Term} = require("./term.js")
 const {TransferManager} = require("./tf.js")
 
-
-
 class Session {
     login = null
     term = null

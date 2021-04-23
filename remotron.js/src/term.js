@@ -2,9 +2,12 @@ const {Terminal} = require("xterm");
 const { FitAddon } = require ("xterm-addon-fit")
 class Term{
     terminal = null
+    terminal_div = null
+
     constructor(session_name) {
+        this.terminal_div = document.getElementById(`${session_name}-terminal`)
         this.terminal = new Terminal()
-        this.terminal.open(document.getElementById(`${session_name}-terminal`))
+        this.terminal.open(this.terminal_div)
         this.terminal.onKey(async (e) => {
             send_msg("send", {
                 "s": session_name,
@@ -22,9 +25,12 @@ class Term{
                 "r": e.rows
             })
         })
-        // TODO: put the fit addons in a global array and use a single event listener
+
         window.addEventListener('resize', ()=>{
-            fitAddon.fit();
+            if (this.terminal_div.getBoundingClientRect().width !== 0){
+                // if the terminal div is not shown in the interface, don't resize
+                fitAddon.fit();
+            }
         });
     }
 }
