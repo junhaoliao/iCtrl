@@ -8,6 +8,15 @@ const new_tab_button = document.getElementById("new_tab_button")
 const pages_container = document.getElementById("pages_container")
 const init_page = document.getElementById("init_page")
 
+function semantic_toast(type, msg) {
+    $("body")
+      .toast({
+        class: type,
+        message: msg
+      })
+    ;
+}
+
 // TODO: refactor this func into a file
 // This should be called after setting all loaded tabs
 function semantic_flush_tabs() {
@@ -183,3 +192,5 @@ function selectTab(tab_name) {
 // FIXME: only uncomment this if the tabs are not able to load
 //  at least the logs can be displayed if things have been wrong at the handshaking stage
 // semantic_flush_tabs()
+
+// semantic_toast("success", "Launched!")

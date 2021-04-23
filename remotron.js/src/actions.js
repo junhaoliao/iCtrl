@@ -4,6 +4,15 @@ function actOpenNewTab() {
 
 function actAddNewSession(tab, page, profile_name, session_name_input) {
     const session_name = session_name_input.value
+    if (session_name in SESSIONS){
+        semantic_toast("error", `Already has a session named "${session_name}"`)
+        return
+    } else if (session_name === ""){
+        // TODO: generate a name according to the profile name
+        semantic_toast("error", `Session name cannot be empty`)
+        return
+    }
+
     send_msg("new_session", {
         "profile": profile_name,
         "session": session_name
