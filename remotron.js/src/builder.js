@@ -197,15 +197,19 @@ if (process.platform === "darwin"){
     rmt_tab_bar.insertBefore(rmt_window_ctrl, new_tab_button)
 } else {
     rmt_tab_bar.appendChild(rmt_window_ctrl)
-    rmt_window_ctrl.style.flexDirection = "row-reverse"
 }
 rmt_window_ctrl.id = "rmt_window_ctrl"
 rmt_window_ctrl.className = "unselectable"
-rmt_window_ctrl.innerHTML =
-`
+const close_button_html = `
 <div id="win_close_button" class="win_button">
     <a id="win_close_text" class="win_text">×</a>
 </div>
+    `
+if (process.platform === "darwin"){
+    rmt_window_ctrl.innerHTML = close_button_html
+}
+rmt_window_ctrl.innerHTML +=
+`
 <div id="win_min_button" class="win_button">
     <a id="win_min_text" class="win_text">－</a>
 </div>
@@ -213,6 +217,9 @@ rmt_window_ctrl.innerHTML =
     <a id="win_max_text" class="win_text">＋</a>
 </div>
 `
+if (process.platform !== "darwin"){
+    rmt_window_ctrl.innerHTML += close_button_html
+}
 
 const win_close_button = document.getElementById("win_close_button")
 win_close_button.onclick = ()=>{
@@ -222,17 +229,34 @@ const win_min_button = document.getElementById("win_min_button")
 win_min_button.onclick = ()=>{
     electron_ipc.send("min")
 }
-let fullscreen = false
+let max_button_state = false
 const win_max_button = document.getElementById("win_max_button")
 win_max_button.onclick = ()=>{
+    max_button_state = !max_button_state
     if (process.platform === "darwin"){
+        // max_button_state = fullscreen
         // in fullscreen mode, hide the min button on Mac
-        fullscreen = !fullscreen
-        win_min_button.style.visibility = fullscreen?"hidden":""
+        win_min_button.style.visibility = max_button_state?"hidden":""
+        electron_ipc.send("fullscreen")
     }
-    electron_ipc.send("max")
+    // TODO: test this on Windows
+    // max_button_state = restored
+    else if (max_button_state){
+        electron_ipc.send("restore")
+    } else {
+        electron_ipc.send("max")
+    }
 }
 
+rmt_tab_bar.ondblclick = ()=>{
+    if (process.platform === "darwin"){
+        electron_ipc.send("max")
+    }
+    else {
+        // TODO: test this on Windows
+        electron_ipc.send("restore")
+    }
+}
 
 // FIXME: only uncomment this if the tabs are not able to load
 //  at least the logs can be displayed if things have been wrong at the handshaking stage

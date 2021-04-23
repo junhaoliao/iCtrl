@@ -10,8 +10,7 @@
     min-width: 85px;
     margin-top: auto;
     margin-bottom: auto;
-    display: flex;
-    justify-content: center;
+    text-align: center;
 }
 
 .win_button{

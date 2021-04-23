@@ -29,13 +29,14 @@ function createWindow() {
         mainWindow.minimize()
     })
     ipcMain.on("max", ()=>{
-        if (process.platform === "darwin"){
-            mainWindow.setFullScreen(!mainWindow.fullScreen)
-        } else {
-            mainWindow.maximize()
-        }
+        mainWindow.maximize()
     })
-
+    ipcMain.on("fullscreen", ()=>{
+        mainWindow.setFullScreen(!mainWindow.fullScreen)
+    })
+    ipcMain.on("restore", ()=>{
+        mainWindow.restore()
+    })
     // Open the DevTools.
     mainWindow.webContents.openDevTools()
 }
