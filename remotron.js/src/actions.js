@@ -24,6 +24,10 @@ function actAddNewSession(tab, page, profile_name, session_name_input) {
 }
 
 function actCloseTab(tab, page) {
+    if ("NEW_TAB" === tab.getAttribute("data-tab")){
+        new_tab_button.style.visibility = ""
+    }
+
     // TODO: should terminate the session on the server side as well
     destroyTab(tab, page)
 }

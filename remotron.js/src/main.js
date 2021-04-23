@@ -19,6 +19,8 @@ function createWindow() {
     // mainWindow.loadFile('debugger.html')
     mainWindow.loadFile('src/index.html')
 
+    mainWindow.maximize()
+    
     // Open the DevTools.
     mainWindow.webContents.openDevTools()
 }
