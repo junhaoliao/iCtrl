@@ -7,7 +7,6 @@ const rmt_tab_bar = document.getElementById("rmt_tab_bar")
 const new_tab_button = document.getElementById("new_tab_button")
 
 const pages_container = document.getElementById("pages_container")
-const init_tab = document.getElementById("init_tab")
 
 function semantic_toast(type, msg) {
     $("body")
@@ -199,14 +198,26 @@ if (process.platform === "darwin"){
     rmt_tab_bar.appendChild(rmt_window_ctrl)
 }
 rmt_window_ctrl.id = "rmt_window_ctrl"
-rmt_window_ctrl.className = "unselectable"
+rmt_window_ctrl.className = "item"
 const close_button_html = `
 <div id="win_close_button" class="win_button">
     <a id="win_close_text" class="win_text">×</a>
 </div>
-    `
+`
+const init_tab = document.createElement("div")
+init_tab.className = "item"
+init_tab.setAttribute("data-tab", "INIT")
+init_tab.innerHTML = `<img id="rmt_icon" class="undraggable" alt="icon" src="../resources/icon.png">`
+
 if (process.platform === "darwin"){
+    init_tab.className = "right item"
+    rmt_window_ctrl.style.minWidth = "85.5px"
     rmt_window_ctrl.innerHTML = close_button_html
+}
+else {
+    rmt_window_ctrl.className = "right item"
+    init_tab.style.minWidth = "85.5px"
+    rmt_tab_bar.insertBefore(init_tab, new_tab_button)
 }
 rmt_window_ctrl.innerHTML +=
 `
@@ -217,7 +228,10 @@ rmt_window_ctrl.innerHTML +=
     <a id="win_max_text" class="win_text">＋</a>
 </div>
 `
-if (process.platform !== "darwin"){
+if (process.platform === "darwin"){
+    rmt_tab_bar.appendChild(init_tab)
+}
+else {
     rmt_window_ctrl.innerHTML += close_button_html
 }
 
@@ -249,17 +263,19 @@ win_max_button.onclick = ()=>{
 }
 
 rmt_tab_bar.ondblclick = ()=>{
+    max_button_state = !max_button_state
     if (process.platform === "darwin"){
         electron_ipc.send("max")
     }
-    else {
-        // TODO: test this on Windows
+    else if (max_button_state){
         electron_ipc.send("restore")
+    } else {
+        electron_ipc.send("max")
     }
 }
 
 // FIXME: only uncomment this if the tabs are not able to load
 //  at least the logs can be displayed if things have been wrong at the handshaking stage
-// semantic_flush_tabs()
+semantic_flush_tabs()
 
 // semantic_toast("success", "Launched!")

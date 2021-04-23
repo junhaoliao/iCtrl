@@ -2,6 +2,14 @@ const net = require("net")
 const {spawn} = require("child_process")
 const {Pull, Push} = require("zeromq")
 
+const platform = require("os").platform()
+let PYTHON_PATH = "../PyMotron/venv/bin/python3"
+if (platform === "win32"){
+    PYTHON_PATH = "../PyMotron/venv/Scripts/python.exe"
+} else {
+    alert("OS not supported "+ platform)
+}
+
 const IPC_RECV = new Pull
 const IPC_SEND = new Push
 module.exports.IPC_RECV = IPC_RECV
@@ -59,7 +67,7 @@ window.addEventListener('DOMContentLoaded', () => {
             console.log("Binding successful")
 
             const PyMotron = spawn(
-                "../PyMotron/venv/bin/python3",
+                PYTHON_PATH,
                 [
                     "-u",
                     "../PyMotron/PyMotron.py",
