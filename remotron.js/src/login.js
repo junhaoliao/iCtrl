@@ -1,6 +1,3 @@
-
-
-
 class LoginPage{
     session_name = null
     use_private_key = null

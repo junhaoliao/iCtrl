@@ -1,30 +1,35 @@
+const net = require("net")
 const {spawn} = require("child_process")
 const {Pull, Push} = require("zeromq")
 
 const IPC_RECV = new Pull
 const IPC_SEND = new Push
-
 module.exports.IPC_RECV = IPC_RECV
 module.exports.IPC_SEND = IPC_SEND
 
+const SEND_PORT = getFreePort()
+const RECV_PORT = getFreePort()
+
+function getFreePort() {
+    const srv = net.createServer()
+    srv.listen()
+    const port = srv.address().port
+    srv.close()
+    return port
+}
 
 function handle_main(key, value) {
     if (key === "sync_ack") {
         handle_sync_ack(value)
-    }
-    else if (key === "profiles"){
+    } else if (key === "profiles") {
         handle_profiles(value)
-    }
-    else if (key === "login_ack"){
+    } else if (key === "login_ack") {
         handle_login_ack(value)
-    }
-    else if (key === "recv"){
+    } else if (key === "recv") {
         handle_recv(value)
-    }
-    else if (key === "sftp_cwd"){
+    } else if (key === "sftp_cwd") {
         handle_sftp_cwd(value)
-    }
-    else {
+    } else {
         printLog(`handle_main: Unknown key=${key}, value=${value}`)
         return false
     }
@@ -50,16 +55,16 @@ async function listen() {
 }
 
 window.addEventListener('DOMContentLoaded', () => {
-    IPC_RECV.bind("tcp://*:8001").then(r => {
-            printLog("Binding successful")
+    IPC_RECV.bind("tcp://*:"+String(RECV_PORT)).then(r => {
+            console.log("Binding successful")
 
             const PyMotron = spawn(
                 "../PyMotron/venv/bin/python3",
                 [
                     "-u",
                     "../PyMotron/PyMotron.py",
-                    8000,
-                    8001
+                    SEND_PORT,
+                    RECV_PORT
                 ],
                 {
                     cwd: "../PyMotron"
@@ -81,7 +86,7 @@ window.addEventListener('DOMContentLoaded', () => {
                 printLog(`\nPyMotron exited with code ${code}`);
             });
 
-            IPC_SEND.connect("tcp://127.0.0.1:8000")
+            IPC_SEND.connect("tcp://127.0.0.1:"+String(SEND_PORT))
 
             send_msg("sync")
 
@@ -89,11 +94,12 @@ window.addEventListener('DOMContentLoaded', () => {
         }
     )
 })
+
 function debug_submit() {
     const debug_key = document.getElementById("debug_key")
     const debug_value = document.getElementById("debug_value")
 
-    const debug_value_JSON = (debug_value.value === "")?null:JSON.parse(debug_value.value)
+    const debug_value_JSON = (debug_value.value === "") ? null : JSON.parse(debug_value.value)
 
     send_msg(debug_key.value, debug_value_JSON)
 

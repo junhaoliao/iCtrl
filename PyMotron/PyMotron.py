@@ -57,11 +57,6 @@ if __name__ == '__main__':
     try:
         RECV_PORT = int(sys.argv[1])
         SEND_PORT = int(sys.argv[2])
-        # TODO: check this condition this later
-        if RECV_PORT < 8000 or RECV_PORT > 8010:
-            raise ValueError("RECV_PORT out of range: %d" % RECV_PORT)
-        elif SEND_PORT < 8000 or SEND_PORT > 8010:
-            raise ValueError("SEND_PORT out of range: %d" % SEND_PORT)
     except Exception as e:
         print("Exception:", e)
         print("Usage: PyMotron RECV_PORT SEND_PORT")

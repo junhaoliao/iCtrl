@@ -10,10 +10,10 @@ class UGConnection:
     # TODO: check variable namings and hide the attributes that should be private
     """ SSH connection for communication between the client and the remote server
     >>> # DONE_TODO: remove credentials before commit
-    >>> HOSTNAME = ""
-    >>> USERNAME = ""
-    >>> PASSWD = ""
-    >>> KEY_FILENAME = "/Users/junhao/PycharmProjects/PyMotron/profile/id_rsa"
+    >>> HOSTNAME = "ug250.eecg.toronto.edu"
+    >>> USERNAME = "liaojunh"
+    >>> PASSWD = "5t6y7u8i"
+    >>> KEY_FILENAME = "./profile/id_rsa"
     >>> # supply only passwd
     >>> conn = UGConnection()
     >>> conn.connect(HOSTNAME, USERNAME, passwd=PASSWD)

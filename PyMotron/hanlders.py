@@ -14,6 +14,18 @@ def send_msg(key, value=None):
     IPC_SEND.send_string(srv_msg_json)
 
 
+def get_free_port():
+    """ return a system assigned free port
+    >>> _ = get_free_port()
+    """
+    import socket
+    sock = socket.socket()
+    sock.bind(("", 0))
+    port = sock.getsockname()[1]
+    sock.close()
+    return port
+
+
 def handle_sync(value):
     print("handle_sync:", value)
     send_msg("sync_ack", USER_PROFILE.query_sync())

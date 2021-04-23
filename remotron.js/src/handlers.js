@@ -4,12 +4,12 @@ const SESSIONS = {}
 // let CONN_PROFILES = {}
 
 function send_msg(key, value = null) {
-    console.log(key, value)
+    // console.log(key, value)
 
     const client_msg_json = {
         [key]: value
     }
-    console.log(client_msg_json)
+    // console.log(client_msg_json)
     IPC_SEND.send(JSON.stringify(client_msg_json)).then()
 }
 

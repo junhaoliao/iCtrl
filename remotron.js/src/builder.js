@@ -52,10 +52,6 @@ function _buildTab() {
     return [new_tab, new_page]
 }
 
-function test() {
-    console.log(123)
-}
-
 function buildLoadedTab(session_name, profile_name, last_server, username, has_private_key, has_vnc_passwd) {
     // servers: Array(125), last_server: "ug250.eecg.toronto.edu", username: "liaojunh", private_key: false, vnc_manual: true
     const server_list = PROFILES["servers"]
@@ -72,7 +68,7 @@ function buildLoadedTab(session_name, profile_name, last_server, username, has_p
         <i class="sign in icon"></i>
         Login
     </a>
-    <a onclick="test()" class="item " data-tab="${session_name}-terminal">
+    <a class="item " data-tab="${session_name}-terminal">
         <i class="terminal icon"></i>
         Terminal
     </a>
@@ -183,3 +179,7 @@ function selectTab(tab_name) {
         }
     }
 }
+
+// FIXME: only uncomment this if the tabs are not able to load
+//  at least the logs can be displayed if things have been wrong at the handshaking stage
+// semantic_flush_tabs()
