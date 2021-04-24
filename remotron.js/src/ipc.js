@@ -64,46 +64,41 @@ async function listen() {
     }
 }
 
-window.addEventListener('DOMContentLoaded', () => {
-    IPC_RECV.bind("tcp://*:" + String(RECV_PORT)).then(r => {
-            console.log("Binding successful")
+const PyMotron = spawn(
+    PYTHON_PATH,
+    [
+        "-u",
+        "../PyMotron/PyMotron.py",
+        SEND_PORT,
+        RECV_PORT
+    ],
+    {
+        cwd: "../PyMotron"
+    });
 
-            const PyMotron = spawn(
-                PYTHON_PATH,
-                [
-                    "-u",
-                    "../PyMotron/PyMotron.py",
-                    SEND_PORT,
-                    RECV_PORT
-                ],
-                {
-                    cwd: "../PyMotron"
-                });
-
-            PyMotron.stdout.on("data", data => {
-                printLog(`\nPyMotron stdout:\n${data}`);
-            });
-
-            PyMotron.stderr.on("data", data => {
-                printLog(`\nPyMotron stderr:\n${data}`);
-            });
-
-            PyMotron.on('error', (error) => {
-                printLog(`\nPyMotron error: ${error.message}`);
-            });
-
-            PyMotron.on("close", code => {
-                printLog(`\nPyMotron exited with code ${code}`);
-            });
-
-            IPC_SEND.connect("tcp://127.0.0.1:" + String(SEND_PORT))
-
-            send_msg("sync")
-
-            listen().then()
-        }
-    )
+IPC_RECV.bind("tcp://*:" + String(RECV_PORT)).then(() => {
+    console.log("Binding successful")
+    IPC_SEND.connect("tcp://127.0.0.1:" + String(SEND_PORT))
+    send_msg("sync")
+    listen().then()
 })
+
+PyMotron.stdout.on("data", data => {
+    printLog(`\nPyMotron stdout:\n${data}`);
+});
+
+PyMotron.stderr.on("data", data => {
+    printLog(`\nPyMotron stderr:\n${data}`);
+});
+
+PyMotron.on('error', (error) => {
+    printLog(`\nPyMotron error: ${error.message}`);
+});
+
+PyMotron.on("close", code => {
+    printLog(`\nPyMotron exited with code ${code}`);
+});
+
 
 function debug_submit() {
     const debug_key = document.getElementById("debug_key")
