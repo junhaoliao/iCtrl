@@ -7,7 +7,9 @@
     "debug_start": "electron .",
     "start": "electron-forge start",
     "package": "electron-forge package",
-    "make": "electron-forge make"
+    "make_x64": "electron-forge make --arch=x64",
+    "make_arm64": "electron-forge make --arch=arm64",
+    "make": "npm run make_x64 && npm run make_arm64"
   },
   "repository": "",
   "keywords": [
@@ -33,6 +35,7 @@
   "config": {
     "forge": {
       "packagerConfig": {
+        "icon": "resources/icon_white_bg",
         "ignore": [
           ".idea",
           ".gitignore",
