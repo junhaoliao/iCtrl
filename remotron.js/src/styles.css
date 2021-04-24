@@ -57,12 +57,25 @@
 
 #rmt_tab_bar {
     height: 40px;
+    background-color: #dee1e5;
+    -webkit-app-region: drag;
 }
 
 #rmt_icon {
     width: 28px;
     margin-left: auto;
     margin-right: auto;
+}
+
+#new_tab_button{
+    width: 32px;
+    border-radius: 36px;
+    justify-content: center;
+    transition: background-color 500ms!important;
+}
+
+#new_tab_button:hover{
+    background-color: #bfc2c6;
 }
 
 #new_tab_button_icon {
@@ -72,7 +85,13 @@
 
 .rmt_tab {
     width: 150px;
+    transition: background-color 500ms!important;
 }
+
+.rmt_tab:hover{
+    background-color: #f2f2f2!important;
+}
+
 
 .rmt_tab_close_button {
     margin-left: auto !important;

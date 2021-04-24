@@ -44,6 +44,11 @@ function _buildTab() {
     new_tab.innerText = "New Tab"
     new_tab.className = "active item rmt_tab"
     new_tab.setAttribute("data-tab", "NEW_TAB")
+    new_tab.onauxclick = (ev) => {
+        if (ev.button === 1){
+            actCloseTab(new_tab, new_page)
+        }
+    }
 
     const close_button = document.createElement("button")
     new_tab.appendChild(close_button)
