@@ -13,7 +13,13 @@ if (is_mac){
         CWD = resolve(__dirname, "..")
     }
 } else {
-    PYTHON_PATH = "venv/Scripts/python.exe"
+    if (process.env.npm_node_execpath === "C:\\Program Files\\nodejs\\node.exe"){
+        PYTHON_PATH = "venv/Scripts/python.exe"
+    } else {
+        const {resolve} = require("path")
+        PYTHON_PATH = resolve(__dirname, "../venv/Scripts/python.exe")
+        CWD = resolve(__dirname, "..")
+    }
 }
 
 function getFreePort() {

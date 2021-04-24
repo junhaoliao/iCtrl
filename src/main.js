@@ -15,7 +15,7 @@ function createWindow() {
         titleBarStyle: 'hidden',
         trafficLightPosition: {x: 16, y: 28},
         frame: false,
-        // show: false, // FIXME: uncomment this before release to speed up loading
+        show: false, 
         webPreferences: {
             // preload: path.join(__dirname, 'preload.js'),
             nodeIntegration: true,
@@ -31,7 +31,9 @@ function createWindow() {
     // mainWindow.webContents.openDevTools()
 
     ipcMain.on("profiler_sync_ack", () => {
-        app.dock.bounce()
+        if (process.platform === "darwin"){
+            app.dock.bounce()
+        }
         mainWindow.show()
 
         console.log("Load Time:", Date.now() - profiler_start, "s")

@@ -1,7 +1,7 @@
 {
   "name": "PyMotron",
   "version": "6.0.0-beta.0",
-  "description": "",
+  "description": "Connect to uoft engineering labs in 5 seconds.",
   "main": "src/main.js",
   "scripts": {
     "debug_start": "electron .",
@@ -36,9 +36,9 @@
         "ignore": [
           ".idea",
           ".gitignore",
-          "^(.*\/requirements.txt$)",
-          "^(.*\/__pycache__$)",
-          "^(.*\/README.md$)",
+          "^(.*/requirements.txt$)",
+          "^(.*/__pycache__$)",
+          "^(.*/README.md$)",
           "profile/keys",
           "profile/user_profile.json"
         ]
@@ -47,7 +47,7 @@
         {
           "name": "@electron-forge/maker-squirrel",
           "config": {
-            "name": "pymotron"
+            "name": "PyMotron"
           }
         },
         {
