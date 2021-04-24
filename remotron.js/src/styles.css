@@ -8,11 +8,11 @@
 
 
 #init_tab {
-    -webkit-app-region: none;
+    -webkit-app-region: no-drag;
 }
 
 #rmt_window_ctrl {
-    -webkit-app-region: none;
+    -webkit-app-region: no-drag;
     margin-top: auto;
     margin-bottom: auto;
     text-align: center;
@@ -77,7 +77,7 @@
 }
 
 #new_tab_button {
-    -webkit-app-region: none;
+    -webkit-app-region: no-drag;
     width: 32px;
     border-radius: 36px;
     justify-content: center;
@@ -94,7 +94,7 @@
 }
 
 .rmt_tab {
-    -webkit-app-region: none;
+    -webkit-app-region: no-drag;
     width: 150px;
     transition: background-color 500ms !important;
 }
