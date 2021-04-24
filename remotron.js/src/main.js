@@ -8,6 +8,7 @@ function createWindow() {
         width: 1440,
         height: 768,
         minWidth: 100,
+        titleBarStyle: 'hiddenInset',
         frame: false,
         webPreferences: {
             // preload: path.join(__dirname, 'preload.js'),
@@ -32,9 +33,9 @@ function createWindow() {
     ipcMain.on("max", ()=>{
         mainWindow.maximize()
     })
-    ipcMain.on("fullscreen", ()=>{
-        mainWindow.setFullScreen(!mainWindow.fullScreen)
-    })
+    // ipcMain.on("fullscreen", ()=>{
+    //     mainWindow.setFullScreen(!mainWindow.fullScreen)
+    // })
     ipcMain.on("restore", ()=>{
         mainWindow.restore()
     })

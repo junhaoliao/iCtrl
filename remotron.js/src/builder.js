@@ -201,34 +201,32 @@ function selectTab(tab_name) {
 // FIXME: revisit the need to put below code into a new file
 
 const rmt_window_ctrl = document.createElement("div")
-if (process.platform === "darwin"){
-    rmt_tab_bar.insertBefore(rmt_window_ctrl, new_tab_button)
-} else {
-    rmt_tab_bar.appendChild(rmt_window_ctrl)
-}
 rmt_window_ctrl.id = "rmt_window_ctrl"
 rmt_window_ctrl.className = "unselectable"
-const close_button_html = `
-<div id="win_close_button" class="win_button">
-    <a id="win_close_text" class="win_text">×</a>
-</div>
-`
+
 const init_tab = document.createElement("div")
 init_tab.className = "item"
 init_tab.setAttribute("data-tab", "INIT")
 init_tab.innerHTML = `<img id="rmt_icon" class="undraggable" alt="icon" src="../resources/icon.png">`
 
+let max_button_state = false
+
 if (process.platform === "darwin"){
+    rmt_tab_bar.insertBefore(rmt_window_ctrl, new_tab_button)
+    rmt_tab_bar.appendChild(init_tab)
+
     init_tab.className = "right item"
+
     rmt_window_ctrl.style.minWidth = "85px"
-    rmt_window_ctrl.innerHTML = close_button_html
 }
 else {
-    rmt_window_ctrl.className = "right item"
-    init_tab.style.minWidth = "85.5px"
+    rmt_tab_bar.appendChild(rmt_window_ctrl)
     rmt_tab_bar.insertBefore(init_tab, new_tab_button)
-}
-rmt_window_ctrl.innerHTML +=
+
+    init_tab.style.minWidth = "85.5px"
+
+    rmt_window_ctrl.className = "right item"
+    rmt_window_ctrl.innerHTML +=
 `
 <div id="win_min_button" class="win_button">
     <a id="win_min_text" class="win_text">－</a>
@@ -236,38 +234,27 @@ rmt_window_ctrl.innerHTML +=
 <div id="win_max_button" class="win_button">
     <a id="win_max_text" class="win_text">＋</a>
 </div>
+<div id="win_close_button" class="win_button">
+    <a id="win_close_text" class="win_text">×</a>
+</div>
 `
-if (process.platform === "darwin"){
-    rmt_tab_bar.appendChild(init_tab)
-}
-else {
-    rmt_window_ctrl.innerHTML += close_button_html
-}
-
-const win_close_button = document.getElementById("win_close_button")
-win_close_button.onclick = ()=>{
-    electron_ipc.send("close")
-}
-const win_min_button = document.getElementById("win_min_button")
-win_min_button.onclick = ()=>{
-    electron_ipc.send("min")
-}
-let max_button_state = false
-const win_max_button = document.getElementById("win_max_button")
-win_max_button.onclick = ()=>{
-    max_button_state = !max_button_state
-    if (process.platform === "darwin"){
-        // max_button_state = fullscreen
-        // in fullscreen mode, hide the min button on Mac
-        win_min_button.style.visibility = max_button_state?"hidden":""
-        electron_ipc.send("fullscreen")
+    const win_close_button = document.getElementById("win_close_button")
+    win_close_button.onclick = ()=>{
+        electron_ipc.send("close")
     }
-    // TODO: test this on Windows
-    // max_button_state = restored
-    else if (max_button_state){
-        electron_ipc.send("restore")
-    } else {
-        electron_ipc.send("max")
+    const win_min_button = document.getElementById("win_min_button")
+    win_min_button.onclick = ()=>{
+        electron_ipc.send("min")
+    }
+
+    const win_max_button = document.getElementById("win_max_button")
+    win_max_button.onclick = ()=>{
+        max_button_state = !max_button_state
+        if (max_button_state){
+            electron_ipc.send("restore")
+        } else {
+            electron_ipc.send("max")
+        }
     }
 }
 
@@ -281,13 +268,14 @@ rmt_tab_bar.ondblclick = (ev)=>{
     }
     else {
         max_button_state = !max_button_state
-        if (max_button_state){
+        if (max_button_state) {
             electron_ipc.send("restore")
         } else {
             electron_ipc.send("max")
         }
     }
 }
+
 
 // TODO: launch the "NEW_TAB" if no sessions can be loaded
 // FIXME: only uncomment this if the tabs are not able to load
