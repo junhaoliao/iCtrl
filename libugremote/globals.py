@@ -2,8 +2,8 @@ import zmq
 
 from paths import *
 
-from libugremote.ug_profile.UGUserProfile import *
-from libugremote.ug_connection.UGConnection import *
+from ug_profile.UGUserProfile import *
+from ug_connection.UGConnection import *
 
 RECV_PORT = -1
 SEND_PORT = -1

@@ -1,4 +1,3 @@
-#!/Users/junhao/PycharmProjects/PyMotron/venv/bin/python3
 import sys
 import threading
 from globals import *

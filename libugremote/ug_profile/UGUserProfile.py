@@ -2,9 +2,8 @@ import os
 import sys
 from typing import Any
 
-from libugremote.ug_profile.UGConnProfile import *
-
-CONN_PROFILE_PATH = "./profile/connections/"
+from ug_profile.UGConnProfile import *
+from paths import *
 
 
 # TODO: check argument verification and assignment order

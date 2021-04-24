@@ -1,6 +1,7 @@
-/PyMotron/venv/
-/remotron.js/node_modules/
+.idea/
 
-/.idea
+node_modules/
+venv/
 
-/PyMotron/profile/
+out/
+profile/

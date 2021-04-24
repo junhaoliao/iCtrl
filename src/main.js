@@ -3,9 +3,6 @@ const profiler_start = Date.now()
 // Modules to control application life and create native browser window
 const {app, BrowserWindow, ipcMain} = require('electron')
 
-ipcMain.on("profiler_sync_ack", () => {
-    console.log("Load Time:", Date.now() - profiler_start, "s")
-})
 
 // const path = require('path')
 
@@ -16,37 +13,48 @@ function createWindow() {
         height: 768,
         minWidth: 100,
         titleBarStyle: 'hidden',
-        trafficLightPosition: {x: 16, y: 12},
+        trafficLightPosition: {x: 16, y: 28},
         frame: false,
+        // show: false, // FIXME: uncomment this before release to speed up loading
         webPreferences: {
             // preload: path.join(__dirname, 'preload.js'),
             nodeIntegration: true,
+            nodeIntegrationInWorker: true,
             contextIsolation: false,
             // devTools: false
         }
     })
-
     mainWindow.maximize()
+
+
     // Open the DevTools.
     // mainWindow.webContents.openDevTools()
 
+    ipcMain.on("profiler_sync_ack", () => {
+        app.dock.bounce()
+        mainWindow.show()
+
+        console.log("Load Time:", Date.now() - profiler_start, "s")
+    })
+
     // and load the index.html of the app.
     // mainWindow.loadFile('debugger.html')
-    mainWindow.loadFile('src/index.html').then()
+    mainWindow.loadFile('src/index.html').then(() => {
+        ipcMain.on("close", () => {
+            mainWindow.close()
+        })
+        ipcMain.on("min", () => {
+            mainWindow.minimize()
+        })
+        ipcMain.on("max", () => {
+            if (mainWindow.isMaximized()) {
+                mainWindow.restore()
+            } else {
+                mainWindow.maximize()
+            }
+        })
+    })
 
-    ipcMain.on("close", () => {
-        mainWindow.close()
-    })
-    ipcMain.on("min", () => {
-        mainWindow.minimize()
-    })
-    ipcMain.on("max", () => {
-        if (mainWindow.isMaximized()) {
-            mainWindow.restore()
-        } else {
-            mainWindow.maximize()
-        }
-    })
     // ipcMain.on("fullscreen", ()=>{
     //     mainWindow.setFullScreen(!mainWindow.fullScreen)
     // })
