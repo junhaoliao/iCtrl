@@ -1,5 +1,11 @@
+const profiler_start = Date.now()
+
 // Modules to control application life and create native browser window
 const {app, BrowserWindow, ipcMain} = require('electron')
+
+ipcMain.on("profiler_sync_ack", () => {
+    console.log("Load Time:", Date.now() - profiler_start, "s")
+})
 
 // const path = require('path')
 
@@ -10,7 +16,7 @@ function createWindow() {
         height: 768,
         minWidth: 100,
         titleBarStyle: 'hidden',
-        trafficLightPosition: {x:16,y:12},
+        trafficLightPosition: {x: 16, y: 12},
         frame: false,
         webPreferences: {
             // preload: path.join(__dirname, 'preload.js'),
@@ -67,7 +73,6 @@ app.whenReady().then(() => {
 // for applications and their menu bar to stay active until the user quits
 // explicitly with Cmd + Q.
 app.on('window-all-closed', function () {
-    // if (process.platform !== 'darwin')
     app.quit()
 })
 

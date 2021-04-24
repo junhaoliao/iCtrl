@@ -13,7 +13,6 @@ function send_msg(key, value = null) {
     IPC_SEND.send(JSON.stringify(client_msg_json)).then()
 }
 
-
 function handle_sync_ack(value) {
     // console.log(value)
     // TODO: integrated with GUI
@@ -37,6 +36,8 @@ function handle_sync_ack(value) {
     semantic_flush_tabs()
     semantic_flush_dropdowns()
     // console.log(SESSIONS)
+    const {ipcRenderer} = require("electron")
+    ipcRenderer.send("profiler_sync_ack")
 }
 
 function handle_profiles(value) {

@@ -208,7 +208,7 @@ init_tab.className = "item"
 init_tab.setAttribute("data-tab", "INIT")
 init_tab.innerHTML = `<img id="rmt_icon" class="undraggable" alt="icon" src="../resources/icon.png">`
 
-if (process.platform === "darwin") {
+if (is_mac) {
     rmt_tab_bar.insertBefore(rmt_window_ctrl, new_tab_button)
     rmt_tab_bar.appendChild(init_tab)
 
@@ -254,7 +254,7 @@ rmt_tab_bar.ondblclick = (ev) => {
         // double-clicking on the tabs should not trigger window controls
         return
     }
-    if (process.platform === "darwin") {
+    if (is_mac) {
         electron_ipc.send("max")
     } else {
         electron_ipc.send("max")

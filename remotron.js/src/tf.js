@@ -221,8 +221,7 @@ class TransferManager {
                         this.remoteLs("./" + file["name"])
                     }
                 }
-            }
-            else { // file
+            } else { // file
                 if (side === "local") {
                     enter_link.onclick = () => {
                         const {shell} = require("electron")

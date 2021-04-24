@@ -2,11 +2,9 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <script>window.$ = window.jQuery = require('jquery');</script>
+    <script src="bootstrap.js"></script>
     <link href="semantic/semantic.min.css" rel="stylesheet" type="text/css">
     <link href="styles.css" rel="stylesheet" type="text/css">
-    <script src="semantic/semantic.min.js"></script>
-    <link href="../node_modules/xterm/css/xterm.css" rel="stylesheet"/>
     <title>UG_Remote</title>
 </head>
 <body>
@@ -32,12 +30,15 @@
         <div id="logs"></div>
     </div>
 </div>
-<script src="debugger.js"></script>
+<link href="../node_modules/xterm/css/xterm.css" rel="stylesheet"/>
+<script>window.$ = window.jQuery = require('jquery');</script>
+<script src="semantic/semantic.min.js"></script>
 <script src="ipc.js"></script>
-<script src="handlers.js"></script>
 <script src="builder.js"></script>
 <script src="actions.js"></script>
 <script src="login.js"></script>
 <script src="tf.js"></script>
+<script src="handlers.js"></script>
+<script src="debugger.js"></script>
 </body>
 </html>
