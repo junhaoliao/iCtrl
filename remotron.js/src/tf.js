@@ -143,6 +143,7 @@ class TransferManager {
     <tbody id="${this.session}-${side}-file_table_body">
     </tbody>
 </table>
+<div id="${this.session}-editor"></div>
 `
     }
 
@@ -199,11 +200,16 @@ class TransferManager {
 
             const name_td = document.createElement("td")
             let size_td = document.createElement("td")
-            if (isDir(file["mode"])) {
-                name_td.innerHTML = "<i class=\"folder icon\"></i> "
-                const enter_link = document.createElement("a")
-                enter_link.style.userSelect = "none"
-                enter_link.innerText = file["name"]
+            if (isDir(file["mode"])) { // dir
+                name_td.innerHTML = "<i class=\"folder icon\"></i>"
+            } else { // file
+                name_td.innerHTML = "<i class=\"file icon\"></i>"
+                size_td.innerHTML = humanFileSize(file["size"])
+            }
+            const enter_link = document.createElement("a")
+            enter_link.style.userSelect = "none"
+            enter_link.innerText = file["name"]
+            if (isDir(file["mode"])) { // dir
                 if (side === "local") {
                     enter_link.onclick = () => {
                         const dest_files = this.localLs(path.resolve(this.local_cwd, file["name"]))
@@ -215,12 +221,21 @@ class TransferManager {
                         this.remoteLs("./" + file["name"])
                     }
                 }
-                name_td.append(enter_link)
-            } else {
-                name_td.innerHTML = "<i class=\"file icon\"></i> "
-                name_td.innerHTML += file["name"]
-                size_td.innerHTML = humanFileSize(file["size"])
             }
+            else { // file
+                if (side === "local") {
+                    enter_link.onclick = () => {
+                        const {spawn} = require("child_process")
+                        spawn("open",[path.resolve(this.local_cwd, file["name"])])
+                    }
+                } else {
+                    enter_link.onclick = () => {
+                        // TODO: add logic for remote files
+                    }
+                }
+            }
+
+            name_td.append(enter_link)
             new_tr.appendChild(name_td)
             new_tr.appendChild(size_td)
 
