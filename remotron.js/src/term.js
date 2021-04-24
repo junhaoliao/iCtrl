@@ -1,6 +1,7 @@
 const {Terminal} = require("xterm");
-const { FitAddon } = require ("xterm-addon-fit")
-class Term{
+const {FitAddon} = require("xterm-addon-fit")
+
+class Term {
     terminal = null
     terminal_div = null
 
@@ -17,7 +18,7 @@ class Term{
         const fitAddon = new FitAddon();
         this.terminal.loadAddon(fitAddon);
 
-        this.terminal.onResize((e)=>{
+        this.terminal.onResize((e) => {
             console.log(e)
             send_msg("resize", {
                 "s": session_name,
@@ -26,12 +27,13 @@ class Term{
             })
         })
 
-        window.addEventListener('resize', ()=>{
-            if (this.terminal_div.getBoundingClientRect().width !== 0){
+        window.addEventListener('resize', () => {
+            if (this.terminal_div.getBoundingClientRect().width !== 0) {
                 // if the terminal div is not shown in the interface, don't resize
                 fitAddon.fit();
             }
         });
     }
 }
+
 module.exports.Term = Term

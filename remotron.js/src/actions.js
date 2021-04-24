@@ -4,10 +4,10 @@ function actOpenNewTab() {
 
 function actAddNewSession(tab, page, profile_name, session_name_input) {
     const session_name = session_name_input.value
-    if (session_name in SESSIONS){
+    if (session_name in SESSIONS) {
         semantic_toast("error", `Already has a session named "${session_name}"`)
         return
-    } else if (session_name === ""){
+    } else if (session_name === "") {
         // TODO: generate a name according to the profile name
         semantic_toast("error", `Session name cannot be empty`)
         return
@@ -20,13 +20,13 @@ function actAddNewSession(tab, page, profile_name, session_name_input) {
     tab.remove()
     page.remove()
     buildLoadedTab(
-            session_name,
-            profile_name,
-            "",
-            "",
-            false,
-            false
-        )
+        session_name,
+        profile_name,
+        "",
+        "",
+        false,
+        false
+    )
     semantic_flush_tabs()
     semantic_flush_dropdowns()
 
@@ -34,7 +34,7 @@ function actAddNewSession(tab, page, profile_name, session_name_input) {
 }
 
 function actCloseTab(tab, page) {
-    if ("NEW_TAB" === tab.getAttribute("data-tab")){
+    if ("NEW_TAB" === tab.getAttribute("data-tab")) {
         new_tab_button.style.visibility = ""
     }
 

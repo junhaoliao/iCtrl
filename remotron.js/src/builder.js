@@ -10,10 +10,10 @@ const pages_container = document.getElementById("pages_container")
 
 function semantic_toast(type, msg) {
     $("body")
-      .toast({
-        class: type,
-        message: msg
-      })
+        .toast({
+            class: type,
+            message: msg
+        })
     ;
 }
 
@@ -45,7 +45,7 @@ function _buildTab() {
     new_tab.className = "active item rmt_tab"
     new_tab.setAttribute("data-tab", "NEW_TAB")
     new_tab.onauxclick = (ev) => {
-        if (ev.button === 1){
+        if (ev.button === 1) {
             actCloseTab(new_tab, new_page)
         }
     }
@@ -138,7 +138,7 @@ function buildNewTab(connection_profiles) {
     new_page.appendChild(connection_types_container)
     connection_types_container.className = "ui cards"
 
-    for (const profile_name in connection_profiles){
+    for (const profile_name in connection_profiles) {
         const connection_type = document.createElement("div")
         connection_types_container.appendChild(connection_type)
         connection_type.className = "card"
@@ -158,8 +158,8 @@ function buildNewTab(connection_profiles) {
     }
     const create_buttons = document.getElementsByClassName("rmt_create_session_button")
     // console.log(create_buttons)
-    for (const button of create_buttons){
-        button.onclick = ()=>{
+    for (const button of create_buttons) {
+        button.onclick = () => {
             actAddNewSession(new_tab, new_page, button.getAttribute("data-value"), session_name_input)
         }
     }
@@ -181,18 +181,16 @@ function destroyTab(tab, page) {
 function selectTab(tab_name) {
     // remove the active tab's "active" class
     for (const tab of rmt_tab_bar.children) {
-        if (tab.getAttribute("data-tab") === tab_name){
+        if (tab.getAttribute("data-tab") === tab_name) {
             tab.classList.add("active")
-        }
-        else {
+        } else {
             tab.classList.remove("active")
         }
     }
     for (const page of pages_container.children) {
-        if (page.getAttribute("data-tab") === tab_name){
+        if (page.getAttribute("data-tab") === tab_name) {
             page.classList.add("active")
-        }
-        else {
+        } else {
             page.classList.remove("active")
         }
     }
@@ -205,21 +203,19 @@ rmt_window_ctrl.id = "rmt_window_ctrl"
 rmt_window_ctrl.className = "unselectable"
 
 const init_tab = document.createElement("div")
+init_tab.id = "init_tab"
 init_tab.className = "item"
 init_tab.setAttribute("data-tab", "INIT")
 init_tab.innerHTML = `<img id="rmt_icon" class="undraggable" alt="icon" src="../resources/icon.png">`
 
-let max_button_state = false
-
-if (process.platform === "darwin"){
+if (process.platform === "darwin") {
     rmt_tab_bar.insertBefore(rmt_window_ctrl, new_tab_button)
     rmt_tab_bar.appendChild(init_tab)
 
     init_tab.className = "right item"
 
     rmt_window_ctrl.style.minWidth = "85px"
-}
-else {
+} else {
     rmt_tab_bar.appendChild(rmt_window_ctrl)
     rmt_tab_bar.insertBefore(init_tab, new_tab_button)
 
@@ -227,9 +223,9 @@ else {
 
     rmt_window_ctrl.className = "right item"
     rmt_window_ctrl.innerHTML +=
-`
+        `
 <div id="win_min_button" class="win_button">
-    <a id="win_min_text" class="win_text">－</a>
+    <a id="win_min_text" class="win_text">−</a>
 </div>
 <div id="win_max_button" class="win_button">
     <a id="win_max_text" class="win_text">＋</a>
@@ -239,40 +235,29 @@ else {
 </div>
 `
     const win_close_button = document.getElementById("win_close_button")
-    win_close_button.onclick = ()=>{
+    win_close_button.onclick = () => {
         electron_ipc.send("close")
     }
     const win_min_button = document.getElementById("win_min_button")
-    win_min_button.onclick = ()=>{
+    win_min_button.onclick = () => {
         electron_ipc.send("min")
     }
 
     const win_max_button = document.getElementById("win_max_button")
-    win_max_button.onclick = ()=>{
-        max_button_state = !max_button_state
-        if (max_button_state){
-            electron_ipc.send("restore")
-        } else {
-            electron_ipc.send("max")
-        }
+    win_max_button.onclick = () => {
+        electron_ipc.send("max")
     }
 }
 
-rmt_tab_bar.ondblclick = (ev)=>{
-    if (ev.target !== rmt_tab_bar){
+rmt_tab_bar.ondblclick = (ev) => {
+    if (ev.target !== rmt_tab_bar) {
         // double-clicking on the tabs should not trigger window controls
         return
     }
-    if (process.platform === "darwin"){
+    if (process.platform === "darwin") {
         electron_ipc.send("max")
-    }
-    else {
-        max_button_state = !max_button_state
-        if (max_button_state) {
-            electron_ipc.send("restore")
-        } else {
-            electron_ipc.send("max")
-        }
+    } else {
+        electron_ipc.send("max")
     }
 }
 

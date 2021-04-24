@@ -13,10 +13,10 @@
   "author": "Junhao Liao",
   "license": "",
   "devDependencies": {
-    "electron": "^13.0.0-beta.14",
-    "xterm": "^4.12.0-beta.25",
-    "zeromq": "^6.0.0-beta.6",
+    "electron": "^13.0.0-beta.17",
     "jquery": "^3.6.0",
-    "xterm-addon-fit": "^0.6.0-beta.2"
+    "xterm": "^4.12.0-beta.25",
+    "xterm-addon-fit": "^0.6.0-beta.2",
+    "zeromq": "^6.0.0-beta.6"
   }
 }

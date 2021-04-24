@@ -4,12 +4,12 @@ const {Pull, Push} = require("zeromq")
 
 const platform = require("os").platform()
 let PYTHON_PATH = null
-if (platform === "darwin"){
+if (platform === "darwin") {
     PYTHON_PATH = "../PyMotron/venv/bin/python3"
-} else if (platform === "win32"){
+} else if (platform === "win32") {
     PYTHON_PATH = "../PyMotron/venv/Scripts/python.exe"
 } else {
-    alert("OS not supported "+ platform)
+    alert("OS not supported " + platform)
 }
 
 const IPC_RECV = new Pull
@@ -65,7 +65,7 @@ async function listen() {
 }
 
 window.addEventListener('DOMContentLoaded', () => {
-    IPC_RECV.bind("tcp://*:"+String(RECV_PORT)).then(r => {
+    IPC_RECV.bind("tcp://*:" + String(RECV_PORT)).then(r => {
             console.log("Binding successful")
 
             const PyMotron = spawn(
@@ -96,7 +96,7 @@ window.addEventListener('DOMContentLoaded', () => {
                 printLog(`\nPyMotron exited with code ${code}`);
             });
 
-            IPC_SEND.connect("tcp://127.0.0.1:"+String(SEND_PORT))
+            IPC_SEND.connect("tcp://127.0.0.1:" + String(SEND_PORT))
 
             send_msg("sync")
 

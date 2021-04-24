@@ -50,7 +50,7 @@ function handle_profiles(value) {
 function handle_login_ack(value) {
     // alert("Login: " + value)
     // TODO: think about a better way to support message types (error, success, warning)
-    if (value.includes("Failed")){
+    if (value.includes("Failed")) {
         semantic_toast("error", value)
     } else {
         semantic_toast("success", value)

@@ -12,21 +12,21 @@
 <body>
 <div class="ui top attached tabular menu unselectable" id="rmt_tab_bar">
     <div class="item" id="new_tab_button" onclick="actOpenNewTab()">
-        <i id="new_tab_button_icon" class="plus icon"></i>
+        <i class="plus icon" id="new_tab_button_icon"></i>
     </div>
 </div>
 <div id="pages_container">
     <div class="ui bottom attached tab" data-tab="INIT" id="init_page">
         <form class="ui form" onsubmit="return debug_submit()">
-        <div class="field">
-            <label for="debug_key">Key</label>
-            <input id="debug_key" placeholder="key" type="text">
-        </div>
-        <div class="field">
-            <label for="debug_value">Value</label>
-            <input id="debug_value" placeholder="val" type="text">
-        </div>
-        <button class="ui button" type="submit">Submit</button>
+            <div class="field">
+                <label for="debug_key">Key</label>
+                <input id="debug_key" placeholder="key" type="text">
+            </div>
+            <div class="field">
+                <label for="debug_value">Value</label>
+                <input id="debug_value" placeholder="val" type="text">
+            </div>
+            <button class="ui button" type="submit">Submit</button>
         </form>
         <h1>Logs</h1>
         <div id="logs"></div>

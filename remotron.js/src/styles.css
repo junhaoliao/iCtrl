@@ -6,13 +6,19 @@
     -webkit-user-drag: none;
 }
 
-#rmt_window_ctrl{
+
+#init_tab {
+    -webkit-app-region: none;
+}
+
+#rmt_window_ctrl {
+    -webkit-app-region: none;
     margin-top: auto;
     margin-bottom: auto;
     text-align: center;
 }
 
-.win_button{
+.win_button {
     margin-left: 3px;
     margin-right: 3px;
     border-radius: 12px;
@@ -24,34 +30,37 @@
     vertical-align: middle;
 }
 
-.win_text{
+.win_text {
     font-size: 14px;
     font-weight: bold;
     display: none;
 }
 
-#rmt_window_ctrl:hover .win_text{
-    display:inline-block;
+#rmt_window_ctrl:hover .win_text {
+    display: inline-block;
 }
 
-#win_close_button{
+#win_close_button {
     background-color: #ff5f57;
 }
-#win_close_text{
+
+#win_close_text {
     color: #7c0605;
 }
 
-#win_min_button{
+#win_min_button {
     background-color: #febc2e;
 }
-#win_min_text{
+
+#win_min_text {
     color: #cb8917;
 }
 
-#win_max_button{
+#win_max_button {
     background-color: #28c63f;
 }
-#win_max_text{
+
+#win_max_text {
     color: #006000;
 }
 
@@ -67,14 +76,15 @@
     margin-right: auto;
 }
 
-#new_tab_button{
+#new_tab_button {
+    -webkit-app-region: none;
     width: 32px;
     border-radius: 36px;
     justify-content: center;
-    transition: background-color 500ms!important;
+    transition: background-color 500ms !important;
 }
 
-#new_tab_button:hover{
+#new_tab_button:hover {
     background-color: #bfc2c6;
 }
 
@@ -84,12 +94,13 @@
 }
 
 .rmt_tab {
+    -webkit-app-region: none;
     width: 150px;
-    transition: background-color 500ms!important;
+    transition: background-color 500ms !important;
 }
 
-.rmt_tab:hover{
-    background-color: #f2f2f2!important;
+.rmt_tab:hover {
+    background-color: #f2f2f2 !important;
 }
 
 

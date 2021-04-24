@@ -71,11 +71,11 @@ class TransferManager {
 
         // setup the callbacks on the toolbar
         const tf_download_button = document.getElementById(`${session_name}-tf-download`)
-        tf_download_button.onclick = ()=>{
+        tf_download_button.onclick = () => {
             this.tfDownload()
         }
         const tf_upload_button = document.getElementById(`${session_name}-tf-upload`)
-        tf_upload_button.onclick = ()=>{
+        tf_upload_button.onclick = () => {
             this.tfUpload()
         }
 
@@ -155,7 +155,7 @@ class TransferManager {
 
     fmUpdateAddrBar(side) {
         this.fmUncheckCheckAll(side)
-        if (side === "local"){
+        if (side === "local") {
             this.local_checked_files = new Set()
         } else {
             this.remote_checked_files = new Set()
@@ -212,7 +212,7 @@ class TransferManager {
                     }
                 } else {
                     enter_link.onclick = () => {
-                        this.remoteLs("./"+file["name"])
+                        this.remoteLs("./" + file["name"])
                     }
                 }
                 name_td.append(enter_link)
@@ -225,7 +225,7 @@ class TransferManager {
             new_tr.appendChild(size_td)
 
             const atime_td = document.createElement("td")
-            if (side === "local"){
+            if (side === "local") {
                 atime_td.innerHTML = file["atime"].toLocaleDateString()
             } else {
                 // console.log(file["atime"])
@@ -234,7 +234,7 @@ class TransferManager {
             new_tr.appendChild(atime_td)
 
             const mtime_td = document.createElement("td")
-            if (side === "local"){
+            if (side === "local") {
                 mtime_td.innerHTML = file["mtime"].toLocaleDateString()
             } else {
                 mtime_td.innerHTML = new Date(file["mtime"] * 1000).toLocaleDateString()
@@ -245,16 +245,16 @@ class TransferManager {
         })
     }
 
-    fmCheck(side, fm_checkbox, check=null){
-        if (check === null){
+    fmCheck(side, fm_checkbox, check = null) {
+        if (check === null) {
             check = fm_checkbox.checked
         }
         fm_checkbox.checked = check
         const filename = fm_checkbox.getAttribute("filename")
-        const fm_checked_files = (side === "local")?this.local_checked_files : this.remote_checked_files
+        const fm_checked_files = (side === "local") ? this.local_checked_files : this.remote_checked_files
         // const fm_cwd = (side === "local")?this.local_cwd : this.remote_cwd
 
-        if (check){
+        if (check) {
             fm_checked_files.add(filename)
         } else {
             fm_checked_files.delete(filename)
@@ -355,14 +355,14 @@ class TransferManager {
         return false
     }
 
-    remoteUp(){
+    remoteUp() {
         this.remoteLs("..")
     }
 
-    tfUpload(){
+    tfUpload() {
         // TODO: check whether there is a file with the same name exisitng in the same directory
         //  to prevent overwriting existing files
-        for (const file_name of this.local_checked_files){
+        for (const file_name of this.local_checked_files) {
             send_msg("sftp_upload", {
                 "session": this.session,
                 "remote": path.resolve(this.remote_cwd, file_name),
@@ -371,10 +371,10 @@ class TransferManager {
         }
     }
 
-    tfDownload(){
+    tfDownload() {
         // TODO: check whether there is a file with the same name exisitng in the same directory
         //  to prevent overwriting existing files
-        for (const file_name of this.remote_checked_files){
+        for (const file_name of this.remote_checked_files) {
             send_msg("sftp_download", {
                 "session": this.session,
                 "remote": path.resolve(this.remote_cwd, file_name),
@@ -384,4 +384,5 @@ class TransferManager {
 
     }
 }
+
 module.exports.TransferManager = TransferManager
