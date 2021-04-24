@@ -89,16 +89,17 @@ class UGConnection:
         :param key_filename: (unused if passwd is not None) private RSA key for user authentication
         :return: None
         """
-        # if the client is already connected, we should attempt to reuse the connection
-        if self.connected:
-            if hostname == self.hostname and username == self.username:
-                # the hostname and username match what we have right now
-                # reuse the connection
-                print("Connection already established on %s@%s" % (username, hostname))
-                return
-            else:
-                # the hostname and username don't match what we have right now
-                print("Hostname or credential mismatch. Disconnect that connection. ")
+        # FIXME: check whether this is needed
+        # # if the client is already connected, we should attempt to reuse the connection
+        # if self.connected:
+        #     if hostname == self.hostname and username == self.username:
+        #         # the hostname and username match what we have right now
+        #         # reuse the connection
+        #         print("Connection already established on %s@%s" % (username, hostname))
+        #         return
+        #     else:
+        #         # the hostname and username don't match what we have right now
+        #         print("Hostname or credential mismatch. Disconnect that connection. ")
 
         # if the client is not connected or can't be reused
         self.disconnect()
@@ -353,3 +354,15 @@ class UGConnection:
 
         forward_thread = threading.Thread(target=forward_srv.serve_forever)
         forward_thread.start()
+
+    def check_machine_loads(self):
+        if not self.connected:
+            raise PermissionError("Misuse: Client not connected.")
+
+        import re
+        loads_by_user_count = []
+        _, _, stdout, _ = self.exec_command_blocking("ruptime -aur")
+        for line in stdout:
+            if "up" in line:
+                numbers = re.findall(r"[-+]?\d*\.\d+|\d+", line)
+                loads_by_user_count.append([numbers[0], numbers[-4], numbers[-3], numbers[-2], numbers[-1]])

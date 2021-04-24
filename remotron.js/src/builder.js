@@ -25,6 +25,10 @@ function semantic_flush_tabs() {
     ;
 }
 
+function semantic_flush_dropdowns() {
+    $(".dropdown").dropdown()
+}
+
 function _buildTab() {
     // remove the active tab's "active" class
     for (const tab of rmt_tab_bar.children) {
@@ -262,7 +266,11 @@ win_max_button.onclick = ()=>{
     }
 }
 
-rmt_tab_bar.ondblclick = ()=>{
+rmt_tab_bar.ondblclick = (ev)=>{
+    if (ev.target !== rmt_tab_bar){
+        // double-clicking on the tabs should not trigger window controls
+        return
+    }
     if (process.platform === "darwin"){
         electron_ipc.send("max")
     }

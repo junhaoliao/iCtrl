@@ -2,6 +2,7 @@ import base64
 import json
 
 from globals import *
+from paths import *
 
 
 # TODO: add a function to send back errors to the client
@@ -50,6 +51,13 @@ def handle_new_session(value):
     CONN[session] = UGConnection()
 
 
+def rm_private_key(session_name):
+    private_key_path = USER_PROFILE["sessions"][session_name]["private_key_path"]
+    if private_key_path != "":
+        os.remove(private_key_path)
+        USER_PROFILE["sessions"][session_name]["private_key_path"] = ""
+
+
 def handle_login(value):
     """
     :param value: the value of the message
@@ -77,26 +85,49 @@ def handle_login(value):
         raise TypeError(f"handle_login: Invalid type({username})={type(username)}")
 
     passwd = value["passwd"]
-    if passwd is not None and type(passwd) is not str:
+    if type(passwd) is not str:
         raise TypeError(f"handle_login: Invalid type({passwd})={type(passwd)}")
 
     save_key = value["save_key"]
     if type(save_key) is not bool:
         raise TypeError(f"handle_login: Invalid type({save_key})={type(save_key)}")
-    # TODO: make sure to handle the key saving
+    if not save_key:
+        rm_private_key(session)
 
     # TODO: check the relation between save_key and passwd
 
-    if passwd is not None:
+    if passwd != "":
         try:
             CONN[session].connect(hostname=server, username=username, passwd=passwd)
-            send_msg("login_ack", session)
+            private_key_path = ""
+            if save_key:
+                import uuid
+                private_key_path = PRIVATE_KEYS_PATH + uuid.uuid1().hex
+                CONN[session].save_keys(private_key_path)
+            USER_PROFILE.modify_session(session_name=session,
+                                        username=username,
+                                        last_server=server,
+                                        private_key_path=private_key_path)
+            USER_PROFILE.save_profile(USER_PROFILE_PATH)
+            send_msg("login_ack", session + " : Login Successful")
         except Exception as e:
             send_msg("login_ack", "Failed: " + str(e))
-
     else:
-        # TODO: support login with keys
-        pass
+        private_key_path = USER_PROFILE["sessions"][session]["private_key_path"]
+        if "" == private_key_path:
+            send_msg("login_ack", "Failed: " + "Please input a password")
+            return
+        elif username == USER_PROFILE["sessions"][session]["username"]:
+            try:
+                CONN[session].connect(hostname=server, username=username, key_filename=private_key_path)
+                USER_PROFILE.modify_session(session_name=session,
+                                            username=username,
+                                            last_server=server,
+                                            private_key_path=private_key_path)
+                USER_PROFILE.save_profile(USER_PROFILE_PATH)
+                send_msg("login_ack", session + " : Login Successful")
+            except Exception as e:
+                send_msg("login_ack", "Failed: " + str(e))
 
 
 def handle_shell(value):

@@ -1,5 +1,7 @@
 import zmq
 
+from paths import *
+
 from libugremote.ug_profile.UGUserProfile import *
 from libugremote.ug_connection.UGConnection import *
 
@@ -12,6 +14,6 @@ IPC_SEND = ZMQ_CONTEXT.socket(zmq.PUSH)
 
 CONN = {}
 USER_PROFILE = UGUserProfile()
-USER_PROFILE.load_profile("./profile/user_profile.json")
+USER_PROFILE.load_profile(USER_PROFILE_PATH)
 for loaded_session_name in USER_PROFILE["sessions"]:
     CONN[loaded_session_name] = UGConnection()

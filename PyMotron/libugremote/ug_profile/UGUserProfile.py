@@ -239,7 +239,6 @@ class UGUserProfile:
 
         self["sessions"][session_name] = new_session
 
-    # TODO: support removing a session
     # TODO: support renaming a session
 
     def modify_session(self, session_name, username, last_server, private_key_path=None, vnc_passwd_path=None):
@@ -256,12 +255,12 @@ class UGUserProfile:
             raise ValueError(f"UGUserProfile: modify_session: Invalid last_server={last_server}")
         session["last_server"] = last_server
 
-        # the private key should be optional
+        # FIXME: recheck whether the private key should be optional
         if private_key_path is not None:
             # TODO: check whether the private_key_path is valid
             session["private_key_path"] = private_key_path
 
-        # the vnc_passwd_path key should be optional
+        # FIXME: recheck whether the vnc_passwd_path key should be optional
         if vnc_passwd_path is not None:
             # TODO: check whether the conn_profile supports vnc_manual
             # TODO: check whether the vnc_passwd_path is valid

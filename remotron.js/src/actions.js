@@ -28,6 +28,7 @@ function actAddNewSession(tab, page, profile_name, session_name_input) {
             false
         )
     semantic_flush_tabs()
+    semantic_flush_dropdowns()
 
     new_tab_button.style.visibility = ""
 }
