@@ -225,8 +225,9 @@ class TransferManager {
             else { // file
                 if (side === "local") {
                     enter_link.onclick = () => {
-                        const {spawn} = require("child_process")
-                        spawn("open",[path.resolve(this.local_cwd, file["name"])])
+                        const {shell} = require("electron")
+                        shell.beep()
+                        shell.openPath(path.resolve(this.local_cwd, file["name"])).then()
                     }
                 } else {
                     enter_link.onclick = () => {
