@@ -1,5 +1,6 @@
 import base64
 import json
+import os
 
 from globals import *
 from paths import *
@@ -126,6 +127,7 @@ def handle_login(value):
                                             private_key_path=private_key_path)
                 USER_PROFILE.save_profile(USER_PROFILE_PATH)
                 send_msg("login_ack", session + " : Login Successful")
+                CONN[session].check_ports()
             except Exception as e:
                 send_msg("login_ack", "Failed: " + str(e))
 
@@ -212,3 +214,36 @@ def handle_sftp_download(value):
 def handle_sftp_upload(value):
     session, local_path, remote_path = get_transfer_parameters(value)
     CONN[session].sftp.put(local_path, remote_path)
+
+
+def handle_vnc(value):
+    session = value["session"]
+    if type(session) is not str:
+        raise TypeError(f"handle_vnc: Invalid type({session})={type(session)}")
+    elif session not in CONN:
+        raise ValueError(f"handle_vnc: Invalid session={session}")
+
+    port = value["port"]
+    if type(port) is not int or port < 0 or port >= 100:
+        raise TypeError(f"handle_vnc: Invalid type({port})={type(port)}")
+
+    import uuid
+    passwd_path = VNC_PASSWORD_PATH + uuid.uuid1().hex
+    CONN[session].sftp.get("./.vnc/passwd", passwd_path)
+
+    vnc_cmd = "vncserver"
+    if port != 0:
+        vnc_cmd += " -kill :'*'; vncserver :" + str(port)
+
+    _, _, stdout, _ = CONN[session].exec_command_blocking(vnc_cmd)
+    _ = stdout.readline()
+    vnc_prompt = stdout.readline()
+    nums_in_prompt = re.findall(r'\d+', vnc_prompt)
+    if len(nums_in_prompt) != 0:
+        actual_display_port = int(nums_in_prompt[1])
+        remote_vnc_port = actual_display_port + 5900
+        local_port = get_free_port()
+        CONN[session].create_forward_tunnel(local_port, remote_vnc_port)
+        os.system(
+            "open -n %s --args --passwd=%s localhost:%d" % (
+                TIGER_VNC_VIEWER_PATH_MACOS, os.path.abspath(passwd_path), local_port))

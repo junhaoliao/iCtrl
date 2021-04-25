@@ -1,6 +1,7 @@
 import base64
 import json
 import threading
+import re
 
 import paramiko
 import zmq
@@ -102,7 +103,8 @@ class UGConnection:
         #         print("Hostname or credential mismatch. Disconnect that connection. ")
 
         # if the client is not connected or can't be reused
-        self.disconnect()
+        if self.connected:
+            self.disconnect()
         try:
             # assume connect() is called correctly (only passwd or key_filename is supplied):
             #   1) if passwd is not None, use password to login
@@ -124,6 +126,9 @@ class UGConnection:
             self.hostname = hostname
             self.username = username
             self.connected = True
+
+            self.sftp = paramiko.SFTPClient.from_transport(self.client.get_transport())
+            self.sftp.chdir(".")
         except Exception as e:
             # common exceptions include
             #   1) Authentication Error
@@ -138,7 +143,7 @@ class UGConnection:
         :return: None
         """
         self.disconnect_shell()
-        self.close_sftp()
+        self.sftp.close()
         self.client.close()
 
         self.hostname = None
@@ -217,7 +222,7 @@ class UGConnection:
             while True:
                 data = self.shell_chan.recv(1024)
                 if not data:
-                    print("\r\n*** EOF ***\r\n\r\n")
+                    print("\r\n*** Shell EOF ***\r\n\r\n")
                     break
                 msg = {
                     "recv": {
@@ -245,16 +250,13 @@ class UGConnection:
             self.shell_chan.close()
         self.shell_chan = None
 
-    def open_sftp(self):
-        # should only be called if the sftp handle isn't setup (self.sftp is None)
-        t = self.client.get_transport()
-        self.sftp = paramiko.SFTPClient.from_transport(t)
-        self.sftp.chdir(".")
+    # def open_sftp(self):
+    #     # should only be called if the sftp handle isn't setup (self.sftp is None)
+    #     t = self.client.get_transport()
+    #     self.sftp = paramiko.SFTPClient.from_transport(t)
+    #     self.sftp.chdir(".")
 
     def sftp_ls(self, path):
-        if self.sftp is None:
-            self.open_sftp()
-
         if path != "":
             self.sftp.chdir(path)
         cwd = self.sftp.getcwd()
@@ -274,9 +276,9 @@ class UGConnection:
 
         return cwd, file_list
 
-    def close_sftp(self):
-        if self.sftp is not None:
-            self.sftp.close()
+    # def close_sftp(self):
+    #     if self.sftp is not None:
+    #         self.sftp.close()
 
     def create_forward_tunnel(self, local_port, remote_port):
         import socketserver
@@ -359,10 +361,46 @@ class UGConnection:
         if not self.connected:
             raise PermissionError("Misuse: Client not connected.")
 
-        import re
         loads_by_user_count = []
         _, _, stdout, _ = self.exec_command_blocking("ruptime -aur")
         for line in stdout:
             if "up" in line:
                 numbers = re.findall(r"[-+]?\d*\.\d+|\d+", line)
                 loads_by_user_count.append([numbers[0], numbers[-4], numbers[-3], numbers[-2], numbers[-1]])
+
+    def check_ports(self):
+        used_ports_set = set()
+        ports_by_me_set = set()
+        if not self.connected:
+            raise PermissionError("Misuse: The client is not yet connected. Misuse of function \"update_ports()\"")
+
+        # send out the vnc port scanning cmd
+        _, _, stdout, _ = self.exec_command_blocking(
+            "sh -c 'nc -z -nv 127.0.0.1 5900-5999 2>&1' | grep 'open\|succeeded'")
+        for line in stdout:
+            if "open" in line:  # on other machines
+                line = line.replace('(UNKNOWN) [127.0.0.1] ', '')  # remove prefix
+                line = line.replace(' (?) open', '')  # remove suffix
+            elif "succeeded" in line:  # on ug250 and ug251
+                line = line.replace('Connection to 127.0.0.1 ', '')  # remove prefix
+                line = line.replace(' port [tcp/*] succeeded!', '')  # remove suffix
+            else:
+                raise ValueError("Unexpected output when scanning vnc ports: %s" % line)
+
+            this_used_port = int(line) - 5900
+            if this_used_port <= 0 or this_used_port > 99:
+                raise ValueError("Unexpected port number when scanning vnc ports: %d" % this_used_port)
+            used_ports_set.add(this_used_port)
+
+        # use the option by vncserver to see what ports are created by me
+        _, _, stdout, _ = self.exec_command_blocking("vncserver -list")
+
+        for line in stdout:
+            print(line)
+            this_port_by_me = re.findall(r'\d+', line)
+            if len(this_port_by_me) != 0:
+                ports_by_me_set.add(int(this_port_by_me[0]))
+
+        # print("used:", used_ports_set)
+        # print("by me: ", ports_by_me_set)
+        return used_ports_set, ports_by_me_set

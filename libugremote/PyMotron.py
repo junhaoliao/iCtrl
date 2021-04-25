@@ -30,6 +30,8 @@ def handle_main(key, value):
         handle_sftp_download(value)
     elif key == "sftp_upload":
         handle_sftp_upload(value)
+    elif key == "vnc":
+        handle_vnc(value)
     else:
         raise ValueError(f"Unknown key={key}, value={value}")
 
@@ -59,7 +61,7 @@ if __name__ == '__main__':
     except Exception as e:
         print("Exception:", e)
         print("Usage: PyMotron RECV_PORT SEND_PORT")
-        exit(1)
+        raise e
 
     # sys.stdout.flush()
     bootstrap()
