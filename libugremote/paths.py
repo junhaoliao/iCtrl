@@ -2,17 +2,32 @@ import os
 import platform
 import shutil
 
-# FIXME: use user directory
-USER_PROFILE_PATH = "./profile/user_profile.json"
-PRIVATE_KEYS_PATH = "./profile/keys/"
-CONN_PROFILE_PATH = "./profile/connections/"
 
-VNC_PASSWORD_PATH = "./profile/vncpasswds/"
+def makedir_if_not_exists(path):
+    if not os.path.exists(path):
+        os.mkdir(path)
+
+
+# PROFILE_PATH = "./profile/"
+# FIXME: use user directory on Windows as well
+PROFILE_PATH = os.path.join(os.path.expanduser("~"), ".pymotron") + "/"
+print(PROFILE_PATH)
+makedir_if_not_exists(PROFILE_PATH)
+
+VNC_PASSWORD_PATH = PROFILE_PATH + "vncpasswds/"
+USER_PROFILE_PATH = PROFILE_PATH + "user_profile.json"
+PRIVATE_KEYS_PATH = PROFILE_PATH + "keys/"
+CONN_PROFILE_PATH = PROFILE_PATH + "connections/"
+
 try:
     shutil.rmtree(VNC_PASSWORD_PATH)
 except FileNotFoundError:
     pass
-os.mkdir(VNC_PASSWORD_PATH)
+
+makedir_if_not_exists(VNC_PASSWORD_PATH)
+makedir_if_not_exists(PRIVATE_KEYS_PATH)
+if not os.path.exists(CONN_PROFILE_PATH):
+    shutil.copytree("./profile/connections", CONN_PROFILE_PATH)
 
 TIGER_VNC_VIEWER_PATH_WIN64 = ""
 TIGER_VNC_VIEWER_PATH_MACOS = "/Applications/TigerVNC Viewer*.app"
