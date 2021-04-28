@@ -82,15 +82,15 @@ function buildLoadedTab(session_name, profile_name, last_server, username, has_p
     loaded_page.setAttribute("data-tab", session_name)
     loaded_page.innerHTML = `
 <div class="ui left fixed vertical labeled icon menu rmt_feature_menu">
-    <a class="item active" data-tab="${session_name}-login">
+    <a id="${session_name}-login_menu_button" class="item active" data-tab="${session_name}-login">
         <i class="sign in icon"></i>
         Login
     </a>
-    <a class="item " data-tab="${session_name}-terminal">
+    <a id="${session_name}-term_menu_button" class="item " data-tab="${session_name}-terminal">
         <i class="terminal icon"></i>
         Terminal
     </a>
-    <a class="item " data-tab="${session_name}-transfer">
+    <a id="${session_name}-tf_menu_button" class="item " data-tab="${session_name}-transfer">
         <i class="file outline icon"></i>
         Files
     </a>

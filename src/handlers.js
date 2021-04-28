@@ -60,7 +60,12 @@ function handle_login_ack(value) {
 }
 
 function handle_recv(value) {
-    SESSIONS[value["s"]].term.terminal.write(atob(value["d"]))
+    const term = SESSIONS[value["s"]].term
+    if (!term.fitted){
+        term.fit()
+        term.fitted = true
+    }
+    term.terminal.write(atob(value["d"]))
 }
 
 function handle_sftp_cwd(value) {

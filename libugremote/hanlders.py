@@ -110,7 +110,7 @@ def handle_login(value):
                                         last_server=server,
                                         private_key_path=private_key_path)
             USER_PROFILE.save_profile(USER_PROFILE_PATH)
-            send_msg("login_ack", session + " : Login Successful")
+            # should be successful at this stage
         except Exception as e:
             send_msg("login_ack", "Failed: " + str(e))
     else:
@@ -126,11 +126,11 @@ def handle_login(value):
                                             last_server=server,
                                             private_key_path=private_key_path)
                 USER_PROFILE.save_profile(USER_PROFILE_PATH)
-                send_msg("login_ack", session + " : Login Successful")
-                CONN[session].check_ports()
+                # should be successful at this stage
             except Exception as e:
                 send_msg("login_ack", "Failed: " + str(e))
 
+        send_msg("login_ack", session)
 
 def handle_shell(value):
     session = value
