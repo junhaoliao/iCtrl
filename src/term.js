@@ -34,6 +34,27 @@ class Term {
                 "d": e.key
             })
         });
+
+        this.terminal.attachCustomKeyEventHandler((e)=>{
+            if (e.metaKey){
+                if (e.key === "c"){
+                    console.log("term: copy")
+                    return false
+                }
+                else if (e.key === "v"){
+                    console.log("term: paste")
+                    navigator.clipboard.readText().then((text)=>{
+                        send_msg("send", {
+                            "s": session_name,
+                            "d": text
+                        })
+                    })
+                    return false
+                }
+            }
+
+            return true
+        })
     }
 
     fit() {
