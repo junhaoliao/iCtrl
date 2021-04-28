@@ -52,9 +52,12 @@ class Term {
                     return false
                 }
             }
-
             return true
         })
+
+        // this.terminal.viewport.onWheel = (e)=>{
+        //     console.log(e)
+        // }
     }
 
     fit() {

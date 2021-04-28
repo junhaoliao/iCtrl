@@ -86,11 +86,11 @@ function buildLoadedTab(session_name, profile_name, last_server, username, has_p
         <i class="sign in icon"></i>
         Login
     </a>
-    <a id="${session_name}-term_menu_button" class="item " data-tab="${session_name}-terminal">
+    <a id="${session_name}-term_menu_button" class="item disabled" data-tab="${session_name}-terminal">
         <i class="terminal icon"></i>
         Terminal
     </a>
-    <a id="${session_name}-tf_menu_button" class="item " data-tab="${session_name}-transfer">
+    <a id="${session_name}-tf_menu_button" class="item disabled" data-tab="${session_name}-transfer">
         <i class="file outline icon"></i>
         Files
     </a>

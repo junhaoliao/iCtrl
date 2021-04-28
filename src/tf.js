@@ -15,6 +15,7 @@ function humanFileSize(size_in_bytes) {
 
 
 class TransferManager {
+    activated = false
     session = null
 
     local_cwd = null

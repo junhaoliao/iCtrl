@@ -24,13 +24,19 @@ class Session {
         //
         // })
         term_menu_button.onclick = ()=>{
-            console.log(this.term.activated)
             if (!this.term.activated){
                 send_msg("shell", session_name)
                 this.term.activated = true
             }
         }
-        // const tf_menu_button = document.getElementById(`${session_name}-tf_menu_button`)
+        const tf_menu_button = document.getElementById(`${session_name}-tf_menu_button`)
+        tf_menu_button.onclick = ()=>{
+            console.log(this.tf.activated)
+            if (!this.tf.activated){
+                this.tf.remoteVisit()
+                this.tf.activated = true
+            }
+        }
     }
 
     loadFields(last_server, username, has_private_key, has_vnc_passwd) {

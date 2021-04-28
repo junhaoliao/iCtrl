@@ -49,12 +49,18 @@ function handle_profiles(value) {
 }
 
 function handle_login_ack(value) {
+    // value is session_name
     // alert("Login: " + value)
     // TODO: think about a better way to support message types (error, success, warning)
     if (value.includes("Failed")) {
         semantic_toast("error", value)
     } else {
         semantic_toast("success", value)
+        // const login_menu_button = document.getElementById(`${session_name}-login_menu_button`)
+        const term_menu_button = document.getElementById(`${value}-term_menu_button`)
+        term_menu_button.classList.remove("disabled")
+        const tf_menu_button = document.getElementById(`${value}-tf_menu_button`)
+        tf_menu_button.classList.remove("disabled")
     }
 
 }
