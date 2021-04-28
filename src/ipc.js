@@ -5,7 +5,7 @@ const IPC_SEND = new Push
 module.exports.IPC_RECV = IPC_RECV
 module.exports.IPC_SEND = IPC_SEND
 
-IPC_RECV.bind("tcp://*:" + String(RECV_PORT)).then(() => {
+IPC_RECV.bind("tcp://127.0.0.1:" + String(RECV_PORT)).then(() => {
     console.log("Binding successful")
     IPC_SEND.connect("tcp://127.0.0.1:" + String(SEND_PORT))
     send_msg("sync")

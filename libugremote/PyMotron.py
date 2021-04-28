@@ -5,7 +5,7 @@ from hanlders import *
 
 
 def bootstrap():
-    IPC_RECV.bind("tcp://*:%d" % RECV_PORT)
+    IPC_RECV.bind("tcp://127.0.0.1:%d" % RECV_PORT)
     IPC_SEND.connect("tcp://127.0.0.1:%d" % SEND_PORT)
 
 
