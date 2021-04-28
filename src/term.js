@@ -15,6 +15,24 @@ class Term {
         this.fitAddon = new FitAddon();
         this.terminal.loadAddon(this.fitAddon);
 
+        this.terminal_div.onauxclick = (e)=>{
+            if (e.which === 3){
+                const selected_text = this.terminal.getSelection()
+                navigator.clipboard.readText().then((pasteboard_text)=>{
+                    if (selected_text === "" || selected_text === pasteboard_text){
+                        this.terminal.clearSelection()
+                        console.log("paste")
+                        send_msg("send", {
+                                "s": session_name,
+                                "d": pasteboard_text
+                        })
+                    } else {
+                        console.log("copy")
+                        document.execCommand("copy")
+                    }
+                })
+            }
+        }
         this.terminal.onResize((e) => {
             send_msg("resize", {
                 "s": session_name,

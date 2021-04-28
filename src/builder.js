@@ -11,6 +11,7 @@ const pages_container = document.getElementById("pages_container")
 function semantic_toast(type, msg) {
     $("body")
         .toast({
+            position: "bottom right",
             class: type,
             message: msg
         })

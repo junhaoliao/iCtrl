@@ -113,6 +113,7 @@ def handle_login(value):
             # should be successful at this stage
         except Exception as e:
             send_msg("login_ack", "Failed: " + str(e))
+            raise e
     else:
         private_key_path = USER_PROFILE["sessions"][session]["private_key_path"]
         if "" == private_key_path:
@@ -129,6 +130,7 @@ def handle_login(value):
                 # should be successful at this stage
             except Exception as e:
                 send_msg("login_ack", "Failed: " + str(e))
+                raise e
 
     send_msg("login_ack", session)
 
