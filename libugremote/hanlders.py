@@ -130,7 +130,7 @@ def handle_login(value):
             except Exception as e:
                 send_msg("login_ack", "Failed: " + str(e))
 
-        send_msg("login_ack", session)
+    send_msg("login_ack", session)
 
 def handle_shell(value):
     session = value
