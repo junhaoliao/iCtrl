@@ -1,5 +1,9 @@
 function actOpenNewTab() {
-    send_msg("query_profiles")
+    if (Object.keys(SESSIONS).length>=5){
+        semantic_toast("error", `Cannot open more than 5 tabs.`)
+    } else{
+        send_msg("query_profiles")
+    }
 }
 
 function actAddNewSession(tab, page, profile_name, session_name_input) {
@@ -38,6 +42,7 @@ function actCloseTab(tab, page) {
         new_tab_button.style.visibility = ""
     }
 
-    // TODO: should terminate the session on the server side as well
+    // FIXME: should terminate the session on the server side as well
+    delete SESSIONS[tab.getAttribute("data-tab")]
     destroyTab(tab, page)
 }

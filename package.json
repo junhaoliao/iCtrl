@@ -28,7 +28,7 @@
   "dependencies": {
     "electron-squirrel-startup": "^1.0.0",
     "jquery": "^3.6.0",
-    "xterm": "^4.11.0",
+    "xterm": "^4.12.0-beta.26",
     "xterm-addon-fit": "^0.6.0-beta.2",
     "zeromq": "^6.0.0-beta.6"
   },
