@@ -61,6 +61,8 @@ function handle_login_ack(value) {
         term_menu_button.classList.remove("disabled")
         const tf_menu_button = document.getElementById(`${value}-tf_menu_button`)
         tf_menu_button.classList.remove("disabled")
+
+        SESSIONS[value].login.setStep("utils")
     }
 
 }
@@ -79,4 +81,9 @@ function handle_sftp_cwd(value) {
     SESSIONS[session_name].tf.remote_cwd = value["dir"]
     SESSIONS[session_name].tf.fmUpdateAddrBar("remote")
     SESSIONS[session_name].tf.fmUpdateFileView("remote", value["files"])
+}
+
+function handle_vnc_auth(value) {
+    // value is session_name
+    SESSIONS[value].login.setStep("vncopt")
 }

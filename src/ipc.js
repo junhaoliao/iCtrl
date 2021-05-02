@@ -23,6 +23,8 @@ function handle_main(key, value) {
         handle_recv(value)
     } else if (key === "sftp_cwd") {
         handle_sftp_cwd(value)
+    } else if (key === "vnc_auth") {
+        handle_vnc_auth(value)
     } else {
         printLog(`handle_main: Unknown key=${key}, value=${value}`)
         return false

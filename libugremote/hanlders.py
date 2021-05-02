@@ -226,6 +226,10 @@ def handle_vnc(value):
     elif session not in CONN:
         raise ValueError(f"handle_vnc: Invalid session={session}")
 
+    vncpasswd = value["passwd"]
+    if vncpasswd is not None and type(vncpasswd) is not str:
+        raise TypeError(f"handle_login: Invalid type({vncpasswd})={type(vncpasswd)}")
+
     # FIXME: refactor this
     conn_profile_name = USER_PROFILE["sessions"][session]["conn_profile"]
     vnc_manual = USER_PROFILE._conn_profiles[conn_profile_name]["vnc_manual"]
@@ -240,13 +244,16 @@ def handle_vnc(value):
         CONN[session].sftp.put("./profile/xstartup", "./.vnc/xstartup")
         CONN[session].exec_command_blocking("chmod 555 ~/.vnc/xstartup")
 
+        if vncpasswd is not None:
+            CONN[session].exec_command_blocking(f"echo '{vncpasswd}'|vncpasswd -f > ~/.vnc/passwd")
+
         # fetch the vnc passwd from the server
         import uuid
         passwd_path = VNC_PASSWORD_PATH + uuid.uuid1().hex
         try:
             CONN[session].sftp.get("./.vnc/passwd", passwd_path)
-        except Exception as e:
-            # FIXME: if passwd not found, send "vnc_auth"
+        except FileNotFoundError as e:
+            send_msg("vnc_auth", session)
             return
 
         ports_by_me = CONN[session].check_ports_by_me()
