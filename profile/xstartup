@@ -1,0 +1,8 @@
+#!/bin/sh
+
+#System configuration
+[ -x /etc/vnc/xstartup ] && exec /etc/vnc/xstartup
+[ -r $HOME/.Xresources ] && xrdb $HOME/.Xresources
+
+#Start the window manager
+gnome-session &

@@ -43,7 +43,8 @@
           "^(.*/__pycache__$)",
           "^(.*/README.md$)",
           "profile/keys",
-          "profile/user_profile.json"
+          "profile/user_profile.json",
+          "profile/xstartup"
         ]
       },
       "makers": [

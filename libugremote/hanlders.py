@@ -134,6 +134,7 @@ def handle_login(value):
 
     send_msg("login_ack", session)
 
+
 def handle_shell(value):
     session = value
     if type(session) is not str:
@@ -233,6 +234,12 @@ def handle_vnc(value):
         # vncserver already listening on the server
         remote_vnc_port = USER_PROFILE._conn_profiles[conn_profile_name]["vnc_listening_port"]
     else:
+        # FIXME: only override if xstartup missing
+        # override xstartup
+        CONN[session].exec_command_blocking("rm -f ~/.vnc/xstartup")
+        CONN[session].sftp.put("./profile/xstartup", "./.vnc/xstartup")
+        CONN[session].exec_command_blocking("chmod 555 ~/.vnc/xstartup")
+
         # fetch the vnc passwd from the server
         import uuid
         passwd_path = VNC_PASSWORD_PATH + uuid.uuid1().hex
