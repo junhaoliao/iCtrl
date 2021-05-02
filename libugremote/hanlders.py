@@ -225,27 +225,50 @@ def handle_vnc(value):
     elif session not in CONN:
         raise ValueError(f"handle_vnc: Invalid session={session}")
 
-    port = value["port"]
-    if type(port) is not int or port < 0 or port >= 100:
-        raise TypeError(f"handle_vnc: Invalid type({port})={type(port)}")
+    # FIXME: refactor this
+    conn_profile_name = USER_PROFILE["sessions"][session]["conn_profile"]
+    vnc_manual = USER_PROFILE._conn_profiles[conn_profile_name]["vnc_manual"]
 
-    import uuid
-    passwd_path = VNC_PASSWORD_PATH + uuid.uuid1().hex
-    CONN[session].sftp.get("./.vnc/passwd", passwd_path)
+    if vnc_manual:
+        # fetch the vnc passwd from the server
+        import uuid
+        passwd_path = VNC_PASSWORD_PATH + uuid.uuid1().hex
+        try:
+            CONN[session].sftp.get("./.vnc/passwd", passwd_path)
+        except Exception as e:
+            # FIXME: if passwd not found, send "vnc_auth"
+            return
 
-    vnc_cmd = "vncserver"
-    if port != 0:
-        vnc_cmd += " -kill :'*'; vncserver :" + str(port)
+        ports_by_me = CONN[session].check_ports_by_me()
+        print("ports_by_me", ports_by_me)
+        only_port_by_me = None
+        vnc_cmd = "vncserver"
+        if len(ports_by_me) > 1:
+            # something is wrong: there should be more than one vncserver launched by the user
+            # kill all instead
+            vnc_cmd += " -kill :'*'; vncserver"
+        elif len(ports_by_me) == 1:
+            only_port_by_me, = ports_by_me
 
-    _, _, stdout, _ = CONN[session].exec_command_blocking(vnc_cmd)
-    _ = stdout.readline()
-    vnc_prompt = stdout.readline()
-    nums_in_prompt = re.findall(r'\d+', vnc_prompt)
-    if len(nums_in_prompt) != 0:
-        actual_display_port = int(nums_in_prompt[1])
-        remote_vnc_port = actual_display_port + 5900
+        if len(ports_by_me) != 1:
+            # if the previous session(s) can't be reused
+            # relaunch the vncserver
+            print(vnc_cmd)
+            _, _, stdout, _ = CONN[session].exec_command_blocking(vnc_cmd)
+
+            for vnc_prompt in stdout:
+                match = re.search("at :(\d+)", vnc_prompt)
+                if match:
+                    only_port_by_me = int(match.group(1))
+                    break
+
+        remote_vnc_port = only_port_by_me + 5900
         local_port = get_free_port()
-        CONN[session].create_forward_tunnel(local_port, remote_vnc_port)
-        os.system(
-            "open -n %s --args --passwd=%s localhost:%d" % (
-                TIGER_VNC_VIEWER_PATH_MACOS, os.path.abspath(passwd_path), local_port))
+
+    else: # not vnc manual, used fixed port
+        pass
+
+    CONN[session].create_forward_tunnel(local_port, remote_vnc_port)
+    os.system(
+        "open -n %s --args --passwd=%s localhost:%d" % (
+            TIGER_VNC_VIEWER_PATH_MACOS, os.path.abspath(passwd_path), local_port))

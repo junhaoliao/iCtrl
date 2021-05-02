@@ -368,11 +368,11 @@ class UGConnection:
                 numbers = re.findall(r"[-+]?\d*\.\d+|\d+", line)
                 loads_by_user_count.append([numbers[0], numbers[-4], numbers[-3], numbers[-2], numbers[-1]])
 
-    def check_ports(self):
-        used_ports_set = set()
-        ports_by_me_set = set()
+    def check_used_ports(self):
         if not self.connected:
             raise PermissionError("Misuse: The client is not yet connected. Misuse of function \"update_ports()\"")
+
+        used_ports_set = set()
 
         # send out the vnc port scanning cmd
         _, _, stdout, _ = self.exec_command_blocking(
@@ -392,15 +392,23 @@ class UGConnection:
                 raise ValueError("Unexpected port number when scanning vnc ports: %d" % this_used_port)
             used_ports_set.add(this_used_port)
 
+        # print("used:", used_ports_set)
+        return used_ports_set
+
+    def check_ports_by_me(self):
+        if not self.connected:
+            raise PermissionError("Misuse: The client is not yet connected. Misuse of function \"update_ports()\"")
+
+        ports_by_me_set = set()
+
         # use the option by vncserver to see what ports are created by me
         _, _, stdout, _ = self.exec_command_blocking("vncserver -list")
 
         for line in stdout:
-            print(line)
-            this_port_by_me = re.findall(r'\d+', line)
-            if len(this_port_by_me) != 0:
-                ports_by_me_set.add(int(this_port_by_me[0]))
+            if "stale" not in line:
+                this_port_by_me = re.findall(r'\d+', line)
+                if len(this_port_by_me) != 0:
+                    ports_by_me_set.add(int(this_port_by_me[0]))
 
-        # print("used:", used_ports_set)
         # print("by me: ", ports_by_me_set)
-        return used_ports_set, ports_by_me_set
+        return ports_by_me_set
