@@ -128,5 +128,5 @@
         "ug251.eecg.toronto.edu"
     ],
     "vnc_manual": true,
-    "forwarding_ports": []
+    "vnc_listening_port": 0
 }

@@ -178,10 +178,5 @@
         "p185.ecf.utoronto.ca"
     ],
     "vnc_manual": false,
-    "forwarding_ports": [
-        [
-            2000,
-            1000
-        ]
-    ]
+    "vnc_listening_port": 1000
 }

@@ -9,17 +9,17 @@ class UGConnProfile:
     >>> for num in EECG_MACHINE_NUMS:
     ...     eecg_profile["servers"].append("ug%d.eecg.toronto.edu"% num)
     >>> eecg_profile["vnc_manual"] = True
-    >>> eecg_profile.save_profile("../profile/eecg.json")
+    >>> eecg_profile.save_profile("./profile/connections/eecg.json")
     >>> test_profile = UGConnProfile()
-    >>> test_profile.load_profile("../profile/eecg.json")
+    >>> test_profile.load_profile("./profile/connections/eecg.json")
     >>> print(test_profile["vnc_manual"])
     True
     >>> print(test_profile["servers"][0])
     ug51.eecg.toronto.edu
     >>> print(test_profile["servers"][-1])
     ug251.eecg.toronto.edu
-    >>> print(test_profile["forwarding_ports"])
-    []
+    >>> print(test_profile["vnc_listening_port"])
+    0
     >>> ecf_profile = UGConnProfile()
     >>> ECF_MACHINE_NUMS = list(range(2, 5))      + \
                             list(range(6, 43))    + \
@@ -35,17 +35,17 @@ class UGConnProfile:
     >>> for num in ECF_MACHINE_NUMS:
     ...     ecf_profile["servers"].append("p%d.ecf.utoronto.ca"% num)
     >>> ecf_profile["vnc_manual"] = False
-    >>> ecf_profile["forwarding_ports"].append((2000, 1000))
-    >>> ecf_profile.save_profile("../profile/ecf.json")
-    >>> test_profile.load_profile("../profile/ecf.json")
+    >>> ecf_profile["vnc_listening_port"] = 1000
+    >>> ecf_profile.save_profile("./profile/connections/ecf.json")
+    >>> test_profile.load_profile("./profile/connections/ecf.json")
     >>> print(test_profile["vnc_manual"])
     False
     >>> print(test_profile["servers"][0])
     remote.ecf.utoronto.ca
     >>> print(test_profile["servers"][-1])
     p185.ecf.utoronto.ca
-    >>> print(test_profile["forwarding_ports"])
-    [[2000, 1000]]
+    >>> print(test_profile["vnc_listening_port"])
+    1000
     """
     version = 1  # in case the schema changes in the future
     _empty_conn_profile = {
@@ -54,8 +54,7 @@ class UGConnProfile:
         "servers": [],
         "vnc_manual": False,
 
-        # (local port, remote port)
-        "forwarding_ports": []
+        "vnc_listening_port": 0
     }
 
     def __init__(self):

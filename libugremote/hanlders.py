@@ -229,7 +229,10 @@ def handle_vnc(value):
     conn_profile_name = USER_PROFILE["sessions"][session]["conn_profile"]
     vnc_manual = USER_PROFILE._conn_profiles[conn_profile_name]["vnc_manual"]
 
-    if vnc_manual:
+    if not vnc_manual:
+        # vncserver already listening on the server
+        remote_vnc_port = USER_PROFILE._conn_profiles[conn_profile_name]["vnc_listening_port"]
+    else:
         # fetch the vnc passwd from the server
         import uuid
         passwd_path = VNC_PASSWORD_PATH + uuid.uuid1().hex
@@ -263,12 +266,15 @@ def handle_vnc(value):
                     break
 
         remote_vnc_port = only_port_by_me + 5900
-        local_port = get_free_port()
 
-    else: # not vnc manual, used fixed port
-        pass
+    local_port = get_free_port()
 
     CONN[session].create_forward_tunnel(local_port, remote_vnc_port)
-    os.system(
-        "open -n %s --args --passwd=%s localhost:%d" % (
-            TIGER_VNC_VIEWER_PATH_MACOS, os.path.abspath(passwd_path), local_port))
+    # FIXME: whether vnc passwd is needed or not should have nothing
+    #  to do with whether the VNC server is already listeninhg
+    if vnc_manual:
+        os.system(
+            f"open -n {TIGER_VNC_VIEWER_PATH_MACOS} --args --passwd={os.path.abspath(passwd_path)} localhost:{local_port}")
+    else:
+        os.system(
+            f"open -n {TIGER_VNC_VIEWER_PATH_MACOS} --args localhost:{local_port}")
