@@ -1,3 +1,4 @@
+require('update-electron-app')()
 const profiler_start = Date.now()
 
 // Modules to control application life and create native browser window

@@ -11,7 +11,7 @@
     "make_arm64": "electron-forge make --arch=arm64",
     "make": "npm run make_x64 && npm run make_arm64"
   },
-  "repository": "",
+  "repository": "https://github.com/junhaoliao/UG_Remote",
   "keywords": [
     "Electron"
   ],
@@ -28,6 +28,7 @@
   "dependencies": {
     "electron-squirrel-startup": "^1.0.0",
     "jquery": "^3.6.0",
+    "update-electron-app": "^2.0.1",
     "xterm": "^4.12.0-beta.26",
     "xterm-addon-fit": "^0.6.0-beta.2",
     "zeromq": "^6.0.0-beta.6"
@@ -35,6 +36,9 @@
   "config": {
     "forge": {
       "packagerConfig": {
+        "osxSign": {
+          "identity": "Developer ID Application: Junhao Liao (4NCV93W849)"
+        },
         "icon": "resources/icon_white_bg",
         "ignore": [
           ".idea",
