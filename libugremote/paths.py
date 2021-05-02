@@ -18,6 +18,7 @@ VNC_PASSWORD_PATH = PROFILE_PATH + "vncpasswds/"
 USER_PROFILE_PATH = PROFILE_PATH + "user_profile.json"
 PRIVATE_KEYS_PATH = PROFILE_PATH + "keys/"
 CONN_PROFILE_PATH = PROFILE_PATH + "connections/"
+XSTARTUP_PATH = PROFILE_PATH + "xstartup"
 
 try:
     shutil.rmtree(VNC_PASSWORD_PATH)
@@ -28,6 +29,8 @@ makedir_if_not_exists(VNC_PASSWORD_PATH)
 makedir_if_not_exists(PRIVATE_KEYS_PATH)
 if not os.path.exists(CONN_PROFILE_PATH):
     shutil.copytree("./profile/connections", CONN_PROFILE_PATH)
+if not os.path.exists(XSTARTUP_PATH):
+    shutil.copy("./profile/xstartup", XSTARTUP_PATH)
 
 TIGER_VNC_VIEWER_PATH_WIN64 = ""
 TIGER_VNC_VIEWER_PATH_MACOS = "/Applications/TigerVNC Viewer*.app"

@@ -113,7 +113,8 @@ def handle_login(value):
             # should be successful at this stage
         except Exception as e:
             send_msg("login_ack", "Failed: " + str(e))
-            raise e
+            # TODO: raise the exception instead once we have a way to send back error messages
+            return
     else:
         private_key_path = USER_PROFILE["sessions"][session]["private_key_path"]
         if "" == private_key_path:
@@ -241,7 +242,7 @@ def handle_vnc(value):
         # FIXME: only override if xstartup missing
         # override xstartup
         CONN[session].exec_command_blocking("rm -f ~/.vnc/xstartup")
-        CONN[session].sftp.put("./profile/xstartup", "./.vnc/xstartup")
+        CONN[session].sftp.put(XSTARTUP_PATH, "./.vnc/xstartup")
         CONN[session].exec_command_blocking("chmod 555 ~/.vnc/xstartup")
 
         if vncpasswd is not None:
