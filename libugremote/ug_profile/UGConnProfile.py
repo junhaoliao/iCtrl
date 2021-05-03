@@ -80,7 +80,7 @@ class UGConnProfile:
                 self._profile = json_data
         except Exception as e:
             self._profile = copy.deepcopy(UGConnProfile._empty_conn_profile)
-            print("Exception happens when trying to load profile. Using default profile. ")
+            print("Exception happens when trying to load connection profile. Using default profile. ")
             # raise e
 
     def save_profile(self, file_path):

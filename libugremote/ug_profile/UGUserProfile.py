@@ -122,7 +122,7 @@ class UGUserProfile:
         for file_name in os.listdir(CONN_PROFILE_PATH):
             if file_name.endswith(".json"):
                 conn_profile = UGConnProfile()
-                conn_profile.load_profile(CONN_PROFILE_PATH + file_name)
+                conn_profile.load_profile(os.path.join(CONN_PROFILE_PATH, file_name))
                 self._conn_profiles[file_name[:-5]] = conn_profile
 
         UGUserProfile.instantiated = True

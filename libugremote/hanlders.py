@@ -287,9 +287,21 @@ def handle_vnc(value):
     CONN[session].create_forward_tunnel(local_port, remote_vnc_port)
     # FIXME: whether vnc passwd is needed or not should have nothing
     #  to do with whether the VNC server is already listeninhg
-    if vnc_manual:
-        os.system(
-            f"open -n {TIGER_VNC_VIEWER_PATH_MACOS} --args --passwd={os.path.abspath(passwd_path)} localhost:{local_port}")
-    else:
-        os.system(
-            f"open -n {TIGER_VNC_VIEWER_PATH_MACOS} --args localhost:{local_port}")
+    if platform.system() == "Windows":
+        import subprocess
+        if vnc_manual:
+            subprocess.Popen([TIGER_VNC_VIEWER_PATH_WIN64,
+                             f"--passwd={os.path.abspath(passwd_path)}",
+                             f"−Maximize",
+                             f"localhost:{local_port}"])
+        else:
+            subprocess.Popen([TIGER_VNC_VIEWER_PATH_WIN64,
+                              f"−Maximize",
+                              f"localhost:{local_port}"])
+    else: # Mac OS
+        if vnc_manual:
+            os.system(
+                f"open -n {TIGER_VNC_VIEWER_PATH_MACOS} --args --passwd={os.path.abspath(passwd_path)} localhost:{local_port}")
+        else:
+            os.system(
+                f"open -n {TIGER_VNC_VIEWER_PATH_MACOS} --args localhost:{local_port}")
