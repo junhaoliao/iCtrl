@@ -9,7 +9,7 @@ def makedir_if_not_exists(path):
 
 if platform.system() == "Windows":
     PROFILE_PATH = os.path.join(os.environ['LOCALAPPDATA'], "ictrl")
-elif platform.system() == "Darwin":
+elif platform.system() == "Darwin" or 'Linux':
     PROFILE_PATH = os.path.join(os.path.expanduser("~"), ".ictrl")
 else:
     raise SystemError(f"Operating System: {platform.system()} not supported")

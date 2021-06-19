@@ -7,7 +7,9 @@ class Connection:
         self.client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
 
     def __del__(self):
+        print('Connection::__del__')
         self.client.close()
+        del self.client
 
     def connect(self, host, username, password=None, key_filename=None):
         try:
