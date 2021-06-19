@@ -1,9 +1,22 @@
 import os
+import threading
 
 from flask import request, abort
+
 from application import app, profiles
 from application.Connection import Connection
+from application.Terminal import Terminal
 from application.paths import PRIVATE_KEY_PATH
+
+
+def get_session_info():
+    session_id = request.form.get('session_id')
+    if session_id not in profiles['sessions']:
+        abort(403, 'failed: session does not exist')
+    host = profiles['sessions'][session_id]['host']
+    username = profiles['sessions'][session_id]['username']
+    this_private_key_path = os.path.join(PRIVATE_KEY_PATH, session_id)
+    return host, username, this_private_key_path
 
 
 @app.route('/profiles')
@@ -34,12 +47,7 @@ def new_session():
 
 @app.route('/exec_blocking', methods=['POST'])
 def exec_blocking():
-    session_id = request.form.get('session_id')
-    if session_id not in profiles['sessions']:
-        abort(403, 'failed: session does not exist')
-    host = profiles['sessions'][session_id]['host']
-    username = profiles['sessions'][session_id]['username']
-    this_private_key_path = os.path.join(PRIVATE_KEY_PATH, session_id)
+    host, username, this_private_key_path = get_session_info()
 
     cmd = request.form.get('cmd')
 
@@ -54,3 +62,16 @@ def exec_blocking():
         abort(500, 'exec failed')
 
     return '\n'.join(stdout) + '\n'.join(stderr)
+
+
+@app.route('/terminal', methods=['POST'])
+def start_terminal():
+    host, username, this_private_key_path = get_session_info()
+
+    term = Terminal()
+    status, reason = term.connect(host=host, username=username, key_filename=this_private_key_path)
+    if status is False:
+        abort(403, description=reason)
+
+    return term.id
+
