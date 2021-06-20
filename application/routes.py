@@ -75,3 +75,8 @@ def start_terminal():
 
     return term.id
 
+
+# @app.route('/vnc', methods=['POST'])
+# def start_vnc():
+#     host, username, this_private_key_path = get_session_info()
+#
