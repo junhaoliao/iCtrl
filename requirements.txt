@@ -1,3 +1,3 @@
 flask
 paramiko
-simple-websocket-server
+SimpleWebSocketServer

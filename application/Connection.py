@@ -68,3 +68,5 @@ class Connection:
 
         return exit_status, stdin, stdout, stderr
 
+    # def port_forwarding(self, local_port, remote_port):
+    #
