@@ -1,4 +1,57 @@
+import select
+import socketserver
+import threading
+
 import paramiko
+
+
+class Handler(socketserver.BaseRequestHandler):
+    def handle(self):
+        try:
+            chan = self.server.ssh_transport.open_channel(
+                "direct-tcpip",
+                ("127.0.0.1", self.server.chain_port),
+                self.request.getpeername(),
+            )
+        except Exception as e:
+            return False, "Incoming request to %s:%d failed: %s" % (
+                "127.0.0.1", self.server.chain_port, repr(e))
+
+        print(
+            "Connected!  Tunnel open %r -> %r -> %r"
+            % (
+                self.request.getpeername(),
+                chan.getpeername(),
+                ("127.0.0.1", self.server.chain_port),
+            )
+        )
+
+        try:
+            while True:
+                r, _, _ = select.select([self.request, chan], [], [])
+                if self.request in r:
+                    data = self.request.recv(1024)
+                    if len(data) == 0:
+                        break
+                    chan.send(data)
+                if chan in r:
+                    data = chan.recv(1024)
+                    if len(data) == 0:
+                        break
+                    self.request.send(data)
+        except Exception as e:
+            print(e)
+
+        try:
+            chan.close()
+            self.server.shutdown()
+        except Exception as e:
+            print(e)
+
+
+class ForwardServer(socketserver.ThreadingTCPServer):
+    daemon_threads = True
+    allow_reuse_address = True
 
 
 class Connection:
@@ -68,5 +121,15 @@ class Connection:
 
         return exit_status, stdin, stdout, stderr
 
-    # def port_forwarding(self, local_port, remote_port):
-    #
+    def _port_forward_thread(self, local_port, remote_port):
+        forward_server = ForwardServer(("", local_port), Handler)
+
+        forward_server.ssh_transport = self.client.get_transport()
+        forward_server.chain_port = remote_port
+
+        forward_server.serve_forever()
+        forward_server.server_close()
+
+    def port_forward(self, *args):
+        forwarding_thread = threading.Thread(target=self._port_forward_thread, args=args)
+        forwarding_thread.start()

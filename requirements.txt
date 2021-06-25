@@ -1,3 +1,5 @@
 flask
 paramiko
 SimpleWebSocketServer
+websockify
+pyDes
