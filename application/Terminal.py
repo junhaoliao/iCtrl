@@ -6,6 +6,8 @@ from SimpleWebSocketServer import SimpleWebSocketServer, WebSocket
 
 from application.Connection import Connection
 
+terminal_connections = {}
+
 
 class Terminal(Connection):
     def __init__(self):
@@ -31,9 +33,6 @@ class Terminal(Connection):
         terminal_connections[self.id] = self
 
         return True, self.id
-
-
-terminal_connections: dict[str, Terminal] = {}
 
 
 class TerminalSocket(WebSocket):

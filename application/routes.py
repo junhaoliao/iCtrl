@@ -6,6 +6,7 @@ from flask import request, abort
 from application import app, profiles
 from application.Connection import Connection
 from application.Terminal import Terminal
+from application.VNC import VNC
 from application.paths import PRIVATE_KEY_PATH
 
 
@@ -76,7 +77,26 @@ def start_terminal():
     return term.id
 
 
-# @app.route('/vnc', methods=['POST'])
-# def start_vnc():
-#     host, username, this_private_key_path = get_session_info()
-#
+@app.route('/vnc', methods=['POST'])
+def start_vnc():
+    host, username, this_private_key_path = get_session_info()
+
+    vnc = VNC()
+    vnc.connect(host=host, username=username, key_filename=this_private_key_path)
+
+    status, password = vnc.get_vnc_password()
+    if not status:
+        abort(403, description='VNC password missing')
+
+    return str(vnc.launch_web_vnc())
+
+
+@app.route('/vncpasswd', methods=['POST'])
+def change_vncpasswd():
+    host, username, this_private_key_path = get_session_info()
+    vnc = VNC()
+
+    passwd = request.form.get('passwd')
+    vnc.reset_vnc_password(passwd)
+
+    return 'success'
