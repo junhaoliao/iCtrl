@@ -3,3 +3,4 @@ paramiko
 SimpleWebSocketServer
 websockify
 pyDes
+zipstream-new
