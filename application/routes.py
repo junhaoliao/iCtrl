@@ -1,5 +1,6 @@
+import json
 import os
-import threading
+from datetime import datetime
 
 from flask import request, abort
 
@@ -7,13 +8,13 @@ from application import app, profiles
 from application.Connection import Connection
 from application.Terminal import Terminal
 from application.VNC import VNC
+from application.SFTP import SFTP
 from application.paths import PRIVATE_KEY_PATH
 
 
-def get_session_info():
-    session_id = request.form.get('session_id')
+def get_session_info(session_id):
     if session_id not in profiles['sessions']:
-        abort(403, 'failed: session does not exist')
+        abort(403, f'failed: session {session_id} does not exist')
     host = profiles['sessions'][session_id]['host']
     username = profiles['sessions'][session_id]['username']
     this_private_key_path = os.path.join(PRIVATE_KEY_PATH, session_id)
@@ -48,7 +49,8 @@ def new_session():
 
 @app.route('/exec_blocking', methods=['POST'])
 def exec_blocking():
-    host, username, this_private_key_path = get_session_info()
+    session_id = request.form.get('session_id')
+    host, username, this_private_key_path = get_session_info(session_id)
 
     cmd = request.form.get('cmd')
 
@@ -67,7 +69,8 @@ def exec_blocking():
 
 @app.route('/terminal', methods=['POST'])
 def start_terminal():
-    host, username, this_private_key_path = get_session_info()
+    session_id = request.form.get('session_id')
+    host, username, this_private_key_path = get_session_info(session_id)
 
     term = Terminal()
     status, reason = term.connect(host=host, username=username, key_filename=this_private_key_path)
@@ -79,7 +82,8 @@ def start_terminal():
 
 @app.route('/vnc', methods=['POST'])
 def start_vnc():
-    host, username, this_private_key_path = get_session_info()
+    session_id = request.form.get('session_id')
+    host, username, this_private_key_path = get_session_info(session_id)
 
     vnc = VNC()
     vnc.connect(host=host, username=username, key_filename=this_private_key_path)
@@ -93,10 +97,81 @@ def start_vnc():
 
 @app.route('/vncpasswd', methods=['POST'])
 def change_vncpasswd():
-    host, username, this_private_key_path = get_session_info()
+    session_id = request.form.get('session_id')
+    host, username, this_private_key_path = get_session_info(session_id)
+
     vnc = VNC()
+    vnc.connect(host=host, username=username, key_filename=this_private_key_path)
 
     passwd = request.form.get('passwd')
-    vnc.reset_vnc_password(passwd)
+    status, reason = vnc.reset_vnc_password(passwd)
+    if not status:
+        abort(403, description=reason)
+
+    return 'success'
+
+
+@app.route('/sftp_ls/<session_id>')
+def sftp_ls(session_id):
+    host, username, this_private_key_path = get_session_info(session_id)
+
+    sftp = SFTP()
+    sftp.connect(host=host, username=username, key_filename=this_private_key_path)
+
+    path = request.args.get('path')
+    status, cwd, file_list = sftp.ls(path)
+    result = {
+        'status': status,
+        'cwd': cwd,
+        'files': file_list
+    }
+    return json.dumps(result)
+
+
+@app.route('/sftp_dl/<session_id>')
+def sftp_dl(session_id):
+    host, username, this_private_key_path = get_session_info(session_id)
+
+    sftp = SFTP()
+    sftp.connect(host=host, username=username, key_filename=this_private_key_path)
+
+    cwd = request.args.get('cwd')
+    files = json.loads(request.args.get('files'))
+
+    sftp.sftp.chdir(cwd)
+
+    zip_mode = True
+    size = 0
+    if len(files) == 1:
+        is_reg, size = sftp.reg_size(files[0])
+        zip_mode = not is_reg
+
+    if zip_mode:
+        r = app.response_class(sftp.zip_generator(cwd, files), mimetype='application/zip')
+        dt_str = datetime.now().strftime('_%Y%m%d_%H%M%S')
+        zip_name = os.path.basename(cwd) + dt_str + '.zip'
+        r.headers.set('Content-Disposition', 'attachment', filename=zip_name)
+    else:
+        r = app.response_class(sftp.dl_generator(files[0]), mimetype='application/octet-stream')
+        r.headers.set('Content-Disposition', 'attachment', filename=files[0])
+        r.headers.set('Content-Length', size)
+
+    return r
+
+
+@app.route('/sftp_rename/<session_id>')
+def sftp_rename(session_id):
+    host, username, this_private_key_path = get_session_info(session_id)
+
+    sftp = SFTP()
+    sftp.connect(host=host, username=username, key_filename=this_private_key_path)
+
+    cwd = request.args.get('cwd')
+    old = request.args.get('old')
+    new = request.args.get('new')
+
+    status, reason = sftp.rename(cwd, old, new)
+    if not status:
+        abort(400, reason)
 
     return 'success'
