@@ -7,7 +7,7 @@ import zipstream
 
 from application.Connection import Connection
 
-DL_BUFFER_SIZE = 1024 * 1024 * 4  # unit: bytes
+DL_CHUNK_SIZE = 1024 * 1024 * 4   # unit: bytes
 
 
 class SFTP(Connection):
@@ -61,14 +61,24 @@ class SFTP(Connection):
 
     def dl_generator(self, path):
         with self.sftp.file(path) as f:
-            f.prefetch()
-            chunk = f.read(DL_BUFFER_SIZE)
-            while chunk != b'':
-                yield chunk
-                chunk = f.read(DL_BUFFER_SIZE)
+            # do NOT use f.prefetch(), which can cause a serious memory leak
+            #  when the user stop the download and the file is very large
+            # Instead, we cache the file with a sliding window of size (4 * DL_CHUNK_SIZE)
+            file_size = f.stat().st_size
+            offset = 0
+            while file_size > 0:
+                read_chunks = []
+                for _ in range(4):
+                    if file_size <= 0:
+                        break
+                    chunk_size = min(file_size, DL_CHUNK_SIZE)
+                    read_chunks.append((offset, chunk_size))
+                    offset += chunk_size
+                    file_size -= chunk_size
+                for c in f.readv(read_chunks):
+                    yield c
 
     def _zip_dir_recurse(self, z, parent, file):
-        print(parent, file)
         fullpath = os.path.join(parent, file)
         mode = self.sftp.stat(fullpath).st_mode
         if stat.S_ISREG(mode):
