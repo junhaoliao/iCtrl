@@ -5,6 +5,7 @@ import {GetApp, VisibilityOff} from '@material-ui/icons';
 import ArrowUpwardIcon from '@material-ui/icons/ArrowUpward';
 import KeyboardArrowRightIcon from '@material-ui/icons/KeyboardArrowRight';
 import {DensityComfortableIcon, DensityCompactIcon, DensityStandardIcon} from '../../icons';
+import PublishIcon from '@material-ui/icons/Publish';
 
 export default class CustomToolbar extends React.Component {
     constructor(props) {
@@ -46,6 +47,10 @@ export default class CustomToolbar extends React.Component {
     };
 
     handleDownload = (ev) => {
+        if (this.fm.selected.length === 0) {
+            this.fm.showAlert('No files selected for download. ');
+            return;
+        }
         const url = `http://localhost:5000/sftp_dl/${this.fm.session_id}?` +
             `cwd=${this.fm.state.cwd}&` +
             `files=${JSON.stringify(this.fm.selected)}`;
@@ -88,7 +93,6 @@ export default class CustomToolbar extends React.Component {
 
     };
 
-
     render() {
         return (<GridToolbarContainer>
             <IconButton aria-label={'up'} onClick={this.handleUpOneLevel} color={'primary'}>
@@ -113,6 +117,10 @@ export default class CustomToolbar extends React.Component {
             <Button color={'primary'} onClick={this.handleDownload}
                     startIcon={<GetApp/>}>
                 Download
+            </Button>
+            <Button color={'primary'} onClick={this.handleDownload}
+                    startIcon={<PublishIcon/>}>
+                Upload
             </Button>
             <Button color={'primary'} onClick={() => {
                 this.handleHiddenFiles();

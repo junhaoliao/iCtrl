@@ -2,17 +2,17 @@ import os.path
 import stat
 from typing import Optional
 
-from paramiko.sftp_client import SFTPClient
 import zipstream
+from paramiko.sftp_client import SFTPClient
 
 from application.Connection import Connection
 
-DL_CHUNK_SIZE = 1024 * 1024 * 4   # unit: bytes
+DL_CHUNK_SIZE = 1024 * 1024 * 4  # unit: bytes
 
 
 class SFTP(Connection):
     def __init__(self):
-        self.sftp:Optional[SFTPClient] = None
+        self.sftp: Optional[SFTPClient] = None
 
         super().__init__()
 
@@ -109,6 +109,7 @@ class SFTP(Connection):
             return False, repr(e)
 
         return True, ''
+
     # TODO: might use this if the server is running locally
     # def dl_direct(self, path):
     #     home = os.path.expanduser("~")
