@@ -108,9 +108,10 @@ export default class FileManager extends React.Component {
         this.editEnter = null;
         this.editCellText = '';
         this.state = {
+            alertOpen: false,
+            alertMsg: null,
             cwd: '',
             cwdInput: '',
-            cwdInputErr: null,
             density: 'standard',
             filesDisplaying: [],
             loading: true
@@ -126,7 +127,8 @@ export default class FileManager extends React.Component {
     loadDir = (path) => {
         this.setState({
             loading: true,
-            cwdInputErr: null
+            alertMsg: null,
+            alertOpen: false
         });
 
         const request = new XMLHttpRequest();
@@ -144,7 +146,8 @@ export default class FileManager extends React.Component {
                 this.forceUpdate();
             } else {
                 this.setState({
-                    cwdInputErr: resp.cwd,
+                    alertMsg: resp.cwd,
+                    alertOpen: true,
                     loading: false
                 });
             }
@@ -226,23 +229,31 @@ export default class FileManager extends React.Component {
         this.editCellText = '';
         document.removeEventListener('keypress', () => {
         });
+
+        // no name change
         if (old_name === new_name) {
             return;
         }
-        // TODO: inform the user with a snack bar
+
+        // given name empty
         if (new_name === '') {
+            this.showAlert('File name cannot be empty.')
             this.loadDir(this.state.cwd);
             return;
         }
 
-        // TODO: inform the user with a snack bar
+        // FIXME: show check whether the conflicts happen between (file and file) or (file and dir)
+        //  the later one should be allowed
+        // check whether there is already a file with the same name
         const duplicate_check = this.files.filter((row) => {
             return row.id === new_name;
         });
         if (duplicate_check.length !== 0) {
-            alert('name duplicated');
+            this.showAlert('File name duplicated!');
             return;
         }
+
+        // remove the old row and do a POST to change the name
         this.setState({
             filesDisplaying: this.state.filesDisplaying.filter((row) => {
                 return row.id !== old_name;
@@ -266,6 +277,20 @@ export default class FileManager extends React.Component {
         const new_name = ev.props.value;
         this.handleChangeName(old_name, new_name);
 
+    };
+
+    handleAlertClose = (ev) => {
+        this.setState({
+            alertOpen: false,
+            alertMsg: null
+        });
+    };
+
+    showAlert = (msg) => {
+        this.setState({
+            alertMsg: msg,
+            alertOpen: true
+        });
     };
 
     render() {
@@ -296,9 +321,9 @@ export default class FileManager extends React.Component {
                 }}
                 onSelectionModelChange={this.handleSelectionModelChange}
             />
-            <Snackbar open={Boolean(this.state.cwdInputErr)}>
+            <Snackbar open={this.state.alertOpen} autoHideDuration={3000} onClose={this.handleAlertClose}>
                 <MuiAlert elevation={6} variant="filled" severity={'error'}>
-                    {this.state.cwdInputErr}
+                    {this.state.alertMsg}
                 </MuiAlert>
             </Snackbar>
         </div>);
