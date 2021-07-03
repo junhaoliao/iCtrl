@@ -11,6 +11,8 @@ from application.VNC import VNC
 from application.SFTP import SFTP
 from application.paths import PRIVATE_KEY_PATH
 
+UPLOAD_CHUNK_SIZE = 1024 * 1024
+
 
 def get_session_info(session_id):
     if session_id not in profiles['sessions']:
@@ -159,6 +161,7 @@ def sftp_dl(session_id):
     return r
 
 
+# FIXME: change this to a PATCH method
 @app.route('/sftp_rename/<session_id>')
 def sftp_rename(session_id):
     host, username, this_private_key_path = get_session_info(session_id)
@@ -173,5 +176,31 @@ def sftp_rename(session_id):
     status, reason = sftp.rename(cwd, old, new)
     if not status:
         abort(400, reason)
+
+    return 'success'
+
+
+@app.route('/sftp_ul/<session_id>', methods=['POST'])
+def sftp_ul(session_id):
+    print('hi')
+    host, username, this_private_key_path = get_session_info(session_id)
+
+    sftp = SFTP()
+    sftp.connect(host=host, username=username, key_filename=this_private_key_path)
+
+    request_file = request.files['file']
+    request_filename = request_file.filename
+    if request_filename == '':
+        abort(400, 'Empty file handle')
+
+    print(request_filename)
+    sftp_file = sftp.file(filename=request_filename)
+    while True:
+        chunk = request_file.stream.read(UPLOAD_CHUNK_SIZE)
+        if chunk == b'':
+            break
+        sftp_file.write(chunk)
+
+    sftp_file.close()
 
     return 'success'

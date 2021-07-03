@@ -110,6 +110,9 @@ class SFTP(Connection):
 
         return True, ''
 
+    def file(self, filename):
+        return self.sftp.file(filename, mode='w')
+
     # TODO: might use this if the server is running locally
     # def dl_direct(self, path):
     #     home = os.path.expanduser("~")

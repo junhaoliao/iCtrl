@@ -6,6 +6,7 @@ import ArrowUpwardIcon from '@material-ui/icons/ArrowUpward';
 import KeyboardArrowRightIcon from '@material-ui/icons/KeyboardArrowRight';
 import {DensityComfortableIcon, DensityCompactIcon, DensityStandardIcon} from '../../icons';
 import PublishIcon from '@material-ui/icons/Publish';
+import axios from 'axios';
 
 export default class CustomToolbar extends React.Component {
     constructor(props) {
@@ -58,6 +59,60 @@ export default class CustomToolbar extends React.Component {
         a.download = '';
         a.href = url;
         a.click();
+    };
+
+    handleUpload = (_) => {
+        const u = document.createElement('input');
+        u.type = 'file';
+        u.multiple = true;
+        const clickFunc = (_) => {
+            for (let i = 0; i < u.files.length; i++) {
+                const file = u.files[i];
+                const form = new FormData();
+                form.append('file', file);
+                const uploadProgressIdx = this.fm.state.uploadProgress.length;
+                this.fm.setState({
+                    uploadProgress: [...this.fm.state.uploadProgress, {
+                        name: file.name,
+                        progress: 0
+                    }]
+                });
+
+                axios.post(
+                    `/sftp_ul/${this.fm.session_id}`,
+                    form,
+                    {
+                        'Content-Type': 'multipart/form-data',
+                        onUploadProgress: progressEvent => {
+                            const percentage = Math.floor(progressEvent.loaded * 100 / progressEvent.total);
+
+                            this.fm.setState(({uploadProgress}) => ({
+                                uploadProgress: [
+                                    ...uploadProgress.slice(0, uploadProgressIdx),
+                                    {
+                                        ...uploadProgress[uploadProgressIdx],
+                                        progress: percentage
+                                    },
+                                    ...uploadProgress.slice(uploadProgressIdx + 1)
+                                ]
+                            }));
+
+                            // always scroll the latest item into the view
+                            const upload_paper = document.getElementById('upload_paper');
+                            upload_paper.scrollTop = upload_paper.scrollHeight;
+                        }
+                    }).then(response => {
+                    console.log(response);
+                }).then(error => {
+                    console.log(error);
+                });
+            }
+            u.removeEventListener('change', clickFunc);
+        };
+
+        u.addEventListener('change', clickFunc);
+
+        u.click();
     };
 
     handleCwdSubmit = (ev) => {
@@ -118,7 +173,7 @@ export default class CustomToolbar extends React.Component {
                     startIcon={<GetApp/>}>
                 Download
             </Button>
-            <Button color={'primary'} onClick={this.handleDownload}
+            <Button color={'primary'} onClick={this.handleUpload}
                     startIcon={<PublishIcon/>}>
                 Upload
             </Button>
