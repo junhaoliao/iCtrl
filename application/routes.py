@@ -7,9 +7,9 @@ from werkzeug.utils import secure_filename
 
 from application import app, profiles
 from application.Connection import Connection
+from application.SFTP import SFTP
 from application.Terminal import Terminal
 from application.VNC import VNC
-from application.SFTP import SFTP
 from application.paths import PRIVATE_KEY_PATH
 
 UPLOAD_CHUNK_SIZE = 1024 * 1024
@@ -89,7 +89,9 @@ def start_vnc():
     host, username, this_private_key_path = get_session_info(session_id)
 
     vnc = VNC()
-    vnc.connect(host=host, username=username, key_filename=this_private_key_path)
+    status, reason = vnc.connect(host=host, username=username, key_filename=this_private_key_path)
+    if status is False:
+        abort(403, description=reason)
 
     status, password = vnc.get_vnc_password()
     if not status:
@@ -104,7 +106,9 @@ def change_vncpasswd():
     host, username, this_private_key_path = get_session_info(session_id)
 
     vnc = VNC()
-    vnc.connect(host=host, username=username, key_filename=this_private_key_path)
+    status, reason = vnc.connect(host=host, username=username, key_filename=this_private_key_path)
+    if status is False:
+        abort(403, description=reason)
 
     passwd = request.form.get('passwd')
     status, reason = vnc.reset_vnc_password(passwd)
@@ -119,7 +123,9 @@ def sftp_ls(session_id):
     host, username, this_private_key_path = get_session_info(session_id)
 
     sftp = SFTP()
-    sftp.connect(host=host, username=username, key_filename=this_private_key_path)
+    status, reason = sftp.connect(host=host, username=username, key_filename=this_private_key_path)
+    if status is False:
+        abort(403, description=reason)
 
     path = request.args.get('path')
     status, cwd, file_list = sftp.ls(path)
@@ -136,7 +142,9 @@ def sftp_dl(session_id):
     host, username, this_private_key_path = get_session_info(session_id)
 
     sftp = SFTP()
-    sftp.connect(host=host, username=username, key_filename=this_private_key_path)
+    status, reason = sftp.connect(host=host, username=username, key_filename=this_private_key_path)
+    if status is False:
+        abort(403, description=reason)
 
     cwd = request.args.get('cwd')
     files = json.loads(request.args.get('files'))
@@ -168,7 +176,9 @@ def sftp_rename(session_id):
     host, username, this_private_key_path = get_session_info(session_id)
 
     sftp = SFTP()
-    sftp.connect(host=host, username=username, key_filename=this_private_key_path)
+    status, reason = sftp.connect(host=host, username=username, key_filename=this_private_key_path)
+    if status is False:
+        abort(403, description=reason)
 
     cwd = request.args.get('cwd')
     old = request.args.get('old')
@@ -186,7 +196,9 @@ def sftp_ul(session_id):
     host, username, this_private_key_path = get_session_info(session_id)
 
     sftp = SFTP()
-    sftp.connect(host=host, username=username, key_filename=this_private_key_path)
+    status, reason = sftp.connect(host=host, username=username, key_filename=this_private_key_path)
+    if status is False:
+        abort(403, description=reason)
 
     path = request.headers.get('Path')
     request_filename = secure_filename(request.headers.get('Filename'))
