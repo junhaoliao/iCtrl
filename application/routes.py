@@ -3,6 +3,7 @@ import os
 from datetime import datetime
 
 from flask import request, abort
+from werkzeug.utils import secure_filename
 
 from application import app, profiles
 from application.Connection import Connection
@@ -182,24 +183,23 @@ def sftp_rename(session_id):
 
 @app.route('/sftp_ul/<session_id>', methods=['POST'])
 def sftp_ul(session_id):
-    print('hi')
     host, username, this_private_key_path = get_session_info(session_id)
 
     sftp = SFTP()
     sftp.connect(host=host, username=username, key_filename=this_private_key_path)
 
-    request_file = request.files['file']
-    request_filename = request_file.filename
+    path = request.headers.get('Path')
+    request_filename = secure_filename(request.headers.get('Filename'))
     if request_filename == '':
         abort(400, 'Empty file handle')
 
-    print(request_filename)
+    sftp.sftp.chdir(path=path)
     sftp_file = sftp.file(filename=request_filename)
-    while True:
-        chunk = request_file.stream.read(UPLOAD_CHUNK_SIZE)
-        if chunk == b'':
-            break
+
+    chunk = request.stream.read(UPLOAD_CHUNK_SIZE)
+    while len(chunk) != 0:
         sftp_file.write(chunk)
+        chunk = request.stream.read(UPLOAD_CHUNK_SIZE)
 
     sftp_file.close()
 

@@ -1,15 +1,14 @@
 import UploadItem from './UploadItem';
-import {Box} from '@material-ui/core';
-
+import {Box, Divider} from '@material-ui/core';
 
 const UploadList = (props) => {
-    console.log('render');
-    const {items} = props;
-    const children = items.map((i) => (
-        <UploadItem
-            filename={i['name']}
-            progress={i['progress']}
-        />
+    const {fm} = props;
+    const uploadItems = fm.state.uploadProgress;
+    const children = uploadItems.map((_, idx) => (
+        <div key={idx}>
+            <UploadItem fm={fm} uploadProgressIdx={idx}/>
+            {(idx !== uploadItems.length - 1) && <Divider/>}
+        </div>
     ));
     return (<Box margin={'16px 20px 16px 20px'} display={'vertical'}>
         {children}
