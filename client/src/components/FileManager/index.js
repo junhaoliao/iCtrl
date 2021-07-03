@@ -3,12 +3,14 @@ import React from 'react';
 import {DataGrid} from '@material-ui/data-grid';
 import FolderIcon from '@material-ui/icons/Folder';
 import InsertDriveFileIcon from '@material-ui/icons/InsertDriveFile';
-import {Grid, Snackbar} from '@material-ui/core';
+import {duration, Grid, Paper, Snackbar} from '@material-ui/core';
 import MuiAlert from '@material-ui/lab/Alert';
 
 import CustomToolbar from './CustomToolbar';
 import * as constants from './constants';
 import {ShortcutIcon} from '../../icons';
+import UploadToolbar from './UploadToolbar';
+import UploadList from './UploadList';
 
 const dateFormatter = (params) => {
     const theDate = new Date(params.value * 1000);
@@ -114,8 +116,12 @@ export default class FileManager extends React.Component {
             cwdInput: '',
             density: 'standard',
             filesDisplaying: [],
-            loading: true
+            loading: true,
+            uploadWindowOpen: true,
+            uploadWindowCollapsed: false,
+            uploadProgress: []
         };
+        // FIXME: change uploadWindowOpen -> false  by default
     }
 
     nonHiddenFiles() {
@@ -237,7 +243,7 @@ export default class FileManager extends React.Component {
 
         // given name empty
         if (new_name === '') {
-            this.showAlert('File name cannot be empty.')
+            this.showAlert('File name cannot be empty.');
             this.loadDir(this.state.cwd);
             return;
         }
@@ -280,6 +286,13 @@ export default class FileManager extends React.Component {
     };
 
     handleAlertClose = (ev) => {
+        // not triggered by the auto-hide timer
+        // FIXME: it seems the timers are not cancelled even if any new alert opens
+        //  may use a counter to tell whether the alert should be hided
+        if (ev != null) {
+            return;
+        }
+
         this.setState({
             alertOpen: false,
             alertMsg: null
@@ -321,10 +334,30 @@ export default class FileManager extends React.Component {
                 }}
                 onSelectionModelChange={this.handleSelectionModelChange}
             />
-            <Snackbar open={this.state.alertOpen} autoHideDuration={3000} onClose={this.handleAlertClose}>
+            <Snackbar
+                open={this.state.alertOpen}
+                autoHideDuration={3000}
+                onClose={this.handleAlertClose}
+                transitionDuration={{enter: 2 * duration.enteringScreen, exit: 2 * duration.leavingScreen,}}
+            >
                 <MuiAlert elevation={6} variant="filled" severity={'error'}>
                     {this.state.alertMsg}
                 </MuiAlert>
+            </Snackbar>
+            <Snackbar
+                open={this.state.uploadWindowOpen}
+                anchorOrigin={{vertical: 'bottom', horizontal: 'right'}}
+            >
+                <div style={{position: 'relative', bottom: 40}}>
+                    <UploadToolbar fm={this}/>
+                    {!this.state.uploadWindowCollapsed &&
+                    <Paper id="upload_paper"
+                           style={{maxHeight: 200, overflowY: 'auto'}}
+                           variant="outlined"
+                           square>
+                        <UploadList items={this.state.uploadProgress}/>
+                    </Paper>}
+                </div>
             </Snackbar>
         </div>);
     }
