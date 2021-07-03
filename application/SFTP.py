@@ -111,7 +111,9 @@ class SFTP(Connection):
         return True, ''
 
     def file(self, filename):
-        return self.sftp.file(filename, mode='w')
+        f = self.sftp.file(filename, mode='w')
+        f.set_pipelined(True)
+        return f
 
     # TODO: might use this if the server is running locally
     # def dl_direct(self, path):

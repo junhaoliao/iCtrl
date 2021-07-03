@@ -11,6 +11,7 @@ import * as constants from './constants';
 import {ShortcutIcon} from '../../icons';
 import UploadToolbar from './UploadToolbar';
 import UploadList from './UploadList';
+import {humanFileSize} from './utils';
 
 const dateFormatter = (params) => {
     const theDate = new Date(params.value * 1000);
@@ -38,11 +39,6 @@ const permissionFormatter = (params) => {
     return mode_str_arr.join('');
 };
 
-// https://stackoverflow.com/questions/10420352/converting-file-size-in-bytes-to-human-readable-string/10420404
-const humanFileSize = (size_in_bytes) => {
-    const i = (size_in_bytes === 0) ? 0 : Math.floor(Math.log(size_in_bytes) / Math.log(1024));
-    return (size_in_bytes / Math.pow(1024, i)).toFixed(2) * 1 + ' ' + ['B', 'kB', 'MB', 'GB', 'TB'][i];
-};
 
 const isDir = (mode) => {
     return (parseInt(mode) & constants.S_IFMT) === constants.S_IFDIR;
@@ -71,22 +67,22 @@ const columns = [
         }
     },
     {
-        field: 'size', headerName: 'Size', width: 100,
+        field: 'size', headerName: 'Size', width: 90,
         valueFormatter: (params) => {
             const valueFormatted = humanFileSize(params.value).toLocaleString();
             return `${valueFormatted}`;
         }
     },
     {
-        field: 'atime', headerName: 'Date Accessed', width: 200,
+        field: 'atime', headerName: 'Date Accessed', width: 188,
         valueFormatter: dateFormatter
     },
     {
-        field: 'mtime', headerName: 'Date Modified', width: 200,
+        field: 'mtime', headerName: 'Date Modified', width: 188,
         valueFormatter: dateFormatter
     },
     {
-        field: 'mode', headerName: 'Permission', width: 150,
+        field: 'mode', headerName: 'Permission', width: 132,
         valueFormatter: permissionFormatter
     },
 ];
@@ -117,7 +113,6 @@ export default class FileManager extends React.Component {
             density: 'standard',
             filesDisplaying: [],
             loading: true,
-            uploadWindowOpen: true,
             uploadWindowCollapsed: false,
             uploadProgress: []
         };
@@ -338,6 +333,7 @@ export default class FileManager extends React.Component {
                 open={this.state.alertOpen}
                 autoHideDuration={3000}
                 onClose={this.handleAlertClose}
+                anchorOrigin={{vertical: 'bottom', horizontal: 'center'}}
                 transitionDuration={{enter: 2 * duration.enteringScreen, exit: 2 * duration.leavingScreen,}}
             >
                 <MuiAlert elevation={6} variant="filled" severity={'error'}>
@@ -345,17 +341,17 @@ export default class FileManager extends React.Component {
                 </MuiAlert>
             </Snackbar>
             <Snackbar
-                open={this.state.uploadWindowOpen}
+                open={this.state.uploadProgress.length !== 0}
                 anchorOrigin={{vertical: 'bottom', horizontal: 'right'}}
             >
-                <div style={{position: 'relative', bottom: 40}}>
+                <div style={{position: 'fixed', bottom: 55, right: 15}}>
                     <UploadToolbar fm={this}/>
                     {!this.state.uploadWindowCollapsed &&
                     <Paper id="upload_paper"
-                           style={{maxHeight: 200, overflowY: 'auto'}}
+                           style={{maxHeight: 180, overflowY: 'auto'}}
                            variant="outlined"
                            square>
-                        <UploadList items={this.state.uploadProgress}/>
+                        <UploadList fm={this}/>
                     </Paper>}
                 </div>
             </Snackbar>
