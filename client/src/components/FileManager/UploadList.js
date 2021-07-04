@@ -1,5 +1,6 @@
-import UploadItem from './UploadItem';
 import {Box, Divider} from '@material-ui/core';
+
+import UploadItem from './UploadItem';
 
 const UploadList = (props) => {
     const {fm} = props;

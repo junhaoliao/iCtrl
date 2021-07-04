@@ -1,8 +1,9 @@
-import {Box, CircularProgress, IconButton, Typography} from '@material-ui/core';
-import CloseIcon from '@material-ui/icons/Close';
 import React from 'react';
-import CheckCircleOutlineIcon from '@material-ui/icons/CheckCircleOutline';
+
+import {Box, CircularProgress, IconButton, Typography} from '@material-ui/core';
+import {CheckCircleOutline, Close} from '@material-ui/icons';
 import {makeStyles} from '@material-ui/styles';
+
 import {humanFileSize} from './utils';
 
 
@@ -90,10 +91,10 @@ const UploadItem = (props) => {
         </Box>
         {!cancelled && <Box>
             {progress === 100 ?
-                <CheckCircleOutlineIcon className={classes.checkIcon}/> :
+                <CheckCircleOutline className={classes.checkIcon}/> :
                 <IconButton onClick={handleCancel} className={classes.iconButton} color={'primary'}
                             aria-label={'cancel upload'}>
-                    <CloseIcon className={classes.closeIcon}/></IconButton>}
+                    <Close className={classes.closeIcon}/></IconButton>}
             {progress !== 100 &&
             <CircularProgress className={classes.circularProgress} variant={'determinate'} value={progress} size={32}/>}
         </Box>}
