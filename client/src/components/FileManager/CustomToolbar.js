@@ -1,12 +1,26 @@
 import {GridToolbarContainer} from '@material-ui/data-grid';
-import {Button, IconButton, InputAdornment, Menu, MenuItem, OutlinedInput} from '@material-ui/core';
+import {
+    Button,
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogContentText,
+    DialogTitle,
+    IconButton,
+    InputAdornment,
+    Menu,
+    MenuItem,
+    OutlinedInput
+} from '@material-ui/core';
 import React from 'react';
 import {GetApp, VisibilityOff} from '@material-ui/icons';
 import ArrowUpwardIcon from '@material-ui/icons/ArrowUpward';
 import KeyboardArrowRightIcon from '@material-ui/icons/KeyboardArrowRight';
 import {DensityComfortableIcon, DensityCompactIcon, DensityIcon, DensityStandardIcon} from '../../icons';
 import PublishIcon from '@material-ui/icons/Publish';
+import DeleteIcon from '@material-ui/icons/Delete';
 import axios from 'axios';
+import {htmlResponseToReason} from './utils';
 
 
 export default class CustomToolbar extends React.Component {
@@ -15,7 +29,8 @@ export default class CustomToolbar extends React.Component {
         this.fm = props.fm;
 
         this.state = {
-            densityMenuAnchorEl: null
+            densityMenuAnchorEl: null,
+            deleteAllPromptOpen: false
         };
     }
 
@@ -116,10 +131,13 @@ export default class CustomToolbar extends React.Component {
                         }
                     }).then(response => {
                     console.log(response);
-                }).then(error => {
-                    console.log(error);
-                }).catch(thrown => {
-                    console.log(thrown);
+                }).catch(error => {
+                    if (error.response) {
+                        this.fm.showAlert(htmlResponseToReason(error.response.data));
+                    } else {
+                        // Something happened in setting up the request that triggered an Error
+                        this.fm.showAlert('Error: ' + error.message);
+                    }
                 });
 
                 // always scroll the latest item into the view
@@ -132,6 +150,44 @@ export default class CustomToolbar extends React.Component {
         u.addEventListener('change', clickFunc);
 
         u.click();
+    };
+
+    handleDeleteAllPrompt = (ev) => {
+        if (ev.target.id !== 'button_proceed_delete') {
+            this.setState({
+                deleteAllPromptOpen: false
+            });
+            return;
+        }
+        const url = `/sftp_rm/${this.fm.session_id}?` +
+            `cwd=${this.fm.state.cwd}&` +
+            `files=${JSON.stringify(this.fm.selected)}`;
+
+        axios.get(url)
+            .then(res => {
+                this.fm.loadDir(this.fm.state.cwd);
+            }).catch(error => {
+            if (error.response) {
+                this.fm.showAlert(htmlResponseToReason(error.response.data));
+            } else {
+                // Something happened in setting up the request that triggered an Error
+                this.fm.showAlert('Error: ' + error.message);
+            }
+        });
+        this.setState({
+            deleteAllPromptOpen: false
+        });
+    };
+
+    handleDelete = (ev) => {
+        if (this.fm.selected.length === 0) {
+            this.fm.showAlert('No files selected for removal.');
+            return;
+        }
+        this.setState({
+            deleteAllPromptOpen: true
+        });
+
     };
 
     handleCwdSubmit = (ev) => {
@@ -168,6 +224,7 @@ export default class CustomToolbar extends React.Component {
     };
 
     render() {
+        const pluralSelection = this.fm.selected.length > 1;
         return (<GridToolbarContainer>
             <IconButton aria-label={'up'} onClick={this.handleUpOneLevel} color={'primary'}>
                 <ArrowUpwardIcon/>
@@ -195,6 +252,10 @@ export default class CustomToolbar extends React.Component {
             <Button color={'primary'} onClick={this.handleUpload}
                     startIcon={<PublishIcon/>}>
                 Upload
+            </Button>
+            <Button color={'primary'} onClick={this.handleDelete}
+                    startIcon={<DeleteIcon/>}>
+                Delete
             </Button>
             <Button color={'primary'} onClick={() => {
                 this.handleHiddenFiles();
@@ -226,7 +287,27 @@ export default class CustomToolbar extends React.Component {
                     Comfortable
                 </MenuItem>
             </Menu>
-
+            <Dialog
+                open={this.state.deleteAllPromptOpen}
+                keepMounted
+                onClose={this.handleDeleteAllPrompt}
+                aria-describedby="delete all upload alert"
+                fullWidth={true}
+                maxWidth={'sm'}
+            >
+                <DialogTitle>{`Delete ${pluralSelection ? 'files' : 'file'} permanently?`}</DialogTitle>
+                <DialogContent>
+                    <DialogContentText id="cancel all upload description">
+                        Your {pluralSelection ? 'files' : 'file'} will be deleted permanently and cannot be
+                        recovered.<br/>
+                        Do you want to proceed?
+                    </DialogContentText>
+                </DialogContent>
+                <DialogActions>
+                    <Button variant={'contained'} onClick={this.handleDeleteAllPrompt}>Cancel</Button>
+                    <Button id={'button_proceed_delete'} onClick={this.handleDeleteAllPrompt}>Proceed</Button>
+                </DialogActions>
+            </Dialog>
         </GridToolbarContainer>);
     }
 }

@@ -115,6 +115,29 @@ class SFTP(Connection):
         f.set_pipelined(True)
         return f
 
+    def _rm_recurse(self, parent, file):
+        fullpath = os.path.join(parent, file)
+        try:
+            self.sftp.remove(fullpath)
+        except IOError:
+            # it is a directory: remove any files or sub-directories under it
+            dir_ls = self.sftp.listdir(fullpath)
+            for dir_file in dir_ls:
+                self._rm_recurse(fullpath, dir_file)
+
+            # now we can remove the emptied directory
+            self.sftp.rmdir(fullpath)
+
+    def rm(self, cwd, file_list):
+        try:
+            self.sftp.chdir(cwd)
+            for file in file_list:
+                self._rm_recurse('', file)
+        except Exception as e:
+            return False, repr(e)
+
+        return True, ''
+
     # TODO: might use this if the server is running locally
     # def dl_direct(self, path):
     #     home = os.path.expanduser("~")

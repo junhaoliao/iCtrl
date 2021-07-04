@@ -46,7 +46,7 @@ const UploadToolbar = (props) => {
 
     const handleUploadWindowClose = (ev) => {
         const shouldPrompt = fm.state.uploadProgress.some(item => {
-            if (item.cancelled){
+            if (item.cancelled) {
                 return false;
             } else {
                 return item.progress !== 100;
@@ -86,7 +86,7 @@ const UploadToolbar = (props) => {
             fullWidth={true}
             maxWidth={'sm'}
         >
-            <DialogTitle>{`Cancel upload${pluralUpload ? 's' : ''}?`}</DialogTitle>
+            <DialogTitle>{`Cancel ${pluralUpload ? 'all uploads' : 'upload'}?`}</DialogTitle>
             <DialogContent>
                 <DialogContentText id="cancel all upload description">
                     Your {pluralUpload ? 'uploads are' : 'upload is'} not complete. <br/>
