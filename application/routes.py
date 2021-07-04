@@ -216,3 +216,21 @@ def sftp_ul(session_id):
     sftp_file.close()
 
     return 'success'
+
+@app.route('/sftp_rm/<session_id>')
+def sftp_rm(session_id):
+    host, username, this_private_key_path = get_session_info(session_id)
+
+    sftp = SFTP()
+    status, reason = sftp.connect(host=host, username=username, key_filename=this_private_key_path)
+    if status is False:
+        abort(403, description=reason)
+
+    cwd = request.args.get('cwd')
+    files = json.loads(request.args.get('files'))
+
+    status, reason = sftp.rm(cwd, files)
+    if not status:
+        abort(400, description=reason)
+
+    return 'success'

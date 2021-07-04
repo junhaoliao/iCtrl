@@ -243,9 +243,7 @@ export default class FileManager extends React.Component {
             return;
         }
 
-        // FIXME: show check whether the conflicts happen between (file and file) or (file and dir)
-        //  the later one should be allowed
-        // check whether there is already a file with the same name
+        // check whether there is already a file or directory with the same name
         const duplicate_check = this.files.filter((row) => {
             return row.id === new_name;
         });
@@ -282,8 +280,8 @@ export default class FileManager extends React.Component {
 
     handleAlertClose = (ev) => {
         // not triggered by the auto-hide timer
-        // FIXME: it seems the timers are not cancelled even if any new alert opens
-        //  may use a counter to tell whether the alert should be hided
+        // FIXME: it seems the timers are not cancelled even if any new alert opens.
+        //  may use a counter to tell whether the alert should be hidden
         if (ev != null) {
             return;
         }
