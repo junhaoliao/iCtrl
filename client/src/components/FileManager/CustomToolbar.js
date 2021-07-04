@@ -1,3 +1,5 @@
+import React from 'react';
+
 import {GridToolbarContainer} from '@material-ui/data-grid';
 import {
     Button,
@@ -12,15 +14,10 @@ import {
     MenuItem,
     OutlinedInput
 } from '@material-ui/core';
-import React from 'react';
-import {GetApp, VisibilityOff} from '@material-ui/icons';
-import ArrowUpwardIcon from '@material-ui/icons/ArrowUpward';
-import KeyboardArrowRightIcon from '@material-ui/icons/KeyboardArrowRight';
-import {DensityComfortableIcon, DensityCompactIcon, DensityIcon, DensityStandardIcon} from '../../icons';
-import PublishIcon from '@material-ui/icons/Publish';
-import DeleteIcon from '@material-ui/icons/Delete';
-import {sftp_dl, sftp_rm, sftp_ul} from '../../actions/sftp';
+import {ArrowUpward, Delete, GetApp, KeyboardArrowRight, Publish, VisibilityOff} from '@material-ui/icons';
 
+import {DensityComfortableIcon, DensityCompactIcon, DensityIcon, DensityStandardIcon} from '../../icons';
+import {sftp_dl, sftp_rm, sftp_ul} from '../../actions/sftp';
 
 export default class CustomToolbar extends React.Component {
     constructor(props) {
@@ -33,8 +30,7 @@ export default class CustomToolbar extends React.Component {
         };
     }
 
-
-    handleClose = (ev) => {
+    handleClose = (_) => {
         this.setState({
             densityMenuAnchorEl: null
         });
@@ -55,14 +51,14 @@ export default class CustomToolbar extends React.Component {
         });
     };
 
-    handleHiddenFiles = (ev) => {
+    handleHiddenFiles = (_) => {
         this.fm.showHidden = !this.fm.showHidden;
         this.fm.setState({
             filesDisplaying: this.fm.showHidden ? this.fm.files : this.fm.nonHiddenFiles(),
         });
     };
 
-    handleDownload = (ev) => {
+    handleDownload = (_) => {
         if (this.fm.selected.length === 0) {
             this.fm.showAlert('No files selected for download. ');
             return;
@@ -101,7 +97,7 @@ export default class CustomToolbar extends React.Component {
         });
     };
 
-    handleDelete = (ev) => {
+    handleDelete = (_) => {
         if (this.fm.selected.length === 0) {
             this.fm.showAlert('No files selected for removal.');
             return;
@@ -109,7 +105,6 @@ export default class CustomToolbar extends React.Component {
         this.setState({
             deleteAllPromptOpen: true
         });
-
     };
 
     handleCwdSubmit = (ev) => {
@@ -134,7 +129,7 @@ export default class CustomToolbar extends React.Component {
         });
     };
 
-    handleUpOneLevel = (ev) => {
+    handleUpOneLevel = (_) => {
         const cwd = this.fm.state.cwd;
         const path = cwd.substring(0, cwd.lastIndexOf('/'));
         if (path === '') {
@@ -149,7 +144,7 @@ export default class CustomToolbar extends React.Component {
         const pluralSelection = this.fm.selected.length > 1;
         return (<GridToolbarContainer>
             <IconButton aria-label={'up'} onClick={this.handleUpOneLevel} color={'primary'}>
-                <ArrowUpwardIcon/>
+                <ArrowUpward/>
             </IconButton>
             <form onSubmit={this.handleCwdSubmit} autoComplete="off">
                 <OutlinedInput style={{width: '30vw'}}
@@ -161,7 +156,7 @@ export default class CustomToolbar extends React.Component {
                                        <IconButton color={'primary'} id={'enter_button'} edge={'end'}
                                                    aria-label={'enter'}
                                                    onClick={this.handleCwdSubmit}>
-                                           <KeyboardArrowRightIcon/>
+                                           <KeyboardArrowRight/>
                                        </IconButton>
                                    </InputAdornment>
                                }
@@ -172,11 +167,11 @@ export default class CustomToolbar extends React.Component {
                 Download
             </Button>
             <Button color={'primary'} onClick={this.handleUpload}
-                    startIcon={<PublishIcon/>}>
+                    startIcon={<Publish/>}>
                 Upload
             </Button>
             <Button color={'primary'} onClick={this.handleDelete}
-                    startIcon={<DeleteIcon/>}>
+                    startIcon={<Delete/>}>
                 Delete
             </Button>
             <Button color={'primary'} onClick={() => {

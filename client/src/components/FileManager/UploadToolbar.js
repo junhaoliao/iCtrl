@@ -10,14 +10,13 @@ import {
     Toolbar,
     Typography
 } from '@material-ui/core';
+import {Close, ExpandLess, ExpandMore} from '@material-ui/icons';
 import {makeStyles} from '@material-ui/styles';
 
-import CloseIcon from '@material-ui/icons/Close';
-import {ExpandLess, ExpandMore} from '@material-ui/icons';
-// TODO: change the background style below
+// TODO: change the background color below to something like theme.palette.primary.main
 const useStyles = makeStyles((theme) => ({
     root: {
-        background: 'linear-gradient(45deg, #FE6B8B 30%, #FF8E53 90%)',
+        background: '#1976d2',
         color: 'white',
         flexGrow: 1
     },
@@ -76,7 +75,7 @@ const UploadToolbar = (props) => {
             {fm.state.uploadWindowCollapsed ? <ExpandLess/> : <ExpandMore/>}
         </IconButton>
         <IconButton onClick={handleUploadWindowClose} aria-label="close upload window">
-            <CloseIcon/>
+            <Close/>
         </IconButton>
         <Dialog
             open={cancelAllPromptOpen}
