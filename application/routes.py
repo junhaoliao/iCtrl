@@ -3,7 +3,6 @@ import os
 from datetime import datetime
 
 from flask import request, abort
-from werkzeug.utils import secure_filename
 
 from application import app, profiles
 from application.Connection import Connection
@@ -129,6 +128,9 @@ def sftp_ls(session_id):
 
     path = request.args.get('path')
     status, cwd, file_list = sftp.ls(path)
+    if status is False:
+        abort(400, description=cwd)
+
     result = {
         'status': status,
         'cwd': cwd,
@@ -170,8 +172,7 @@ def sftp_dl(session_id):
     return r
 
 
-# FIXME: change this to a PATCH method
-@app.route('/sftp_rename/<session_id>')
+@app.route('/sftp_rename/<session_id>', methods=['PATCH'])
 def sftp_rename(session_id):
     host, username, this_private_key_path = get_session_info(session_id)
 
@@ -180,9 +181,9 @@ def sftp_rename(session_id):
     if status is False:
         abort(403, description=reason)
 
-    cwd = request.args.get('cwd')
-    old = request.args.get('old')
-    new = request.args.get('new')
+    cwd = request.json.get('cwd')
+    old = request.json.get('old')
+    new = request.json.get('new')
 
     status, reason = sftp.rename(cwd, old, new)
     if not status:
@@ -201,7 +202,9 @@ def sftp_ul(session_id):
         abort(403, description=reason)
 
     path = request.headers.get('Path')
-    request_filename = secure_filename(request.headers.get('Filename'))
+    # no need to use secure_filename because the user should be responsible for her/his input
+    #  when not using the client
+    request_filename = request.headers.get('Filename')
     if request_filename == '':
         abort(400, 'Empty file handle')
 
@@ -217,7 +220,8 @@ def sftp_ul(session_id):
 
     return 'success'
 
-@app.route('/sftp_rm/<session_id>')
+
+@app.route('/sftp_rm/<session_id>', methods=['POST'])
 def sftp_rm(session_id):
     host, username, this_private_key_path = get_session_info(session_id)
 
@@ -226,8 +230,8 @@ def sftp_rm(session_id):
     if status is False:
         abort(403, description=reason)
 
-    cwd = request.args.get('cwd')
-    files = json.loads(request.args.get('files'))
+    cwd = request.json.get('cwd')
+    files = request.json.get('files')
 
     status, reason = sftp.rm(cwd, files)
     if not status:

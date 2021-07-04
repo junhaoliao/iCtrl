@@ -47,4 +47,3 @@ def read_password():
             print("Passwords don't match - try again")
             continue
         return obfuscate_password(passwd)
-
