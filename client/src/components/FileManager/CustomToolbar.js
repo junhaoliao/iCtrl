@@ -19,8 +19,7 @@ import KeyboardArrowRightIcon from '@material-ui/icons/KeyboardArrowRight';
 import {DensityComfortableIcon, DensityCompactIcon, DensityIcon, DensityStandardIcon} from '../../icons';
 import PublishIcon from '@material-ui/icons/Publish';
 import DeleteIcon from '@material-ui/icons/Delete';
-import axios from 'axios';
-import {htmlResponseToReason} from './utils';
+import {sftp_dl, sftp_rm, sftp_ul} from '../../actions/sftp';
 
 
 export default class CustomToolbar extends React.Component {
@@ -68,13 +67,7 @@ export default class CustomToolbar extends React.Component {
             this.fm.showAlert('No files selected for download. ');
             return;
         }
-        const url = `http://localhost:5000/sftp_dl/${this.fm.session_id}?` +
-            `cwd=${this.fm.state.cwd}&` +
-            `files=${JSON.stringify(this.fm.selected)}`;
-        const a = document.createElement('a');
-        a.download = '';
-        a.href = url;
-        a.click();
+        sftp_dl(this.fm.session_id, this.fm.state.cwd, this.fm.selected);
     };
 
     handleUpload = (_) => {
@@ -83,62 +76,7 @@ export default class CustomToolbar extends React.Component {
         u.multiple = true;
         const clickFunc = (_) => {
             for (let i = 0; i < u.files.length; i++) {
-                const file = u.files[i];
-                // const form = new FormData();
-                // form.append('file', file);
-                const uploadProgressIdx = this.fm.state.uploadProgress.length;
-                const cancelTokenSrc = axios.CancelToken.source();
-                this.fm.setState({
-                    uploadProgress: [...this.fm.state.uploadProgress, {
-                        filename: file.name,
-                        progress: 0,
-                        speed: 0,
-                        loaded: 0,
-                        totalSize: file.size,
-                        cancelTokenSrc: cancelTokenSrc,
-                        cancelled: false
-                    }]
-                });
-                const startTime = new Date().getTime();
-                axios.post(
-                    `/sftp_ul/${this.fm.session_id}`,
-                    file,
-                    {
-                        cancelToken: cancelTokenSrc.token,
-                        headers: {
-                            Path: this.fm.state.cwd,
-                            Filename: file.name
-                        },
-                        onUploadProgress: progressEvent => {
-                            const percentage = Math.floor(progressEvent.loaded * 100 / progressEvent.total);
-
-                            // the time is in miliseconds
-                            const speed = progressEvent.loaded *
-                                1000 / (new Date().getTime() - startTime);
-
-                            this.fm.setState(({uploadProgress}) => ({
-                                uploadProgress: [
-                                    ...uploadProgress.slice(0, uploadProgressIdx),
-                                    {
-                                        ...uploadProgress[uploadProgressIdx],
-                                        progress: percentage,
-                                        speed: speed,
-                                        loaded: progressEvent.loaded
-                                    },
-                                    ...uploadProgress.slice(uploadProgressIdx + 1)
-                                ]
-                            }));
-                        }
-                    }).then(response => {
-                    console.log(response);
-                }).catch(error => {
-                    if (error.response) {
-                        this.fm.showAlert(htmlResponseToReason(error.response.data));
-                    } else {
-                        // Something happened in setting up the request that triggered an Error
-                        this.fm.showAlert('Error: ' + error.message);
-                    }
-                });
+                sftp_ul(this.fm, this.fm.session_id, this.fm.state.cwd, u.files[i]);
 
                 // always scroll the latest item into the view
                 const upload_paper = document.getElementById('upload_paper');
@@ -146,9 +84,7 @@ export default class CustomToolbar extends React.Component {
             }
             u.removeEventListener('change', clickFunc);
         };
-
         u.addEventListener('change', clickFunc);
-
         u.click();
     };
 
@@ -159,21 +95,7 @@ export default class CustomToolbar extends React.Component {
             });
             return;
         }
-        const url = `/sftp_rm/${this.fm.session_id}?` +
-            `cwd=${this.fm.state.cwd}&` +
-            `files=${JSON.stringify(this.fm.selected)}`;
-
-        axios.get(url)
-            .then(res => {
-                this.fm.loadDir(this.fm.state.cwd);
-            }).catch(error => {
-            if (error.response) {
-                this.fm.showAlert(htmlResponseToReason(error.response.data));
-            } else {
-                // Something happened in setting up the request that triggered an Error
-                this.fm.showAlert('Error: ' + error.message);
-            }
-        });
+        sftp_rm(this.fm, this.fm.session_id, this.fm.state.cwd, this.fm.selected);
         this.setState({
             deleteAllPromptOpen: false
         });
@@ -297,7 +219,7 @@ export default class CustomToolbar extends React.Component {
             >
                 <DialogTitle>{`Delete ${pluralSelection ? 'files' : 'file'} permanently?`}</DialogTitle>
                 <DialogContent>
-                    <DialogContentText id="cancel all upload description">
+                    <DialogContentText id="delete all upload description">
                         Your {pluralSelection ? 'files' : 'file'} will be deleted permanently and cannot be
                         recovered.<br/>
                         Do you want to proceed?
@@ -305,7 +227,7 @@ export default class CustomToolbar extends React.Component {
                 </DialogContent>
                 <DialogActions>
                     <Button variant={'contained'} onClick={this.handleDeleteAllPrompt}>Cancel</Button>
-                    <Button id={'button_proceed_delete'} onClick={this.handleDeleteAllPrompt}>Proceed</Button>
+                    <Button id={'button_proceed_delete'} onClick={this.handleDeleteAllPrompt}>Delete</Button>
                 </DialogActions>
             </Dialog>
         </GridToolbarContainer>);

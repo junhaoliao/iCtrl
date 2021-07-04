@@ -20,4 +20,3 @@ USER_PROFILE_PATH = os.path.join(PROFILE_PATH, "user_profile.json")
 
 PRIVATE_KEY_PATH = os.path.join(PROFILE_PATH, "private_keys")
 makedir_if_not_exists(PRIVATE_KEY_PATH)
-

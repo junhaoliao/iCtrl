@@ -12,6 +12,7 @@ if not app.debug:
     def not_found(e):
         return render_template('index.html')
 
+
     @app.route("/")
     def react():
         return render_template('index.html')

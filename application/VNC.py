@@ -1,8 +1,8 @@
 import re
+import socket
+import threading
 
 import websockify
-import threading
-import socket
 
 from application.Connection import Connection
 from application.vncpasswd import decrypt_passwd
@@ -104,6 +104,3 @@ class VNC(Connection):
         proxy_thread.start()
 
         return local_websocket_port
-
-
-
