@@ -2,6 +2,7 @@ import {BrowserRouter as Router, Route, Switch} from 'react-router-dom';
 
 import Home from './components/Home';
 import FileManager from './components/FileManager';
+import VNCViewer from './components/VNCViewer'
 import React from 'react';
 
 
@@ -36,6 +37,9 @@ export default class App extends React.Component {
                 <Switch>
                     <Route path="/fm/:session_id" render={(props) => (
                         <FileManager {...props} profiles={this.state.profiles}/>
+                    )}/>
+                    <Route path="/vnc/:session_id" render={(props) => (
+                        <VNCViewer {...props} profiles={this.state.profiles}/>
                     )}/>
                     <Route path="/">
                         <Home/>

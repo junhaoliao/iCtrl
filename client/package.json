@@ -19,7 +19,7 @@
     "react-scripts": "4.0.3",
     "web-vitals": "^1.1.2",
     "axios": "^0.21.1",
-    "uuid": "^8.3.2"
+    "@novnc/novnc": "^1.2.0"
   },
   "scripts": {
     "start": "react-scripts start",

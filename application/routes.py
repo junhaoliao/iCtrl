@@ -84,7 +84,7 @@ def start_terminal():
 
 @app.route('/vnc', methods=['POST'])
 def start_vnc():
-    session_id = request.form.get('session_id')
+    session_id = request.json.get('session_id')
     host, username, this_private_key_path = get_session_info(session_id)
 
     vnc = VNC()
@@ -96,7 +96,12 @@ def start_vnc():
     if not status:
         abort(403, description='VNC password missing')
 
-    return str(vnc.launch_web_vnc())
+    port = vnc.launch_web_vnc()
+    result = {
+        'port': port,
+        'passwd': password
+    }
+    return json.dumps(result)
 
 
 @app.route('/vncpasswd', methods=['POST'])

@@ -32,7 +32,7 @@ class VNC(Connection):
         super().__del__()
 
     def connect(self, *args, **kwargs):
-        super().connect(*args, **kwargs)
+        return super().connect(*args, **kwargs)
 
     def get_vnc_password(self):
         _, _, stdout, stderr = self.exec_command_blocking('xxd -p ~/.vnc/passwd')
@@ -67,6 +67,7 @@ class VNC(Connection):
             if len(this_port_by_me) != 0:
                 ports_by_me.append(this_port_by_me[0])
 
+        # FIXME: handle disk quota issue when launching vncserver
         relaunch = False
         if len(ports_by_me) > 1:
             # TODO: might recover the valid ones
