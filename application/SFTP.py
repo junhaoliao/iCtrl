@@ -22,7 +22,9 @@ class SFTP(Connection):
         super().__del__()
 
     def connect(self, *args, **kwargs):
-        super().connect(*args, **kwargs)
+        status, reason = super().connect(*args, **kwargs)
+        if not status:
+            return status, reason
 
         try:
             self.sftp = self.client.open_sftp()
