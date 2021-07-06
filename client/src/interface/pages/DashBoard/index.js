@@ -18,9 +18,9 @@ export default class DashBoard extends React.Component {
 
     componentDidMount() {
         const data = {
-            "last_session": "d0b70b67d8d44254815ceeac5def6102",
+            "last_session": "4502c2b1a51c41b2ad3a6a1c7e9a188f",
             "sessions": {
-                "d0b70b67d8d44254815ceeac5def6102": {
+                "4502c2b1a51c41b2ad3a6a1c7e9a188f": {
                     "host": "ictrl.ca",
                     "username": "root"
                 }
@@ -53,12 +53,13 @@ export default class DashBoard extends React.Component {
                 this.handleChangeMachine();
                 break;
             case 'vnc':
-                window.open('http://www.baidu.com', '_blank');
+                window.open(`/vnc/${uuid}`, '_blank');
                 break;
             case 'term':
-                window.open(`terminal/${uuid}`, '_blank');
+                window.open(`/terminal/${uuid}`, '_blank');
                 break;
             case 'file':
+                window.open(`/fm/${uuid}`, '_blank');
                 break;
             case 'more':
                 break;

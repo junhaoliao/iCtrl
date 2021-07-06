@@ -8,6 +8,11 @@ profiles = Profile()
 from application.routes import *
 
 if not app.debug:
+    @app.errorhandler(404)
+    def not_found(e):
+        return render_template('index.html')
+
+
     @app.route("/")
     def react():
         return render_template('index.html')
