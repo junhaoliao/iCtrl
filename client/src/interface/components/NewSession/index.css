@@ -1,0 +1,43 @@
+.new-session-mask {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 100%;
+    background-color: #00000079;
+    z-index: 2;
+}
+
+.new-session-content-wrapper {
+    margin: 30px 20px 20px;
+}
+
+.new-session-input-wrapper {
+    display: flex;
+    flex-direction: row;
+    height: 210px;
+}
+
+.new-session-name-wrapper {
+    display: grid;
+}
+
+.new-session-inputs {
+    display: grid;
+    margin-left: 20px;
+}
+
+.new-session-name {
+    line-height: 50px;
+    font-weight: 600;
+    font-size: 20px;
+    flex: 1;
+    margin-right: auto;
+}
+
+.new-session-save {
+    left: 0;
+    right: 0;
+    margin: 30px auto 0;
+    width: 180px;
+}
