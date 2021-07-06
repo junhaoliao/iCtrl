@@ -6,12 +6,7 @@ export const humanFileSize = (size_in_bytes) => {
     return (size_in_bytes / Math.pow(1024, i)).toFixed(2) * 1 + ' ' + ['B', 'kB', 'MB', 'GB', 'TB'][i];
 };
 
-export const htmlResponseToReason = (response) => {
-    const html = document.createElement('html');
-    html.innerHTML = response;
-    const reasonHTML = html.children[1];
-    return reasonHTML.innerText;
-};
+
 
 export const isDir = (mode) => {
     return (parseInt(mode) & constants.S_IFMT) === constants.S_IFDIR;

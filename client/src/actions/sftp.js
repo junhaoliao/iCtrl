@@ -1,5 +1,5 @@
 import axios from 'axios';
-import {htmlResponseToReason} from '../components/FileManager/utils';
+import {htmlResponseToReason} from './utils';
 
 export const sftp_ls = (fm, path) => {
     fm.setState({
