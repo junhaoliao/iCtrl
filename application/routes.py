@@ -106,7 +106,7 @@ def start_vnc():
 
 @app.route('/vncpasswd', methods=['POST'])
 def change_vncpasswd():
-    session_id = request.form.get('session_id')
+    session_id = request.json.get('session_id')
     host, username, this_private_key_path = get_session_info(session_id)
 
     vnc = VNC()
@@ -114,7 +114,7 @@ def change_vncpasswd():
     if status is False:
         abort(403, description=reason)
 
-    passwd = request.form.get('passwd')
+    passwd = request.json.get('passwd')
     status, reason = vnc.reset_vnc_password(passwd)
     if not status:
         abort(403, description=reason)

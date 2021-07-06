@@ -2,8 +2,8 @@ import {BrowserRouter as Router, Route, Switch} from 'react-router-dom';
 
 import Home from './components/Home';
 import FileManager from './components/FileManager';
-import VNCViewer from './components/VNCViewer'
 import React from 'react';
+import VNCViewer from './components/VNCViewer';
 
 
 export default class App extends React.Component {
