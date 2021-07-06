@@ -5,13 +5,15 @@ import {
   Link
 } from "react-router-dom";
 
-import Home from "./components/Home";
+import Home from "./interface/pages/Home";
+import Term from "./interface/pages/Term";
 
 function App() {
   return (
       // eslint-disable-next-line react/jsx-no-undef
         <Router>
         <Switch>
+          <Route path="/terminal/:session_id" component={Term} />
           <Route path="/">
             <Home />
           </Route>
