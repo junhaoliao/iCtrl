@@ -36,6 +36,7 @@ export default class Term extends React.Component {
     }
 
     render() {
+        ***REMOVED***
         return (
             <div id="terminal" style={{ height: '100vh' }}></div>
         )

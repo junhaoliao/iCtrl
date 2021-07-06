@@ -2,9 +2,11 @@ import os
 import threading
 import uuid
 
-from simple_websocket_server import WebSocketServer, WebSocket
+from SimpleWebSocketServer import SimpleWebSocketServer, WebSocket
 
 from application.Connection import Connection
+
+terminal_connections = {}
 
 
 class Terminal(Connection):
@@ -33,18 +35,15 @@ class Terminal(Connection):
         return True, self.id
 
 
-terminal_connections: dict[str, Terminal] = {}
-
-
 class TerminalSocket(WebSocket):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.term = None
 
-    def handle(self):
+    def handleMessage(self):
         self.term.channel.send(self.data)
 
-    def connected(self):
+    def handleConnected(self):
         print(self.address, 'connected')
         terminal_id = self.request.path[1:]
         if terminal_id not in terminal_connections:
@@ -59,17 +58,17 @@ class TerminalSocket(WebSocket):
                 if not data:
                     print("\r\n*** Shell EOF ***\r\n\r\n")
                     break
-                self.send_message(data)
+                self.sendMessage(data)
 
         writer = threading.Thread(target=writeall)
         writer.start()
 
-    def handle_close(self):
+    def handleClose(self):
         print(self.address, 'closed')
         del terminal_connections[self.term.id]
         del self.term
 
 
 if os.environ.get("WERKZEUG_RUN_MAIN") == "true":
-    terminal_server = WebSocketServer('', 8000, TerminalSocket)
-    threading.Thread(target=terminal_server.serve_forever).start()
+    terminal_server = SimpleWebSocketServer('', 8000, TerminalSocket)
+    threading.Thread(target=terminal_server.serveforever).start()

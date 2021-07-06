@@ -75,4 +75,3 @@ class Profile:
 
     def query(self):
         return self._profile
-
