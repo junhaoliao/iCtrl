@@ -49,7 +49,8 @@ class VNC(Connection):
             "killall -q -w Xtigervnc",
             "rm -rf ~/.vnc",
             "mkdir ~/.vnc",
-            "echo '%s'| vncpasswd -f > ~/.vnc/passwd" % password,
+            # TODO: check whether the target has tigervnc installed
+            "echo '%s'| tigervncpasswd -f > ~/.vnc/passwd" % password,
             "chmod 600 ~/.vnc/passwd",
         ]
         _, _, _, stderr = self.exec_command_blocking(';'.join(reset_cmd_lst))

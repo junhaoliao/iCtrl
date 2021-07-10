@@ -10,9 +10,13 @@ from application.SFTP import SFTP
 from application.Terminal import Terminal
 from application.VNC import VNC
 from application.paths import PRIVATE_KEY_PATH
+from application.codes import ICtrlStep, ICtrlError
 
 UPLOAD_CHUNK_SIZE = 1024 * 1024
 
+
+def int_to_bytes(num):
+    return bytes([num])
 
 def get_session_info(session_id):
     if session_id not in profiles['sessions']:
@@ -87,21 +91,36 @@ def start_vnc():
     session_id = request.json.get('session_id')
     host, username, this_private_key_path = get_session_info(session_id)
 
-    vnc = VNC()
-    status, reason = vnc.connect(host=host, username=username, key_filename=this_private_key_path)
-    if status is False:
-        abort(403, description=reason)
+    def generate():
+        yield int_to_bytes(ICtrlStep.VNC.SSH_AUTH)
+        vnc = VNC()
+        status, reason = vnc.connect(host=host, username=username, key_filename=this_private_key_path)
+        if status is False:
+            print(reason)
+            # FIXME: return corresponding code according to the reason
+            yield int_to_bytes(ICtrlError.SSH.GENERAL)
+            return
 
-    status, password = vnc.get_vnc_password()
-    if not status:
-        abort(403, description='VNC password missing')
+        yield int_to_bytes(ICtrlStep.VNC.CHECK_LOAD)
 
-    port = vnc.launch_web_vnc()
-    result = {
-        'port': port,
-        'passwd': password
-    }
-    return json.dumps(result)
+        yield int_to_bytes(ICtrlStep.VNC.PARSE_PASSWD)
+        status, password = vnc.get_vnc_password()
+        if not status:
+            yield int_to_bytes(ICtrlError.VNC.PASSWD_MISSING)
+            return
+
+        yield int_to_bytes(ICtrlStep.VNC.LAUNCH_VNC)
+        yield int_to_bytes(ICtrlStep.VNC.CREATE_TUNNEL)
+        port = vnc.launch_web_vnc()
+
+        yield int_to_bytes(ICtrlStep.VNC.DONE)
+        result = {
+            'port': port,
+            'passwd': password
+        }
+        yield json.dumps(result)
+
+    return app.response_class(generate(), mimetype='application/octet-stream')
 
 
 @app.route('/vncpasswd', methods=['POST'])
