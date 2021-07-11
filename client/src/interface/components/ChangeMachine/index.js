@@ -15,6 +15,7 @@ export default class ChangeMachine extends React.Component {
         super(props);
         this.state = {
             open: true,
+            SelectMachineInput: '',
         }
     }
 
@@ -29,23 +30,24 @@ export default class ChangeMachine extends React.Component {
 
     handleSave() {
         // to do
-        const newMachine = document.getElementById('change-machine-selector').innerHTML;
+        const { SelectMachineInput } = this.state;
         const { sessionId } = this.props;
         // console.log(newMachine, this.props.sessionId);
         axios.patch('/change_host', {
             session_id: sessionId, 
-            new_host: `${newMachine}.eecg.toronto.edu`
+            new_host: `${SelectMachineInput}.eecg.toronto.edu`
         }).then(response => {
             console.log(response.data);
+            window.location.reload()
         }).catch(err => {
             console.log('error', err)
         })
         this.handleClose();
     }
 
-    handleMachineChange(e) {
+    handleMachineChange = (e) =>{
         // console.log('machine changed', e.target.value)
-        document.getElementById('change-machine-selector').innerHTML = e.target.value;
+        this.setState({ SelectMachineInput: e.target.value })
     }
 
     render() {
@@ -64,15 +66,15 @@ export default class ChangeMachine extends React.Component {
                             <TextField
                                 id="change-machine-selector"
                                 select
-                                label="Select"
-                                value={'ug250'}
-                                onChange={(e) => this.handleMachineChange(e)}
+                                label="New Host"
+                                value={this.state.SelectMachineInput}
+                                onChange={this.handleMachineChange}
                                 helperText="Please select your machine"
                                 style={{ width: '-webkit-fill-available' }}
                                 >
                                 {machineList.map((option) => (
                                     <MenuItem id="machine-name" key={option} value={option}>
-                                    {option}
+                                        {option}
                                     </MenuItem>
                                 ))}
                             </TextField>
