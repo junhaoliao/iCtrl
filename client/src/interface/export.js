@@ -1,4 +1,4 @@
 // export pages
-export { DashBoard } from './pages/DashBoard';
+export { Dashboard } from './pages/DashBoard';
 
 // export components
