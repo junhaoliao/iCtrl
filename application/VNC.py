@@ -64,9 +64,11 @@ class VNC(Connection):
         ports_by_me = []
         _, _, stdout, _ = self.exec_command_blocking('vncserver -list')
         for line in stdout:
-            this_port_by_me = re.findall(r'\d+', line)
-            if len(this_port_by_me) != 0:
-                ports_by_me.append(this_port_by_me[0])
+            if 'stale' not in line:
+                # if the server was improperly terminated, the status is 'stale'
+                this_port_by_me = re.findall(r'\d+', line)
+                if len(this_port_by_me) != 0:
+                    ports_by_me.append(this_port_by_me[0])
 
         # FIXME: handle disk quota issue when launching vncserver
         relaunch = False
