@@ -61,6 +61,9 @@ class Profile:
 
         return session_id
 
+    def change_host(self, session_id, new_host):
+        self["sessions"][session_id]['host'] = new_host
+
     def change_viewer(self, viewer):
         self["viewer"] = viewer
 
