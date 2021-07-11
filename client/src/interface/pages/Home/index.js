@@ -1,7 +1,7 @@
 import React from "react";
 
 import { Input } from '@material-ui/core';
-import DashBoard from '../DashBoard';
+import Dashboard from '../DashBoard';
 
 export default class Home extends React.Component {
     constructor(props) {
@@ -23,7 +23,7 @@ export default class Home extends React.Component {
                 <h1>Counter: </h1>
                 <Input value={this.state.counter}/>
                 <div style={{ height: 100 }} />
-                <DashBoard />
+                <Dashboard />
             </div>
         );
     }

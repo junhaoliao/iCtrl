@@ -83,7 +83,7 @@ export const sftp_ul = (fm, session_id, cwd, file) => {
                 }));
             }
         }).then(response => {
-        console.log(response);
+        console.log(response.data);
     }).catch(error => {
         if (error.response) {
             fm.showAlert(htmlResponseToReason(error.response.data));

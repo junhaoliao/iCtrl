@@ -1,5 +1,9 @@
 .new-session-content-wrapper {
-    margin: 30px 20px 20px;
+    margin: 24px 40px 12px;
+}
+
+.new-session-content-wrapper > * {
+    margin-top: 30px;
 }
 
 .new-session-input-wrapper {
