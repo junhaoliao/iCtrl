@@ -34,9 +34,9 @@ def get_profiles():
 
 @app.route('/session', methods=['POST'])
 def new_session():
-    host = request.form.get('host')
-    username = request.form.get('username')
-    password = request.form.get("password")
+    host = request.json.get('host')
+    username = request.json.get('username')
+    password = request.json.get("password")
 
     conn = Connection()
 

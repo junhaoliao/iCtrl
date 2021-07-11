@@ -45,7 +45,7 @@ export default class VNCViewer extends React.Component {
                     const resultArr = new Uint8Array(data.slice(data.indexOf(ICtrlStep.VNC.DONE) + 1));
                     const decodedStr = new TextDecoder().decode(resultArr);
                     const {port, passwd} = JSON.parse(decodedStr);
-                    const url = `ws://192.168.2.129:${port}`;
+                    const url = `ws://localhost:${port}`;
                     // Creating a new RFB object will start a new connection
                     const rfb = new RFB(
                         document.getElementById('screen'),
