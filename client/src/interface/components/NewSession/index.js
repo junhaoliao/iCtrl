@@ -2,7 +2,7 @@
 import React from 'react';
 import Button from '@material-ui/core/Button';
 import TextField from '@material-ui/core/TextField';
-import { Dialog, DialogActions, Typography } from '@material-ui/core';
+import { Dialog, DialogActions, Typography, Input } from '@material-ui/core';
 import axios from 'axios';
 
 import './index.css';
@@ -52,20 +52,20 @@ export default class NewSession extends React.Component {
                 <div className="new-session-content-wrapper">
                     <div className="new-session-input-wrapper">
                         <div className="new-session-name-wrapper">
-                        <Typography class="new-session-name" variant={'h6'}>
+                        <Typography className="new-session-name" variant={'h6'}>
                             HostName*
                         </Typography>
-                        <Typography class="new-session-name" variant={'h6'}>
+                        <Typography className="new-session-name" variant={'h6'}>
                             UserName*
                         </Typography>
-                        <Typography class="new-session-name" variant={'h6'}>
+                        <Typography className="new-session-name" variant={'h6'}>
                             Password
                         </Typography>
                         </div>
                         <div className="new-session-inputs">
                             <TextField id="host" label="Required" variant="outlined" />
                             <TextField id="username" label="Required" variant="outlined" />
-                            <TextField id="password" label="Optional" variant="outlined" />
+                            <Input id="password" type="password" label="Optional" variant="outlined" />
                         </div>
                         
                     </div>
@@ -73,10 +73,6 @@ export default class NewSession extends React.Component {
                         <Button onClick={() => this.handleClose()}>Close</Button>
                         <Button variant={'contained'} id={'button_cancel'} onClick={() => this.handleSave()}>Save</Button>
                     </DialogActions>
-                    {/* <div className="new-session-save">
-                        <Button variant="contained" color="secondary" onClick={() => this.handleClose()}>Close</Button>
-                        <Button style={{ marginLeft: 20 }} variant="contained" color="primary" onClick={() => this.handleSave()}>Save</Button>
-                    </div> */}
                 </div>
             </Dialog>
         )

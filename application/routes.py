@@ -59,7 +59,7 @@ def change_host():
         abort(403, f'failed: session {session_id} does not exist')
 
     new_host = request.json.get('new_host')
-    profiles.change_host(new_host)
+    profiles.change_host(session_id, new_host)
 
     return 'success'
 
