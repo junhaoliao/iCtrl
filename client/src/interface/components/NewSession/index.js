@@ -2,7 +2,8 @@
 import React from 'react';
 import Button from '@material-ui/core/Button';
 import TextField from '@material-ui/core/TextField';
-import Dialog from '@material-ui/core/Dialog';
+import { Dialog, DialogActions, Typography } from '@material-ui/core';
+import axios from 'axios';
 
 import './index.css';
 
@@ -25,43 +26,59 @@ export default class NewSession extends React.Component {
 
     handleSave() {
         // to do
+        const host = document.getElementById('host').value;
+        const username = document.getElementById('username').value;
+        const password = document.getElementById('password').value;
+        // console.log(hostname, username, password)
+        axios.post('/session', {
+            host, username, password
+        }).then(response => {
+            console.log(response.data);
+        }).catch(err => {
+            console.log('error', err)
+        })
         this.handleClose();
     }
 
     render() {
         const { open } = this.state;
         return (
-            <div className="new-session-bg">
-                <div className="new-session-mask" />
-                <div>
-                    <Dialog
-                        open={open}
-                        onClose={() => this.handleClose()}
-                        aria-labelledby="alert-dialog-title"
-                        aria-describedby="alert-dialog-description"
-                    >
-                        <div className="new-session-content-wrapper">
-                            <div className="new-session-input-wrapper">
-                                <div className="new-session-name-wrapper">
-                                    <div className="new-session-name">HostName*</div>
-                                    <div className="new-session-name">UserName*</div>
-                                    <div className="new-session-name">Password</div>
-                                </div>
-                                <div className="new-session-inputs">
-                                    <TextField id="outlined-basic" label="Required" variant="outlined" />
-                                    <TextField id="outlined-basic" label="Required" variant="outlined" />
-                                    <TextField id="outlined-basic" label="Optional" variant="outlined" />
-                                </div>
-                                
-                            </div>
-                            <div className="new-session-save">
-                                <Button variant="contained" color="secondary" onClick={() => this.handleClose()}>Close</Button>
-                                <Button style={{ marginLeft: 20 }} variant="contained" color="primary" onClick={() => this.handleSave()}>Save</Button>
-                            </div>
+            <Dialog
+                open={open}
+                onClose={() => this.handleClose()}
+                aria-labelledby="alert-dialog-title"
+                aria-describedby="alert-dialog-description"
+            >
+                <div className="new-session-content-wrapper">
+                    <div className="new-session-input-wrapper">
+                        <div className="new-session-name-wrapper">
+                        <Typography class="new-session-name" variant={'h6'}>
+                            HostName*
+                        </Typography>
+                        <Typography class="new-session-name" variant={'h6'}>
+                            UserName*
+                        </Typography>
+                        <Typography class="new-session-name" variant={'h6'}>
+                            Password
+                        </Typography>
                         </div>
-                    </Dialog>
+                        <div className="new-session-inputs">
+                            <TextField id="host" label="Required" variant="outlined" />
+                            <TextField id="username" label="Required" variant="outlined" />
+                            <TextField id="password" label="Optional" variant="outlined" />
+                        </div>
+                        
+                    </div>
+                    <DialogActions>
+                        <Button onClick={() => this.handleClose()}>Close</Button>
+                        <Button variant={'contained'} id={'button_cancel'} onClick={() => this.handleSave()}>Save</Button>
+                    </DialogActions>
+                    {/* <div className="new-session-save">
+                        <Button variant="contained" color="secondary" onClick={() => this.handleClose()}>Close</Button>
+                        <Button style={{ marginLeft: 20 }} variant="contained" color="primary" onClick={() => this.handleSave()}>Save</Button>
+                    </div> */}
                 </div>
-            </div>
+            </Dialog>
         )
     }
 }

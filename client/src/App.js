@@ -1,11 +1,13 @@
 import React from 'react';
 
 import {BrowserRouter as Router, Route, Switch} from 'react-router-dom';
+import axios from 'axios';
 
 import Home from './interface/pages/Home';
 import FileManager from './interface/pages/FileManager';
 import VNCViewer from './interface/pages/VNCViewer';
 import Term from './interface/pages/Term';
+import DashBoard from './interface/pages/DashBoard';
 
 
 export default class App extends React.Component {
@@ -18,13 +20,13 @@ export default class App extends React.Component {
 
     componentDidMount() {
         if (Object.keys(this.state.profiles).length === 0) {
-            fetch('/profiles')
-                .then(res => res.json())
-                .then(result => {
-                    console.log('fetch');
+            axios.get('/profiles')
+            .then(response => {
+                   
                     this.setState({
-                        profiles: result
+                        profiles: response.data
                     });
+                    console.log(this.state.profiles);
                 });
         }
     }
@@ -46,9 +48,9 @@ export default class App extends React.Component {
                     <Route path="/terminal/:session_id" render={(props) => (
                         <Term {...props} profiles={this.state.profiles}/>
                     )}/>
-                    <Route path="/">
-                        <Home/>
-                    </Route>
+                   <Route path="/" render={(props) => (
+                        <DashBoard {...props} profiles={this.state.profiles}/>
+                    )}/>
                 </Switch>
             </Router>
         );

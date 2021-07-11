@@ -4,10 +4,11 @@ import Button from '@material-ui/core/Button';
 import MenuItem from '@material-ui/core/MenuItem';
 import TextField from '@material-ui/core/TextField';
 import Dialog from '@material-ui/core/Dialog';
+import axios from 'axios';
 
 import './index.css';
 
-const machineList = [ 'ug250', 'ug250.1', 'ug250.2', 'ug250.3' ];
+const machineList = [ 'ug250', 'ug249' ];
 
 export default class ChangeMachine extends React.Component {
     constructor(props) {
@@ -28,11 +29,22 @@ export default class ChangeMachine extends React.Component {
 
     handleSave() {
         // to do
+        const newMachine = document.getElementById('change-machine-selector').innerHTML;
+        const { sessionId } = this.props;
+        // console.log(newMachine, this.props.sessionId);
+        axios.patch('/change_host', {
+            session_id: sessionId, 
+            new_host: `${newMachine}.eecg.toronto.edu`
+        }).then(response => {
+            console.log(response.data);
+        }).catch(err => {
+            console.log('error', err)
+        })
         this.handleClose();
     }
 
     handleMachineChange(e) {
-        console.log('machine changed', e.target.value)
+        // console.log('machine changed', e.target.value)
         document.getElementById('change-machine-selector').innerHTML = e.target.value;
     }
 
@@ -53,13 +65,13 @@ export default class ChangeMachine extends React.Component {
                                 id="change-machine-selector"
                                 select
                                 label="Select"
-                                value={'ug250.2'}
+                                value={'ug250'}
                                 onChange={(e) => this.handleMachineChange(e)}
                                 helperText="Please select your machine"
                                 style={{ width: '-webkit-fill-available' }}
                                 >
                                 {machineList.map((option) => (
-                                    <MenuItem key={option} value={option}>
+                                    <MenuItem id="machine-name" key={option} value={option}>
                                     {option}
                                     </MenuItem>
                                 ))}
