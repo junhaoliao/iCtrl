@@ -52,6 +52,17 @@ def new_session():
 
     return 'success'
 
+@app.route('/change_host', methods=['PATCH'])
+def change_host():
+    session_id = request.json.get('session_id')
+    if session_id not in profiles['sessions']:
+        abort(403, f'failed: session {session_id} does not exist')
+
+    new_host = request.json.get('new_host')
+    profiles.change_host(new_host)
+
+    return 'success'
+
 
 @app.route('/exec_blocking', methods=['POST'])
 def exec_blocking():
