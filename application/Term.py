@@ -1,7 +1,9 @@
 import os
 import threading
 import uuid
+from typing import Optional
 
+from paramiko import Channel
 from SimpleWebSocketServer import SimpleWebSocketServer, WebSocket
 
 from application.Connection import Connection
@@ -9,10 +11,10 @@ from application.Connection import Connection
 terminal_connections = {}
 
 
-class Terminal(Connection):
+class Term(Connection):
     def __init__(self):
         self.id = None
-        self.channel = None
+        self.channel = Optional[Channel]
 
         super().__init__()
 
@@ -34,6 +36,13 @@ class Terminal(Connection):
 
         return True, self.id
 
+    def resize(self, width, height):
+        try:
+            self.channel.resize_pty(width, height)
+        except Exception as e:
+            return False, str(e)
+
+        return True, ''
 
 class TerminalSocket(WebSocket):
     def __init__(self, *args, **kwargs):

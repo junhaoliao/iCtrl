@@ -7,7 +7,7 @@ from flask import request, abort
 from application import app, profiles
 from application.Connection import Connection
 from application.SFTP import SFTP
-from application.Terminal import Terminal
+from application.Term import Term, terminal_connections
 from application.VNC import VNC
 from application.paths import PRIVATE_KEY_PATH
 from application.codes import ICtrlStep, ICtrlError
@@ -75,16 +75,34 @@ def exec_blocking():
 
 @app.route('/terminal', methods=['POST'])
 def start_terminal():
-    session_id = request.form.get('session_id')
+    session_id = request.json.get('session_id')
     host, username, this_private_key_path = get_session_info(session_id)
 
-    term = Terminal()
+    term = Term()
     status, reason = term.connect(host=host, username=username, key_filename=this_private_key_path)
     if status is False:
         abort(403, description=reason)
 
     return term.id
 
+@app.route('/terminal_resize', methods=['PATCH'])
+def resize_terminal():
+    session_id = request.json.get('session_id')
+    host, username, this_private_key_path = get_session_info(session_id)
+
+    term_id = request.json.get('term_id')
+    if term_id not in terminal_connections:
+        abort(403, description='invalid term_id')
+
+    width = request.json.get('w')
+    height = request.json.get('h')
+
+    term = terminal_connections[term_id]
+    status, reason = term.resize(width, height)
+    if status is False:
+        abort(403, description=reason)
+
+    return 'success'
 
 @app.route('/vnc', methods=['POST'])
 def start_vnc():
