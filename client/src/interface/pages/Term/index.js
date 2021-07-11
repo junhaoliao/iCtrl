@@ -54,7 +54,7 @@ export default class Term extends React.Component {
 
     render() {
         return (
-            <div id="terminal" style={{height: '100vh'}}/>
+            <div id="terminal" style={{height: '100vh', width:'100vw'}}/>
         );
     }
 }
