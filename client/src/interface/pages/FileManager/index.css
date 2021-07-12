@@ -5,6 +5,7 @@
 .upload-item-name{
     max-width: 250px;
     overflow-x: hidden;
+    text-overflow: ellipsis;
 }
 
 .upload-item-cancel-button{

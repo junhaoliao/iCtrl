@@ -194,6 +194,10 @@ export default class FileManager extends React.Component {
                 onEditCellChangeCommitted={this.handleEditCellChangeCommitted}
                 sortModel={[
                     {
+                        field: 'mode',
+                        sort: 'asc',
+                    },
+                    {
                         field: 'id',
                         sort: 'asc',
                     }]}
