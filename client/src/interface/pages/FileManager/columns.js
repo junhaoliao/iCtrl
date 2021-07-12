@@ -1,4 +1,4 @@
-import {Grid} from '@material-ui/core';
+import {Stack} from '@material-ui/core';
 import {ShortcutIcon} from '../../../icons';
 import FolderIcon from '@material-ui/icons/Folder';
 import InsertDriveFileIcon from '@material-ui/icons/InsertDriveFile';
@@ -12,13 +12,13 @@ const columns = [
             const is_dir = isDir(params.getValue(params.value, 'mode'));
             const is_lnk = isLnk(params.getValue(params.value, 'mode'));
             return (
-                <Grid container spacing={1}>
-                    <Grid item style={{position: 'relative', top: 5}}>
+                <Stack direction={'row'} spacing={1}>
+                    <div style={{position: 'relative', top: 5}}>
                         {is_lnk ? <ShortcutIcon/> : (is_dir ? <FolderIcon fontSize={'small'}/> :
                             <InsertDriveFileIcon fontSize={'small'}/>)}
-                    </Grid>
-                    <Grid item>{params.value}</Grid>
-                </Grid>
+                    </div>
+                    <div>{params.value}</div>
+                </Stack>
 
             );
         }
