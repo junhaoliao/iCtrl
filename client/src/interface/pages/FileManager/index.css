@@ -1,0 +1,17 @@
+.upload-item{
+    cursor: default;
+}
+
+.upload-item-name{
+    max-width: 250px;
+    overflow-x: hidden;
+}
+
+.upload-item-cancel-button{
+    width: 30px;
+    height: 30px;
+    position: relative;
+    right: -30px;
+    top: -10px;
+    z-index: 1;
+}
