@@ -203,6 +203,9 @@ export default class FileManager extends React.Component {
                     }]}
                 components={{
                     Toolbar: CustomToolbar,
+                    NoRowsOverlay: (_ => (
+                        <div style={{margin:'auto'}}>Empty Directory</div>
+                    ))
                 }}
                 componentsProps={{
                     toolbar: {fm: this}
