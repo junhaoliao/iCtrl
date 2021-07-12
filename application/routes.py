@@ -18,6 +18,7 @@ UPLOAD_CHUNK_SIZE = 1024 * 1024
 def int_to_bytes(num):
     return bytes([num])
 
+
 def get_session_info(session_id):
     if session_id not in profiles['sessions']:
         abort(403, f'failed: session {session_id} does not exist')
@@ -32,36 +33,46 @@ def get_profiles():
     return profiles.query()
 
 
-@app.route('/session', methods=['POST'])
-def new_session():
-    host = request.json.get('host')
-    username = request.json.get('username')
-    password = request.json.get("password")
+@app.route('/session', methods=['POST', 'PATCH', 'DELETE'])
+def handle_session():
+    if request.method == 'POST':
+        host = request.json.get('host')
+        username = request.json.get('username')
+        password = request.json.get("password")
 
-    conn = Connection()
+        conn = Connection()
 
-    status, reason = conn.connect(host, username, password)
-    if status is False:
-        abort(403, reason)
+        status, reason = conn.connect(host, username, password)
+        if status is False:
+            abort(403, reason)
 
-    session_id = profiles.add_session(host, username)
-    this_private_key_path = os.path.join(PRIVATE_KEY_PATH, session_id)
-    status, reason = conn.save_keys(this_private_key_path)
-    if status is False:
-        abort(500, reason)
+        session_id = profiles.add_session(host, username)
+        this_private_key_path = os.path.join(PRIVATE_KEY_PATH, session_id)
+        status, reason = conn.save_keys(this_private_key_path)
+        if status is False:
+            abort(500, reason)
 
-    return 'success'
+        return 'success'
+    elif request.method == 'PATCH':
+        session_id = request.json.get('session_id')
+        if session_id not in profiles['sessions']:
+            abort(403, f'failed: session {session_id} does not exist')
 
-@app.route('/change_host', methods=['PATCH'])
-def change_host():
-    session_id = request.json.get('session_id')
-    if session_id not in profiles['sessions']:
-        abort(403, f'failed: session {session_id} does not exist')
+        new_host = request.json.get('new_host')
+        profiles.change_host(session_id, new_host)
 
-    new_host = request.json.get('new_host')
-    profiles.change_host(session_id, new_host)
+        return 'success'
+    elif request.method == 'DELETE':
+        session_id = request.args.get('session_id')
+        if session_id not in profiles['sessions']:
+            abort(403, f'failed: session {session_id} does not exist')
 
-    return 'success'
+        profiles.delete_session(session_id)
+        return 'success'
+    else:
+        abort(405)
+
+
 
 
 @app.route('/exec_blocking', methods=['POST'])
@@ -96,6 +107,7 @@ def start_terminal():
 
     return term.id
 
+
 @app.route('/terminal_resize', methods=['PATCH'])
 def resize_terminal():
     session_id = request.json.get('session_id')
@@ -114,6 +126,7 @@ def resize_terminal():
         abort(403, description=reason)
 
     return 'success'
+
 
 @app.route('/vnc', methods=['POST'])
 def start_vnc():

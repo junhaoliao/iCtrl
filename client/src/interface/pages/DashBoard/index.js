@@ -21,8 +21,11 @@ import BackgroundLetterAvatar from '../../components/BackgroundLetterAvatar';
 import StorageIcon from '@material-ui/icons/Storage';
 import {ConsoleIcon, FileManagerIcon, RemoteDesktopIcon} from '../../../icons';
 import MoreVertIcon from '@material-ui/icons/MoreVert';
+import DeleteIcon from '@material-ui/icons/Delete';
+
 import MenuItem from '@material-ui/core/MenuItem';
 import NewSession from '../../components/NewSession';
+import axios from 'axios';
 
 export default class Dashboard extends React.Component {
     constructor(props) {
@@ -59,6 +62,16 @@ export default class Dashboard extends React.Component {
             case 'file':
                 window.open(`/fm/${sessionId}`, '_blank');
                 break;
+            case 'delete':
+                axios.delete(`/session`, {
+                    params: {session_id: sessionId}
+                }).then(response =>{
+                    console.log(response.data)
+                    window.location.reload()
+                }).catch(error=>{
+                    console.log(error)
+                })
+                break
             default:
                 return;
         }
@@ -161,7 +174,10 @@ export default class Dashboard extends React.Component {
                                 File Manager
                             </MenuItem>
                         </Hidden>
-                        <MenuItem onClick={() => this.handleMenuClick(key, 'delete')}>Delete</MenuItem>
+                        <MenuItem onClick={() => this.handleMenuClick(key, 'delete')}>
+                            <ListItemIcon><DeleteIcon style={{color: 'grey'}}/></ListItemIcon>
+                            Delete
+                        </MenuItem>
                     </Menu>
                 </ListItem>
             );
