@@ -27,6 +27,8 @@ import MenuItem from '@material-ui/core/MenuItem';
 import NewSession from '../../components/NewSession';
 import axios from 'axios';
 
+import logo from '../../../icons/logo.png';
+
 export default class Dashboard extends React.Component {
     constructor(props) {
         super(props);
@@ -65,13 +67,13 @@ export default class Dashboard extends React.Component {
             case 'delete':
                 axios.delete(`/session`, {
                     params: {session_id: sessionId}
-                }).then(response =>{
-                    console.log(response.data)
-                    window.location.reload()
-                }).catch(error=>{
-                    console.log(error)
-                })
-                break
+                }).then(response => {
+                    console.log(response.data);
+                    window.location.reload();
+                }).catch(error => {
+                    console.log(error);
+                });
+                break;
             default:
                 return;
         }
@@ -193,11 +195,20 @@ export default class Dashboard extends React.Component {
                     </IconButton>
                 </Box>
                 <Divider/>
-                <List>
-                    {sessionList}
-                </List>
+                {sessionList.length !== 0 ?
+                    <List>
+                        {sessionList}
+                    </List> :
+                    <div style={{display:'flex', flexDirection:'column', marginTop:'22vh'}}>
+                        <img style={{margin:'auto', height:'20vh', marginBottom:'8vh', filter: 'grayscale(75%)'}} src={logo} alt="Logo"/>
+                        <h4 style={{margin:'auto', textAlign:'center' ,color:'grey'}}>No Session Found<br/>
+                            Please click on <AddCircleIcon style={{color:'orange', position:'relative',top:'6px'}}/> to add a new session</h4>
+                    </div>
+                }
+
                 <NewSession open={this.state.addNewSessionOpen} onAddNewSessionClose={this.handleAddNewSessionClose}/>
             </Container>
         );
     }
+
 }
