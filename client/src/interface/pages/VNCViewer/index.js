@@ -57,6 +57,18 @@ export default class VNCViewer extends React.Component {
                             loading: false
                         });
                     });
+                    rfb.addEventListener('clipboard', (ev)=>{
+                        navigator.clipboard.writeText(ev.detail.text).then()
+                    })
+                    let clipboardText = null
+                    window.onfocus = ev => {
+                        navigator.clipboard.readText().then((text)=>{
+                            if (clipboardText !== text){
+                                clipboardText = text
+                                rfb.clipboardPasteFrom(text)
+                            }
+                        })
+                    }
                     return;
                 }
                 data.push(...value);
