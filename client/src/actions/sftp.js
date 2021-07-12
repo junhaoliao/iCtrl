@@ -114,6 +114,7 @@ export const sftp_rm = (fm, session_id, cwd, files) => {
         }).then(res => {
         fm.loadDir(fm.state.cwd);
     }).catch(error => {
+        fm.loadDir(fm.state.cwd);
         if (error.response) {
             fm.showAlert(htmlResponseToReason(error.response.data));
         } else {
