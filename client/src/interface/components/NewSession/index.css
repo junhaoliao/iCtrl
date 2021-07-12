@@ -1,9 +1,13 @@
 .new-session-content-wrapper {
-    margin: 24px 40px 12px;
+    margin-top: 0px;
+    margin-right: 30px;
+    margin-left: 30px;
+    margin-bottom: 12px;
 }
 
 .new-session-content-wrapper > * {
-    margin-top: 30px;
+    margin-top: 16px;
+    margin-bottom: 24px;
 }
 
 .new-session-input-wrapper {
