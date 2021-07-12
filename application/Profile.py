@@ -61,11 +61,22 @@ class Profile:
 
         return session_id
 
+    def delete_session(self, session_id):
+        try:
+            os.remove(os.path.join(PRIVATE_KEY_PATH, session_id))
+        except FileNotFoundError:
+            print('Not valid SSH key found for deletion')
+
+        self['sessions'].pop(session_id)
+        self.save_profile()
+
     def change_host(self, session_id, new_host):
         self["sessions"][session_id]['host'] = new_host
+        self.save_profile()
 
     def change_viewer(self, viewer):
         self["viewer"] = viewer
+        self.save_profile()
 
     def save_profile(self):
         try:
