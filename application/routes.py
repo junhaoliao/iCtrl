@@ -73,8 +73,6 @@ def handle_session():
         abort(405)
 
 
-
-
 @app.route('/exec_blocking', methods=['POST'])
 def exec_blocking():
     session_id = request.form.get('session_id')
