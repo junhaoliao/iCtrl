@@ -5,6 +5,7 @@ import Loading from '../../components/Loading';
 import {VNCSteps} from '../../components/Loading/steps';
 import {VNCAuthentication} from '../../components/Loading/authentications';
 import {ICtrlError, ICtrlStep} from '../../../actions/codes';
+import {Helmet} from 'react-helmet';
 
 
 export default class VNCViewer extends React.Component {
@@ -57,18 +58,18 @@ export default class VNCViewer extends React.Component {
                             loading: false
                         });
                     });
-                    rfb.addEventListener('clipboard', (ev)=>{
-                        navigator.clipboard.writeText(ev.detail.text).then()
-                    })
-                    let clipboardText = null
+                    rfb.addEventListener('clipboard', (ev) => {
+                        navigator.clipboard.writeText(ev.detail.text).then();
+                    });
+                    let clipboardText = null;
                     window.onfocus = ev => {
-                        navigator.clipboard.readText().then((text)=>{
-                            if (clipboardText !== text){
-                                clipboardText = text
-                                rfb.clipboardPasteFrom(text)
+                        navigator.clipboard.readText().then((text) => {
+                            if (clipboardText !== text) {
+                                clipboardText = text;
+                                rfb.clipboardPasteFrom(text);
                             }
-                        })
-                    }
+                        });
+                    };
                     return;
                 }
                 data.push(...value);
@@ -126,7 +127,13 @@ export default class VNCViewer extends React.Component {
     }
 
     render() {
+        const {host, username} = this.props.profiles.sessions[this.session_id];
+
         return (<div>
+                <Helmet>
+                    <title>{`VNC - ${username}@${host}`}</title>
+                    <link rel="icon" href={`/favicon/VNC/${this.session_id}`} />
+                </Helmet>
                 {this.state.loading &&
                 <Loading
                     currentStep={this.state.currentStep}
