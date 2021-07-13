@@ -1,8 +1,9 @@
 import json
 import os
 from datetime import datetime
+from io import BytesIO
 
-from flask import request, abort
+from flask import request, abort, send_file
 
 from application import app, profiles
 from application.Connection import Connection
@@ -11,6 +12,7 @@ from application.Term import Term, terminal_connections
 from application.VNC import VNC
 from application.paths import PRIVATE_KEY_PATH
 from application.codes import ICtrlStep, ICtrlError
+from application.Favicon import Favicon
 
 UPLOAD_CHUNK_SIZE = 1024 * 1024
 
@@ -302,3 +304,22 @@ def sftp_rm(session_id):
         abort(400, description=reason)
 
     return 'success'
+
+
+@app.route('/favicon/<feature>/<session_id>')
+def generate_favicon(feature, session_id):
+    host, _, _ = get_session_info(session_id)
+
+    temp = BytesIO()
+    icon = Favicon(host)
+    if feature == 'VNC':
+        icon.VNC(temp)
+    elif feature == 'term':
+        icon.console(temp)
+    elif feature == 'fm':
+        icon.file_manager(temp)
+    else:
+        abort(400, f'Invalid feature {feature}')
+
+    temp.seek(0)
+    return send_file(temp, mimetype='image/png')

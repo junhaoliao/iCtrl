@@ -6,7 +6,7 @@ import axios from 'axios';
 import FileManager from './interface/pages/FileManager';
 import VNCViewer from './interface/pages/VNCViewer';
 import Term from './interface/pages/Term';
-import Dashboard from './interface/pages/DashBoard';
+import Dashboard from './interface/pages/Dashboard';
 
 
 export default class App extends React.Component {

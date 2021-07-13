@@ -7,7 +7,6 @@ import websockify
 from application.Connection import Connection
 from application.vncpasswd import decrypt_passwd
 
-
 def find_free_port():
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
         sock.bind(('', 0))

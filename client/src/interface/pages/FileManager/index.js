@@ -9,6 +9,7 @@ import UploadList from './UploadList';
 import columns from './columns';
 import {sftp_dl, sftp_ls, sftp_rename} from '../../../actions/sftp';
 import {isDir} from './utils';
+import {Helmet} from 'react-helmet';
 
 
 export default class FileManager extends React.Component {
@@ -20,8 +21,6 @@ export default class FileManager extends React.Component {
         } = props;
 
         this.session_id = params.session_id;
-        this.username = sessions[this.session_id].username;
-        this.host = sessions[this.session_id].host;
 
         this.showHidden = false;
         this.files = [];
@@ -53,7 +52,6 @@ export default class FileManager extends React.Component {
     };
 
     componentDidMount() {
-        document.title = `${this.username}@${this.host} - File Manager`;
         this.loadDir('');
     }
 
@@ -178,7 +176,12 @@ export default class FileManager extends React.Component {
     };
 
     render() {
+        const {host, username} = this.props.profiles.sessions[this.session_id]
         return (<div style={{height: '100vh', minWidth: 900}}>
+            <Helmet>
+                <title>{`File Manager - ${username}@${host}`}</title>
+                <link rel="icon" href={`/favicon/fm/${this.session_id}`}/>
+            </Helmet>
             <DataGrid
                 rows={this.state.filesDisplaying}
                 density={this.state.density}

@@ -1,7 +1,7 @@
 import React from "react";
 
 import { Input } from '@material-ui/core';
-import Dashboard from '../DashBoard';
+import Dashboard from '../Dashboard';
 
 export default class Home extends React.Component {
     constructor(props) {
