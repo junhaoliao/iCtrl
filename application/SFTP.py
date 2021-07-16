@@ -112,6 +112,14 @@ class SFTP(Connection):
 
         return True, ''
 
+    def remode(self, cwd, new_mode):
+        try:
+            self.sftp.chmod(cwd, new_mode)
+        except Exception as e:
+            return False, repr(e)
+
+        return True, ''
+
     def file(self, filename):
         f = self.sftp.file(filename, mode='w')
         f.set_pipelined(True)

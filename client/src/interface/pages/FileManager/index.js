@@ -6,15 +6,18 @@ import {DataGrid} from '@material-ui/data-grid';
 import CustomToolbar from './CustomToolbar';
 import UploadToolbar from './UploadToolbar';
 import UploadList from './UploadList';
+import ChangePermission from '../../components/ChangePermission';
 import columns from './columns';
 import {sftp_dl, sftp_ls, sftp_rename} from '../../../actions/sftp';
 import {isDir} from './utils';
 import {Helmet} from 'react-helmet';
+import { M_IRGRP, M_IROTH, M_IROWR } from './constants';
 
 
 export default class FileManager extends React.Component {
     constructor(props) {
         super(props);
+        this.changePermission = React.createRef()
         const {
             match: {params},
             profiles: {sessions}
@@ -31,11 +34,14 @@ export default class FileManager extends React.Component {
         this.state = {
             alertOpen: false,
             alertMsg: null,
+            changePermissionOpen: false,
             cwd: '',
             cwdInput: '',
             density: 'standard',
             filesDisplaying: [],
+            id: '',
             loading: true,
+            mode: 0,
             uploadWindowCollapsed: false,
             uploadProgress: []
         };
@@ -74,6 +80,7 @@ export default class FileManager extends React.Component {
         this.clearSelection(ev.api);
         this.clickTimeout = setTimeout(() => {
             const id = ev.row.id;
+            this.setState({id: ev.row.id, mode: ev.row.mode})
             if (ev.field === 'id' && curr_selected.length === 1 && curr_selected.includes(id)) {
                 ev.api.setCellMode(id, 'id', 'edit');
 
@@ -86,11 +93,21 @@ export default class FileManager extends React.Component {
                     }
                 };
                 return;
+            } else if (ev.field === 'mode' && curr_selected.length === 1 && curr_selected.includes(id)) {
+                this.handleChangePermission(ev.row.id, ev.row.mode)
             }
             ev.api.selectRow(id);
         }, 200);
     };
 
+    handleChangePermission = (id, mode) => {
+        this.changePermission.current.update_id_mode(this.state.cwd, id, mode & 0b111111111, this.session_id)
+        this.setState({changePermissionOpen: true});
+    };
+
+    handleChangePermissionClose = (ev) => {
+        this.setState({changePermissionOpen: false});
+    };
 
     handleRowDoubleClick = (ev) => {
         const name = ev.row.id;
@@ -241,6 +258,11 @@ export default class FileManager extends React.Component {
                     </Paper>}
                 </div>
             </Snackbar>
+            <ChangePermission 
+            open={this.state.changePermissionOpen}
+            onChangePermissionClose={this.handleChangePermissionClose}
+            ref={this.changePermission}
+            />
         </div>);
     }
 }
