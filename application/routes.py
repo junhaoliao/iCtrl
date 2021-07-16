@@ -257,6 +257,23 @@ def sftp_rename(session_id):
 
     return 'success'
 
+@app.route('/sftp_remode/<session_id>', methods=['PATCH'])
+def sftp_remode(session_id):
+    host, username, this_private_key_path = get_session_info(session_id)
+
+    sftp = SFTP()
+    status, reason = sftp.connect(host=host, username=username, key_filename=this_private_key_path)
+    if status is False:
+        abort(403, description=reason)
+
+    cwd = request.json.get('cwd')
+    new_mode = request.json.get('new_mode')
+
+    status, reason = sftp.remode(cwd, new_mode)
+    if not status:
+        abort(400, reason)
+
+    return 'success'
 
 @app.route('/sftp_ul/<session_id>', methods=['POST'])
 def sftp_ul(session_id):
