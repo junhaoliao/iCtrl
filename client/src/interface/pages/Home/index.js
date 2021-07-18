@@ -11,12 +11,6 @@ export default class Home extends React.Component {
         }
     }
 
-    componentDidMount() {
-        // setInterval(()=>{
-        //     this.setState({counter: this.state.counter + 1})
-        // }, 100);
-    }
-
     render() {
         return(
             <div>

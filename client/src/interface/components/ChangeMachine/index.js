@@ -58,7 +58,6 @@ export default class ChangeMachine extends React.Component {
                 <div>
                     <Dialog
                         open={open}
-                        onClose={() => this.handleClose()}
                         aria-labelledby="alert-dialog-title"
                         aria-describedby="alert-dialog-description"
                     >
