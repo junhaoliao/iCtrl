@@ -11,7 +11,6 @@ import columns from './columns';
 import {sftp_dl, sftp_ls, sftp_rename} from '../../../actions/sftp';
 import {isDir} from './utils';
 import {Helmet} from 'react-helmet';
-import { M_IRGRP, M_IROTH, M_IROWR } from './constants';
 
 
 export default class FileManager extends React.Component {
@@ -19,8 +18,7 @@ export default class FileManager extends React.Component {
         super(props);
         this.changePermission = React.createRef()
         const {
-            match: {params},
-            profiles: {sessions}
+            match: {params}
         } = props;
 
         this.session_id = params.session_id;
@@ -39,9 +37,7 @@ export default class FileManager extends React.Component {
             cwdInput: '',
             density: 'standard',
             filesDisplaying: [],
-            id: '',
             loading: true,
-            mode: 0,
             uploadWindowCollapsed: false,
             uploadProgress: []
         };
@@ -100,13 +96,9 @@ export default class FileManager extends React.Component {
         }, 200);
     };
 
-    handleChangePermission = (id, mode) => {
-        this.changePermission.current.update_id_mode(this.state.cwd, id, mode & 0b111111111, this.session_id)
+    handleChangePermission = (name, mode) => {
+        this.changePermission.current.update_id_mode(this.state.cwd, name, mode, this.session_id)
         this.setState({changePermissionOpen: true});
-    };
-
-    handleChangePermissionClose = (ev) => {
-        this.setState({changePermissionOpen: false});
     };
 
     handleRowDoubleClick = (ev) => {
@@ -224,7 +216,7 @@ export default class FileManager extends React.Component {
                 components={{
                     Toolbar: CustomToolbar,
                     NoRowsOverlay: (_ => (
-                        <div style={{margin:'auto'}}>Empty Directory</div>
+                        <div style={{margin: 'auto'}}>Empty Directory</div>
                     ))
                 }}
                 componentsProps={{
@@ -258,10 +250,10 @@ export default class FileManager extends React.Component {
                     </Paper>}
                 </div>
             </Snackbar>
-            <ChangePermission 
-            open={this.state.changePermissionOpen}
-            onChangePermissionClose={this.handleChangePermissionClose}
-            ref={this.changePermission}
+            <ChangePermission
+                open={this.state.changePermissionOpen}
+                fm={this}
+                ref={this.changePermission}
             />
         </div>);
     }

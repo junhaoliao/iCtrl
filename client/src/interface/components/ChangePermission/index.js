@@ -1,192 +1,203 @@
 import React from 'react';
 import Button from '@material-ui/core/Button';
-import Checkbox from '@material-ui/core/Checkbox';
-import FormGroup from '@material-ui/core/FormGroup';
-import FormControlLabel from '@material-ui/core/FormControlLabel';
-import {Box, Dialog, DialogActions, DialogTitle, Divider, Tooltip, Typography} from '@material-ui/core';
-import axios from 'axios';
+import {
+    Box,
+    Checkbox,
+    Dialog,
+    DialogActions,
+    DialogTitle,
+    FormControlLabel,
+    Switch,
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableRow,
+    TextField,
+    Tooltip
+} from '@material-ui/core';
 
 import './index.css';
-import * as constants from '../../pages/FileManager/constants';
+import {PERMISSION_BITS} from "../../pages/FileManager/constants";
+import {isDir} from "../../pages/FileManager/utils";
+import {sftp_chmod} from "../../../actions/sftp";
 
 export default class ChangePermission extends React.Component {
     constructor(props) {
         super(props);
+        this.cwd = null
         this.state = {
-            cwd: '',
-            id: '',
-            mode: 0,
-            session_id: ''
+            name: null,
+            mode: null,
+            modeCheck: null,
+            modeInput: null,
+            applyRecursively: false
         };
     }
 
     handleSubmit() {
-        axios.patch(`/sftp_remode/${this.state.session_id}`, {
-            cwd: this.state.cwd + "/" + this.state.id, 
-            new_mode: this.state.mode
-        }).then(response => {
-            console.log(response.data);
-            window.location.reload();
-        }).catch(err => {
-            console.log('error', err);
-        });
+        sftp_chmod(
+            this.props.fm,
+            this.cwd,
+            this.state.name,
+            this.state.mode & 0o777,
+            this.state.applyRecursively)
     }
 
     handleClose = (ev) => {
-        if (ev.target && ev.target.id === 'button_save') {
+        if (ev.target && ev.target.id === 'button_apply') {
             this.handleSubmit();
         }
-        this.props.onChangePermissionClose();
+
+        this.props.fm.setState({
+            changePermissionOpen: false
+        })
     };
-    
-    handleOnChange = (mode_bit) => {
-        this.setState({mode: this.state.mode ^ mode_bit})
+
+    handleModeChange = (ev) => {
+        const bit = parseInt(ev.target.name)
+        this.setState({
+            mode: this.state.mode ^ bit,
+            modeCheck: this.state.modeCheck ^ bit,
+            modeInput: (this.state.modeCheck ^ bit).toString(8).padStart(3, '0')
+        })
     }
 
-    update_id_mode = (_cwd, _id, _mode, _session_id) => {
-        this.setState({cwd: _cwd,
-                       id: _id, 
-                       mode: _mode,
-                       session_id: _session_id})
+    handleModeInputChange = (ev) => {
+        const value = ev.target.value
+        if (value.length > 3) {
+            return
+        }
+        if (value.length !== 0 && !/^[0-7]+$/.test(value)) {
+            return
+        }
+        this.setState({
+            modeInput: value,
+            modeCheck: parseInt(value.padEnd(3, '0'), 8)
+        })
+    }
+    handleModeInputBlur = (_) => {
+        if (this.state.modeInput.length !== 3) {
+            this.setState({
+                modeCheck: (this.state.mode & 0o777),
+                modeInput: (this.state.mode & 0o777).toString(8).padStart(3, '0')
+            })
+        } else {
+            this.setState({
+                mode: this.state.mode & 0xfe00 | this.state.modeCheck
+            })
+        }
+    }
+    update_id_mode = (_cwd, _name, _mode) => {
+        this.cwd = _cwd
+        this.setState({
+            name: _name,
+            mode: _mode,
+            modeCheck: (_mode & 0o777),
+            modeInput: (_mode & 0o777).toString(8).padStart(3, '0')
+        })
     }
 
     render() {
         const {open} = this.props;
+        if (!open) {
+            return null
+        }
+
+        const {name, mode, modeCheck, modeInput, applyRecursively} = this.state
+        const entryIsDir = isDir(mode)
+
+        const rows_list = []
+        for (let i = 0; i < 3; i++) {
+            const who = ['Owner', 'Group', 'Others'][i]
+            const row = [<TableCell key={who}><Box fontWeight={'bold'}>{who}</Box></TableCell>]
+
+            for (let j = 0; j < 3; j++) {
+                const op = ['read', 'write', 'execute'][j]
+                const index = i * 3 + j
+                const bit = PERMISSION_BITS[index]
+                row.push(<TableCell key={String(bit)} align={'center'}>
+                    <Tooltip
+                        placement={'top-start'}
+                        title={`If set, the ${who} can ${op} on the ${entryIsDir ? 'directory' : 'file'}`}>
+                        <Checkbox
+                            name={String(bit)}
+                            onChange={this.handleModeChange}
+                            checked={Boolean(modeCheck & bit)}/>
+                    </Tooltip>
+                </TableCell>)
+            }
+            rows_list.push(
+                <TableRow key={`row_${i}`}>
+                    {row}
+                </TableRow>
+            )
+        }
+
         return (
             <Dialog
                 open={open}
-                onClose={this.handleClose}
                 fullWidth={true}
                 maxWidth={'xs'}
                 aria-labelledby="change permission"
             >
-                <DialogTitle>Change Permission</DialogTitle>
-                <DialogTitle>{this.state.id}</DialogTitle>
+                <DialogTitle>{name} - Permissions</DialogTitle>
                 <div className={'change-permission-content-wrapper'}>
-                    <FormGroup row>
-                        <Tooltip flexGrow={1} title={'Owner Permission'}>
-                            <Typography variant={'subtitle1'}>Owner</Typography>
-                        </Tooltip>
-                        <FormControlLabel
-                        control={
-                            <Checkbox
-                            checked={this.state.mode & constants.M_IROWR ? true : false}
-                            onChange={(event) => {this.handleOnChange(constants.M_IROWR)}}
-                            name="owner_read"
-                            color="primary"
-                            />
-                        }
-                        label="Read"
+                    <Box display={'flex'}>
+                        <Box flexGrow={1}
+                             fontWeight={'bold'}
+                             alignSelf={'center'}>
+                            Unix Permission
+                        </Box>
+                        <TextField
+                            title={'Unix Permissions'}
+                            size={'small'}
+                            onChange={this.handleModeInputChange}
+                            onBlur={this.handleModeInputBlur}
+                            value={modeInput}
                         />
+                    </Box>
+                    <br/>
+                    <Table size={'small'}>
+                        <TableHead>
+                            <TableRow>
+                                <TableCell/>
+                                <TableCell align={'center'}><Box fontWeight={'bold'}>Read</Box></TableCell>
+                                <TableCell align={'center'}><Box fontWeight={'bold'}>Write</Box></TableCell>
+                                <TableCell align={'center'}><Box fontWeight={'bold'}>Exec</Box></TableCell>
+                            </TableRow>
+                        </TableHead>
+                        <TableBody>
+                            {rows_list}
+                        </TableBody>
+                    </Table>
+                    <br/>
+                    {entryIsDir &&
+                    <Tooltip
+                        placement={'top-start'}
+                        title={'Apply the permissions to the children in this directory as well'}>
                         <FormControlLabel
-                        control={
-                            <Checkbox
-                            checked={this.state.mode & constants.M_IWOWR ? true : false}
-                            onChange={(event) => {this.handleOnChange(constants.M_IWOWR)}}
-                            name="owner_write"
-                            color="primary"
-                            />
-                        }
-                        label="Write"
-                        />
-                        <FormControlLabel
-                        control={
-                            <Checkbox
-                            checked={this.state.mode & constants.M_IXOWR ? true : false}
-                            onChange={(event) => {this.handleOnChange(constants.M_IXOWR)}}
-                            name="owner_execute"
-                            color="primary"
-                            />
-                        }
-                        label="Execute"
-                        />
-                        </FormGroup>
-                        <FormGroup row>
-                        <Tooltip flexGrow={1} title={'Group Permission'}>
-                        <Typography variant={'subtitle1'}>Group</Typography>
-                        </Tooltip>
-                        <FormControlLabel
-                        control={
-                            <Checkbox
-                            checked={this.state.mode & constants.M_IRGRP ? true : false}
-                            onChange={(event) => {this.handleOnChange(constants.M_IRGRP)}}
-                            name="group_read"
-                            color="primary"
-                            />
-                        }
-                        label="Read"
-                        />
-                        <FormControlLabel
-                        control={
-                            <Checkbox
-                            checked={this.state.mode & constants.M_IWGRP ? true : false}
-                            onChange={(event) => {this.handleOnChange(constants.M_IWGRP)}}
-                            name="group_write"
-                            color="primary"
-                            />
-                        }
-                        label="Write"
-                        />
-                        <FormControlLabel
-                        control={
-                            <Checkbox
-                            checked={this.state.mode & constants.M_IXGRP ? true : false}
-                            onChange={(event) => {this.handleOnChange(constants.M_IXGRP)}}
-                            name="group_execute"
-                            color="primary"
-                            />
-                        }
-                        label="Execute"
-                        />
-                        </FormGroup>
-                        <FormGroup row>
-                        <Tooltip flexGrow={1} title={'Others Permission'}>
-                        <Typography variant={'subtitle1'}>Others</Typography>
-                        </Tooltip>
-                        <FormControlLabel
-                        control={
-                            <Checkbox
-                            checked={this.state.mode & constants.M_IROTH ? true : false}
-                            onChange={(event) => {this.handleOnChange(constants.M_IROTH)}}
-                            name="others_read"
-                            color="primary"
-                            />
-                        }
-                        label="Read"
-                        />
-                        <FormControlLabel
-                        control={
-                            <Checkbox
-                            checked={this.state.mode & constants.M_IWOTH ? true : false}
-                            onChange={(event) => {this.handleOnChange(constants.M_IWOTH)}}
-                            name="others_write"
-                            color="primary"
-                            />
-                        }
-                        label="Write"
-                        />
-                        <FormControlLabel
-                        control={
-                            <Checkbox
-                            checked={this.state.mode & constants.M_IXOTH ? true : false}
-                            onChange={(event) => {this.handleOnChange(constants.M_IXOTH)}}
-                            name="others_execute"
-                            color="primary"
-                            />
-                        }
-                        label="Execute"
-                        />
-                    </FormGroup>
+                            control={
+                                <Switch
+                                    checked={applyRecursively}
+                                    color={'warning'}
+                                    onChange={() => {
+                                        this.setState({applyRecursively: !this.state.applyRecursively})
+                                    }}
+                                />
+                            }
+                            label="Apply changes recursively"/>
+                    </Tooltip>
+                    }
                 </div>
                 <DialogActions>
                     <Button onClick={this.handleClose}>Close</Button>
                     <Button variant={'contained'}
-                            id={'button_save'}
+                            id={'button_apply'}
                             onClick={this.handleClose}>
-                        Save
+                        Apply
                     </Button>
                 </DialogActions>
-
             </Dialog>
         );
     }

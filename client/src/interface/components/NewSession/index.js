@@ -34,7 +34,6 @@ export default class NewSession extends React.Component {
         return (
             <Dialog
                 open={open}
-                onClose={this.handleClose}
                 fullWidth={true}
                 maxWidth={'xs'}
                 aria-labelledby="new session"
