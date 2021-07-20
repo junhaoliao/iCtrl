@@ -112,11 +112,13 @@ class SFTP(Connection):
 
         return True, ''
 
-    def remode(self, cwd, new_mode):
-        try:
-            self.sftp.chmod(cwd, new_mode)
-        except Exception as e:
-            return False, repr(e)
+    def chmod(self, path, mode, recursive):
+        _, _, _, stderr = self.exec_command_blocking(
+            f'chmod {"-R" if recursive else ""} {"{0:0{1}o}".format(mode,3)} "{path}"')
+        stderr_lines = stderr.readlines()
+        if len(stderr_lines) != 0:
+            print(stderr_lines)
+            return False, 'Some files were not applied with the request mode due to permission issues.'
 
         return True, ''
 

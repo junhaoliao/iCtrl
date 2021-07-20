@@ -257,7 +257,8 @@ def sftp_rename(session_id):
 
     return 'success'
 
-@app.route('/sftp_remode/<session_id>', methods=['PATCH'])
+
+@app.route('/sftp_chmod/<session_id>', methods=['PATCH'])
 def sftp_remode(session_id):
     host, username, this_private_key_path = get_session_info(session_id)
 
@@ -266,14 +267,16 @@ def sftp_remode(session_id):
     if status is False:
         abort(403, description=reason)
 
-    cwd = request.json.get('cwd')
-    new_mode = request.json.get('new_mode')
+    path = request.json.get('path')
+    mode = request.json.get('mode')
+    recursive = request.json.get('recursive')
 
-    status, reason = sftp.remode(cwd, new_mode)
+    status, reason = sftp.chmod(path, mode, recursive)
     if not status:
         abort(400, reason)
 
     return 'success'
+
 
 @app.route('/sftp_ul/<session_id>', methods=['POST'])
 def sftp_ul(session_id):
