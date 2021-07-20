@@ -59,16 +59,28 @@ export default class VNCViewer extends React.Component {
                         });
                     });
                     rfb.addEventListener('clipboard', (ev) => {
-                        navigator.clipboard.writeText(ev.detail.text).then();
+                        try {
+                            navigator.clipboard.writeText(ev.detail.text).then();
+                        } catch (e) {
+                            // 2 cases:
+                            // 1) not hosting over https on the server
+                            // 2) the browser is too old to support clipboard
+                            console.log(e);
+                        }
                     });
                     let clipboardText = null;
-                    window.onfocus = ev => {
-                        navigator.clipboard.readText().then((text) => {
-                            if (clipboardText !== text) {
-                                clipboardText = text;
-                                rfb.clipboardPasteFrom(text);
-                            }
-                        });
+                    window.onfocus = _ => {
+                        try {
+                            navigator.clipboard.readText().then((text) => {
+                                if (clipboardText !== text) {
+                                    clipboardText = text;
+                                    rfb.clipboardPasteFrom(text);
+                                }
+                            });
+                        } catch (e) {
+                            // ditto
+                            console.log(e);
+                        }
                     };
                     return;
                 }
@@ -132,7 +144,7 @@ export default class VNCViewer extends React.Component {
         return (<div>
                 <Helmet>
                     <title>{`VNC - ${username}@${host}`}</title>
-                    <link rel="icon" href={`/favicon/VNC/${this.session_id}`} />
+                    <link rel="icon" href={`/favicon/VNC/${this.session_id}`}/>
                 </Helmet>
                 {this.state.loading &&
                 <Loading
