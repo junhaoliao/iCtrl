@@ -82,8 +82,8 @@ export const sftp_ul = (fm, session_id, cwd, file) => {
                     ]
                 }));
             }
-        }).then(response => {
-        console.log(response.data);
+        }).then(_ => {
+        fm.loadDir(fm.state.cwd);
     }).catch(error => {
         if (error.response) {
             fm.showAlert(htmlResponseToReason(error.response.data));
@@ -127,15 +127,15 @@ export const sftp_rm = (fm, session_id, cwd, files) => {
 export const sftp_chmod = (fm, cwd, name, mode, recursive) => {
     fm.setState({
         loading: true
-    })
+    });
     axios.patch(`/sftp_chmod/${fm.session_id}`, {
         path: `${cwd}/${name}`,
         mode: mode,
         recursive: recursive
     }).then(_ => {
-        fm.loadDir(cwd)
+        fm.loadDir(cwd);
     }).catch(error => {
-        fm.loadDir(cwd)
+        fm.loadDir(cwd);
         if (error.response) {
             fm.showAlert(htmlResponseToReason(error.response.data));
         } else {
@@ -143,4 +143,4 @@ export const sftp_chmod = (fm, cwd, name, mode, recursive) => {
             fm.showAlert('Error: ' + error.message);
         }
     });
-}
+};
