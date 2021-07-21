@@ -24,15 +24,15 @@ const columns = [
         }
     },
     {
-        field: 'size', headerName: 'Size', width: 90,
+        field: 'size', headerName: 'Size', width: 88,
         valueFormatter: (params) => (humanFileSize(params.value))
     },
     {
-        field: 'atime', headerName: 'Date Accessed', width: 188,
+        field: 'atime', headerName: 'Date Accessed', width: 186,
         valueFormatter: dateFormatter
     },
     {
-        field: 'mtime', headerName: 'Date Modified', width: 188,
+        field: 'mtime', headerName: 'Date Modified', width: 186,
         valueFormatter: dateFormatter
     },
     {

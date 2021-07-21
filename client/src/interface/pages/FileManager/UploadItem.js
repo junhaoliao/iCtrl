@@ -33,7 +33,7 @@ const UploadItem = (props) => {
         };
 
         const uploadDone = progress === 100;
-        return (<ListItem button className={'upload-item'} >
+        return (<ListItem button className={'upload-item'}>
             <ListItemText
                 primary={<div title={filename} className={'upload-item-name'}>
                     {filename}

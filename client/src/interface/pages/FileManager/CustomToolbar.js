@@ -12,9 +12,10 @@ import {
     InputAdornment,
     Menu,
     MenuItem,
-    OutlinedInput
+    OutlinedInput,
+    Tooltip
 } from '@material-ui/core';
-import {ArrowUpward, Delete, GetApp, KeyboardArrowRight, Publish, VisibilityOff} from '@material-ui/icons';
+import {ArrowUpward, Delete, GetApp, KeyboardArrowRight, Publish, Visibility, VisibilityOff} from '@material-ui/icons';
 
 import {DensityComfortableIcon, DensityCompactIcon, DensityIcon, DensityStandardIcon} from '../../../icons';
 import {sftp_dl, sftp_rm, sftp_ul} from '../../../actions/sftp';
@@ -114,6 +115,12 @@ export default class CustomToolbar extends React.Component {
         ev.preventDefault();
     };
 
+    handleCwdInputKeyPress = (ev) => {
+        if (ev.key === 'Enter') {
+            this.handleCwdSubmit(ev);
+        }
+    };
+
     handleCwdInputChange = (ev) => {
         this.fm.setState({
             cwdInput: ev.target.value
@@ -143,47 +150,62 @@ export default class CustomToolbar extends React.Component {
     render() {
         const pluralSelection = this.fm.selected.length > 1;
         return (<GridToolbarContainer>
-            <IconButton aria-label={'up'} onClick={this.handleUpOneLevel} color={'primary'}>
-                <ArrowUpward/>
-            </IconButton>
-            <form onSubmit={this.handleCwdSubmit} autoComplete="off">
-                <OutlinedInput style={{width: '30vw'}}
-                               onBlur={this.handleCwdInputBlur} onChange={this.handleCwdInputChange}
-                               value={this.fm.state.cwdInput}
-                               error={Boolean(this.fm.state.cwdInputErr)}
-                               endAdornment={
-                                   <InputAdornment position="end">
-                                       <IconButton color={'primary'} id={'enter_button'} edge={'end'}
-                                                   aria-label={'enter'}
-                                                   onClick={this.handleCwdSubmit}>
-                                           <KeyboardArrowRight/>
-                                       </IconButton>
-                                   </InputAdornment>
-                               }
-                               inputProps={{'aria-label': 'current-directory'}}/>
-            </form>
-            <Button color={'primary'} onClick={this.handleDownload}
-                    startIcon={<GetApp/>}>
-                Download
-            </Button>
-            <Button color={'primary'} onClick={this.handleUpload}
-                    startIcon={<Publish/>}>
-                Upload
-            </Button>
-            <Button color={'primary'} onClick={this.handleDelete}
-                    startIcon={<Delete/>}>
-                Delete
-            </Button>
-            <Button color={'primary'} onClick={() => {
-                this.handleHiddenFiles();
-            }}
-                    startIcon={<VisibilityOff/>}>
-                {this.fm.showHidden ? 'Hide' : 'Show'} Hidden Files
-            </Button>
-            <Button color={'primary'} aria-controls="density" aria-haspopup="true" onClick={this.handleMenuOpen}
-                    startIcon={<DensityIcon/>}>
-                Density
-            </Button>
+            <Tooltip title={'Go to Parent Folder'}>
+                <IconButton aria-label={'up'} onClick={this.handleUpOneLevel} color={'primary'}>
+                    <ArrowUpward/>
+                </IconButton>
+            </Tooltip>
+
+            <OutlinedInput
+                fullWidth
+                style={{height: 40}}
+                autoComplete={"new-password"}
+                onKeyPress={this.handleCwdInputKeyPress}
+                onBlur={this.handleCwdInputBlur}
+                onChange={this.handleCwdInputChange}
+                value={this.fm.state.cwdInput}
+                error={Boolean(this.fm.state.cwdInputErr)}
+                endAdornment={
+                    <InputAdornment position="end">
+                        <IconButton color={'primary'} id={'enter_button'} edge={'end'}
+                                    aria-label={'enter'}
+                                    onClick={this.handleCwdSubmit}>
+                            <KeyboardArrowRight/>
+                        </IconButton>
+                    </InputAdornment>
+                }
+                inputProps={{'aria-label': 'current-directory'}}/>
+
+            <Tooltip title={'Density'}>
+                <IconButton color={'primary'} onClick={this.handleMenuOpen}>
+                    <DensityIcon/>
+                </IconButton>
+            </Tooltip>
+
+            <Tooltip title={`${this.fm.showHidden ? 'Hide' : 'Show'} Hidden Files`}>
+                <IconButton color={'primary'} onClick={this.handleHiddenFiles}>
+                    {this.fm.showHidden ? <VisibilityOff/> : <Visibility/>}
+                </IconButton>
+            </Tooltip>
+
+            <Tooltip title={'Delete'}>
+                <IconButton color={'primary'} onClick={this.handleDelete}>
+                    <Delete/>
+                </IconButton>
+            </Tooltip>
+
+            <Tooltip title={'Upload'}>
+                <IconButton color={'primary'} onClick={this.handleUpload}>
+                    <Publish/>
+                </IconButton>
+            </Tooltip>
+
+            <Tooltip title={'Download'}>
+                <IconButton color={'primary'} onClick={this.handleDownload}>
+                    <GetApp/>
+                </IconButton>
+            </Tooltip>
+
             <Menu
                 id="density"
                 anchorEl={this.state.densityMenuAnchorEl}

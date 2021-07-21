@@ -21,13 +21,13 @@ function stringToColor(string) {
 }
 
 function stringAvatar(name) {
-    const hostname = name.split('.')[0]
+    const hostname = name.split('.')[0];
     return {
         sx: {
             bgcolor: stringToColor(name),
-            fontSize:'small'
+            fontSize: 'small'
         },
-        children: hostname==='192'?name.substr(-5, 5):hostname,
+        children: hostname === '192' ? name.substr(-5, 5) : hostname,
     };
 }
 

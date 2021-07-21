@@ -1,5 +1,5 @@
 import React from 'react';
-import {Helmet} from 'react-helmet';
+import {Helmet, HelmetProvider} from 'react-helmet-async';
 
 import './index.css';
 
@@ -186,9 +186,12 @@ export default class Dashboard extends React.Component {
 
         return (
             <Container maxWidth={'lg'}>
-                <Helmet>
-                    <title>iCtrl - Dashboard</title>
-                </Helmet>
+                <HelmetProvider>
+                    <Helmet>
+                        <title>iCtrl - Dashboard</title>
+                    </Helmet>
+                </HelmetProvider>
+
                 <br/><br/>
                 <Box display="flex">
                     <Typography flexGrow={1} variant={'h3'}>Dashboard</Typography>
@@ -201,10 +204,12 @@ export default class Dashboard extends React.Component {
                     <List>
                         {sessionList}
                     </List> :
-                    <div style={{display:'flex', flexDirection:'column', marginTop:'22vh'}}>
-                        <img style={{margin:'auto', height:'20vh', marginBottom:'8vh', filter: 'grayscale(75%)'}} src={logo} alt="Logo"/>
-                        <h4 style={{margin:'auto', textAlign:'center' ,color:'grey'}}>No Session Found<br/>
-                            Please click on <AddCircleIcon style={{color:'orange', position:'relative',top:'6px'}}/> to add a new session</h4>
+                    <div style={{display: 'flex', flexDirection: 'column', marginTop: '22vh'}}>
+                        <img style={{margin: 'auto', height: '20vh', marginBottom: '8vh', filter: 'grayscale(75%)'}}
+                             src={logo} alt="Logo"/>
+                        <h4 style={{margin: 'auto', textAlign: 'center', color: 'grey'}}>No Session Found<br/>
+                            Please click on <AddCircleIcon
+                                style={{color: 'orange', position: 'relative', top: '6px'}}/> to add a new session</h4>
                     </div>
                 }
 

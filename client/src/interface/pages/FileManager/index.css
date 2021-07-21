@@ -1,14 +1,14 @@
-.upload-item{
+.upload-item {
     cursor: default;
 }
 
-.upload-item-name{
+.upload-item-name {
     max-width: 250px;
     overflow-x: hidden;
     text-overflow: ellipsis;
 }
 
-.upload-item-cancel-button{
+.upload-item-cancel-button {
     width: 30px;
     height: 30px;
     position: relative;

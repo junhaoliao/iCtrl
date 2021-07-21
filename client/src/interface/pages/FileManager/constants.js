@@ -27,4 +27,4 @@ export const PERMISSION_BITS = [
     S_IROTH,
     S_IWOTH,
     S_IXOTH,
-]
+];
