@@ -11,7 +11,7 @@ const UploadList = (props) => {
             <UploadItem key={idx} fm={fm} uploadProgressIdx={idx}/>
         );
         if (idx !== uploadItems.length - 1) {
-            children.push(<Divider/>);
+            children.push(<Divider key={`divider-${idx}`}/>);
         }
     });
     return (<List margin={'16px 20px 16px 20px'}>

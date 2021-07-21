@@ -1,6 +1,19 @@
 import React from 'react';
 
-import {Alert, Drawer, duration, List, ListItem, ListItemIcon, ListItemText, Paper, Snackbar} from '@material-ui/core';
+import {
+    Alert,
+    Divider,
+    Drawer,
+    duration,
+    List,
+    ListItem,
+    ListItemIcon,
+    ListItemText,
+    Menu,
+    MenuItem,
+    Paper,
+    Snackbar
+} from '@material-ui/core';
 import {DataGrid} from '@material-ui/data-grid';
 
 import CustomToolbar from './CustomToolbar';
@@ -8,13 +21,25 @@ import UploadToolbar from './UploadToolbar';
 import UploadList from './UploadList';
 import ChangePermission from '../../components/ChangePermission';
 import columns from './columns';
-import {sftp_dl, sftp_ls, sftp_rename} from '../../../actions/sftp';
+import {sftp_dl, sftp_ls, sftp_rename, sftp_ul} from '../../../actions/sftp';
 import {isDir} from './utils';
 import {Helmet, HelmetProvider} from 'react-helmet-async';
-import {Add, Assignment, CloudDownload, Computer, DesktopMac, Home, MusicNote, PhotoLibrary} from '@material-ui/icons';
+import {
+    Add,
+    Assignment,
+    CloudDownload,
+    Computer,
+    CreateNewFolder,
+    DesktopMac,
+    DriveFolderUpload,
+    Home,
+    MusicNote,
+    PhotoLibrary,
+    UploadFile
+} from '@material-ui/icons';
 import Button from '@material-ui/core/Button';
 
-const drawerWidth = 180;
+const drawerWidth = 200;
 
 export default class FileManager extends React.Component {
     constructor(props) {
@@ -41,6 +66,7 @@ export default class FileManager extends React.Component {
             density: 'standard',
             filesDisplaying: [],
             loading: true,
+            newMenuAnchorEl: null,
             uploadWindowCollapsed: false,
             uploadProgress: []
         };
@@ -187,10 +213,38 @@ export default class FileManager extends React.Component {
         });
     };
 
+    handleNewMenuOpen = (ev) => {
+        this.setState({newMenuAnchorEl: ev.target});
+    };
+
+    handleNewMenuClose = (_) => {
+        this.setState({newMenuAnchorEl: null});
+    };
+
+    handleUpload = (isDirectory) => {
+        this.handleNewMenuClose();
+        const u = document.createElement('input');
+        u.type = 'file';
+        u.webkitdirectory = isDirectory;
+        u.multiple = true;
+        const clickFunc = (_) => {
+            for (let i = 0; i < u.files.length; i++) {
+                sftp_ul(this, this.session_id, this.state.cwd, u.files[i], isDirectory);
+
+                // always scroll the latest item into the view
+                const upload_paper = document.getElementById('upload_paper');
+                upload_paper.scrollTop = upload_paper.scrollHeight;
+            }
+            u.removeEventListener('change', clickFunc);
+        };
+        u.addEventListener('change', clickFunc);
+        u.click();
+    };
+
     render() {
         const {host, username} = this.props.profiles.sessions[this.session_id];
         return (
-            <div style={{overflowY:'hidden'}}>
+            <div style={{overflowY: 'hidden'}}>
                 <HelmetProvider>
                     <Helmet>
                         <title>{`File Manager - ${username}@${host}`}</title>
@@ -199,11 +253,13 @@ export default class FileManager extends React.Component {
                 </HelmetProvider>
                 <Drawer open variant={'persistent'} anchor={'left'}>
                     <Button
-                        style={{marginTop: 5, height: 40, marginLeft: 16, marginRight: 16}}
+                        onClick={this.handleNewMenuOpen}
+                        style={{marginTop: 5, height: 40, marginLeft: 16, marginRight: 16, marginBottom: 8}}
                         variant="contained"
                         startIcon={<Add/>}>
                         New
                     </Button>
+                    <Divider/>
                     <List style={{width: drawerWidth}}>
                         {[
                             [<Home/>, 'Home', ''],
@@ -216,7 +272,9 @@ export default class FileManager extends React.Component {
                         ].map((item, index) => (
                             <ListItem
                                 button
-                                onClick={()=>{this.loadDir(item[2])}}
+                                onClick={() => {
+                                    this.loadDir(item[2]);
+                                }}
                                 key={item[1]}>
                                 <ListItemIcon>
                                     {item[0]}
@@ -289,6 +347,35 @@ export default class FileManager extends React.Component {
                     fm={this}
                     ref={this.changePermission}
                 />
+                <Menu
+                    open={Boolean(this.state.newMenuAnchorEl)}
+                    anchorEl={this.state.newMenuAnchorEl}
+                    onClose={this.handleNewMenuClose}
+                >
+                    <MenuItem key={'new-menu-folder'} style={{width: drawerWidth - 32}}>
+                        <ListItemIcon>
+                            <CreateNewFolder/>
+                        </ListItemIcon>
+                        <ListItemText>Folder</ListItemText>
+                    </MenuItem>
+                    <Divider/>
+                    <MenuItem key={'new-menu-file-upload'} onClick={() => {
+                        this.handleUpload(false);
+                    }}>
+                        <ListItemIcon>
+                            <UploadFile/>
+                        </ListItemIcon>
+                        <ListItemText>File Upload</ListItemText>
+                    </MenuItem>
+                    <MenuItem key={'new-menu-folder-upload'} onClick={() => {
+                        this.handleUpload(true);
+                    }}>
+                        <ListItemIcon>
+                            <DriveFolderUpload/>
+                        </ListItemIcon>
+                        <ListItemText>Folder Upload</ListItemText>
+                    </MenuItem>
+                </Menu>
             </div>
         );
     }
