@@ -1,6 +1,6 @@
 import React from 'react';
 
-import {Alert, duration, Paper, Snackbar} from '@material-ui/core';
+import {Alert, Drawer, duration, List, ListItem, ListItemIcon, ListItemText, Paper, Snackbar} from '@material-ui/core';
 import {DataGrid} from '@material-ui/data-grid';
 
 import CustomToolbar from './CustomToolbar';
@@ -10,13 +10,16 @@ import ChangePermission from '../../components/ChangePermission';
 import columns from './columns';
 import {sftp_dl, sftp_ls, sftp_rename} from '../../../actions/sftp';
 import {isDir} from './utils';
-import {Helmet} from 'react-helmet';
+import {Helmet, HelmetProvider} from 'react-helmet-async';
+import {Add, Assignment, CloudDownload, Computer, DesktopMac, Home, MusicNote, PhotoLibrary} from '@material-ui/icons';
+import Button from '@material-ui/core/Button';
 
+const drawerWidth = 180;
 
 export default class FileManager extends React.Component {
     constructor(props) {
         super(props);
-        this.changePermission = React.createRef()
+        this.changePermission = React.createRef();
         const {
             match: {params}
         } = props;
@@ -76,7 +79,7 @@ export default class FileManager extends React.Component {
         this.clearSelection(ev.api);
         this.clickTimeout = setTimeout(() => {
             const id = ev.row.id;
-            this.setState({id: ev.row.id, mode: ev.row.mode})
+            this.setState({id: ev.row.id, mode: ev.row.mode});
             if (ev.field === 'id' && curr_selected.length === 1 && curr_selected.includes(id)) {
                 ev.api.setCellMode(id, 'id', 'edit');
 
@@ -90,14 +93,14 @@ export default class FileManager extends React.Component {
                 };
                 return;
             } else if (ev.field === 'mode' && curr_selected.length === 1 && curr_selected.includes(id)) {
-                this.handleChangePermission(ev.row.id, ev.row.mode)
+                this.handleChangePermission(ev.row.id, ev.row.mode);
             }
             ev.api.selectRow(id);
         }, 200);
     };
 
     handleChangePermission = (name, mode) => {
-        this.changePermission.current.update_id_mode(this.state.cwd, name, mode, this.session_id)
+        this.changePermission.current.update_id_mode(this.state.cwd, name, mode, this.session_id);
         this.setState({changePermissionOpen: true});
     };
 
@@ -185,77 +188,109 @@ export default class FileManager extends React.Component {
     };
 
     render() {
-        const {host, username} = this.props.profiles.sessions[this.session_id]
-        return (<div style={{height: '100vh', minWidth: 900}}>
-            <Helmet>
-                <title>{`File Manager - ${username}@${host}`}</title>
-                <link rel="icon" href={`/favicon/fm/${this.session_id}`}/>
-            </Helmet>
-            <DataGrid
-                rows={this.state.filesDisplaying}
-                density={this.state.density}
-                columns={columns}
-                checkboxSelection
-                disableSelectionOnClick
-                disableColumnMenu
-                rowsPerPageOptions={[]}
-                loading={this.state.loading}
-                onCellClick={this.handleCellClick}
-                onRowDoubleClick={this.handleRowDoubleClick}
-                onEditCellChange={this.handleEditCellChange}
-                onEditCellChangeCommitted={this.handleEditCellChangeCommitted}
-                sortModel={[
-                    {
-                        field: 'mode',
-                        sort: 'asc',
-                    },
-                    {
-                        field: 'id',
-                        sort: 'asc',
-                    }]}
-                components={{
-                    Toolbar: CustomToolbar,
-                    NoRowsOverlay: (_ => (
-                        <div style={{margin: 'auto'}}>Empty Directory</div>
-                    ))
-                }}
-                componentsProps={{
-                    toolbar: {fm: this}
-                }}
-                onSelectionModelChange={this.handleSelectionModelChange}
-            />
-            <Snackbar
-                open={this.state.alertOpen}
-                autoHideDuration={5000}
-                onClose={this.handleAlertClose}
-                anchorOrigin={{vertical: 'bottom', horizontal: 'center'}}
-                transitionDuration={{enter: 2 * duration.enteringScreen, exit: 2 * duration.leavingScreen,}}
-            >
-                <Alert elevation={6} variant="filled" severity={'error'}>
-                    {this.state.alertMsg}
-                </Alert>
-            </Snackbar>
-            <Snackbar
-                open={this.state.uploadProgress.length !== 0}
-                anchorOrigin={{vertical: 'bottom', horizontal: 'right'}}
-            >
-                <div style={{position: 'fixed', bottom: 55, right: 15}}>
-                    <UploadToolbar fm={this}/>
-                    {!this.state.uploadWindowCollapsed &&
-                    <Paper id="upload_paper"
-                           style={{maxHeight: 180, overflowY: 'auto'}}
-                           variant="outlined"
-                           square>
-                        <UploadList fm={this}/>
-                    </Paper>}
+        const {host, username} = this.props.profiles.sessions[this.session_id];
+        return (
+            <div style={{overflowY:'hidden'}}>
+                <HelmetProvider>
+                    <Helmet>
+                        <title>{`File Manager - ${username}@${host}`}</title>
+                        <link rel="icon" href={`/favicon/fm/${this.session_id}`}/>
+                    </Helmet>
+                </HelmetProvider>
+                <Drawer open variant={'persistent'} anchor={'left'}>
+                    <Button
+                        style={{marginTop: 5, height: 40, marginLeft: 16, marginRight: 16}}
+                        variant="contained"
+                        startIcon={<Add/>}>
+                        New
+                    </Button>
+                    <List style={{width: drawerWidth}}>
+                        {[
+                            [<Home/>, 'Home', ''],
+                            [<DesktopMac/>, 'Desktop', 'Desktop'],
+                            [<Assignment/>, 'Documents', 'Documents'],
+                            [<CloudDownload/>, 'Downloads', 'Downloads'],
+                            [<MusicNote/>, 'Music', 'Music'],
+                            [<PhotoLibrary/>, 'Pictures', 'Pictures'],
+                            [<Computer/>, 'Root', '/'],
+                        ].map((item, index) => (
+                            <ListItem
+                                button
+                                onClick={()=>{this.loadDir(item[2])}}
+                                key={item[1]}>
+                                <ListItemIcon>
+                                    {item[0]}
+                                </ListItemIcon>
+                                <ListItemText
+                                    primary={item[1]}/>
+                            </ListItem>
+                        ))}
+                    </List>
+                </Drawer>
+                <div style={{marginLeft: `${drawerWidth}px`, height: '100vh'}}>
+                    <DataGrid
+                        rows={this.state.filesDisplaying}
+                        density={this.state.density}
+                        columns={columns}
+                        checkboxSelection
+                        disableSelectionOnClick
+                        disableColumnMenu
+                        rowsPerPageOptions={[]}
+                        loading={this.state.loading}
+                        onCellClick={this.handleCellClick}
+                        onRowDoubleClick={this.handleRowDoubleClick}
+                        onEditCellChange={this.handleEditCellChange}
+                        onEditCellChangeCommitted={this.handleEditCellChangeCommitted}
+                        sortModel={[
+                            {
+                                field: 'id',
+                                sort: 'asc',
+                            }]}
+                        components={{
+                            Toolbar: CustomToolbar,
+                            NoRowsOverlay: (_ => (
+                                <div style={{margin: 'auto'}}>Empty Directory</div>
+                            ))
+                        }}
+                        componentsProps={{
+                            toolbar: {fm: this}
+                        }}
+                        onSelectionModelChange={this.handleSelectionModelChange}
+                    />
                 </div>
-            </Snackbar>
-            <ChangePermission
-                open={this.state.changePermissionOpen}
-                fm={this}
-                ref={this.changePermission}
-            />
-        </div>);
+                <Snackbar
+                    open={this.state.alertOpen}
+                    autoHideDuration={5000}
+                    onClose={this.handleAlertClose}
+                    anchorOrigin={{vertical: 'bottom', horizontal: 'center'}}
+                    transitionDuration={{enter: 2 * duration.enteringScreen, exit: 2 * duration.leavingScreen,}}
+                >
+                    <Alert elevation={6} variant="filled" severity={'error'}>
+                        {this.state.alertMsg}
+                    </Alert>
+                </Snackbar>
+                <Snackbar
+                    open={this.state.uploadProgress.length !== 0}
+                    anchorOrigin={{vertical: 'bottom', horizontal: 'right'}}
+                >
+                    <div style={{position: 'fixed', bottom: 55, right: 15}}>
+                        <UploadToolbar fm={this}/>
+                        {!this.state.uploadWindowCollapsed &&
+                        <Paper id="upload_paper"
+                               style={{maxHeight: 180, overflowY: 'auto'}}
+                               variant="outlined"
+                               square>
+                            <UploadList fm={this}/>
+                        </Paper>}
+                    </div>
+                </Snackbar>
+                <ChangePermission
+                    open={this.state.changePermissionOpen}
+                    fm={this}
+                    ref={this.changePermission}
+                />
+            </div>
+        );
     }
 }
 

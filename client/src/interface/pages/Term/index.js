@@ -5,7 +5,7 @@ import 'xterm/css/xterm.css';
 import {AttachAddon} from 'xterm-addon-attach';
 import {FitAddon} from 'xterm-addon-fit';
 import axios from 'axios';
-import {Helmet} from 'react-helmet';
+import {Helmet, HelmetProvider} from 'react-helmet-async';
 
 export default class Term extends React.Component {
     constructor(props) {
@@ -58,10 +58,12 @@ export default class Term extends React.Component {
 
         return (
             <div id="terminal" style={{height: '100vh', width: '100vw'}}>
-                <Helmet>
-                    <title>{`Terminal - ${username}@${host}`}</title>
-                    <link rel="icon" href={`/favicon/term/${this.session_id}`} />
-                </Helmet>
+                <HelmetProvider>
+                    <Helmet>
+                        <title>{`Terminal - ${username}@${host}`}</title>
+                        <link rel="icon" href={`/favicon/term/${this.session_id}`}/>
+                    </Helmet>
+                </HelmetProvider>
             </div>
         );
     }

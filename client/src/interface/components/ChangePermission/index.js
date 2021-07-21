@@ -18,14 +18,14 @@ import {
 } from '@material-ui/core';
 
 import './index.css';
-import {PERMISSION_BITS} from "../../pages/FileManager/constants";
-import {isDir} from "../../pages/FileManager/utils";
-import {sftp_chmod} from "../../../actions/sftp";
+import {PERMISSION_BITS} from '../../pages/FileManager/constants';
+import {isDir} from '../../pages/FileManager/utils';
+import {sftp_chmod} from '../../../actions/sftp';
 
 export default class ChangePermission extends React.Component {
     constructor(props) {
         super(props);
-        this.cwd = null
+        this.cwd = null;
         this.state = {
             name: null,
             mode: null,
@@ -41,7 +41,7 @@ export default class ChangePermission extends React.Component {
             this.cwd,
             this.state.name,
             this.state.mode & 0o777,
-            this.state.applyRecursively)
+            this.state.applyRecursively);
     }
 
     handleClose = (ev) => {
@@ -51,71 +51,71 @@ export default class ChangePermission extends React.Component {
 
         this.props.fm.setState({
             changePermissionOpen: false
-        })
+        });
     };
 
     handleModeChange = (ev) => {
-        const bit = parseInt(ev.target.name)
+        const bit = parseInt(ev.target.name);
         this.setState({
             mode: this.state.mode ^ bit,
             modeCheck: this.state.modeCheck ^ bit,
             modeInput: (this.state.modeCheck ^ bit).toString(8).padStart(3, '0')
-        })
-    }
+        });
+    };
 
     handleModeInputChange = (ev) => {
-        const value = ev.target.value
+        const value = ev.target.value;
         if (value.length > 3) {
-            return
+            return;
         }
         if (value.length !== 0 && !/^[0-7]+$/.test(value)) {
-            return
+            return;
         }
         this.setState({
             modeInput: value,
             modeCheck: parseInt(value.padEnd(3, '0'), 8)
-        })
-    }
+        });
+    };
     handleModeInputBlur = (_) => {
         if (this.state.modeInput.length !== 3) {
             this.setState({
                 modeCheck: (this.state.mode & 0o777),
                 modeInput: (this.state.mode & 0o777).toString(8).padStart(3, '0')
-            })
+            });
         } else {
             this.setState({
-                mode: this.state.mode & 0xfe00 | this.state.modeCheck
-            })
+                mode: (this.state.mode & 0xfe00) | this.state.modeCheck
+            });
         }
-    }
+    };
     update_id_mode = (_cwd, _name, _mode) => {
-        this.cwd = _cwd
+        this.cwd = _cwd;
         this.setState({
             name: _name,
             mode: _mode,
             modeCheck: (_mode & 0o777),
             modeInput: (_mode & 0o777).toString(8).padStart(3, '0')
-        })
-    }
+        });
+    };
 
     render() {
         const {open} = this.props;
         if (!open) {
-            return null
+            return null;
         }
 
-        const {name, mode, modeCheck, modeInput, applyRecursively} = this.state
-        const entryIsDir = isDir(mode)
+        const {name, mode, modeCheck, modeInput, applyRecursively} = this.state;
+        const entryIsDir = isDir(mode);
 
-        const rows_list = []
+        const rows_list = [];
         for (let i = 0; i < 3; i++) {
-            const who = ['Owner', 'Group', 'Others'][i]
-            const row = [<TableCell key={who}><Box fontWeight={'bold'}>{who}</Box></TableCell>]
+            const who = ['Owner', 'Group', 'Others'][i];
+            const row = [<TableCell key={who}><Box fontWeight={'bold'}>{who}</Box></TableCell>];
 
             for (let j = 0; j < 3; j++) {
-                const op = ['read', 'write', 'execute'][j]
-                const index = i * 3 + j
-                const bit = PERMISSION_BITS[index]
+                const op = ['read', 'write', 'execute'][j];
+                const index = i * 3 + j;
+                const bit = PERMISSION_BITS[index];
                 row.push(<TableCell key={String(bit)} align={'center'}>
                     <Tooltip
                         placement={'top-start'}
@@ -125,13 +125,13 @@ export default class ChangePermission extends React.Component {
                             onChange={this.handleModeChange}
                             checked={Boolean(modeCheck & bit)}/>
                     </Tooltip>
-                </TableCell>)
+                </TableCell>);
             }
             rows_list.push(
                 <TableRow key={`row_${i}`}>
                     {row}
                 </TableRow>
-            )
+            );
         }
 
         return (
@@ -182,7 +182,7 @@ export default class ChangePermission extends React.Component {
                                     checked={applyRecursively}
                                     color={'warning'}
                                     onChange={() => {
-                                        this.setState({applyRecursively: !this.state.applyRecursively})
+                                        this.setState({applyRecursively: !this.state.applyRecursively});
                                     }}
                                 />
                             }

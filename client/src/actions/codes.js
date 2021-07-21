@@ -7,10 +7,10 @@ class VNCError {
 }
 
 class SSHError {
-    static GENERAL = 200
-    static HOST_UNREACHABLE =  this.GENERAL + 1
-    static AUTH_MISSING = this.GENERAL + 2
-    static AUTH_WRONG =  this.GENERAL + 3
+    static GENERAL = 200;
+    static HOST_UNREACHABLE = this.GENERAL + 1;
+    static AUTH_MISSING = this.GENERAL + 2;
+    static AUTH_WRONG = this.GENERAL + 3;
 }
 
 export const ICtrlError = {

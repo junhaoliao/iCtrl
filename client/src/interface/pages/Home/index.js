@@ -1,6 +1,6 @@
-import React from "react";
+import React from 'react';
 
-import { Input } from '@material-ui/core';
+import {Input} from '@material-ui/core';
 import Dashboard from '../Dashboard';
 
 export default class Home extends React.Component {
@@ -8,16 +8,16 @@ export default class Home extends React.Component {
         super(props);
         this.state = {
             counter: 1
-        }
+        };
     }
 
     render() {
-        return(
+        return (
             <div>
                 <h1>Counter: </h1>
                 <Input value={this.state.counter}/>
-                <div style={{ height: 100 }} />
-                <Dashboard />
+                <div style={{height: 100}}/>
+                <Dashboard/>
             </div>
         );
     }

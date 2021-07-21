@@ -7,7 +7,6 @@ export const humanFileSize = (size_in_bytes) => {
 };
 
 
-
 export const isDir = (mode) => {
     return (parseInt(mode) & constants.S_IFMT) === constants.S_IFDIR;
 };

@@ -5,7 +5,7 @@ import Loading from '../../components/Loading';
 import {VNCSteps} from '../../components/Loading/steps';
 import {VNCAuthentication} from '../../components/Loading/authentications';
 import {ICtrlError, ICtrlStep} from '../../../actions/codes';
-import {Helmet} from 'react-helmet';
+import {Helmet, HelmetProvider} from 'react-helmet-async';
 
 
 export default class VNCViewer extends React.Component {
@@ -142,10 +142,13 @@ export default class VNCViewer extends React.Component {
         const {host, username} = this.props.profiles.sessions[this.session_id];
 
         return (<div>
-                <Helmet>
-                    <title>{`VNC - ${username}@${host}`}</title>
-                    <link rel="icon" href={`/favicon/VNC/${this.session_id}`}/>
-                </Helmet>
+                <HelmetProvider>
+                    <Helmet>
+                        <title>{`VNC - ${username}@${host}`}</title>
+                        <link rel="icon" href={`/favicon/VNC/${this.session_id}`}/>
+                    </Helmet>
+                </HelmetProvider>
+
                 {this.state.loading &&
                 <Loading
                     currentStep={this.state.currentStep}

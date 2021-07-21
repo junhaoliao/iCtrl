@@ -8,7 +8,7 @@ import axios from 'axios';
 
 import './index.css';
 
-const machineList = [ 'ug250', 'ug249' ];
+const machineList = ['ug250', 'ug249'];
 
 export default class ChangeMachine extends React.Component {
     constructor(props) {
@@ -16,45 +16,45 @@ export default class ChangeMachine extends React.Component {
         this.state = {
             open: true,
             SelectMachineInput: '',
-        }
+        };
     }
 
     handleClickOpen() {
-        this.setState({ open: true });
-      };
-    
+        this.setState({open: true});
+    };
+
     handleClose() {
-        this.props.handleDone()
-        this.setState({ open: false });
+        this.props.handleDone();
+        this.setState({open: false});
     };
 
     handleSave() {
         // to do
-        const { SelectMachineInput } = this.state;
-        const { sessionId } = this.props;
+        const {SelectMachineInput} = this.state;
+        const {sessionId} = this.props;
         // console.log(newMachine, this.props.sessionId);
         axios.patch('/change_host', {
-            session_id: sessionId, 
+            session_id: sessionId,
             new_host: `${SelectMachineInput}.eecg.toronto.edu`
         }).then(response => {
             console.log(response.data);
-            window.location.reload()
+            window.location.reload();
         }).catch(err => {
-            console.log('error', err)
-        })
+            console.log('error', err);
+        });
         this.handleClose();
     }
 
-    handleMachineChange = (e) =>{
+    handleMachineChange = (e) => {
         // console.log('machine changed', e.target.value)
-        this.setState({ SelectMachineInput: e.target.value })
-    }
+        this.setState({SelectMachineInput: e.target.value});
+    };
 
     render() {
-        const { open } = this.state;
+        const {open} = this.state;
         return (
             <div className="change-machine-bg">
-                <div className="change-machine-mask" />
+                <div className="change-machine-mask"/>
                 <div>
                     <Dialog
                         open={open}
@@ -69,8 +69,8 @@ export default class ChangeMachine extends React.Component {
                                 value={this.state.SelectMachineInput}
                                 onChange={this.handleMachineChange}
                                 helperText="Please select your machine"
-                                style={{ width: '-webkit-fill-available' }}
-                                >
+                                style={{width: '-webkit-fill-available'}}
+                            >
                                 {machineList.map((option) => (
                                     <MenuItem id="machine-name" key={option} value={option}>
                                         {option}
@@ -78,13 +78,15 @@ export default class ChangeMachine extends React.Component {
                                 ))}
                             </TextField>
                             <div className="change-machine-save">
-                                <Button variant="contained" color="secondary" onClick={() => this.handleClose()}>Close</Button>
-                                <Button style={{ marginLeft: 20 }} variant="contained" color="primary" onClick={() => this.handleSave()}>Change</Button>
+                                <Button variant="contained" color="secondary"
+                                        onClick={() => this.handleClose()}>Close</Button>
+                                <Button style={{marginLeft: 20}} variant="contained" color="primary"
+                                        onClick={() => this.handleSave()}>Change</Button>
                             </div>
                         </div>
                     </Dialog>
                 </div>
             </div>
-        )
+        );
     }
 }
