@@ -38,7 +38,7 @@ export const sftp_dl = (session_id, cwd, files) => {
     a.click();
 };
 
-export const sftp_ul = (fm, session_id, cwd, file) => {
+export const sftp_ul = (fm, session_id, cwd, file, isDirectory) => {
     const uploadProgressIdx = fm.state.uploadProgress.length;
     const cancelTokenSrc = axios.CancelToken.source();
     fm.setState({
@@ -59,8 +59,8 @@ export const sftp_ul = (fm, session_id, cwd, file) => {
         {
             cancelToken: cancelTokenSrc.token,
             headers: {
-                Path: cwd,
-                Filename: file.name
+                Cwd: cwd,
+                Path: isDirectory ? (file.webkitRelativePath) : (file.name)
             },
             onUploadProgress: progressEvent => {
                 const percentage = Math.floor(progressEvent.loaded * 100 / progressEvent.total);

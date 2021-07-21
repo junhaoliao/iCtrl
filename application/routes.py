@@ -2,6 +2,7 @@ import json
 import os
 from datetime import datetime
 from io import BytesIO
+from pathlib import Path
 
 from flask import request, abort, send_file
 
@@ -287,14 +288,21 @@ def sftp_ul(session_id):
     if status is False:
         abort(403, description=reason)
 
-    path = request.headers.get('Path')
+    cwd = request.headers.get('Cwd')
+
     # no need to use secure_filename because the user should be responsible for her/his input
     #  when not using the client
-    request_filename = request.headers.get('Filename')
-    if request_filename == '':
-        abort(400, 'Empty file handle')
+    relative_path = request.headers.get('Path')
 
-    sftp.sftp.chdir(path=path)
+    p = Path(relative_path)
+    request_filename = p.name
+
+    relative_dir_path = p.parent
+    if str(relative_dir_path) != '.':
+        cwd = os.path.join(cwd, relative_dir_path)
+        sftp.exec_command_blocking(f'mkdir -p "{cwd}"')
+
+    sftp.sftp.chdir(path=cwd)
     sftp_file = sftp.file(filename=request_filename)
 
     chunk = request.stream.read(UPLOAD_CHUNK_SIZE)

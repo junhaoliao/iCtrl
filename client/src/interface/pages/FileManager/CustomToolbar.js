@@ -15,10 +15,10 @@ import {
     OutlinedInput,
     Tooltip
 } from '@material-ui/core';
-import {ArrowUpward, Delete, GetApp, KeyboardArrowRight, Publish, Visibility, VisibilityOff} from '@material-ui/icons';
+import {ArrowUpward, Delete, GetApp, KeyboardArrowRight, Visibility, VisibilityOff} from '@material-ui/icons';
 
 import {DensityComfortableIcon, DensityCompactIcon, DensityIcon, DensityStandardIcon} from '../../../icons';
-import {sftp_dl, sftp_rm, sftp_ul} from '../../../actions/sftp';
+import {sftp_dl, sftp_rm} from '../../../actions/sftp';
 
 export default class CustomToolbar extends React.Component {
     constructor(props) {
@@ -65,24 +65,6 @@ export default class CustomToolbar extends React.Component {
             return;
         }
         sftp_dl(this.fm.session_id, this.fm.state.cwd, this.fm.selected);
-    };
-
-    handleUpload = (_) => {
-        const u = document.createElement('input');
-        u.type = 'file';
-        u.multiple = true;
-        const clickFunc = (_) => {
-            for (let i = 0; i < u.files.length; i++) {
-                sftp_ul(this.fm, this.fm.session_id, this.fm.state.cwd, u.files[i]);
-
-                // always scroll the latest item into the view
-                const upload_paper = document.getElementById('upload_paper');
-                upload_paper.scrollTop = upload_paper.scrollHeight;
-            }
-            u.removeEventListener('change', clickFunc);
-        };
-        u.addEventListener('change', clickFunc);
-        u.click();
     };
 
     handleDeleteAllPrompt = (ev) => {
@@ -159,7 +141,7 @@ export default class CustomToolbar extends React.Component {
             <OutlinedInput
                 fullWidth
                 style={{height: 40}}
-                autoComplete={"new-password"}
+                autoComplete={'new-password'}
                 onKeyPress={this.handleCwdInputKeyPress}
                 onBlur={this.handleCwdInputBlur}
                 onChange={this.handleCwdInputChange}
@@ -194,12 +176,6 @@ export default class CustomToolbar extends React.Component {
                 </IconButton>
             </Tooltip>
 
-            <Tooltip title={'Upload'}>
-                <IconButton color={'primary'} onClick={this.handleUpload}>
-                    <Publish/>
-                </IconButton>
-            </Tooltip>
-
             <Tooltip title={'Download'}>
                 <IconButton color={'primary'} onClick={this.handleDownload}>
                     <GetApp/>
@@ -230,13 +206,13 @@ export default class CustomToolbar extends React.Component {
                 open={this.state.deleteAllPromptOpen}
                 keepMounted
                 onClose={this.handleDeleteAllPrompt}
-                aria-describedby="delete all upload alert"
+                aria-describedby="delete all alert"
                 fullWidth={true}
                 maxWidth={'sm'}
             >
                 <DialogTitle>{`Delete ${pluralSelection ? 'files' : 'file'} permanently?`}</DialogTitle>
                 <DialogContent>
-                    <DialogContentText id="delete all upload description">
+                    <DialogContentText id="delete all description">
                         Your {pluralSelection ? 'files' : 'file'} will be deleted permanently and cannot be
                         recovered.<br/>
                         Do you want to proceed?
