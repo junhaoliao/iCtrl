@@ -46,7 +46,7 @@ export default class VNCViewer extends React.Component {
                     const resultArr = new Uint8Array(data.slice(data.indexOf(ICtrlStep.VNC.DONE) + 1));
                     const decodedStr = new TextDecoder().decode(resultArr);
                     const {port, passwd} = JSON.parse(decodedStr);
-                    const url = `ws://localhost:${port}`;
+                    const url = `ws://192.168.2.129:${port}`;
                     // Creating a new RFB object will start a new connection
                     const rfb = new RFB(
                         document.getElementById('screen'),
@@ -135,6 +135,15 @@ export default class VNCViewer extends React.Component {
     };
 
     componentDidMount() {
+        // some mobile browser doesn't have the address bar adjusted
+        //  when we set the screen's height to 100vh, so we will need to
+        //  overwrite this manually
+        const resetHeight = () => {
+            document.getElementById('screen').style.height = window.innerHeight + 'px';
+        };
+        window.addEventListener('resize', resetHeight);
+        resetHeight();
+
         this.connect();
     }
 
