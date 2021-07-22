@@ -21,6 +21,7 @@ import UploadToolbar from './UploadToolbar';
 import UploadList from './UploadList';
 import ChangePermission from '../../components/ChangePermission';
 import columns from './columns';
+import MemoryUsage from '../../components/MemoryUsage';
 import {sftp_dl, sftp_ls, sftp_rename, sftp_ul} from '../../../actions/sftp';
 import {isDir} from './utils';
 import {Helmet, HelmetProvider} from 'react-helmet-async';
@@ -32,6 +33,7 @@ import {
     CreateNewFolder,
     DesktopMac,
     DriveFolderUpload,
+    FilterDrama,
     Home,
     MusicNote,
     PhotoLibrary,
@@ -283,6 +285,18 @@ export default class FileManager extends React.Component {
                                     primary={item[1]}/>
                             </ListItem>
                         ))}
+                    </List>
+                    <Divider/>
+                    <List style={{width: drawerWidth}}>
+                        <ListItem>
+                            <ListItemIcon>
+                                <FilterDrama/>
+                            </ListItemIcon>
+                            <ListItemText primary="Storage" />
+                        </ListItem>
+                        <ListItem>
+                            <MemoryUsage fm={this}></MemoryUsage>
+                        </ListItem>
                     </List>
                 </Drawer>
                 <div style={{marginLeft: `${drawerWidth}px`, height: '100vh'}}>
