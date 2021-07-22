@@ -1,7 +1,7 @@
 import React from 'react';
 
 import {
-    Alert,
+    Alert, Box,
     Divider,
     Drawer,
     duration,
@@ -12,7 +12,7 @@ import {
     Menu,
     MenuItem,
     Paper,
-    Snackbar
+    Snackbar, Typography
 } from '@material-ui/core';
 import {DataGrid} from '@material-ui/data-grid';
 
@@ -38,6 +38,7 @@ import {
     UploadFile
 } from '@material-ui/icons';
 import Button from '@material-ui/core/Button';
+import NewFolderDialog from './NewFolderDialog';
 
 const drawerWidth = 200;
 
@@ -67,6 +68,7 @@ export default class FileManager extends React.Component {
             filesDisplaying: [],
             loading: true,
             newMenuAnchorEl: null,
+            newFolderDialogOpen:false,
             uploadWindowCollapsed: false,
             uploadProgress: []
         };
@@ -213,8 +215,17 @@ export default class FileManager extends React.Component {
         });
     };
 
-    handleNewMenuOpen = (ev) => {
-        this.setState({newMenuAnchorEl: ev.target});
+    handleNewFolderDialogOpen= (_) => {
+        this.handleNewMenuClose()
+        this.setState({newFolderDialogOpen: true});
+    };
+    handleNewFolderDialogClose = () =>{
+        this.setState({newFolderDialogOpen: false});
+        this.loadDir(this.state.cwd)
+    }
+
+    handleNewMenuOpen = (_) => {
+        this.setState({newMenuAnchorEl: document.getElementById('new-button')});
     };
 
     handleNewMenuClose = (_) => {
@@ -253,11 +264,13 @@ export default class FileManager extends React.Component {
                 </HelmetProvider>
                 <Drawer open variant={'persistent'} anchor={'left'}>
                     <Button
+                        id={'new-button'}
                         onClick={this.handleNewMenuOpen}
+                        color={'primary'}
                         style={{marginTop: 5, height: 40, marginLeft: 16, marginRight: 16, marginBottom: 8}}
-                        variant="contained"
+                        variant={'contained'}
                         startIcon={<Add/>}>
-                        New
+                        <Typography variant={'subtitle1'} fontWeight={'bolder'}>New</Typography>
                     </Button>
                     <Divider/>
                     <List style={{width: drawerWidth}}>
@@ -351,8 +364,10 @@ export default class FileManager extends React.Component {
                     open={Boolean(this.state.newMenuAnchorEl)}
                     anchorEl={this.state.newMenuAnchorEl}
                     onClose={this.handleNewMenuClose}
+                    transitionDuration={100}
                 >
-                    <MenuItem key={'new-menu-folder'} style={{width: drawerWidth - 32}}>
+                    <MenuItem key={'new-menu-folder'} style={{width: drawerWidth - 32}}
+                    onClick={this.handleNewFolderDialogOpen}>
                         <ListItemIcon>
                             <CreateNewFolder/>
                         </ListItemIcon>
@@ -376,6 +391,12 @@ export default class FileManager extends React.Component {
                         <ListItemText>Folder Upload</ListItemText>
                     </MenuItem>
                 </Menu>
+                <NewFolderDialog
+                    open={this.state.newFolderDialogOpen}
+                    onClose={this.handleNewFolderDialogClose}
+                    sessionId={this.session_id}
+                    cwd={this.state.cwd}
+                />
             </div>
         );
     }
