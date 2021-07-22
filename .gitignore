@@ -5,3 +5,5 @@
 /.vscode
 
 **/__pycache__
+
+application/__init__.pyc
