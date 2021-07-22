@@ -1,21 +1,20 @@
 import React from 'react';
-import { sftp_quota } from '../../../actions/sftp';
-import {
-    Box,
-    LinearProgress,
-    Typography
-} from '@material-ui/core'
+import {sftp_quota} from '../../../actions/sftp';
+import {Box, LinearProgress, Skeleton, Typography} from '@material-ui/core';
 
 function LinearProgressWithLabel(props) {
     return (
         <Box sx={{display: 'flex', alignItems: 'center'}}>
-            <Box sx={{width: '100%', mr: 1}}>
-                <LinearProgress variant="determinate" {...props} />
+            <Box flexGrow={1}>
+                <LinearProgress
+                    variant={props.loading ? 'indeterminate' : 'determinate'}
+                    value={props.value}
+                />
             </Box>
-            <Box sx={{minWidth: 35}}>
-                <Typography variant="body2" color="text.secondary">{`${Math.round(
-                    props.value,
-                )}%`}</Typography>
+            <Box sx={{marginLeft: 1.5}}>
+                <Typography display={'flex'} variant="body2" color="text.secondary">
+                    {props.loading ? <Skeleton width={15}/> : `${Math.round(props.value)}`}%
+                </Typography>
             </Box>
         </Box>
     );
@@ -26,10 +25,11 @@ export default class MemoryUsage extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            memQuota:  0,
-            memUnit: '',
-            memUsed: 0
-        }
+            used: 0,
+            usedUnit: '',
+            quota: 0,
+            quotaUnit: ''
+        };
     }
 
     componentDidMount() {
@@ -37,15 +37,27 @@ export default class MemoryUsage extends React.Component {
             this.props.fm,
             this.props.fm.state.cwd,
             this
-        )
+        );
     }
 
     render() {
-        return (<div>
-            <LinearProgressWithLabel variant="determinate" value={this.state.memUsed / this.state.memQuota * 100}/>
-            <Typography variant="caption" display="block">
-                {this.state.memUsed} {this.state.memUnit} of {this.state.memQuota} {this.state.memUnit} Used
-            </Typography>
+        const {
+            used,
+            usedUnit,
+            quota,
+            quotaUnit
+        } = this.state;
+        const loading = (quota === 0);
+        const loadFailed = (quota === null);
+        return (<div style={{width: '100%', visibility: loadFailed ? 'hidden' : 'visible'}}>
+                <LinearProgressWithLabel loading={loading}
+                                         value={used / quota * 100}/>
+                <Typography variant="caption" display={'flex'}>
+                    {loading ? <Skeleton width={44}/> : `${used}${usedUnit}`}
+                    {' / '}
+                    {loading ? <Skeleton width={44}/> : `${quota}${quotaUnit}`}
+                    {' Used'}
+                </Typography>
             </div>
         );
     }

@@ -143,31 +143,25 @@ export const sftp_chmod = (fm, cwd, name, mode, recursive) => {
             fm.showAlert('Error: ' + error.message);
         }
     });
-}
+};
 
 export const sftp_quota = (fm, cwd, ms) => {
-    fm.setState({
-        loading: true
-    })
-    axios.post("/exec_blocking", {
+    // load silently as much as possible
+    //  because not all machines support quota checking
+    axios.post('/exec_blocking', {
         session_id: fm.session_id,
-        cmd: "quota -s | tail -n 1"
+        cmd: 'quota -s | tail -n 1'
     }).then(res => {
-        fm.loadDir(cwd)
-        const mem = res.data.match(/[0-9]+[a-zA-Z]+/g)
+        const mem = res.data.match(/[0-9]+[a-zA-Z]+/g);
         ms.setState({
-            memQuota: parseInt(mem[1]),
-            memUnit: mem[0].replace(/[0-9]+/,''),
-            memUsed: parseInt(mem[0])
-        })
+            used: parseInt(mem[0]),
+            usedUnit: mem[0].replace(/[0-9]+/, ''),
+            quota: parseInt(mem[1]),
+            quotaUnit: mem[1].replace(/[0-9]+/, ''),
+        });
     }).catch(error => {
-        fm.loadDir(cwd)
-        if (error.response) {
-            fm.showAlert(htmlResponseToReason(error.response.data));
-        } else {
-            // Something happened in setting up the request that triggered an Error
-            fm.showAlert('Error: ' + error.message);
-        }
+        // handle this silently because not all machines support quota checking
+        ms.setState({quota: null});
     });
-}
+};
 
