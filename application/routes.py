@@ -79,17 +79,16 @@ def handle_session():
 
 @app.route('/exec_blocking', methods=['POST'])
 def exec_blocking():
-    session_id = request.form.get('session_id')
+    session_id = request.json.get('session_id')
     host, username, this_private_key_path = get_session_info(session_id)
 
-    cmd = request.form.get('cmd')
+    cmd = request.json.get('cmd')
 
     conn = Connection()
     status, reason = conn.connect(host, username, key_filename=this_private_key_path)
     if status is False:
         abort(403, description=reason)
 
-    # TODO: test this
     status, _, stdout, stderr = conn.exec_command_blocking(cmd)
     if status is False:
         abort(500, 'exec failed')
