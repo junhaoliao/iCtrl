@@ -114,7 +114,7 @@ class SFTP(Connection):
 
     def chmod(self, path, mode, recursive):
         _, _, _, stderr = self.exec_command_blocking(
-            f'chmod {"-R" if recursive else ""} {"{0:0{1}o}".format(mode,3)} "{path}"')
+            f'chmod {"-R" if recursive else ""} {"{0:0{1}o}".format(mode, 3)} "{path}"')
         stderr_lines = stderr.readlines()
         if len(stderr_lines) != 0:
             print(stderr_lines)
@@ -161,3 +161,10 @@ class SFTP(Connection):
     #         print(transferred/1024/1024/time_elapsed, "MB/s")
     #
     #     self.sftp.get(path, local_path, byte_count)
+
+    def mkdir(self, cwd, name):
+        _, _, _, stderr = self.exec_command_blocking(f'cd "{cwd}"&& mkdir "{name}"')
+        stderr_lines = stderr.readlines()
+        if len(stderr_lines) != 0:
+            return False, stderr_lines[0]
+        return True, ''

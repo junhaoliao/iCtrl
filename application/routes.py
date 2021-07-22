@@ -3,6 +3,7 @@ import os
 from datetime import datetime
 from io import BytesIO
 from pathlib import Path
+from time import sleep
 
 from flask import request, abort, send_file
 
@@ -260,7 +261,7 @@ def sftp_rename(session_id):
 
 
 @app.route('/sftp_chmod/<session_id>', methods=['PATCH'])
-def sftp_remode(session_id):
+def sftp_chmod(session_id):
     host, username, this_private_key_path = get_session_info(session_id)
 
     sftp = SFTP()
@@ -275,6 +276,24 @@ def sftp_remode(session_id):
     status, reason = sftp.chmod(path, mode, recursive)
     if not status:
         abort(400, reason)
+
+    return 'success'
+
+@app.route('/sftp_mkdir/<session_id>', methods=['PUT'])
+def sftp_mkdir(session_id):
+    host, username, this_private_key_path = get_session_info(session_id)
+
+    sftp = SFTP()
+    status, reason = sftp.connect(host=host, username=username, key_filename=this_private_key_path)
+    if status is False:
+        abort(403, description=reason)
+
+    cwd = request.json.get('cwd')
+    name = request.json.get('name')
+
+    status, reason = sftp.mkdir(cwd, name)
+    if status is False:
+        abort(400, description=reason)
 
     return 'success'
 
@@ -300,7 +319,9 @@ def sftp_ul(session_id):
     relative_dir_path = p.parent
     if str(relative_dir_path) != '.':
         cwd = os.path.join(cwd, relative_dir_path)
+        # TODO: check: will this ever fail?
         sftp.exec_command_blocking(f'mkdir -p "{cwd}"')
+
 
     sftp.sftp.chdir(path=cwd)
     sftp_file = sftp.file(filename=request_filename)
