@@ -1,7 +1,7 @@
 import React from 'react';
 
 import {
-    Alert, Box,
+    Alert,
     Divider,
     Drawer,
     duration,
@@ -12,7 +12,8 @@ import {
     Menu,
     MenuItem,
     Paper,
-    Snackbar, Typography
+    Snackbar,
+    Typography
 } from '@material-ui/core';
 import {DataGrid} from '@material-ui/data-grid';
 
@@ -70,7 +71,7 @@ export default class FileManager extends React.Component {
             filesDisplaying: [],
             loading: true,
             newMenuAnchorEl: null,
-            newFolderDialogOpen:false,
+            newFolderDialogOpen: false,
             uploadWindowCollapsed: false,
             uploadProgress: []
         };
@@ -217,14 +218,14 @@ export default class FileManager extends React.Component {
         });
     };
 
-    handleNewFolderDialogOpen= (_) => {
-        this.handleNewMenuClose()
+    handleNewFolderDialogOpen = (_) => {
+        this.handleNewMenuClose();
         this.setState({newFolderDialogOpen: true});
     };
-    handleNewFolderDialogClose = () =>{
+    handleNewFolderDialogClose = () => {
         this.setState({newFolderDialogOpen: false});
-        this.loadDir(this.state.cwd)
-    }
+        this.loadDir(this.state.cwd);
+    };
 
     handleNewMenuOpen = (_) => {
         this.setState({newMenuAnchorEl: document.getElementById('new-button')});
@@ -298,17 +299,15 @@ export default class FileManager extends React.Component {
                                     primary={item[1]}/>
                             </ListItem>
                         ))}
-                    </List>
-                    <Divider/>
-                    <List style={{width: drawerWidth}}>
+                        <Divider/>
                         <ListItem>
                             <ListItemIcon>
                                 <FilterDrama/>
                             </ListItemIcon>
-                            <ListItemText primary="Storage" />
+                            <ListItemText primary="Storage"/>
                         </ListItem>
                         <ListItem>
-                            <MemoryUsage fm={this}></MemoryUsage>
+                            <MemoryUsage fm={this}/>
                         </ListItem>
                     </List>
                 </Drawer>
@@ -381,7 +380,7 @@ export default class FileManager extends React.Component {
                     transitionDuration={100}
                 >
                     <MenuItem key={'new-menu-folder'} style={{width: drawerWidth - 32}}
-                    onClick={this.handleNewFolderDialogOpen}>
+                              onClick={this.handleNewFolderDialogOpen}>
                         <ListItemIcon>
                             <CreateNewFolder/>
                         </ListItemIcon>
