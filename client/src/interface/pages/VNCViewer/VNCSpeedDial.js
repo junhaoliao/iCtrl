@@ -1,6 +1,6 @@
 import React from 'react';
 import {Box, Slider, SpeedDial, SpeedDialAction, SpeedDialIcon, Stack} from '@material-ui/core';
-import {Fullscreen, Height, HighQuality, LensBlur, VisibilityOff} from '@material-ui/icons';
+import {Fullscreen, FullscreenExit, Height, HighQuality, LensBlur, VisibilityOff} from '@material-ui/icons';
 
 export default class VNCSpeedDial extends React.Component {
     constructor(props) {
@@ -196,7 +196,7 @@ export default class VNCSpeedDial extends React.Component {
             />
             <SpeedDialAction
                 key={'toggle-fullscreen'}
-                icon={<Fullscreen/>}
+                icon={isFullscreen ?<FullscreenExit/>:<Fullscreen/>}
                 tooltipTitle={<div style={{width: isFullscreen ? 108 : 119}}>
                     {isFullscreen ? 'Exit' : 'Enter'} Fullscreen
                 </div>}
@@ -239,7 +239,6 @@ export default class VNCSpeedDial extends React.Component {
                 </Stack>}
                 tooltipOpen
                 tooltipPlacement={tooltipPlacement}
-
             />
             <br/>
             <SpeedDialAction
@@ -264,8 +263,6 @@ export default class VNCSpeedDial extends React.Component {
                 tooltipOpen
                 tooltipPlacement={tooltipPlacement}
             />
-
-
         </SpeedDial>);
     }
 }
