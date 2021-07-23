@@ -6,6 +6,8 @@ import {VNCSteps} from '../../components/Loading/steps';
 import {VNCAuthentication} from '../../components/Loading/authentications';
 import {ICtrlError, ICtrlStep} from '../../../actions/codes';
 import {Helmet, HelmetProvider} from 'react-helmet-async';
+import {Backdrop} from '@material-ui/core';
+import VNCSpeedDial from './VNCSpeedDial';
 
 
 export default class VNCViewer extends React.Component {
@@ -20,10 +22,17 @@ export default class VNCViewer extends React.Component {
         this.username = sessions[this.session_id].username;
         this.host = sessions[this.session_id].host;
 
+        this.rfb = null;
+
+        this.fabMoved = false;
+        this.speedDialOpenTime = 0;
+
         this.state = {
             loading: true,
             currentStep: -1,
-            authentication: null
+            authentication: null,
+            showFab: true,
+            speedDialOpen: false
         };
     }
 
@@ -48,40 +57,43 @@ export default class VNCViewer extends React.Component {
                     const {port, passwd} = JSON.parse(decodedStr);
                     const url = `ws://192.168.2.129:${port}`;
                     // Creating a new RFB object will start a new connection
-                    const rfb = new RFB(
+                    this.rfb = new RFB(
                         document.getElementById('screen'),
                         url,
                         {credentials: {password: passwd}});
-                    rfb.resizeSession = true;
-                    rfb.addEventListener('connect', () => {
+                    this.rfb.resizeSession = true;
+                    this.rfb.addEventListener('connect', () => {
                         this.setState({
                             loading: false
                         });
+
+
+                        this.rfb.addEventListener('clipboard', (ev) => {
+                            try {
+                                navigator.clipboard.writeText(ev.detail.text).then();
+                            } catch (e) {
+                                // 2 cases:
+                                // 1) not hosting over https on the server
+                                // 2) the browser is too old to support clipboard
+                                console.log(e);
+                            }
+                        });
+                        let clipboardText = null;
+                        window.onfocus = _ => {
+                            try {
+                                navigator.clipboard.readText().then((text) => {
+                                    if (clipboardText !== text) {
+                                        clipboardText = text;
+                                        this.rfb.clipboardPasteFrom(text);
+                                    }
+                                });
+                            } catch (e) {
+                                // ditto
+                                console.log(e);
+                            }
+                        };
                     });
-                    rfb.addEventListener('clipboard', (ev) => {
-                        try {
-                            navigator.clipboard.writeText(ev.detail.text).then();
-                        } catch (e) {
-                            // 2 cases:
-                            // 1) not hosting over https on the server
-                            // 2) the browser is too old to support clipboard
-                            console.log(e);
-                        }
-                    });
-                    let clipboardText = null;
-                    window.onfocus = _ => {
-                        try {
-                            navigator.clipboard.readText().then((text) => {
-                                if (clipboardText !== text) {
-                                    clipboardText = text;
-                                    rfb.clipboardPasteFrom(text);
-                                }
-                            });
-                        } catch (e) {
-                            // ditto
-                            console.log(e);
-                        }
-                    };
+
                     return;
                 }
                 data.push(...value);
@@ -147,9 +159,47 @@ export default class VNCViewer extends React.Component {
         this.connect();
     }
 
-    render() {
-        const {host, username} = this.props.profiles.sessions[this.session_id];
+    handleSpeedDialOpen = (ev) => {
+        if (ev.type === 'mouseenter') {
+            return;
+        }
 
+        // prevent the speed dial from opening when using a mouse
+        if (this.fabMoved) {
+            this.fabMoved = false;
+            return;
+        }
+
+        this.speedDialOpenTime = new Date().getTime();
+        this.setState({
+            speedDialOpen: true
+        });
+    };
+
+    closeSpeedDial = () => {
+        this.setState({
+            speedDialOpen: false
+        });
+    };
+
+    handleSpeedDialClose = (ev) => {
+        if (ev.type === 'mouseleave' || (new Date().getTime() - this.speedDialOpenTime) < 200) {
+            return;
+        }
+
+        this.closeSpeedDial();
+    };
+
+    handleFabHide = () => {
+        this.setState({
+            showFab: false,
+            speedDialOpen: false
+        });
+    };
+
+    render() {
+        const {host, username} = this.props.profiles['sessions'][this.session_id];
+        const {speedDialOpen} = this.state;
         return (<div>
                 <HelmetProvider>
                     <Helmet>
@@ -157,6 +207,20 @@ export default class VNCViewer extends React.Component {
                         <link rel="icon" href={`/favicon/VNC/${this.session_id}`}/>
                     </Helmet>
                 </HelmetProvider>
+                <Backdrop open={speedDialOpen}/>
+                {this.state.showFab && !this.state.loading &&
+                <VNCSpeedDial
+                    rfb={this.rfb}
+                    speedDialOpen={speedDialOpen}
+                    onSpeedDialClose={this.handleSpeedDialClose}
+                    onSpeedDialOpen={this.handleSpeedDialOpen}
+                    closeSpeedDial={this.closeSpeedDial}
+                    onFabMove={() => {
+                        this.fabMoved = true;
+                    }}
+                    onFabHide={this.handleFabHide}/>
+                }
+
 
                 {this.state.loading &&
                 <Loading
@@ -168,4 +232,5 @@ export default class VNCViewer extends React.Component {
 
         );
     }
+
 }
