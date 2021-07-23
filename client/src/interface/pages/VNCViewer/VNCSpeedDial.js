@@ -1,12 +1,14 @@
 import React from 'react';
 import {Box, Slider, SpeedDial, SpeedDialAction, SpeedDialIcon, Stack} from '@material-ui/core';
-import {HighQuality, LensBlur, VisibilityOff} from '@material-ui/icons';
+import {Fullscreen, Height, HighQuality, LensBlur, VisibilityOff} from '@material-ui/icons';
 
 export default class VNCSpeedDial extends React.Component {
     constructor(props) {
         super(props);
 
         this.state = {
+            isFullscreen: Boolean(document.fullscreenElement),
+            resizeSession: true,
             speedDialDirection: 'up',
             tooltipPlacement: 'left',
             qualityLevel: 6,
@@ -83,7 +85,7 @@ export default class VNCSpeedDial extends React.Component {
                 newLeft = window.innerWidth - width;
             }
             fab.style.top = newTop + 'px';
-            fab.style.left = newLeft + 'px';;
+            fab.style.left = newLeft + 'px';
             fab.style.bottom = null;
             fab.style.right = null;
         } else {
@@ -130,6 +132,28 @@ export default class VNCSpeedDial extends React.Component {
         this.props.rfb.compressionLevel = value;
     };
 
+    handleToggleResize = (ev) => {
+        const newResizeSession = !this.state.resizeSession;
+        this.setState({
+            resizeSession: newResizeSession
+        });
+        this.props.rfb.resizeSession = newResizeSession;
+    };
+
+    handleToggleFullscreen = (ev) => {
+        if (Boolean(document.fullscreenElement)) {
+            document.exitFullscreen();
+            this.setState({
+                isFullscreen: false
+            });
+        } else {
+            document.body.requestFullscreen();
+            this.setState({
+                isFullscreen: true
+            });
+        }
+    };
+
     render() {
         const {
             speedDialOpen,
@@ -137,7 +161,14 @@ export default class VNCSpeedDial extends React.Component {
             onSpeedDialOpen: handleSpeedDialOpen,
             onFabHide: handleFabHide
         } = this.props;
-        const {speedDialDirection, tooltipPlacement, qualityLevel, compressionLevel} = this.state;
+        const {
+            speedDialDirection,
+            tooltipPlacement,
+            qualityLevel,
+            compressionLevel,
+            resizeSession,
+            isFullscreen
+        } = this.state;
 
         return (<SpeedDial
             id={'fab'}
@@ -148,7 +179,7 @@ export default class VNCSpeedDial extends React.Component {
             onClose={handleSpeedDialClose}
             onOpen={handleSpeedDialOpen}
             FabProps={{
-                size:'small',
+                size: 'small',
                 onMouseDown: this.handleFabMouseDown,
                 onTouchStart: this.handleFabTouchStart,
             }}
@@ -163,6 +194,30 @@ export default class VNCSpeedDial extends React.Component {
                 tooltipPlacement={tooltipPlacement}
                 onClick={handleFabHide}
             />
+            <SpeedDialAction
+                key={'toggle-fullscreen'}
+                icon={<Fullscreen/>}
+                tooltipTitle={<div style={{width: isFullscreen ? 108 : 119}}>
+                    {isFullscreen ? 'Exit' : 'Enter'} Fullscreen
+                </div>}
+                tooltipOpen
+                tooltipPlacement={tooltipPlacement}
+                onClick={this.handleToggleFullscreen}
+            />
+            <SpeedDialAction
+                key={'toggle-resize'}
+                icon={<Height/>}
+                tooltipTitle={<div style={{width: 94}}>Auto Resize:
+                    {resizeSession ?
+                        <div style={{color:'green', fontWeight:'bold'}}>Enabled</div> :
+                        <div style={{color:'red'}}>Disabled</div>
+                    }
+                </div>}
+                tooltipOpen
+                tooltipPlacement={tooltipPlacement}
+                onClick={this.handleToggleResize}
+            />
+            <br/>
             <SpeedDialAction
                 key={'quality'}
                 icon={<HighQuality/>}
@@ -209,6 +264,8 @@ export default class VNCSpeedDial extends React.Component {
                 tooltipOpen
                 tooltipPlacement={tooltipPlacement}
             />
+
+
         </SpeedDial>);
     }
 }
