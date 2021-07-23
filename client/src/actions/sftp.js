@@ -145,7 +145,7 @@ export const sftp_chmod = (fm, cwd, name, mode, recursive) => {
     });
 };
 
-export const sftp_quota = (fm, cwd, ms) => {
+export const sftp_quota = (fm, ms) => {
     // load silently as much as possible
     //  because not all machines support quota checking
     axios.post('/exec_blocking', {

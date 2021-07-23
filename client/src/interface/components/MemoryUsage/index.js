@@ -35,7 +35,6 @@ export default class MemoryUsage extends React.Component {
     componentDidMount() {
         sftp_quota(
             this.props.fm,
-            this.props.fm.state.cwd,
             this
         );
     }
