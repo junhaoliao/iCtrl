@@ -1,0 +1,38 @@
+#screen {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+}
+
+#textarea {
+    width: 1px;
+    height: 1px;
+    background-color: #fff;
+    color: #fff;
+    border: 0;
+    position: absolute;
+    left: -40px;
+    z-index: -1;
+    ime-mode: disabled
+}
+
+#fab {
+    position: absolute;
+    bottom: 38px;
+    right: 0
+}
+
+#auto-resize-tooltip-title {
+    width: 94px;
+}
+
+#auto-resize-enabled-text {
+    color: green;
+    font-weight: bold;
+}
+
+#auto-resize-disabled-text {
+    color: red;
+}

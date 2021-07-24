@@ -1,14 +1,13 @@
 import React from 'react';
-import RFB from '@novnc/novnc/core/rfb';
-import axios from 'axios';
-import Loading from '../../components/Loading';
-import {VNCSteps} from '../../components/Loading/steps';
-import {VNCAuthentication} from '../../components/Loading/authentications';
-import {ICtrlError, ICtrlStep} from '../../../actions/codes';
+
 import {Helmet, HelmetProvider} from 'react-helmet-async';
 import {Backdrop} from '@material-ui/core';
-import VNCSpeedDial from './VNCSpeedDial';
 
+import './index.css';
+import Loading from '../../components/Loading';
+import {VNCSteps} from '../../components/Loading/steps';
+import VNCSpeedDial from './VNCSpeedDial';
+import {vncConnect} from '../../../actions/vnc';
 
 export default class VNCViewer extends React.Component {
     constructor(props) {
@@ -23,6 +22,7 @@ export default class VNCViewer extends React.Component {
         this.host = sessions[this.session_id].host;
 
         this.rfb = null;
+        this.lastKeyboardinput = null;
 
         this.fabMoved = false;
         this.speedDialOpenTime = 0;
@@ -36,127 +36,13 @@ export default class VNCViewer extends React.Component {
         };
     }
 
-    connect = () => {
-        fetch(`/vnc`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({session_id: this.session_id})
-        }).then(response => {
-            if (response.status !== 200) {
-                console.log('error');
-                return;
-            }
-            const reader = response.body.getReader();
-            const data = [];
-            const readStream = ({value, done}) => {
-                if (done) {
-                    const resultArr = new Uint8Array(data.slice(data.indexOf(ICtrlStep.VNC.DONE) + 1));
-                    const decodedStr = new TextDecoder().decode(resultArr);
-                    const {port, passwd} = JSON.parse(decodedStr);
-                    const url = `ws://192.168.2.129:${port}`;
-                    // Creating a new RFB object will start a new connection
-                    this.rfb = new RFB(
-                        document.getElementById('screen'),
-                        url,
-                        {credentials: {password: passwd}});
-                    this.rfb.resizeSession = true;
-                    this.rfb.addEventListener('connect', () => {
-                        this.setState({
-                            loading: false
-                        });
-
-
-                        this.rfb.addEventListener('clipboard', (ev) => {
-                            try {
-                                navigator.clipboard.writeText(ev.detail.text).then();
-                            } catch (e) {
-                                // 2 cases:
-                                // 1) not hosting over https on the server
-                                // 2) the browser is too old to support clipboard
-                                console.log(e);
-                            }
-                        });
-                        let clipboardText = null;
-                        window.onfocus = _ => {
-                            try {
-                                navigator.clipboard.readText().then((text) => {
-                                    if (clipboardText !== text) {
-                                        clipboardText = text;
-                                        this.rfb.clipboardPasteFrom(text);
-                                    }
-                                });
-                            } catch (e) {
-                                // ditto
-                                console.log(e);
-                            }
-                        };
-                    });
-
-                    return;
-                }
-                data.push(...value);
-                if (data.includes(ICtrlStep.VNC.DONE)) {
-                    // streaming the result
-                    this.setState({
-                        currentStep: ICtrlStep.VNC.DONE
-                    });
-                } else {
-                    const currentStep = value.slice(-1)[0];
-                    if (currentStep < 100) {
-                        // not an error
-                        this.setState({
-                            currentStep: currentStep
-                        });
-                    } else {
-                        if (currentStep === ICtrlError.VNC.PASSWD_MISSING) {
-                            const myVNCAuthentication = Object.assign(VNCAuthentication);
-                            myVNCAuthentication.submitter = (authInput) => {
-                                this.setState({
-                                    currentStep: 0,
-                                    authentication: null
-                                });
-                                axios.post('/vncpasswd', {
-                                    session_id: this.session_id,
-                                    passwd: authInput
-                                }).then(response => {
-                                    console.log(response);
-                                    this.connect();
-                                }).catch(error => {
-                                    console.log(error);
-                                });
-
-                            };
-                            this.setState({
-                                authentication: myVNCAuthentication
-                            });
-                        }
-
-
-                        // stop reading the stream now that an error occurs
-                        return;
-                    }
-
-                }
-
-                reader.read().then(readStream);
-            };
-            reader.read().then(readStream);
-        });
+    keyboardInputReset = () => {
+        this.keyboardElem.value = new Array(100).join('_');
+        this.lastKeyboardinput = this.keyboardElem.value;
     };
 
     componentDidMount() {
-        // some mobile browser doesn't have the address bar adjusted
-        //  when we set the screen's height to 100vh, so we will need to
-        //  overwrite this manually
-        const resetHeight = () => {
-            document.getElementById('screen').style.height = window.innerHeight + 'px';
-        };
-        window.addEventListener('resize', resetHeight);
-        resetHeight();
-
-        this.connect();
+        vncConnect(this).then();
     }
 
     handleSpeedDialOpen = (ev) => {
@@ -221,16 +107,17 @@ export default class VNCViewer extends React.Component {
                     onFabHide={this.handleFabHide}/>
                 }
 
-
                 {this.state.loading &&
                 <Loading
                     currentStep={this.state.currentStep}
                     steps={VNCSteps}
                     authentication={this.state.authentication}/>}
-                <div style={{height: '100vh', width: '100vw', display: this.state.loading && 'none'}} id={'screen'}/>
+                <div style={{display: this.state.loading && 'none'}} id={'screen'}>
+                    <textarea id={'textarea'} autoCapitalize="off"
+                              autoComplete="off" spellCheck="false" tabIndex="-1"
+                    />
+                </div>
             </div>
-
         );
     }
-
 }
