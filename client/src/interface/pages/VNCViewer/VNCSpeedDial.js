@@ -1,11 +1,15 @@
 import React from 'react';
 import {Box, Slider, SpeedDial, SpeedDialAction, SpeedDialIcon, Stack} from '@material-ui/core';
-import {Fullscreen, FullscreenExit, Height, HighQuality, LensBlur, VisibilityOff} from '@material-ui/icons';
+import {Fullscreen, FullscreenExit, Height, HighQuality, Keyboard, LensBlur, VisibilityOff} from '@material-ui/icons';
+import {iOS} from '../../../actions/utils';
+
+import './index.css';
 
 export default class VNCSpeedDial extends React.Component {
     constructor(props) {
         super(props);
 
+        // TODO: support saving those per session
         this.state = {
             isFullscreen: Boolean(document.fullscreenElement),
             resizeSession: true,
@@ -16,22 +20,22 @@ export default class VNCSpeedDial extends React.Component {
         };
     }
 
-    handleFabMouseDown = (ev) => {
+    handleFabMouseDown = (_) => {
         window.addEventListener('mousemove', this.handleFabMove, true);
         window.addEventListener('mouseup', this.handleFabMouseUp, true);
     };
 
-    handleFabTouchStart = (ev) => {
+    handleFabTouchStart = (_) => {
         window.addEventListener('touchmove', this.handleFabMove, true);
         window.addEventListener('touchend', this.handleFabTouchEnd, true);
     };
 
-    handleFabMouseUp = (ev) => {
+    handleFabMouseUp = (_) => {
         window.removeEventListener('mousemove', this.handleFabMove, true);
         window.removeEventListener('mouseup', this.handleFabMouseUp, true);
     };
 
-    handleFabTouchEnd = (ev) => {
+    handleFabTouchEnd = (_) => {
         window.removeEventListener('touchmove', this.handleFabMove, true);
         window.removeEventListener('touchend', this.handleFabMouseUp, true);
     };
@@ -111,8 +115,6 @@ export default class VNCSpeedDial extends React.Component {
             fab.style.bottom = newBottom + 'px';
             fab.style.right = newRight + 'px';
         }
-
-
     };
 
 
@@ -132,7 +134,7 @@ export default class VNCSpeedDial extends React.Component {
         this.props.rfb.compressionLevel = value;
     };
 
-    handleToggleResize = (ev) => {
+    handleToggleResize = (_) => {
         const newResizeSession = !this.state.resizeSession;
         this.setState({
             resizeSession: newResizeSession
@@ -140,17 +142,30 @@ export default class VNCSpeedDial extends React.Component {
         this.props.rfb.resizeSession = newResizeSession;
     };
 
-    handleToggleFullscreen = (ev) => {
+    handleToggleFullscreen = (_) => {
         if (Boolean(document.fullscreenElement)) {
-            document.exitFullscreen();
+            document.exitFullscreen().then();
             this.setState({
                 isFullscreen: false
             });
         } else {
-            document.body.requestFullscreen();
+            document.body.requestFullscreen().then();
             this.setState({
                 isFullscreen: true
             });
+        }
+    };
+
+    handleKeyboardOpen = (ev) => {
+        this.props.closeSpeedDial();
+        if (iOS()) {
+            const canvas = document.getElementById('screen').lastElementChild.firstElementChild;
+            canvas.setAttribute('contenteditable', 'true');
+            canvas.focus();
+            canvas.setAttribute('contenteditable', 'false');
+        } else {
+            const textarea = document.getElementById('textarea');
+            textarea.focus();
         }
     };
 
@@ -172,7 +187,6 @@ export default class VNCSpeedDial extends React.Component {
 
         return (<SpeedDial
             id={'fab'}
-            style={{position: 'absolute', bottom: 38, right: 0}}
             icon={<SpeedDialIcon/>}
             open={speedDialOpen}
             direction={speedDialDirection}
@@ -195,8 +209,17 @@ export default class VNCSpeedDial extends React.Component {
                 onClick={handleFabHide}
             />
             <SpeedDialAction
+                key={'open-keyboard'}
+                icon={<Keyboard/>}
+                tooltipTitle={'Keyboard'}
+                tooltipOpen
+                tooltipPlacement={tooltipPlacement}
+                onClick={this.handleKeyboardOpen}
+            />
+            {document.fullscreenEnabled &&
+            <SpeedDialAction
                 key={'toggle-fullscreen'}
-                icon={isFullscreen ?<FullscreenExit/>:<Fullscreen/>}
+                icon={isFullscreen ? <FullscreenExit/> : <Fullscreen/>}
                 tooltipTitle={<div style={{width: isFullscreen ? 108 : 119}}>
                     {isFullscreen ? 'Exit' : 'Enter'} Fullscreen
                 </div>}
@@ -204,13 +227,14 @@ export default class VNCSpeedDial extends React.Component {
                 tooltipPlacement={tooltipPlacement}
                 onClick={this.handleToggleFullscreen}
             />
+            }
             <SpeedDialAction
                 key={'toggle-resize'}
                 icon={<Height/>}
-                tooltipTitle={<div style={{width: 94}}>Auto Resize:
+                tooltipTitle={<div id={'auto-resize-tooltip-title'}>Auto Resize:
                     {resizeSession ?
-                        <div style={{color:'green', fontWeight:'bold'}}>Enabled</div> :
-                        <div style={{color:'red'}}>Disabled</div>
+                        <div id={'auto-resize-enabled-text'}>Enabled</div> :
+                        <div id={'auto-resize-disabled-text'}>Disabled</div>
                     }
                 </div>}
                 tooltipOpen
