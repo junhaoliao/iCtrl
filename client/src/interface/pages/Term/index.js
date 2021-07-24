@@ -1,9 +1,9 @@
-/* eslint-disable react-hooks/rules-of-hooks */
 import React from 'react';
 import {Terminal} from 'xterm';
 import 'xterm/css/xterm.css';
 import {AttachAddon} from 'xterm-addon-attach';
 import {FitAddon} from 'xterm-addon-fit';
+import { WebglAddon } from 'xterm-addon-webgl';
 import axios from 'axios';
 import {Helmet, HelmetProvider} from 'react-helmet-async';
 
@@ -22,8 +22,14 @@ export default class Term extends React.Component {
             const term = new Terminal();
             term.open(document.getElementById('terminal'));
 
+            const addon = new WebglAddon();
+            addon.onContextLoss(e => {
+              addon.dispose();
+            });
+            term.loadAddon(addon);
+
             this.term_id = response.data;
-            const socket = new WebSocket(`ws://localhost:8000/${this.term_id}`);
+            const socket = new WebSocket(`ws://192.168.2.129:8000/${this.term_id}`);
             const attachAddon = new AttachAddon(socket);
             term.loadAddon(attachAddon);
 
@@ -34,8 +40,8 @@ export default class Term extends React.Component {
                         term_id: this.term_id,
                         w: cols,
                         h: rows
-                    }).then(response => {
-                        console.log(response);
+                    }).then(_ => {
+                        // console.log(response);
                     }).catch(error => {
                         console.log(error);
                     });
@@ -57,7 +63,7 @@ export default class Term extends React.Component {
         const {host, username} = this.props.profiles.sessions[this.session_id];
 
         return (
-            <div id="terminal" style={{height: '100vh', width: '100vw'}}>
+            <div id="terminal" style={{position:'absolute', top:0, bottom: 0, left:0, right:0}}>
                 <HelmetProvider>
                     <Helmet>
                         <title>{`Terminal - ${username}@${host}`}</title>
