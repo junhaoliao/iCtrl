@@ -7,6 +7,7 @@ from paramiko import Channel
 from SimpleWebSocketServer import SimpleWebSocketServer, WebSocket
 
 from application.Connection import Connection
+from application import app
 
 terminal_connections = {}
 
@@ -44,6 +45,7 @@ class Term(Connection):
 
         return True, ''
 
+
 class TerminalSocket(WebSocket):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -78,6 +80,9 @@ class TerminalSocket(WebSocket):
         del self.term
 
 
-if os.environ.get("WERKZEUG_RUN_MAIN") == "true":
+# if the Flask 'app' is in debug mode, all code will be re-run (which means they will run twice) after app.run()
+# since the ws server will bind to the port, we should only run it once
+# if we are in debug mode, run the server in the second round
+if not app.debug or os.environ.get("WERKZEUG_RUN_MAIN") == "true":
     terminal_server = SimpleWebSocketServer('', 8000, TerminalSocket)
     threading.Thread(target=terminal_server.serveforever).start()

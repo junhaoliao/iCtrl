@@ -34,7 +34,7 @@ export const vncConnect = async (vncViewer) => {
             const {port, passwd} = JSON.parse(decodedStr);
 
             // Creating a new RFB object will start a new connection
-            const url = `ws://192.168.2.129:${port}`;
+            const url = `ws://127.0.0.1:${port}`;
             vncViewer.rfb = new RFB(
                 document.getElementById('screen'),
                 url,

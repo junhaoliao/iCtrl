@@ -3,7 +3,7 @@ import {Terminal} from 'xterm';
 import 'xterm/css/xterm.css';
 import {AttachAddon} from 'xterm-addon-attach';
 import {FitAddon} from 'xterm-addon-fit';
-import { WebglAddon } from 'xterm-addon-webgl';
+import {WebglAddon} from 'xterm-addon-webgl';
 import axios from 'axios';
 import {Helmet, HelmetProvider} from 'react-helmet-async';
 
@@ -24,12 +24,12 @@ export default class Term extends React.Component {
 
             const addon = new WebglAddon();
             addon.onContextLoss(e => {
-              addon.dispose();
+                addon.dispose();
             });
             term.loadAddon(addon);
 
             this.term_id = response.data;
-            const socket = new WebSocket(`ws://192.168.2.129:8000/${this.term_id}`);
+            const socket = new WebSocket(`ws://127.0.0.1:8000/${this.term_id}`);
             const attachAddon = new AttachAddon(socket);
             term.loadAddon(attachAddon);
 
@@ -63,13 +63,15 @@ export default class Term extends React.Component {
         const {host, username} = this.props.profiles.sessions[this.session_id];
 
         return (
-            <div id="terminal" style={{position:'absolute', top:0, bottom: 0, left:0, right:0}}>
+            <div>
                 <HelmetProvider>
                     <Helmet>
                         <title>{`Terminal - ${username}@${host}`}</title>
                         <link rel="icon" href={`/favicon/term/${this.session_id}`}/>
                     </Helmet>
                 </HelmetProvider>
+
+                <div id="terminal" style={{position: 'absolute', top: 0, bottom: 0, left: 0, right: 0}}/>
             </div>
         );
     }
