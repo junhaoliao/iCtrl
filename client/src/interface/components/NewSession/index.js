@@ -31,32 +31,32 @@ export default class NewSession extends React.Component {
 
     shiftFocus = (ev) => {
         // only shift the focus if the 'Enter'/'Return' key is pressed
-        if (ev.key !== 'Enter'){
-            return
-        }
-
-        const id = ev.target.id
-
-        // all fields are required except 'password'
-        if (id==='password' && ev.target.value.length === 0){
+        if (ev.key !== 'Enter') {
             return;
         }
 
-        let nextField = null
+        const id = ev.target.id;
 
-        if (id === 'host'){
-            nextField = document.getElementById('username')
-        } else if (id === 'username'){
-            nextField = document.getElementById('password')
-        } else if (id === 'password'){
-            nextField = document.getElementById('button-save')
+        // all fields are required except 'password'
+        if (id === 'password' && ev.target.value.length === 0) {
+            return;
+        }
+
+        let nextField = null;
+
+        if (id === 'host') {
+            nextField = document.getElementById('username');
+        } else if (id === 'username') {
+            nextField = document.getElementById('password');
+        } else if (id === 'password') {
+            nextField = document.getElementById('button-save');
         } else {
             // should never reach here,
             //  or this callback is used in a wrong place
-            throw Error('wrong branch')
+            throw Error('wrong branch');
         }
 
-        nextField.focus()
+        nextField.focus();
     };
 
     render() {

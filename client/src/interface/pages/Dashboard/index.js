@@ -104,7 +104,7 @@ export default class Dashboard extends React.Component {
         this.handleFeatureClick(sessionId, type);
     };
 
-    handleAddNewSessionClose = (ev) => {
+    handleAddNewSessionClose = (_) => {
         this.setState({
             addNewSessionOpen: false
         });
@@ -123,7 +123,7 @@ export default class Dashboard extends React.Component {
                     </ListItemAvatar>
                     <ListItemText
                         primary={value.host}
-                        primaryTypographyProps={{style: {fontSize: 18, fontWeight:'bold', wordWrap: 'break-word'}}}
+                        primaryTypographyProps={{style: {fontSize: 18, fontWeight: 'bold', wordWrap: 'break-word'}}}
                         secondary={value.username}/>
                     <Menu
                         id="simple-menu"
