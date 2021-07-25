@@ -24,6 +24,10 @@
     right: 0
 }
 
+#speed-dial-backdrop {
+    z-index: 1;
+}
+
 #auto-resize-tooltip-title {
     width: 94px;
 }

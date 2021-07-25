@@ -85,7 +85,7 @@ export default class VNCViewer extends React.Component {
 
     render() {
         const {host, username} = this.props.profiles['sessions'][this.session_id];
-        const {speedDialOpen} = this.state;
+        const {authentication, currentStep, loading, speedDialOpen, showFab} = this.state;
         return (<div>
                 <HelmetProvider>
                     <Helmet>
@@ -93,8 +93,9 @@ export default class VNCViewer extends React.Component {
                         <link rel="icon" href={`/favicon/VNC/${this.session_id}`}/>
                     </Helmet>
                 </HelmetProvider>
-                <Backdrop open={speedDialOpen}/>
-                {this.state.showFab && !this.state.loading &&
+
+                <Backdrop id={'speed-dial-backdrop'} open={speedDialOpen}/>
+                {showFab && !loading &&
                 <VNCSpeedDial
                     rfb={this.rfb}
                     speedDialOpen={speedDialOpen}
@@ -107,12 +108,12 @@ export default class VNCViewer extends React.Component {
                     onFabHide={this.handleFabHide}/>
                 }
 
-                {this.state.loading &&
+                {loading &&
                 <Loading
-                    currentStep={this.state.currentStep}
+                    currentStep={currentStep}
                     steps={VNCSteps}
-                    authentication={this.state.authentication}/>}
-                <div style={{display: this.state.loading && 'none'}} id={'screen'}>
+                    authentication={authentication}/>}
+                <div style={{display: loading && 'none'}} id={'screen'}>
                     <textarea id={'textarea'} autoCapitalize="off"
                               autoComplete="off" spellCheck="false" tabIndex="-1"
                     />
