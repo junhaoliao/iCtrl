@@ -13,6 +13,7 @@ import {
     ListItem,
     ListItemAvatar,
     ListItemIcon,
+    ListItemSecondaryAction,
     ListItemText,
     Menu,
     Tooltip,
@@ -120,36 +121,10 @@ export default class Dashboard extends React.Component {
                     <ListItemAvatar>
                         <BackgroundLetterAvatar name={value.host}/>
                     </ListItemAvatar>
-                    <ListItemText primary={value.host} secondary={value.username}/>
-                    <Hidden smDown>
-                        {showCM &&
-                        <Tooltip title="Change Machine" aria-label="change machine">
-                            <IconButton onClick={() => this.handleFeatureClick(key, 'CM')}>
-                                <StorageIcon style={{color: '#4caf50'}} fontSize={'large'}/>
-                            </IconButton>
-                        </Tooltip>
-                        }
-                        <Tooltip title="VNC" aria-label="VNC">
-                            <IconButton onClick={() => this.handleFeatureClick(key, 'vnc')}>
-                                <RemoteDesktopIcon style={{color: 'lightcoral'}} fontSize={'large'}/>
-                            </IconButton>
-                        </Tooltip>
-                        <Tooltip title="Terminal" aria-label="terminal">
-                            <IconButton onClick={() => this.handleFeatureClick(key, 'term')}>
-                                <ConsoleIcon style={{color: 'black'}} fontSize={'large'}/>
-                            </IconButton>
-                        </Tooltip>
-                        <Tooltip title="File Manger" aria-label="file manager">
-                            <IconButton onClick={() => this.handleFeatureClick(key, 'file')}>
-                                <FileManagerIcon style={{color: '#1976d2'}} fontSize={'large'}/>
-                            </IconButton>
-                        </Tooltip>
-                    </Hidden>
-                    <Tooltip title="More Options" aria-label="more options">
-                        <IconButton onClick={(ev) => this.handleMenuOpen(ev, key)}>
-                            <MoreVertIcon fontSize={'large'}/>
-                        </IconButton>
-                    </Tooltip>
+                    <ListItemText
+                        primary={value.host}
+                        primaryTypographyProps={{style: {fontSize: 18, fontWeight:'bold', wordWrap: 'break-word'}}}
+                        secondary={value.username}/>
                     <Menu
                         id="simple-menu"
                         anchorEl={this.state.anchorEl}
@@ -180,6 +155,37 @@ export default class Dashboard extends React.Component {
                             Delete
                         </MenuItem>
                     </Menu>
+                    <ListItemSecondaryAction>
+                        <Hidden smDown>
+                            {showCM &&
+                            <Tooltip title="Change Machine" aria-label="change machine">
+                                <IconButton onClick={() => this.handleFeatureClick(key, 'CM')}>
+                                    <StorageIcon style={{color: '#4caf50'}} fontSize={'large'}/>
+                                </IconButton>
+                            </Tooltip>
+                            }
+                            <Tooltip title="VNC" aria-label="VNC">
+                                <IconButton onClick={() => this.handleFeatureClick(key, 'vnc')}>
+                                    <RemoteDesktopIcon style={{color: 'lightcoral'}} fontSize={'large'}/>
+                                </IconButton>
+                            </Tooltip>
+                            <Tooltip title="Terminal" aria-label="terminal">
+                                <IconButton onClick={() => this.handleFeatureClick(key, 'term')}>
+                                    <ConsoleIcon style={{color: 'black'}} fontSize={'large'}/>
+                                </IconButton>
+                            </Tooltip>
+                            <Tooltip title="File Manger" aria-label="file manager">
+                                <IconButton onClick={() => this.handleFeatureClick(key, 'file')}>
+                                    <FileManagerIcon style={{color: '#1976d2'}} fontSize={'large'}/>
+                                </IconButton>
+                            </Tooltip>
+                        </Hidden>
+                        <Tooltip title="More Options" aria-label="more options">
+                            <IconButton onClick={(ev) => this.handleMenuOpen(ev, key)}>
+                                <MoreVertIcon fontSize={'large'}/>
+                            </IconButton>
+                        </Tooltip>
+                    </ListItemSecondaryAction>
                 </ListItem>
             );
         }
@@ -200,6 +206,8 @@ export default class Dashboard extends React.Component {
                     </IconButton>
                 </Box>
                 <Divider/>
+
+                {/* Display a greyed-out logo when there is no session configured */}
                 {sessionList.length !== 0 ?
                     <List>
                         {sessionList}
