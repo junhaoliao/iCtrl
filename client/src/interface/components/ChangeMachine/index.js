@@ -4,11 +4,12 @@ import {Button, Dialog, DialogActions, DialogContent, DialogTitle,} from '@mater
 import {DataGrid} from '@material-ui/data-grid';
 import columns from './column';
 import {session_change_host, session_ruptime} from '../../../actions/session';
+import axios from 'axios';
 
 export default class ChangeMachine extends React.Component {
     constructor(props) {
         super(props);
-
+        this.cancelTokenSrc = axios.CancelToken.source()
 
         this.state = {
             selectedHost: null,
@@ -16,30 +17,37 @@ export default class ChangeMachine extends React.Component {
         };
     }
 
-    handleSubmit() {
-        session_change_host(this.props.session_id, this.state.selectedHost, this.props.domain);
-    };
 
     handleClose = (ev) => {
         if (ev.target && ev.target.id === 'button_apply') {
-            this.handleSubmit();
+            session_change_host(this.props.session_id, this.state.selectedHost, this.props.domain);
         }
 
+        this.cancelTokenSrc.cancel()
         this.props.onChangeMenuClose();
     };
 
-    handleSave() {
-        this.handleClose();
-    }
-
-    handleRowClick = (ev) => {
+    handleSelectionModelChange = (selectionModel) => {
         this.setState({
-            selectedHost: ev.row.id
+            selectedHost: selectionModel[0]
         });
     };
 
+    handleStateChange = ({api, state}) => {
+        // select the first row once loaded
+        if (state.rows.allRows.length !== 0 && state.selection.length === 0) {
+            const firstHost = state.sorting.sortedRows[0];
+            api.selectRow(firstHost);
+        }
+    };
+
+    handleRowDoubleClick = (row) => {
+        session_change_host(this.props.session_id, row.id, this.props.domain);
+        this.props.onChangeMenuClose();
+    };
+
     componentDidMount() {
-        session_ruptime(this.props.session_id, this);
+        session_ruptime(this, this.cancelTokenSrc.token);
     }
 
     render() {
@@ -60,7 +68,6 @@ export default class ChangeMachine extends React.Component {
                         pageSize={100}
                         rowsPerPageOptions={[]}
                         loading={!machineList.length}
-                        onRowClick={this.handleRowClick}
                         sortModel={[
                             {field: 'userNum', sort: 'asc'},
                             {field: 'load15', sort: 'asc'},
@@ -68,6 +75,9 @@ export default class ChangeMachine extends React.Component {
                             {field: 'load1', sort: 'asc'},
                         ]}
                         hideFooter={machineList.length <= 100}
+                        onSelectionModelChange={this.handleSelectionModelChange}
+                        onRowDoubleClick={this.handleRowDoubleClick}
+                        onStateChange={this.handleStateChange}
                     />
                 </DialogContent>
                 <DialogActions>

@@ -20,18 +20,15 @@ function stringToColor(string) {
     return color;
 }
 
-function stringAvatar(name) {
-    const hostname = name.split('.')[0];
-    return {
-        sx: {
-            bgcolor: stringToColor(name),
-            fontSize: 'small'
-        },
-        children: hostname === '192' ? name.substr(-5, 5) : hostname,
-    };
-}
-
 const BackgroundLetterAvatar = (props) => {
-    return (<Avatar {...stringAvatar(props.name)} />);
+    const {name} = props;
+    const hostname = name.split('.')[0];
+
+    return (<Avatar sx={{
+        backgroundColor: stringToColor(name),
+        fontSize: 'small'
+    }}>
+        {hostname === '192' ? name.substr(-5, 5) : hostname}
+    </Avatar>);
 };
 export default BackgroundLetterAvatar;

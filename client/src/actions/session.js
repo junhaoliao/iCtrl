@@ -1,9 +1,11 @@
 import axios from 'axios';
 
-export const session_ruptime = (sessionId, cm) => {
+export const session_ruptime = (cm, cancelToken) => {
     axios.post('/exec_blocking', {
-        session_id: sessionId,
+        session_id: cm.props.session_id,
         cmd: 'ruptime -aur | grep up'
+    },{
+        cancelToken: cancelToken
     }).then(res => {
         // parse response data (str) into json format
         const machineListJson = [];
@@ -30,7 +32,7 @@ export const session_ruptime = (sessionId, cm) => {
         }
         cm.setState({machineList: machineListJson});
     }).catch(error => {
-        cm.setState({machineList: null});
+        console.log(error)
     });
 };
 
