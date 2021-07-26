@@ -14,14 +14,14 @@ export default class Term extends React.Component {
         this.session_id = params.session_id;
         this.term_id = null;
 
-        this.resize_timeout = null
+        this.resize_timeout = null;
     }
 
     componentDidMount() {
         axios.post(`/terminal`, {
             session_id: this.session_id
         }).then(response => {
-            const term_div = document.getElementById('terminal')
+            const term_div = document.getElementById('terminal');
             const term = new Terminal();
             term.open(term_div);
 
@@ -37,48 +37,48 @@ export default class Term extends React.Component {
             term.loadAddon(attachAddon);
 
             try {
-                navigator.clipboard.readText().then(_=>{
+                navigator.clipboard.readText().then(_ => {
                     term_div.onauxclick = ev => {
-                        if (ev.button === 2){
-                            const selection = term.getSelection()
-                            if (selection === ''){
-                                navigator.clipboard.readText().then(text=>{
-                                    socket.send(text)
-                                })
+                        if (ev.button === 2) {
+                            const selection = term.getSelection();
+                            if (selection === '') {
+                                navigator.clipboard.readText().then(text => {
+                                    socket.send(text);
+                                });
                             } else {
-                                navigator.clipboard.writeText(selection).then()
-                                term.clearSelection()
+                                navigator.clipboard.writeText(selection).then();
+                                term.clearSelection();
                             }
                         }
-                    }
+                    };
                     term_div.oncontextmenu = ev => {
-                        ev.preventDefault()
-                    }
-                }).catch(error=>{
+                        ev.preventDefault();
+                    };
+                }).catch(error => {
                     // clipboard permission not given
-                    console.log(error)
-                })
+                    console.log(error);
+                });
             } catch (e) {
-                console.log('clipboard not permitted / supported')
+                console.log('clipboard not permitted / supported');
             }
 
             term.onResize(({cols, rows}) => {
                 if (this.term_id != null) {
                     // add a 500 ms delay to prevent requesting terminal resize too frequently,
                     //  thus saving network bandwidth among the client, the server, and the target
-                    clearTimeout(this.resize_timeout)
-                    this.resize_timeout = setTimeout(()=>{
+                    clearTimeout(this.resize_timeout);
+                    this.resize_timeout = setTimeout(() => {
                         axios.patch(`/terminal_resize`, {
-                        session_id: this.session_id,
-                        term_id: this.term_id,
-                        w: cols,
-                        h: rows
-                    }).then(_ => {
-                        term.scrollToBottom()
-                    }).catch(error => {
-                        console.log(error);
-                    });
-                    }, 500)
+                            session_id: this.session_id,
+                            term_id: this.term_id,
+                            w: cols,
+                            h: rows
+                        }).then(_ => {
+                            term.scrollToBottom();
+                        }).catch(error => {
+                            console.log(error);
+                        });
+                    }, 500);
                 }
             });
             const fitAddon = new FitAddon();

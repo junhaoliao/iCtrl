@@ -1,7 +1,7 @@
 const columns = [
     {
         field: 'id',
-        headerName: 'Machine #',
+        headerName: 'Host',
         flex: 1,
     },
     {
@@ -24,6 +24,6 @@ const columns = [
         headerName: '15-min Avg',
         flex: 1,
     }
-  ];
+];
 
 export default columns;
