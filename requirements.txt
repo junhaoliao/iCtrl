@@ -1,6 +1,6 @@
 flask
 paramiko
-SimpleWebSocketServer
+git+git://github.com/junhaoliao/simple-websocket-server#egg=SimpleWebSocketServer
 websockify
 pyDes
 zipstream-new

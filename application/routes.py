@@ -3,7 +3,6 @@ import os
 from datetime import datetime
 from io import BytesIO
 from pathlib import Path
-from time import sleep
 
 from flask import request, abort, send_file
 
