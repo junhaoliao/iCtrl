@@ -9,7 +9,7 @@ import axios from 'axios';
 export default class ChangeMachine extends React.Component {
     constructor(props) {
         super(props);
-        this.cancelTokenSrc = axios.CancelToken.source()
+        this.cancelTokenSrc = axios.CancelToken.source();
 
         this.state = {
             selectedHost: null,
@@ -23,7 +23,7 @@ export default class ChangeMachine extends React.Component {
             session_change_host(this.props.session_id, this.state.selectedHost, this.props.domain);
         }
 
-        this.cancelTokenSrc.cancel()
+        this.cancelTokenSrc.cancel();
         this.props.onChangeMenuClose();
     };
 
