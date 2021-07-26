@@ -165,37 +165,3 @@ export const sftp_quota = (fm, ms) => {
     });
 };
 
-export const sftp_ruptime = (sessionId, cm) => {
-    axios.post('/exec_blocking', {
-        session_id: sessionId,
-        cmd: 'ruptime -aur | grep up'
-    }).then(res => {
-        // parse response data (str) into json format
-        const machineListJson = []
-        for (const machine of res.data.split("\n")) {
-            const machineInfo = machine.split(",")
-            if (machineInfo.length === 5) {
-                const machineJson = {
-                    "id": parseInt(machineInfo[0].match(/ug[0-9]+/)[0].replace(/ug/, '')),
-                    "userNum": parseInt(machineInfo[1]),
-                    "load1": parseFloat(machineInfo[2].match(/[0-9]+.[0-9]+/)),
-                    "load5": parseFloat(machineInfo[3]),
-                    "load15": parseFloat(machineInfo[4]),
-                }
-                machineListJson.push(machineJson)
-            }
-        }
-        cm.setState({machineList: machineListJson})
-    }).catch(error => {
-        cm.setState({machineList: null})
-    });
-};
-
-export const sftp_changehost = (sessionId, host) => {
-    axios.patch('/session', {
-        session_id: sessionId,
-        host: `ug${host}.eecg.toronto.edu`
-    }).catch(error => {
-        console.log(error);
-    });
-};

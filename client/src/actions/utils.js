@@ -25,3 +25,10 @@ export const iOS = () => {
         // iPad on iOS 13 detection
         || (navigator.userAgent.includes('Mac') && 'ontouchend' in document);
 };
+
+export const canChangeMachine = (hostname) => {
+    return hostname.endsWith('.eecg.toronto.edu') ||
+                hostname.endsWith('.ecf.toronto.edu') ||
+                hostname.endsWith('.eecg.utoronto.ca') ||
+                hostname.endsWith('.ecf.utoronto.ca')
+}

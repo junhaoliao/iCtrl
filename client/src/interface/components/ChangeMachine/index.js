@@ -1,30 +1,23 @@
 /* eslint-disable react-hooks/rules-of-hooks */
 import React from 'react';
-import {
-    Button,
-    Dialog,
-    DialogActions,
-    DialogContent,
-    DialogTitle,
-} from '@material-ui/core';
+import {Button, Dialog, DialogActions, DialogContent, DialogTitle,} from '@material-ui/core';
 import {DataGrid} from '@material-ui/data-grid';
-import columns from './column'
-import { sftp_ruptime, sftp_changehost } from '../../../actions/sftp';
+import columns from './column';
+import {session_change_host, session_ruptime} from '../../../actions/session';
 
 export default class ChangeMachine extends React.Component {
     constructor(props) {
         super(props);
+
+
         this.state = {
+            selectedHost: null,
             machineList: [],
-            machineNum: -1,
-            sessionId: '',
         };
     }
 
     handleSubmit() {
-        if (this.state.machineNum !== -1) {
-            sftp_changehost(this.state.sessionId, this.state.machineNum)
-        }
+        session_change_host(this.props.session_id, this.state.selectedHost, this.props.domain);
     };
 
     handleClose = (ev) => {
@@ -32,9 +25,7 @@ export default class ChangeMachine extends React.Component {
             this.handleSubmit();
         }
 
-        this.props.db.setState({
-            changeMachineOpen: false
-        });
+        this.props.onChangeMenuClose();
     };
 
     handleSave() {
@@ -42,53 +33,52 @@ export default class ChangeMachine extends React.Component {
     }
 
     handleRowClick = (ev) => {
-        this.setState({machineNum: ev.row.id})
-    }
+        this.setState({
+            selectedHost: ev.row.id
+        });
+    };
 
-    update_machine_list(_sessionId) {
-        this.setState({sessionId: _sessionId})
-        sftp_ruptime(_sessionId, this);
+    componentDidMount() {
+        session_ruptime(this.props.session_id, this);
     }
 
     render() {
-        const {open} = this.props;
+        const {machineList} = this.state;
+
         return (
             <Dialog
-                open={open}
+                open={true}
                 fullWidth={true}
-                maxWidth={"md"}
+                maxWidth={'md'}
                 aria-labelledby="change machine"
             >
                 <DialogTitle>Change Machine</DialogTitle>
-                <DialogContent style={{ height: "380px" }}>
+                <DialogContent style={{height: '380px'}}>
                     <DataGrid
-                        rows={this.state.machineList}
+                        rows={machineList}
                         columns={columns}
                         pageSize={100}
-                        loading={this.state.machineList.length ? false : true}
-                        onRowClick={this.handleRowClick}
                         rowsPerPageOptions={[]}
+                        loading={!machineList.length}
+                        onRowClick={this.handleRowClick}
                         sortModel={[
-                            {
-                                field: 'userNum',
-                                sort: 'asc',
-                            },
-                            {
-                                field: 'load15',
-                                sort: 'asc',
-                            }
+                            {field: 'userNum', sort: 'asc'},
+                            {field: 'load15', sort: 'asc'},
+                            {field: 'load5', sort: 'asc'},
+                            {field: 'load1', sort: 'asc'},
                         ]}
-                        hideFooter
+                        hideFooter={machineList.length <= 100}
                     />
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={this.handleClose}>Close</Button>
-                    <Button variant={'contained'}
-                            id={'button_apply'}
+                    <Button id={'button_apply'}
+                            variant={'contained'}
+                            disabled={!Boolean(this.state.selectedHost)}
                             onClick={this.handleClose}>
                         Apply
                     </Button>
-                    </DialogActions>
+                </DialogActions>
             </Dialog>
         );
     }

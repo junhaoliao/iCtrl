@@ -32,14 +32,14 @@ import NewSession from '../../components/NewSession';
 import axios from 'axios';
 
 import logo from '../../../icons/logo.png';
+import {canChangeMachine} from '../../../actions/utils';
 
 export default class Dashboard extends React.Component {
     constructor(props) {
         super(props);
-        this.changeMachine = React.createRef();
         this.state = {
             addNewSessionOpen: false,
-            changeMachineOpen: false,
+            changeMachineSessionId: null,
             anchorEl: null,
             anchorSessionId: null,
         };
@@ -49,15 +49,18 @@ export default class Dashboard extends React.Component {
         this.setState({addNewSessionOpen: true});
     };
 
-    handleChangeMachine(sessionId) {
-        this.setState({changeMachineOpen: true});
-        this.changeMachine.current.update_machine_list(sessionId)
-    }
+    handleChangeMachineOpen = (sessionId) => {
+        this.setState({changeMachineSessionId: sessionId});
+    };
+
+    handleChangeMachineClose = () => {
+        this.setState({changeMachineSessionId: null});
+    };
 
     handleFeatureClick(sessionId, type) {
         switch (type) {
             case 'CM':
-                this.handleChangeMachine(sessionId);
+                this.handleChangeMachineOpen(sessionId);
                 break;
             case 'vnc':
                 window.open(`/vnc/${sessionId}`, '_blank');
@@ -113,10 +116,19 @@ export default class Dashboard extends React.Component {
 
 
     render() {
+        const {
+            anchorEl,
+            anchorSessionId,
+            changeMachineSessionId,
+            addNewSessionOpen
+        } = this.state;
+
         const sessionList = [];
-        const sessions = this.props.profiles.sessions;
+        const sessions = this.props.profiles['sessions'];
+        const changeMachineHost = Boolean(changeMachineSessionId)? sessions[changeMachineSessionId].host : null
+
         for (const [key, value] of Object.entries(sessions)) {
-            const showCM = value.host.endsWith('toronto.edu');
+            const showCM = canChangeMachine(value.host);
             sessionList.push(
                 <ListItem style={{cursor: 'default'}} button key={key}>
                     <ListItemAvatar>
@@ -128,8 +140,8 @@ export default class Dashboard extends React.Component {
                         secondary={value.username}/>
                     <Menu
                         id="simple-menu"
-                        anchorEl={this.state.anchorEl}
-                        open={this.state.anchorSessionId === key}
+                        anchorEl={anchorEl}
+                        open={anchorSessionId === key}
                         onClose={this.handleMenuClose}
                     >
                         <Hidden smUp>
@@ -222,8 +234,12 @@ export default class Dashboard extends React.Component {
                     </div>
                 }
 
-                <NewSession open={this.state.addNewSessionOpen} onAddNewSessionClose={this.handleAddNewSessionClose}/>
-                <ChangeMachine open={this.state.changeMachineOpen} db={this} ref={this.changeMachine}/>
+                <NewSession open={addNewSessionOpen} onAddNewSessionClose={this.handleAddNewSessionClose}/>
+                {Boolean(changeMachineSessionId) &&
+                <ChangeMachine
+                    session_id={changeMachineSessionId}
+                    domain={changeMachineHost.substr(changeMachineHost.indexOf('.'))}
+                    onChangeMenuClose={this.handleChangeMachineClose}/>}
             </Container>
         );
     }
