@@ -4,7 +4,7 @@ export const session_ruptime = (cm, cancelToken) => {
     axios.post('/exec_blocking', {
         session_id: cm.props.session_id,
         cmd: 'ruptime -aur | grep up'
-    },{
+    }, {
         cancelToken: cancelToken
     }).then(res => {
         // parse response data (str) into json format
@@ -32,12 +32,12 @@ export const session_ruptime = (cm, cancelToken) => {
         }
         cm.setState({machineList: machineListJson});
     }).catch(error => {
-        console.log(error)
+        console.log(error);
     });
 };
 
 export const session_change_host = (sessionId, host, domain) => {
-    console.log(domain)
+    console.log(domain);
     axios.patch('/session', {
         session_id: sessionId,
         host: `${host}${domain}`
@@ -46,4 +46,27 @@ export const session_change_host = (sessionId, host, domain) => {
     }).catch(error => {
         console.log(error);
     });
+};
+
+export const hostList = () => {
+    const list = [];
+
+    // EECG Computers
+    for (let i = 52; i <= 75; i++) {
+        list.push(`ug${i}.eecg.toronto.edu`);
+    }
+    for (let i = 132; i <= 180; i++) {
+        list.push(`ug${i}.eecg.toronto.edu`);
+    }
+    for (let i = 201; i <= 251; i++) {
+        list.push(`ug${i}.eecg.toronto.edu`);
+    }
+
+    // ECF Computers
+    for (let i = 1; i <= 196; i++) {
+        list.push(`p${i}.ecf.utoronto.ca`);
+    }
+    list.push('remote.ecf.utoronto.ca');
+
+    return list;
 };

@@ -125,7 +125,7 @@ export default class Dashboard extends React.Component {
 
         const sessionList = [];
         const sessions = this.props.profiles['sessions'];
-        const changeMachineHost = Boolean(changeMachineSessionId)? sessions[changeMachineSessionId].host : null
+        const changeMachineHost = Boolean(changeMachineSessionId) ? sessions[changeMachineSessionId].host : null;
 
         for (const [key, value] of Object.entries(sessions)) {
             const showCM = canChangeMachine(value.host);

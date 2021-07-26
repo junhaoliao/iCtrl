@@ -1,10 +1,11 @@
 import React from 'react';
 import Button from '@material-ui/core/Button';
 import TextField from '@material-ui/core/TextField';
-import {Box, Dialog, DialogActions, DialogTitle, Tooltip, Typography} from '@material-ui/core';
+import {Autocomplete, Box, Dialog, DialogActions, DialogTitle, Tooltip, Typography} from '@material-ui/core';
 import axios from 'axios';
 
 import './index.css';
+import {hostList} from '../../../actions/session';
 
 export default class NewSession extends React.Component {
     handleSubmit() {
@@ -75,14 +76,24 @@ export default class NewSession extends React.Component {
                         <Tooltip flexGrow={1} title={'[Required] host name of the target SSH server'}>
                             <Typography variant={'subtitle1'}>Host<span style={{color: 'red'}}>*</span></Typography>
                         </Tooltip>
-                        <TextField id={'host'}
-                                   autoFocus
-                                   autoComplete={'off'}
-                                   style={{width: 250}}
-                                   size={'small'}
-                                   placeholder={'example.com'}
-                                   variant={'standard'}
-                                   onKeyDown={this.shiftFocus}
+                        <Autocomplete
+                            id={'host'}
+                            options={hostList()}
+                            clearOnBlur={false}
+                            freeSolo={true}
+                            autoComplete={true}
+                            renderInput={(params) => (
+                                <TextField
+                                    {...params}
+                                    autoFocus
+                                    size={'small'}
+                                    placeholder={'example.com'}
+                                    variant={'standard'}
+                                    style={{width: 250}}
+                                />
+                            )
+                            }
+                            onKeyDown={this.shiftFocus}
                         />
                     </Box>
                     <Box display={'flex'}>
