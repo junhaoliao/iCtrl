@@ -1,92 +1,95 @@
 /* eslint-disable react-hooks/rules-of-hooks */
 import React from 'react';
-import Button from '@material-ui/core/Button';
-import MenuItem from '@material-ui/core/MenuItem';
-import TextField from '@material-ui/core/TextField';
-import Dialog from '@material-ui/core/Dialog';
-import axios from 'axios';
-
-import './index.css';
-
-const machineList = ['ug250', 'ug249'];
+import {
+    Button,
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogTitle,
+} from '@material-ui/core';
+import {DataGrid} from '@material-ui/data-grid';
+import columns from './column'
+import { sftp_ruptime, sftp_changehost } from '../../../actions/sftp';
 
 export default class ChangeMachine extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            open: true,
-            SelectMachineInput: '',
+            machineList: [],
+            machineNum: -1,
+            sessionId: '',
         };
     }
 
-    handleClickOpen() {
-        this.setState({open: true});
+    handleSubmit() {
+        if (this.state.machineNum !== -1) {
+            sftp_changehost(this.state.sessionId, this.state.machineNum)
+        }
     };
 
-    handleClose() {
-        this.props.handleDone();
-        this.setState({open: false});
+    handleClose = (ev) => {
+        if (ev.target && ev.target.id === 'button_apply') {
+            this.handleSubmit();
+        }
+
+        this.props.db.setState({
+            changeMachineOpen: false
+        });
     };
 
     handleSave() {
-        // to do
-        const {SelectMachineInput} = this.state;
-        const {sessionId} = this.props;
-        // console.log(newMachine, this.props.sessionId);
-        axios.patch('/change_host', {
-            session_id: sessionId,
-            new_host: `${SelectMachineInput}.eecg.toronto.edu`
-        }).then(response => {
-            console.log(response.data);
-            window.location.reload();
-        }).catch(err => {
-            console.log('error', err);
-        });
         this.handleClose();
     }
 
-    handleMachineChange = (e) => {
-        // console.log('machine changed', e.target.value)
-        this.setState({SelectMachineInput: e.target.value});
-    };
+    handleRowClick = (ev) => {
+        this.setState({machineNum: ev.row.id})
+    }
+
+    update_machine_list(_sessionId) {
+        this.setState({sessionId: _sessionId})
+        sftp_ruptime(_sessionId, this);
+    }
 
     render() {
-        const {open} = this.state;
+        const {open} = this.props;
         return (
-            <div className="change-machine-bg">
-                <div className="change-machine-mask"/>
-                <div>
-                    <Dialog
-                        open={open}
-                        aria-labelledby="alert-dialog-title"
-                        aria-describedby="alert-dialog-description"
-                    >
-                        <div className="change-machine-content-wrapper">
-                            <TextField
-                                id="change-machine-selector"
-                                select
-                                label="New Host"
-                                value={this.state.SelectMachineInput}
-                                onChange={this.handleMachineChange}
-                                helperText="Please select your machine"
-                                style={{width: '-webkit-fill-available'}}
-                            >
-                                {machineList.map((option) => (
-                                    <MenuItem id="machine-name" key={option} value={option}>
-                                        {option}
-                                    </MenuItem>
-                                ))}
-                            </TextField>
-                            <div className="change-machine-save">
-                                <Button variant="contained" color="secondary"
-                                        onClick={() => this.handleClose()}>Close</Button>
-                                <Button style={{marginLeft: 20}} variant="contained" color="primary"
-                                        onClick={() => this.handleSave()}>Change</Button>
-                            </div>
-                        </div>
-                    </Dialog>
-                </div>
-            </div>
+            <Dialog
+                open={open}
+                fullWidth={true}
+                maxWidth={"md"}
+                aria-labelledby="change machine"
+            >
+                <DialogTitle>Change Machine</DialogTitle>
+                <DialogContent style={{ height: "380px" }}>
+                    <DataGrid
+                        rows={this.state.machineList}
+                        columns={columns}
+                        pageSize={100}
+                        loading={this.state.machineList.length ? false : true}
+                        onRowClick={this.handleRowClick}
+                        rowsPerPageOptions={[]}
+                        sortModel={[
+                            {
+                                field: 'userNum',
+                                sort: 'asc',
+                            },
+                            {
+                                field: 'load15',
+                                sort: 'asc',
+                            }
+                        ]}
+                        hideFooter
+                    />
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={this.handleClose}>Close</Button>
+                    <Button variant={'contained'}
+                            id={'button_apply'}
+                            onClick={this.handleClose}>
+                        Apply
+                    </Button>
+                    </DialogActions>
+            </Dialog>
         );
     }
 }
