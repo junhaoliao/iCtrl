@@ -61,8 +61,8 @@ def handle_session():
         if session_id not in profiles['sessions']:
             abort(403, f'failed: session {session_id} does not exist')
 
-        new_host = request.json.get('new_host')
-        profiles.change_host(session_id, new_host)
+        host = request.json.get('host')
+        profiles.change_host(session_id, host)
 
         return 'success'
     elif request.method == 'DELETE':

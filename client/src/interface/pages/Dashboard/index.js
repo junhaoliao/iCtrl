@@ -25,6 +25,7 @@ import StorageIcon from '@material-ui/icons/Storage';
 import {ConsoleIcon, FileManagerIcon, RemoteDesktopIcon} from '../../../icons';
 import MoreVertIcon from '@material-ui/icons/MoreVert';
 import DeleteIcon from '@material-ui/icons/Delete';
+import ChangeMachine from '../../components/ChangeMachine';
 
 import MenuItem from '@material-ui/core/MenuItem';
 import NewSession from '../../components/NewSession';
@@ -35,11 +36,12 @@ import logo from '../../../icons/logo.png';
 export default class Dashboard extends React.Component {
     constructor(props) {
         super(props);
+        this.changeMachine = React.createRef();
         this.state = {
             addNewSessionOpen: false,
-            changeMachine: false,
+            changeMachineOpen: false,
             anchorEl: null,
-            anchorSessionId: null
+            anchorSessionId: null,
         };
     }
 
@@ -47,16 +49,15 @@ export default class Dashboard extends React.Component {
         this.setState({addNewSessionOpen: true});
     };
 
-    handleChangeMachine() {
-        const {changeMachine} = this.state;
-        this.setState({changeMachine: !changeMachine});
+    handleChangeMachine(sessionId) {
+        this.setState({changeMachineOpen: true});
+        this.changeMachine.current.update_machine_list(sessionId)
     }
 
     handleFeatureClick(sessionId, type) {
-        this.setState({sessionId});
         switch (type) {
             case 'CM':
-                this.handleChangeMachine();
+                this.handleChangeMachine(sessionId);
                 break;
             case 'vnc':
                 window.open(`/vnc/${sessionId}`, '_blank');
@@ -222,6 +223,7 @@ export default class Dashboard extends React.Component {
                 }
 
                 <NewSession open={this.state.addNewSessionOpen} onAddNewSessionClose={this.handleAddNewSessionClose}/>
+                <ChangeMachine open={this.state.changeMachineOpen} db={this} ref={this.changeMachine}/>
             </Container>
         );
     }
