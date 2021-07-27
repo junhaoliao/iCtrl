@@ -23,7 +23,6 @@ import {sftp_dl, sftp_rm} from '../../../actions/sftp';
 export default class CustomToolbar extends React.Component {
     constructor(props) {
         super(props);
-        this.fm = props.fm;
 
         this.state = {
             densityMenuAnchorEl: null,
@@ -44,7 +43,7 @@ export default class CustomToolbar extends React.Component {
     };
 
     handleDensityChange = (ev) => {
-        this.fm.setState({
+        this.props.fm.setState({
             density: ev.currentTarget.getAttribute('aria-label')
         });
         this.setState({
@@ -53,18 +52,18 @@ export default class CustomToolbar extends React.Component {
     };
 
     handleHiddenFiles = (_) => {
-        this.fm.showHidden = !this.fm.showHidden;
-        this.fm.setState({
-            filesDisplaying: this.fm.showHidden ? this.fm.files : this.fm.nonHiddenFiles(),
+        this.props.fm.showHidden = !this.props.fm.showHidden;
+        this.props.fm.setState({
+            filesDisplaying: this.props.fm.showHidden ? this.props.fm.files : this.props.fm.nonHiddenFiles(),
         });
     };
 
     handleDownload = (_) => {
-        if (this.fm.selected.length === 0) {
-            this.fm.showAlert('No files selected for download. ');
+        if (this.props.fm.selected.length === 0) {
+            this.props.fm.showAlert('No files selected for download. ');
             return;
         }
-        sftp_dl(this.fm.session_id, this.fm.state.cwd, this.fm.selected);
+        sftp_dl(this.props.fm.session_id, this.props.fm.state.cwd, this.props.fm.selected);
     };
 
     handleDeleteAllPrompt = (ev) => {
@@ -74,15 +73,15 @@ export default class CustomToolbar extends React.Component {
             });
             return;
         }
-        sftp_rm(this.fm, this.fm.session_id, this.fm.state.cwd, this.fm.selected);
+        sftp_rm(this.props.fm, this.props.fm.session_id, this.props.fm.state.cwd, this.props.fm.selected);
         this.setState({
             deleteAllPromptOpen: false
         });
     };
 
     handleDelete = (_) => {
-        if (this.fm.selected.length === 0) {
-            this.fm.showAlert('No files selected for removal.');
+        if (this.props.fm.selected.length === 0) {
+            this.props.fm.showAlert('No files selected for removal.');
             return;
         }
         this.setState({
@@ -91,8 +90,8 @@ export default class CustomToolbar extends React.Component {
     };
 
     handleCwdSubmit = (ev) => {
-        const path = this.fm.state.cwdInput;
-        this.fm.loadDir(path);
+        const path = this.props.fm.state.cwdInput;
+        this.props.fm.loadDir(path);
 
         ev.preventDefault();
     };
@@ -104,7 +103,7 @@ export default class CustomToolbar extends React.Component {
     };
 
     handleCwdInputChange = (ev) => {
-        this.fm.setState({
+        this.props.fm.setState({
             cwdInput: ev.target.value
         });
     };
@@ -112,25 +111,25 @@ export default class CustomToolbar extends React.Component {
         if (ev.relatedTarget && ev.relatedTarget.id === 'enter_button') {
             return;
         }
-        this.fm.setState({
-            cwdInput: this.fm.state.cwd,
+        this.props.fm.setState({
+            cwdInput: this.props.fm.state.cwd,
             cwdInputErr: null
         });
     };
 
     handleUpOneLevel = (_) => {
-        const cwd = this.fm.state.cwd;
+        const cwd = this.props.fm.state.cwd;
         const path = cwd.substring(0, cwd.lastIndexOf('/'));
         if (path === '') {
-            this.fm.loadDir('/');
+            this.props.fm.loadDir('/');
         } else {
-            this.fm.loadDir(path);
+            this.props.fm.loadDir(path);
         }
 
     };
 
     render() {
-        const pluralSelection = this.fm.selected.length > 1;
+        const pluralSelection = this.props.fm.selected.length > 1;
         return (<GridToolbarContainer>
             <Tooltip title={'Go to Parent Folder'}>
                 <IconButton aria-label={'up'} onClick={this.handleUpOneLevel} color={'primary'}>
@@ -145,8 +144,8 @@ export default class CustomToolbar extends React.Component {
                 onKeyPress={this.handleCwdInputKeyPress}
                 onBlur={this.handleCwdInputBlur}
                 onChange={this.handleCwdInputChange}
-                value={this.fm.state.cwdInput}
-                error={Boolean(this.fm.state.cwdInputErr)}
+                value={this.props.fm.state.cwdInput}
+                error={Boolean(this.props.fm.state.cwdInputErr)}
                 endAdornment={
                     <InputAdornment position="end">
                         <IconButton color={'primary'} id={'enter_button'} edge={'end'}
@@ -164,9 +163,9 @@ export default class CustomToolbar extends React.Component {
                 </IconButton>
             </Tooltip>
 
-            <Tooltip title={`${this.fm.showHidden ? 'Hide' : 'Show'} Hidden Files`}>
+            <Tooltip title={`${this.props.fm.showHidden ? 'Hide' : 'Show'} Hidden Files`}>
                 <IconButton color={'primary'} onClick={this.handleHiddenFiles}>
-                    {this.fm.showHidden ? <VisibilityOff/> : <Visibility/>}
+                    {this.props.fm.showHidden ? <VisibilityOff/> : <Visibility/>}
                 </IconButton>
             </Tooltip>
 

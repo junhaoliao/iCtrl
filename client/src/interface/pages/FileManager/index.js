@@ -91,8 +91,8 @@ export default class FileManager extends React.Component {
         this.loadDir('');
     }
 
-    handleSelectionModelChange = (ev) => {
-        this.selected = ev.selectionModel;
+    handleSelectionModelChange = (selectionModel) => {
+        this.selected = selectionModel;
     };
 
     clearSelection = (api) => {
