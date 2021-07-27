@@ -1,4 +1,4 @@
-from flask import Flask, render_template
+from flask import Flask, render_template, send_from_directory
 from werkzeug.serving import WSGIRequestHandler
 
 from application.Profile import Profile
@@ -13,7 +13,13 @@ from application.routes import *
 
 if not app.debug:
     @app.errorhandler(404)
-    def not_found(e):
+    def not_found(_):
+        if request.path == '/icon.png':
+            return send_from_directory(app.template_folder, 'icon.png')
+        elif request.path == '/manifest.json':
+            return send_from_directory(app.template_folder, 'manifest.json')
+        else:
+            print(request.path)
         return render_template('index.html')
 
 

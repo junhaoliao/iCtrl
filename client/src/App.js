@@ -45,9 +45,12 @@ export default class App extends React.Component {
                     <Route path="/terminal/:session_id" render={(props) => (
                         <Term {...props} profiles={this.state.profiles}/>
                     )}/>
-                    <Route path="/" render={(props) => (
+                    <Route exact path="/" render={(props) => (
                         <Dashboard {...props} profiles={this.state.profiles}/>
                     )}/>
+                    <Route path={'/*'}>
+                        <div>404</div>
+                    </Route>
                 </Switch>
             </Router>
         );
