@@ -101,7 +101,7 @@ export default class Term extends React.Component {
                 <HelmetProvider>
                     <Helmet>
                         <title>{`Terminal - ${username}@${host}`}</title>
-                        <link rel="icon" href={`/favicon/term/${this.session_id}`}/>
+                        <link rel="icon" href={`/favicon/terminal/${this.session_id}`}/>
                     </Helmet>
                 </HelmetProvider>
 

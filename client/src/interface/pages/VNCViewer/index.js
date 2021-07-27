@@ -90,7 +90,7 @@ export default class VNCViewer extends React.Component {
                 <HelmetProvider>
                     <Helmet>
                         <title>{`VNC - ${username}@${host}`}</title>
-                        <link rel="icon" href={`/favicon/VNC/${this.session_id}`}/>
+                        <link rel="icon" href={`/favicon/vnc/${this.session_id}`}/>
                     </Helmet>
                 </HelmetProvider>
 
