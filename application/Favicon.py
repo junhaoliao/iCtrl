@@ -1,5 +1,7 @@
 from PIL import Image, ImageDraw, ImageFont
 
+from application.paths import FONT_ARIAL_PATH
+
 
 class Favicon:
     # Reference: https://next.material-ui.com/components/avatars/
@@ -29,7 +31,7 @@ class Favicon:
         self.draw = ImageDraw.Draw(self.im)
 
         self.draw.ellipse((28, 28, 200, 200), fill=self.color)
-        font = ImageFont.truetype("./resources/Arial Unicode.ttf", 60)
+        font = ImageFont.truetype(FONT_ARIAL_PATH, 60)
         w, h = self.draw.textsize(self.short_text, font=font)
         self.draw.text(((228 - w) / 2, (228 - h) / 2), self.short_text, font=font)
 
