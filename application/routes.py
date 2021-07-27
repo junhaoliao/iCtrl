@@ -359,9 +359,9 @@ def generate_favicon(feature, session_id):
 
     temp = BytesIO()
     icon = Favicon(host)
-    if feature == 'VNC':
+    if feature == 'vnc':
         icon.VNC(temp)
-    elif feature == 'term':
+    elif feature == 'terminal':
         icon.console(temp)
     elif feature == 'fm':
         icon.file_manager(temp)
