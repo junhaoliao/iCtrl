@@ -1,16 +1,11 @@
 import re
-import socket
 import threading
 
 import websockify
 
 from application.Connection import Connection
+from application.utils import find_free_port
 from application.vncpasswd import decrypt_passwd
-
-def find_free_port():
-    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
-        sock.bind(('', 0))
-        return sock.getsockname()[1]
 
 
 def websocket_proxy_thread(local_websocket_port, local_vnc_port):

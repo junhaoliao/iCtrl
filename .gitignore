@@ -1,9 +1,9 @@
-/venv/
+/venv
 
 /.idea
-
 /.vscode
 
 **/__pycache__
+**/*.pyc
 
-application/__init__.pyc
+/build

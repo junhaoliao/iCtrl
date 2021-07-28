@@ -3,11 +3,12 @@ import threading
 import uuid
 from typing import Optional
 
-from paramiko import Channel
 from SimpleWebSocketServer import SimpleWebSocketServer, WebSocket
+from paramiko import Channel
 
-from application.Connection import Connection
 from application import app
+from application.Connection import Connection
+from application.utils import find_free_port
 
 terminal_connections = {}
 
@@ -84,5 +85,6 @@ class TerminalSocket(WebSocket):
 # since the ws server will bind to the port, we should only run it once
 # if we are in debug mode, run the server in the second round
 if not app.debug or os.environ.get("WERKZEUG_RUN_MAIN") == "true":
-    terminal_server = SimpleWebSocketServer('', 8000, TerminalSocket)
+    TERMINAL_PORT = find_free_port()
+    terminal_server = SimpleWebSocketServer('', TERMINAL_PORT, TerminalSocket)
     threading.Thread(target=terminal_server.serveforever).start()
