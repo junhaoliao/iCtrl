@@ -8,18 +8,15 @@ from flask import request, abort, send_file
 
 from application import app, profiles
 from application.Connection import Connection
-from application.SFTP import SFTP
-from application.Term import Term, terminal_connections
-from application.VNC import VNC
-from application.paths import PRIVATE_KEY_PATH
-from application.codes import ICtrlStep, ICtrlError
 from application.Favicon import Favicon
+from application.SFTP import SFTP
+from application.Term import Term, terminal_connections, TERMINAL_PORT
+from application.VNC import VNC
+from application.codes import ICtrlStep, ICtrlError
+from application.paths import PRIVATE_KEY_PATH
+from application.utils import int_to_bytes
 
 UPLOAD_CHUNK_SIZE = 1024 * 1024
-
-
-def int_to_bytes(num):
-    return bytes([num])
 
 
 def get_session_info(session_id):
@@ -105,7 +102,11 @@ def start_terminal():
     if status is False:
         abort(403, description=reason)
 
-    return term.id
+    result = {
+        'port': TERMINAL_PORT,
+        'term_id': term.id
+    }
+    return json.dumps(result)
 
 
 @app.route('/terminal_resize', methods=['PATCH'])
@@ -277,6 +278,7 @@ def sftp_chmod(session_id):
 
     return 'success'
 
+
 @app.route('/sftp_mkdir/<session_id>', methods=['PUT'])
 def sftp_mkdir(session_id):
     host, username, this_private_key_path = get_session_info(session_id)
@@ -319,7 +321,6 @@ def sftp_ul(session_id):
         cwd = os.path.join(cwd, relative_dir_path)
         # TODO: check: will this ever fail?
         sftp.exec_command_blocking(f'mkdir -p "{cwd}"')
-
 
     sftp.sftp.chdir(path=cwd)
     sftp_file = sftp.file(filename=request_filename)

@@ -26,13 +26,13 @@ export default class Term extends React.Component {
             term.open(term_div);
 
             const addon = new WebglAddon();
-            addon.onContextLoss(e => {
+            addon.onContextLoss(_ => {
                 addon.dispose();
             });
             term.loadAddon(addon);
 
-            this.term_id = response.data;
-            const socket = new WebSocket(`ws://127.0.0.1:8000/${this.term_id}`);
+            this.term_id = response.data['term_id'];
+            const socket = new WebSocket(`ws://127.0.0.1:${response.data['port']}/${this.term_id}`);
             const attachAddon = new AttachAddon(socket);
             term.loadAddon(attachAddon);
 
