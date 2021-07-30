@@ -1,11 +1,11 @@
+// Modules to control application life and create native browser window
+const {app, BrowserWindow, nativeImage} = require('electron')
+if (require('electron-squirrel-startup')) return app.quit();
+
 const {spawn} = require("child_process")
 const {get} = require('http')
 const {createServer} = require("net")
-
-
-// Modules to control application life and create native browser window
-const {app, BrowserWindow, nativeImage} = require('electron')
-
+const {resolve} = require('path')
 
 function getFreePort() {
     const srv = createServer()
@@ -17,9 +17,8 @@ function getFreePort() {
 
 const mainPort = getFreePort()
 
-
 // launch the backend
-spawn('ictrl_be.exe', [mainPort], {cwd: './ictrl_be'})
+spawn('ictrl_be.exe', [mainPort], {cwd: resolve(__dirname, 'ictrl_be')})
 
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
@@ -30,7 +29,10 @@ app.whenReady().then(() => {
         width: 800,
         height: 600,
         show: false,
-        autoHideMenuBar: true
+        autoHideMenuBar: true,
+            webPreferences: {
+                nativeWindowOpen: true
+            }
     })
 
     mainWindow.loadURL(`http://localhost:${mainPort}`)
@@ -41,17 +43,6 @@ app.whenReady().then(() => {
     })
 
     mainWindow.once('ready-to-show', () => {
-        // TODO: might not need this, we can just set the default icon for the Dashboard
-        get({
-            hostname: 'localhost',
-            port: mainPort,
-            path: '/icon.png',
-        }, (res) => {
-            res.on('data', (data) => {
-                const icon = nativeImage.createFromBuffer(data)
-                mainWindow.setIcon(icon)
-            });
-        });
         mainWindow.maximize()
     })
 
@@ -62,7 +53,10 @@ app.whenReady().then(() => {
             width: 800,
             height: 600,
             show: false,
-            autoHideMenuBar: true
+            autoHideMenuBar: true,
+            webPreferences: {
+                nativeWindowOpen: true
+            }
         })
         newWindow.loadURL(url)
 
