@@ -1,9 +1,10 @@
 {
   "name": "ictrl-desktop-client",
-  "description": "Desktop client for iCtrl.",
-  "version": "0.1.0",
+  "description": "Desktop client for iCtrl",
+  "version": "6.0.1",
   "private": true,
   "main": "main.js",
+  "repository": "https://github.com/junhaoliao/UG_Remote",
   "author": {
     "name": "Junhao Liao",
     "email": "junhao@junhao.ca",
@@ -31,28 +32,35 @@
       "url": "https://www.ece.utoronto.ca/people/timorabadi-h"
     }
   ],
+  "dependencies": {
+    "update-electron-app": "^2.0.1"
+  },
   "devDependencies": {
     "@electron-forge/cli": "^6.0.0-beta.59",
     "@electron-forge/maker-deb": "^6.0.0-beta.59",
     "@electron-forge/maker-rpm": "^6.0.0-beta.59",
     "@electron-forge/maker-squirrel": "^6.0.0-beta.59",
     "@electron-forge/maker-zip": "^6.0.0-beta.59",
+    "@electron-forge/publisher-github": "^6.0.0-beta.59",
     "electron": "^14.0.0-beta.17"
   },
   "scripts": {
     "electron": "electron .",
     "start": "electron-forge start",
     "package": "electron-forge package",
-    "make": "electron-forge make"
-  },
-  "dependencies": {
-    "electron-squirrel-startup": "^1.0.0"
+    "make": "electron-forge make",
+    "publish": "electron-forge publish"
   },
   "config": {
     "forge": {
       "packagerConfig": {
         "icon": "resources/icon",
-        "ignore": "(.gitignore|resources*)"
+        "ignore": "(.gitignore|resources*)",
+        "win32metadata": {
+          "ProductName": "iCtrl Desktop",
+          "FileDescription": "Desktop client for iCtrl",
+          "CompanyName": "iCtrl"
+        }
       },
       "makers": [
         {
@@ -75,6 +83,18 @@
         {
           "name": "@electron-forge/maker-rpm",
           "config": {}
+        }
+      ],
+      "publishers": [
+        {
+          "name": "@electron-forge/publisher-github",
+          "config": {
+            "repository": {
+              "owner": "junhaoliao",
+              "name": "UG_Remote"
+            },
+            "draft": true
+          }
         }
       ]
     }
