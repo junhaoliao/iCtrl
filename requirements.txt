@@ -5,4 +5,4 @@ websockify
 pyDes
 zipstream-new
 Pillow
-
+pyinstaller

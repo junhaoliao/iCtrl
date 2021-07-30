@@ -1,6 +1,6 @@
 # -*- mode: python ; coding: utf-8 -*-
 import PyInstaller.config
-PyInstaller.config.CONF['distpath'] = "./client"
+PyInstaller.config.CONF['distpath'] = './desktop_client'
 
 block_cipher = None
 
@@ -29,7 +29,7 @@ exe = EXE(pyz,
           debug=False,
           bootloader_ignore_signals=False,
           strip=False,
-          upx=True,
+          upx=False,
           console=True,
           disable_windowed_traceback=False,
           target_arch=None,
