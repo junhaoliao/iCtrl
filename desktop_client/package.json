@@ -1,7 +1,7 @@
 {
   "name": "ictrl-desktop-client",
   "description": "Desktop client for iCtrl",
-  "version": "6.0.1",
+  "version": "6.0.0-beta.0",
   "private": true,
   "main": "main.js",
   "repository": "https://github.com/junhaoliao/UG_Remote",
