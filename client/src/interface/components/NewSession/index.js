@@ -161,7 +161,7 @@ export default class NewSession extends React.Component {
                     {Boolean(error) && <Alert severity="error">{error}</Alert>}
                 </div>
                 <DialogActions>
-                    <Button onClick={this.handleClose}>Close</Button>
+                    <Button disabled={loading} onClick={this.handleClose}>Close</Button>
                     <LoadingButton variant={'contained'}
                                    id={'button-save'}
                                    loading={loading}
