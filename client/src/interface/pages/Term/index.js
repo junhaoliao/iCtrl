@@ -62,6 +62,7 @@ export default class Term extends React.Component {
                 console.log('clipboard not permitted / supported');
             }
 
+            // setup the resize behaviours
             term.onResize(({cols, rows}) => {
                 if (this.term_id != null) {
                     // add a 500 ms delay to prevent requesting terminal resize too frequently,
@@ -88,6 +89,8 @@ export default class Term extends React.Component {
                 fitAddon.fit();
             };
 
+            // focus on the terminal once everything finishes loading
+            term.focus()
         }).catch(error => {
             console.log(error);
         });
