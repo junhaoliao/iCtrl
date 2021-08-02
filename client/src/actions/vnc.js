@@ -123,6 +123,7 @@ export const vncConnect = async (vncViewer) => {
                 vncViewer.keyboardElem.addEventListener('submit', () => false);
 
                 /* Setup bi-directional clipboard forwarding */
+                // TODO: keep an eye on the official support discussed on https://github.com/novnc/noVNC/pull/1562
                 // remote -> local
                 vncViewer.rfb.addEventListener('clipboard', (ev) => {
                     try {
