@@ -86,12 +86,9 @@ class VNC(Connection):
                     vnc_port = int(match.group(1))
                     break
 
-        return vnc_port
+        return 5900 + vnc_port
 
-    def launch_web_vnc(self):
-        my_port = self.launch_vnc()
-
-        remote_port = 5900 + my_port
+    def create_tunnel(self, remote_port):
         local_vnc_port = find_free_port()
         local_websocket_port = find_free_port()
 
