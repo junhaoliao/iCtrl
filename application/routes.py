@@ -133,6 +133,7 @@ def resize_terminal():
 def start_vnc():
     session_id = request.json.get('session_id')
     host, username, this_private_key_path = get_session_info(session_id)
+    is_ecf = host.endswith('.ecf.utoronto.ca') or host.endswith('ecf.toronto.edu')
 
     def generate():
         yield int_to_bytes(ICtrlStep.VNC.SSH_AUTH)
@@ -147,18 +148,26 @@ def start_vnc():
         yield int_to_bytes(ICtrlStep.VNC.CHECK_LOAD)
 
         yield int_to_bytes(ICtrlStep.VNC.PARSE_PASSWD)
-        status, password = vnc.get_vnc_password()
-        if not status:
-            yield int_to_bytes(ICtrlError.VNC.PASSWD_MISSING)
-            return
+        if is_ecf:
+            password = None
+        else:
+            status, password = vnc.get_vnc_password()
+            if not status:
+                yield int_to_bytes(ICtrlError.VNC.PASSWD_MISSING)
+                return
 
         yield int_to_bytes(ICtrlStep.VNC.LAUNCH_VNC)
+        if is_ecf:
+            vnc_port = 1000
+        else:
+            vnc_port = vnc.launch_vnc()
+
         yield int_to_bytes(ICtrlStep.VNC.CREATE_TUNNEL)
-        port = vnc.launch_web_vnc()
+        ws_port = vnc.create_tunnel(vnc_port)
 
         yield int_to_bytes(ICtrlStep.VNC.DONE)
         result = {
-            'port': port,
+            'port': ws_port,
             'passwd': password
         }
         yield json.dumps(result)
