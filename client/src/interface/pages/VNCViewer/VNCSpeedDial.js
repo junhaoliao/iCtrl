@@ -43,7 +43,7 @@ export default class VNCSpeedDial extends React.Component {
     handleFabMove = (ev) => {
         this.props.closeSpeedDial();
         const fab = document.getElementById('fab');
-        const width = fab.offsetWidth;
+        const width = 56;
 
         // prevent the speed dial from opening when using a mouse
         if (ev.touches === undefined) {
@@ -90,8 +90,8 @@ export default class VNCSpeedDial extends React.Component {
             }
             fab.style.top = newTop + 'px';
             fab.style.left = newLeft + 'px';
-            fab.style.bottom = null;
-            fab.style.right = null;
+            fab.style.bottom = 'unset';
+            fab.style.right = 'unset';
         } else {
             if (this.state.speedDialDirection === 'down') {
                 this.setState({
@@ -110,8 +110,8 @@ export default class VNCSpeedDial extends React.Component {
             if (newRight < 0) {
                 newRight = 0;
             }
-            fab.style.top = null;
-            fab.style.left = null;
+            fab.style.top = 'unset';
+            fab.style.left = 'unset';
             fab.style.bottom = newBottom + 'px';
             fab.style.right = newRight + 'px';
         }
