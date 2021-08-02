@@ -13,7 +13,6 @@ _EMPTY_SESSION = {
 
 _EMPTY_USER_PROFILE = {
     "version": _PROFILE_VERSION,
-    "viewer": "TigerVNC",
     "sessions": {},
     "last_session": ""
 }
@@ -30,7 +29,6 @@ class Profile:
                     raise ValueError("Profile: Version info not found or mismatch in the profile.")
 
                 # FIXME: make sure the profile file is not modified in an attempt to crash the script
-                self["viewer"] = json_data["viewer"]
                 self["sessions"] = json_data["sessions"]
                 self["last_session"] = json_data["last_session"]
 
@@ -72,10 +70,6 @@ class Profile:
 
     def change_host(self, session_id, new_host):
         self["sessions"][session_id]['host'] = new_host
-        self.save_profile()
-
-    def change_viewer(self, viewer):
-        self["viewer"] = viewer
         self.save_profile()
 
     def save_profile(self):
