@@ -1,33 +1,66 @@
 import React from 'react';
 import Button from '@material-ui/core/Button';
 import TextField from '@material-ui/core/TextField';
-import {Autocomplete, Box, Dialog, DialogActions, DialogTitle, Tooltip, Typography} from '@material-ui/core';
+import {Alert, Autocomplete, Box, Dialog, DialogActions, DialogTitle, Tooltip, Typography} from '@material-ui/core';
 import axios from 'axios';
 
 import './index.css';
 import {hostList} from '../../../actions/session';
+import {LoadingButton} from '@material-ui/lab';
+import {htmlResponseToReason} from '../../../actions/utils';
 
 export default class NewSession extends React.Component {
+    constructor(props) {
+        super(props);
+        this.state = {
+            error: null,
+            loading: false
+        };
+    }
+
     handleSubmit() {
         const host = document.getElementById('host').value;
         const username = document.getElementById('username').value;
         const password = document.getElementById('password').value;
 
+        if (host.length === 0) {
+            this.setState({
+                error: `The 'Host' field cannot be empty`
+            });
+            return;
+        } else if (username.length === 0) {
+            this.setState({
+                error: `The 'Username' field cannot be empty`
+            });
+            return;
+        }
+
+        this.setState({
+            error: null,
+            loading: true
+        });
+
         axios.post('/session', {
             host, username, password
-        }).then(response => {
-            console.log(response.data);
+        }).then(_ => {
             window.location.reload();
-        }).catch(err => {
-            console.log('error', err);
+        }).catch(error => {
+            this.setState({
+                error: htmlResponseToReason(error.response.data),
+                loading: false
+            });
         });
     }
 
     handleClose = (ev) => {
         if (ev.target && ev.target.id === 'button-save') {
             this.handleSubmit();
+        } else {
+            this.setState({
+                error: null
+            })
+            this.props.onAddNewSessionClose();
         }
-        this.props.onAddNewSessionClose();
     };
 
     shiftFocus = (ev) => {
@@ -62,6 +95,7 @@ export default class NewSession extends React.Component {
 
     render() {
         const {open} = this.props;
+        const {error, loading} = this.state;
         return (
             <Dialog
                 open={open}
@@ -110,7 +144,8 @@ export default class NewSession extends React.Component {
                         />
                     </Box>
                     <Box display={'flex'}>
-                        <Tooltip flexGrow={1} title={'[Optional] password for login'}>
+                        <Tooltip flexGrow={1} title={'[Optional] password for login. ' +
+                        'If left empty, you will need to enter the password at the next login. '}>
                             <Typography variant={'subtitle1'}>Password</Typography>
                         </Tooltip>
                         <TextField id={'password'}
@@ -123,17 +158,18 @@ export default class NewSession extends React.Component {
                                    onKeyDown={this.shiftFocus}
                         />
                     </Box>
-
+                    {Boolean(error) && <Alert severity="error">{error}</Alert>}
                 </div>
                 <DialogActions>
                     <Button onClick={this.handleClose}>Close</Button>
-                    <Button variant={'contained'}
-                            id={'button-save'}
-                            onClick={this.handleClose}>
+                    <LoadingButton variant={'contained'}
+                                   id={'button-save'}
+                                   loading={loading}
+                                   loadingIndicator={'Saving...'}
+                                   onClick={this.handleClose}>
                         Save
-                    </Button>
+                    </LoadingButton>
                 </DialogActions>
-
             </Dialog>
         );
     }
