@@ -5,7 +5,7 @@ import websockify
 
 from application.Connection import Connection
 from application.utils import find_free_port
-from application.vncpasswd import decrypt_passwd
+from application.vncpasswd import decrypt_passwd, obfuscate_password
 
 
 def websocket_proxy_thread(local_websocket_port, local_vnc_port):
@@ -37,14 +37,15 @@ class VNC(Connection):
             return True, decrypt_passwd(bytearray.fromhex(hexdump))
 
     def reset_vnc_password(self, password):
+        hexed_passwd = obfuscate_password(password).hex()
+
         reset_cmd_lst = [
             # killall -q: don't complain if no process found
             #         -w: wait until the processes to die then continue to the next cmd
             "killall -q -w Xtigervnc",
             "rm -rf ~/.vnc",
             "mkdir ~/.vnc",
-            # TODO: check whether the target has tigervnc installed
-            "echo '%s'| tigervncpasswd -f > ~/.vnc/passwd" % password,
+            "echo '%s'| xxd -r -p > ~/.vnc/passwd" % hexed_passwd,
             "chmod 600 ~/.vnc/passwd",
         ]
         _, _, _, stderr = self.exec_command_blocking(';'.join(reset_cmd_lst))
