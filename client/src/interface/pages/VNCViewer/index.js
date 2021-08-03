@@ -41,8 +41,12 @@ export default class VNCViewer extends React.Component {
         this.lastKeyboardinput = this.keyboardElem.value;
     };
 
-    componentDidMount() {
+    connect = () =>{
         vncConnect(this).then();
+    }
+
+    componentDidMount() {
+        this.connect()
     }
 
     handleSpeedDialOpen = (ev) => {
