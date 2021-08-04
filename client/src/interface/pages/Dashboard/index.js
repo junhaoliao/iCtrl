@@ -213,7 +213,7 @@ export default class Dashboard extends React.Component {
 
                 <br/><br/>
                 <Box display="flex">
-                    <Typography flexGrow={1} variant={'h3'}>Dashboard</Typography>
+                    <Typography className={'no_select'} flexGrow={1} variant={'h3'}>Dashboard</Typography>
                     <IconButton onClick={this.handleAddNewSession} size={'large'}>
                         <AddCircleIcon style={{color: 'darkorange'}} fontSize="large"/>
                     </IconButton>

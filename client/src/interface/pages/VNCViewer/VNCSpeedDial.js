@@ -187,6 +187,7 @@ export default class VNCSpeedDial extends React.Component {
 
         return (<SpeedDial
             id={'fab'}
+            className={'no_select'}
             icon={<SpeedDialIcon/>}
             open={speedDialOpen}
             direction={speedDialDirection}
