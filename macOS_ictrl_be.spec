@@ -34,7 +34,7 @@ exe = EXE(pyz,
           console=True,
           disable_windowed_traceback=False,
           target_arch=None,
-          codesign_identity='Developer ID Application: Junhao Liao (4NCV93W849)',
+          codesign_identity=None,
           entitlements_file=None )
 coll = COLLECT(exe,
                a.binaries,

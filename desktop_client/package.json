@@ -83,6 +83,7 @@
           "name": "@electron-forge/maker-dmg",
           "config": {
             "name": "ictrl-desktop-setup",
+            "icon": "assets/installer_icon.icns",
             "background": "assets/mac_dmg_background.png",
             "format": "ULFO"
           }
