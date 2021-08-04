@@ -135,9 +135,10 @@ export default class FileManager extends React.Component {
         this.setState({changePermissionOpen: true});
     };
 
-    handleRowDoubleClick = (ev) => {
+    handleCellDoubleClick = (ev) => {
         const name = ev.row.id;
-        if (ev.api.getCellMode(name, 'id') === 'edit') {
+
+        if (ev.field === '__check__' || ev.api.getCellMode(name, 'id') === 'edit') {
             return;
         }
 
@@ -322,7 +323,7 @@ export default class FileManager extends React.Component {
                         rowsPerPageOptions={[]}
                         loading={this.state.loading}
                         onCellClick={this.handleCellClick}
-                        onRowDoubleClick={this.handleRowDoubleClick}
+                        onCellDoubleClick={this.handleCellDoubleClick}
                         onEditCellChange={this.handleEditCellChange}
                         onEditCellChangeCommitted={this.handleEditCellChangeCommitted}
                         sortModel={[
