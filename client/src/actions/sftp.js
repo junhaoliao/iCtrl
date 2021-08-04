@@ -32,7 +32,7 @@ export const sftp_ls = (fm, path) => {
 export const sftp_dl = (session_id, cwd, files) => {
     const a = document.createElement('a');
     a.download = '';
-    a.href = `http://localhost:5000/sftp_dl/${session_id}?` +
+    a.href = `/sftp_dl/${session_id}?` +
         `cwd=${cwd}&` +
         `files=${JSON.stringify(files)}`;
     a.click();
