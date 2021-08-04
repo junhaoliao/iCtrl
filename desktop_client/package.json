@@ -1,7 +1,7 @@
 {
   "name": "ictrl-desktop-client",
   "description": "Desktop client for iCtrl",
-  "version": "6.0.0",
+  "version": "6.0.0-beta.0",
   "private": true,
   "main": "main.js",
   "repository": "https://github.com/junhaoliao/iCtrl",
@@ -40,7 +40,7 @@
     "@electron-forge/maker-deb": "^6.0.0-beta.59",
     "@electron-forge/maker-rpm": "^6.0.0-beta.59",
     "@electron-forge/maker-squirrel": "^6.0.0-beta.59",
-    "@electron-forge/maker-zip": "^6.0.0-beta.59",
+    "@electron-forge/maker-dmg": "^6.0.0-beta.59",
     "@electron-forge/publisher-github": "^6.0.0-beta.59",
     "electron": "^14.0.0-beta.17"
   },
@@ -54,12 +54,20 @@
   "config": {
     "forge": {
       "packagerConfig": {
-        "icon": "resources/icon",
-        "ignore": "(.gitignore|resources*)",
+        "name": "iCtrl Desktop",
+        "icon": "assets/icon",
+        "ignore": "(.gitignore|assets*)",
         "win32metadata": {
           "ProductName": "iCtrl Desktop",
           "FileDescription": "Desktop client for iCtrl",
           "CompanyName": "iCtrl"
+        },
+        "appCategoryType": "public.app-category.utilities",
+        "osxSign": {
+          "hardenedRuntime": true,
+          "entitlements": "assets/entitlements.mac.plist",
+          "entitlements-inherit": "assets/entitlements.mac.plist",
+          "gatekeeper-assess": false
         }
       },
       "makers": [
@@ -67,15 +75,17 @@
           "name": "@electron-forge/maker-squirrel",
           "config": {
             "name": "ictrl-desktop-client",
-            "setupIcon": "resources/installer_icon.ico",
+            "setupIcon": "assets/installer_icon.ico",
             "setupExe": "ictrl-desktop-setup.exe"
           }
         },
         {
-          "name": "@electron-forge/maker-zip",
-          "platforms": [
-            "darwin"
-          ]
+          "name": "@electron-forge/maker-dmg",
+          "config": {
+            "name": "ictrl-desktop-setup",
+            "background": "assets/mac_dmg_background.png",
+            "format": "ULFO"
+          }
         },
         {
           "name": "@electron-forge/maker-deb",

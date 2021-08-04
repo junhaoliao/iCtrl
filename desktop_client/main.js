@@ -1,14 +1,14 @@
-require('update-electron-app')()
-const {handleSquirrelEvent} = require('./squirrel_event')
+require('update-electron-app')();
+const {handleSquirrelEvent} = require('./squirrel_event');
 
 // this should be placed at top of main.js to handle setup events quickly
 if (handleSquirrelEvent()) {
-  // squirrel event handled and app will exit in 1000ms, so don't do anything else
-  return;
+    // squirrel event handled and app will exit in 1000ms, so don't do anything else
+    return;
 }
 
 // Modules to control application life and create native browser window
-const {app, BrowserWindow, nativeImage} = require('electron');
+const {app, BrowserWindow, nativeImage, Menu} = require('electron');
 const {spawn} = require('child_process');
 const {get} = require('http');
 const {resolve} = require('path');
@@ -17,8 +17,21 @@ const {getFreePort} = require('./utils');
 
 const mainPort = getFreePort();
 
-// launch the backend
-spawn('ictrl_be.exe', [mainPort], {cwd: resolve(__dirname, 'ictrl_be')});
+const isMac = process.platform === 'darwin';
+
+/* launch the backend */
+// the backend process handle
+let ictrl_be = null;
+if (isMac) {
+    console.log(resolve(__dirname, 'ictrl_be'));
+    ictrl_be = spawn('./ictrl_be', [mainPort], {cwd: resolve(__dirname, 'ictrl_be')});
+} else {
+    // TODO: add support for Linux
+    // Assuming Windows
+    ictrl_be = spawn('ictrl_be.exe', [mainPort], {cwd: resolve(__dirname, 'ictrl_be')});
+}
+
+Menu.setApplicationMenu(null)
 
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
@@ -29,22 +42,30 @@ app.whenReady().then(() => {
         width: 800,
         height: 600,
         show: false,
-        autoHideMenuBar: true,
         webPreferences: {
             nativeWindowOpen: true
         }
     });
 
-    mainWindow.loadURL(`http://localhost:${mainPort}`);
+    mainWindow.setTitle('Loading... ')
 
-    mainWindow.removeMenu();
-    mainWindow.setAppDetails({
-        appId: 'iCtrl'
+    mainWindow.loadURL(`http://127.0.0.1:${mainPort}`);
+    // need to reload on Mac because the first load times out very quickly
+    mainWindow.webContents.on('did-fail-load', () => {
+        mainWindow.reload()
     });
 
-    mainWindow.once('ready-to-show', () => {
+    mainWindow.webContents.on('did-finish-load', () => {
+        mainWindow.show()
         mainWindow.maximize();
     });
+
+
+    if (!isMac) {
+        mainWindow.setAppDetails({
+            appId: 'iCtrl'
+        });
+    }
 
     mainWindow.webContents.on('new-window', (event, url) => {
         event.preventDefault();
@@ -53,24 +74,25 @@ app.whenReady().then(() => {
             width: 800,
             height: 600,
             show: false,
-            autoHideMenuBar: true,
             webPreferences: {
                 nativeWindowOpen: true
             }
         });
         newWindow.loadURL(url);
 
-        newWindow.removeMenu();
         newWindow.once('ready-to-show', () => {
             const url = newWindow.getURL();
-            newWindow.setAppDetails({
-                appId: url
-            });
+            if (!isMac) {
+                newWindow.setAppDetails({
+                    appId: url
+                });
+            }
+
             const split = url.split('/');
             const sessionId = split[split.length - 1];
             const feature = split[split.length - 2];
             get({
-                hostname: 'localhost',
+                hostname: '127.0.0.1',
                 port: mainPort,
                 path: `/favicon/${feature}/${sessionId}`,
             }, (res) => {
@@ -80,6 +102,7 @@ app.whenReady().then(() => {
                 });
             });
 
+            newWindow.show();
             newWindow.maximize();
         });
 
@@ -95,6 +118,11 @@ app.whenReady().then(() => {
 app.on('window-all-closed', () => {
     app.quit();
 });
+
+app.on('before-quit', ()=>{
+    // kill the backend when the app exits
+    ictrl_be.kill('SIGKILL')
+})
 
 // In this file you can include the rest of your app's specific main process
 // code. You can also put them in separate files and require them here.
