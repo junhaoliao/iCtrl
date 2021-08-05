@@ -2,7 +2,7 @@ import {ICtrlError, ICtrlStep} from './codes';
 import RFB from '@novnc/novnc/core/rfb';
 import KeyTable from '@novnc/novnc/core/input/keysym';
 import keysyms from '@novnc/novnc/core/input/keysymdef';
-import {VNCAuthentication} from '../interface/components/Loading/authentications';
+import {SSHHostUnreachableRefresh, VNCAuthentication} from '../interface/components/Loading/authentications';
 import axios from 'axios';
 
 export const vncConnect = async (vncViewer) => {
@@ -186,7 +186,11 @@ export const vncConnect = async (vncViewer) => {
                 });
             } else {
                 // handle the errors / server requests
-                if (currentStep === ICtrlError.VNC.PASSWD_MISSING) {
+                if (currentStep === ICtrlError.SSH.HOST_UNREACHABLE) {
+                    vncViewer.setState({
+                        authentication: SSHHostUnreachableRefresh
+                    });
+                } else if (currentStep === ICtrlError.VNC.PASSWD_MISSING) {
                     // make a copy of the VNCAuthentication model
                     const myVNCAuthentication = Object.assign(VNCAuthentication);
                     myVNCAuthentication.submitter = (authInput) => {
@@ -207,6 +211,8 @@ export const vncConnect = async (vncViewer) => {
                     vncViewer.setState({
                         authentication: myVNCAuthentication
                     });
+                } else {
+                    console.log(`VNC error code: ${currentStep}`)
                 }
 
                 // stop reading the stream now that an error occurs

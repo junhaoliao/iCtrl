@@ -140,9 +140,11 @@ def start_vnc():
         vnc = VNC()
         status, reason = vnc.connect(host=host, username=username, key_filename=this_private_key_path)
         if status is False:
-            print(reason)
-            # FIXME: return corresponding code according to the reason
-            yield int_to_bytes(ICtrlError.SSH.GENERAL)
+            if reason.startswith('[Errno 60]'):
+                yield int_to_bytes(ICtrlError.SSH.HOST_UNREACHABLE)
+            else:
+                # TODO: return the other specific codes
+                yield int_to_bytes(ICtrlError.SSH.GENERAL)
             return
 
         yield int_to_bytes(ICtrlStep.VNC.CHECK_LOAD)

@@ -18,7 +18,7 @@ export const ICtrlError = {
     SSH: SSHError
 };
 
-const VNCStep = {
+const VNCStepCodes = {
     SSH_AUTH: 0,
     CHECK_LOAD: 1,
     PARSE_PASSWD: 2,
@@ -27,6 +27,13 @@ const VNCStep = {
     DONE: STEP_DONE
 };
 
+const TermStepCodes = {
+    SSH_AUTH: 0,
+    CHECK_LOAD: 1,
+    DONE: STEP_DONE
+};
+
 export const ICtrlStep = {
-    VNC: VNCStep
+    VNC: VNCStepCodes,
+    Term: TermStepCodes
 };

@@ -77,6 +77,7 @@ export default class Loading extends React.Component {
                                     }}>
                                         <Stack spacing={2} direction="row">
                                             <TextField
+                                                style={(!Boolean(authentication.validator)) && {visibility: 'hidden'}}
                                                 fullWidth
                                                 label="Password"
                                                 variant={'standard'}
@@ -92,9 +93,11 @@ export default class Loading extends React.Component {
                                                 type={'submit'}
                                                 style={{width: 150, height: 36, alignSelf: 'center'}}
                                                 variant={'contained'}
-                                                disabled={this.state.authInput === '' || this.state.authHelperText !== ' '}
+                                                disabled={Boolean(authentication.validator) &&
+                                                    (this.state.authInput === '' ||
+                                                        this.state.authHelperText !== ' ')}
                                             >
-                                                Confirm
+                                                {authentication.submitterName}
                                             </Button>
                                         </Stack>
                                     </form>
