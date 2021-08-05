@@ -1,10 +1,22 @@
+export const SSHHostUnreachableRefresh = {
+    label: 'Host Unreachable',
+    description: `We are unable to reach the SSH host. 
+    Please contact the host administrator or refresh this page to reconnect.`,
+    validator: null,
+    submitterName: 'Refresh',
+    submitter: ()=>{
+        window.location.reload();
+    }
+}
+
 export const SSHNoKeyAuthentication = {
     label: 'Please enter your SSH password',
     description: `We can't find any SSH keys for the connection. 
-    Please enter your password for the SSH connection`,
+    Please enter your password for the SSH connection:`,
     validator: (_) => {
         return ' ';
     },
+    submitterName: 'Confirm',
     submitter: (authInput) => {
         console.log('Virtual submitter not overridden: ', authInput);
     }
@@ -20,6 +32,7 @@ export const VNCAuthentication = {
         }
         return ' ';
     },
+    submitterName: 'Confirm',
     submitter: (authInput) => {
         console.log(authInput);
     }

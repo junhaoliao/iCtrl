@@ -32,3 +32,20 @@ export const VNCSteps = [
             `Congrats!`
     }
 ];
+
+export const TermSteps = [
+    {
+        label: 'SSH Authentication',
+        description: 'Connecting to the remote SSH machine with stored credentials (if any)...',
+    },
+    {
+        label: '[Not Enabled] Load Check',
+        description:
+            'Detecting the load for the machine selected. This feature is exclusive to UofT servers. ',
+    },
+    {
+        label: 'Connected!',
+        description:
+            `Congrats!`
+    }
+]

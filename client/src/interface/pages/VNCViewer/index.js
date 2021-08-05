@@ -117,6 +117,7 @@ export default class VNCViewer extends React.Component {
                     currentStep={currentStep}
                     steps={VNCSteps}
                     authentication={authentication}/>}
+
                 <div style={{display: loading && 'none'}} id={'screen'}>
                     <textarea id={'textarea'} autoCapitalize="off"
                               autoComplete="off" spellCheck="false" tabIndex="-1"
