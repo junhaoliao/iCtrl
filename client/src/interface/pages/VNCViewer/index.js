@@ -70,6 +70,7 @@ export default class VNCViewer extends React.Component {
         this.setState({
             speedDialOpen: false
         });
+        this.rfb.focus()
     };
 
     handleSpeedDialClose = (ev) => {
@@ -85,6 +86,7 @@ export default class VNCViewer extends React.Component {
             showFab: false,
             speedDialOpen: false
         });
+        this.rfb.focus()
     };
 
     render() {
