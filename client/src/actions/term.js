@@ -95,7 +95,7 @@ const setupResize = (term, sessionID, term_id) => {
 export const termConnect = ({session_id: sessionID, setState}) => {
     axios.post(`/terminal`, {
         session_id: sessionID
-    }).then(({data:{term_id, port}}) => {
+    }).then(({data: {term_id, port}}) => {
         const {term, term_div} = setupDOM();
         setupWebGL(term);
         const socket = setupWebSocket(term, term_id, port);

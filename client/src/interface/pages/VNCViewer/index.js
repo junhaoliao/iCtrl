@@ -1,6 +1,4 @@
 import React from 'react';
-
-import {Helmet, HelmetProvider} from 'react-helmet-async';
 import {Backdrop} from '@material-ui/core';
 
 import './index.css';
@@ -8,6 +6,7 @@ import Loading from '../../components/Loading';
 import {VNCSteps} from '../../components/Loading/steps';
 import VNCSpeedDial from './VNCSpeedDial';
 import {vncConnect} from '../../../actions/vnc';
+import {changeFavicon} from '../../utils';
 
 export default class VNCViewer extends React.Component {
     constructor(props) {
@@ -41,14 +40,6 @@ export default class VNCViewer extends React.Component {
         this.lastKeyboardinput = this.keyboardElem.value;
     };
 
-    connect = () =>{
-        vncConnect(this).then();
-    }
-
-    componentDidMount() {
-        this.connect()
-    }
-
     handleSpeedDialOpen = (ev) => {
         if (ev.type === 'mouseenter') {
             return;
@@ -70,7 +61,7 @@ export default class VNCViewer extends React.Component {
         this.setState({
             speedDialOpen: false
         });
-        this.rfb.focus()
+        this.rfb.focus();
     };
 
     handleSpeedDialClose = (ev) => {
@@ -86,20 +77,21 @@ export default class VNCViewer extends React.Component {
             showFab: false,
             speedDialOpen: false
         });
-        this.rfb.focus()
+        this.rfb.focus();
     };
 
-    render() {
+    componentDidMount() {
         const {host, username} = this.props.profiles['sessions'][this.session_id];
+        document.title = `VNC - ${username}@${host}`;
+
+        changeFavicon(`/favicon/vnc/${this.session_id}`);
+        vncConnect(this).then();
+    }
+
+    render() {
+
         const {authentication, currentStep, loading, speedDialOpen, showFab} = this.state;
         return (<div>
-                <HelmetProvider>
-                    <Helmet>
-                        <title>{`VNC - ${username}@${host}`}</title>
-                        <link rel="icon" href={`/favicon/vnc/${this.session_id}`}/>
-                    </Helmet>
-                </HelmetProvider>
-
                 <Backdrop id={'speed-dial-backdrop'} open={speedDialOpen}/>
                 {showFab && !loading &&
                 <VNCSpeedDial

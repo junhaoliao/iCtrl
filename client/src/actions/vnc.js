@@ -210,7 +210,7 @@ export const vncConnect = async (vncViewer) => {
                         authentication: myVNCAuthentication
                     });
                 } else {
-                    console.log(`VNC error code: ${currentStep}`)
+                    console.log(`VNC error code: ${currentStep}`);
                 }
 
                 // stop reading the stream now that an error occurs

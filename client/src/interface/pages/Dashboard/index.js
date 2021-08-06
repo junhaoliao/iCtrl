@@ -1,5 +1,4 @@
 import React from 'react';
-import {Helmet, HelmetProvider} from 'react-helmet-async';
 
 import './index.css';
 
@@ -114,6 +113,9 @@ export default class Dashboard extends React.Component {
         });
     };
 
+    componentDidMount() {
+        document.title = 'iCtrl - Dashboard';
+    }
 
     render() {
         const {
@@ -205,12 +207,6 @@ export default class Dashboard extends React.Component {
 
         return (
             <Container maxWidth={'lg'}>
-                <HelmetProvider>
-                    <Helmet>
-                        <title>iCtrl - Dashboard</title>
-                    </Helmet>
-                </HelmetProvider>
-
                 <br/><br/>
                 <Box display="flex">
                     <Typography className={'no_select'} flexGrow={1} variant={'h3'}>Dashboard</Typography>

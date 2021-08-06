@@ -5,7 +5,7 @@ import InsertDriveFileIcon from '@material-ui/icons/InsertDriveFile';
 import {dateFormatter, humanFileSize, isDir, isLnk, permissionFormatter} from './utils';
 import React from 'react';
 
-import "../../../index.css"
+import '../../../index.css';
 
 const columns = [
     {

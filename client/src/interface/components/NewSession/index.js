@@ -58,7 +58,7 @@ export default class NewSession extends React.Component {
         } else {
             this.setState({
                 error: null
-            })
+            });
             this.props.onAddNewSessionClose();
         }
     };
@@ -108,7 +108,8 @@ export default class NewSession extends React.Component {
                 <div className={'new-session-content-wrapper'}>
                     <Box display={'flex'}>
                         <Tooltip flexGrow={1} title={'[Required] host name of the target SSH server'}>
-                            <Typography className={'no_select'} variant={'subtitle1'}>Host<span style={{color: 'red'}}>*</span></Typography>
+                            <Typography className={'no_select'} variant={'subtitle1'}>Host<span
+                                style={{color: 'red'}}>*</span></Typography>
                         </Tooltip>
                         <Autocomplete
                             id={'host'}
@@ -132,7 +133,8 @@ export default class NewSession extends React.Component {
                     </Box>
                     <Box display={'flex'}>
                         <Tooltip flexGrow={1} title={'[Required] username for login'}>
-                            <Typography className={'no_select'} variant={'subtitle1'}>Username<span style={{color: 'red'}}>*</span></Typography>
+                            <Typography className={'no_select'} variant={'subtitle1'}>Username<span
+                                style={{color: 'red'}}>*</span></Typography>
                         </Tooltip>
                         <TextField id={'username'}
                                    autoComplete={'off'}

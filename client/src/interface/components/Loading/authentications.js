@@ -4,10 +4,10 @@ export const SSHHostUnreachableRefresh = {
     Please contact the host administrator or refresh this page to reconnect.`,
     validator: null,
     submitterName: 'Refresh',
-    submitter: ()=>{
+    submitter: () => {
         window.location.reload();
     }
-}
+};
 
 export const SSHNoKeyAuthentication = {
     label: 'Please enter your SSH password',
