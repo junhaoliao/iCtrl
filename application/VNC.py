@@ -54,9 +54,13 @@ class VNC(Connection):
         reset_cmd_lst = [
             # killall -q: don't complain if no process found
             #         -w: wait until the processes to die then continue to the next cmd
+            # cp /etc/vnc/xstartup ~/.vnc
+            #  : provide a xstartup file to prevent the VNC settings dialog from popping up
             "killall -q -w Xtigervnc",
             "rm -rf ~/.vnc",
             "mkdir ~/.vnc",
+            "cp /etc/vnc/xstartup ~/.vnc  >& /dev/null",
+            "cp /cad2/ece297s/public/vnc/xstartup ~/.vnc  >& /dev/null",
             "echo '%s'| xxd -r -p > ~/.vnc/passwd" % hexed_passwd,
             "chmod 600 ~/.vnc/passwd",
         ]
