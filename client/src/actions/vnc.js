@@ -161,10 +161,10 @@ export const vncConnect = async (vncViewer) => {
             return;
         } // if (done)
 
-        // if the steam is not finished, push the values that was read into 'data'
+        // if the stream is not finished, push the values that was read into 'data'
         data.push(...value);
 
-        // the steam is in this format:
+        // the stream is in this format:
         // STEP1 | STEP2 | ... | _DONE_ | FINAL_RESPONSE
         // from above we can see step 'DONE' serve as a divider of the step codes and the final response
 
@@ -185,6 +185,9 @@ export const vncConnect = async (vncViewer) => {
                     currentStep: currentStep
                 });
             } else {
+                vncViewer.setState({
+                    currentStep: data.slice(-2)[0]
+                });
                 // handle the errors / server requests
                 if (currentStep === ICtrlError.SSH.HOST_UNREACHABLE) {
                     vncViewer.setState({
@@ -194,16 +197,11 @@ export const vncConnect = async (vncViewer) => {
                     // make a copy of the VNCAuthentication model
                     const myVNCAuthentication = Object.assign(VNCAuthentication);
                     myVNCAuthentication.submitter = (authInput) => {
-                        vncViewer.setState({
-                            currentStep: 0,
-                            authentication: null
-                        });
                         axios.post('/vncpasswd', {
                             session_id: vncViewer.session_id,
                             passwd: authInput
                         }).then(response => {
-                            console.log(response);
-                            vncViewer.connect();
+                            window.location.reload();
                         }).catch(error => {
                             console.log(error);
                         });
@@ -224,6 +222,16 @@ export const vncConnect = async (vncViewer) => {
         reader.read().then(readStream);
     };
 
-    // make the call to read the steam
+    // make the call to read the stream
     reader.read().then(readStream);
+};
+
+export const resetVNC = (sessionID) => {
+    axios.post('/vnc_reset', {
+        session_id: sessionID
+    }).then((_) => {
+        window.location.reload();
+    }).catch(error => {
+        console.log(error);
+    });
 };

@@ -1,9 +1,33 @@
 import React from 'react';
-import {Box, Slider, SpeedDial, SpeedDialAction, SpeedDialIcon, Stack} from '@material-ui/core';
-import {Fullscreen, FullscreenExit, Height, HighQuality, Keyboard, LensBlur, VisibilityOff} from '@material-ui/icons';
-import {iOS} from '../../../actions/utils';
+import {
+    Box,
+    Button,
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogContentText,
+    DialogTitle,
+    Slider,
+    SpeedDial,
+    SpeedDialAction,
+    SpeedDialIcon,
+    Stack
+} from '@material-ui/core';
+import {
+    Fullscreen,
+    FullscreenExit,
+    Height,
+    HighQuality,
+    Keyboard,
+    LensBlur,
+    Refresh,
+    VisibilityOff
+} from '@material-ui/icons';
+import {isIOS} from '../../../actions/utils';
 
 import './index.css';
+import {LoadingButton} from '@material-ui/lab';
+import {resetVNC} from '../../../actions/vnc';
 
 export default class VNCSpeedDial extends React.Component {
     constructor(props) {
@@ -16,7 +40,9 @@ export default class VNCSpeedDial extends React.Component {
             speedDialDirection: 'up',
             tooltipPlacement: 'left',
             qualityLevel: 6,
-            compressionLevel: 2
+            compressionLevel: 2,
+            resetDialogOpen: false,
+            resetting: false
         };
     }
 
@@ -156,9 +182,9 @@ export default class VNCSpeedDial extends React.Component {
         }
     };
 
-    handleKeyboardOpen = (ev) => {
+    handleKeyboardOpen = (_) => {
         this.props.closeSpeedDial();
-        if (iOS()) {
+        if (isIOS()) {
             const canvas = document.getElementById('screen').lastElementChild.firstElementChild;
             canvas.setAttribute('contenteditable', 'true');
             canvas.focus();
@@ -167,6 +193,27 @@ export default class VNCSpeedDial extends React.Component {
             const textarea = document.getElementById('textarea');
             textarea.focus();
         }
+    };
+
+    handleResetConnection = (_) => {
+        this.props.closeSpeedDial();
+        this.setState({
+            resetDialogOpen: true
+        });
+    };
+
+    handleResetDialogClose = (ev) => {
+        if (ev.target.id !== 'reset-button') {
+            this.setState({
+                resetDialogOpen: false
+            });
+        } else {
+            this.setState({
+                resetting: true
+            });
+            resetVNC(this.props.session_id);
+        }
+
     };
 
     render() {
@@ -182,113 +229,152 @@ export default class VNCSpeedDial extends React.Component {
             qualityLevel,
             compressionLevel,
             resizeSession,
-            isFullscreen
+            isFullscreen,
+            resetDialogOpen,
+            resetting
         } = this.state;
 
-        return (<SpeedDial
-            id={'fab'}
-            className={'no_select'}
-            icon={<SpeedDialIcon/>}
-            open={speedDialOpen}
-            direction={speedDialDirection}
-            onClose={handleSpeedDialClose}
-            onOpen={handleSpeedDialOpen}
-            FabProps={{
-                size: 'small',
-                onMouseDown: this.handleFabMouseDown,
-                onTouchStart: this.handleFabTouchStart,
-            }}
-            ariaLabel={'speed dial more'}
-            transitionDuration={1000}
-        >
-            <SpeedDialAction
-                key={'hide'}
-                icon={<VisibilityOff/>}
-                tooltipTitle={`Hide`}
-                tooltipOpen
-                tooltipPlacement={tooltipPlacement}
-                onClick={handleFabHide}
-            />
-            <SpeedDialAction
-                key={'open-keyboard'}
-                icon={<Keyboard/>}
-                tooltipTitle={'Keyboard'}
-                tooltipOpen
-                tooltipPlacement={tooltipPlacement}
-                onClick={this.handleKeyboardOpen}
-            />
-            {document.fullscreenEnabled &&
-            <SpeedDialAction
-                key={'toggle-fullscreen'}
-                icon={isFullscreen ? <FullscreenExit/> : <Fullscreen/>}
-                tooltipTitle={<div style={{width: isFullscreen ? 108 : 119}}>
-                    {isFullscreen ? 'Exit' : 'Enter'} Fullscreen
-                </div>}
-                tooltipOpen
-                tooltipPlacement={tooltipPlacement}
-                onClick={this.handleToggleFullscreen}
-            />
-            }
-            <SpeedDialAction
-                key={'toggle-resize'}
-                icon={<Height/>}
-                tooltipTitle={<div id={'auto-resize-tooltip-title'}>Auto Resize:
-                    {resizeSession ?
-                        <div id={'auto-resize-enabled-text'}>Enabled</div> :
-                        <div id={'auto-resize-disabled-text'}>Disabled</div>
-                    }
-                </div>}
-                tooltipOpen
-                tooltipPlacement={tooltipPlacement}
-                onClick={this.handleToggleResize}
-            />
-            <br/>
-            <SpeedDialAction
-                key={'quality'}
-                icon={<HighQuality/>}
-                tooltipTitle={<Stack>
-                    <Box display={'flex'}>
-                        <Box flexGrow={1}>Quality</Box>
-                        <Box>{qualityLevel}</Box>
-                    </Box>
-                    <Slider
-                        aria-label="quality level"
-                        valueLabelDisplay="off"
-                        value={qualityLevel}
-                        step={1}
-                        min={0}
-                        max={9}
-                        onChange={this.handleQualityLevelChange}
-                        sx={{width: 200}}
-                    />
-                </Stack>}
-                tooltipOpen
-                tooltipPlacement={tooltipPlacement}
-            />
-            <br/>
-            <SpeedDialAction
-                key={'compression'}
-                icon={<LensBlur/>}
-                tooltipTitle={<Stack>
-                    <Box display={'flex'}>
-                        <Box flexGrow={1}>Compression</Box>
-                        <Box>{compressionLevel}</Box>
-                    </Box>
-                    <Slider
-                        aria-label="compression level"
-                        valueLabelDisplay="off"
-                        step={1}
-                        value={compressionLevel}
-                        min={0}
-                        max={9}
-                        onChange={this.handleCompressionLevelChange}
-                        sx={{width: 200}}
-                    />
-                </Stack>}
-                tooltipOpen
-                tooltipPlacement={tooltipPlacement}
-            />
-        </SpeedDial>);
+        return (
+            <div><SpeedDial
+                id={'fab'}
+                className={'no_select'}
+                icon={<SpeedDialIcon/>}
+                open={speedDialOpen}
+                direction={speedDialDirection}
+                onClose={handleSpeedDialClose}
+                onOpen={handleSpeedDialOpen}
+                FabProps={{
+                    size: 'small',
+                    onMouseDown: this.handleFabMouseDown,
+                    onTouchStart: this.handleFabTouchStart,
+                }}
+                ariaLabel={'speed dial more'}
+                transitionDuration={1000}
+            >
+                <SpeedDialAction
+                    key={'hide'}
+                    icon={<VisibilityOff/>}
+                    tooltipTitle={`Hide`}
+                    tooltipOpen
+                    tooltipPlacement={tooltipPlacement}
+                    onClick={handleFabHide}
+                />
+                <SpeedDialAction
+                    key={'reset'}
+                    icon={<Refresh/>}
+                    tooltipTitle={'Reset'}
+                    tooltipOpen
+                    tooltipPlacement={tooltipPlacement}
+                    onClick={this.handleResetConnection}
+                />
+                <SpeedDialAction
+                    key={'open-keyboard'}
+                    icon={<Keyboard/>}
+                    tooltipTitle={'Keyboard'}
+                    tooltipOpen
+                    tooltipPlacement={tooltipPlacement}
+                    onClick={this.handleKeyboardOpen}
+                />
+                {document.fullscreenEnabled &&
+                <SpeedDialAction
+                    key={'toggle-fullscreen'}
+                    icon={isFullscreen ? <FullscreenExit/> : <Fullscreen/>}
+                    tooltipTitle={<div style={{width: isFullscreen ? 108 : 119}}>
+                        {isFullscreen ? 'Exit' : 'Enter'} Fullscreen
+                    </div>}
+                    tooltipOpen
+                    tooltipPlacement={tooltipPlacement}
+                    onClick={this.handleToggleFullscreen}
+                />
+                }
+                <SpeedDialAction
+                    key={'toggle-resize'}
+                    icon={<Height/>}
+                    tooltipTitle={<div id={'auto-resize-tooltip-title'}>Auto Resize:
+                        {resizeSession ?
+                            <div id={'auto-resize-enabled-text'}>Enabled</div> :
+                            <div id={'auto-resize-disabled-text'}>Disabled</div>
+                        }
+                    </div>}
+                    tooltipOpen
+                    tooltipPlacement={tooltipPlacement}
+                    onClick={this.handleToggleResize}
+                />
+                <br/>
+                <SpeedDialAction
+                    key={'quality'}
+                    icon={<HighQuality/>}
+                    tooltipTitle={<Stack>
+                        <Box display={'flex'}>
+                            <Box flexGrow={1}>Quality</Box>
+                            <Box>{qualityLevel}</Box>
+                        </Box>
+                        <Slider
+                            aria-label="quality level"
+                            valueLabelDisplay="off"
+                            value={qualityLevel}
+                            step={1}
+                            min={0}
+                            max={9}
+                            onChange={this.handleQualityLevelChange}
+                            sx={{width: 200}}
+                        />
+                    </Stack>}
+                    tooltipOpen
+                    tooltipPlacement={tooltipPlacement}
+                />
+                <br/>
+                <SpeedDialAction
+                    key={'compression'}
+                    icon={<LensBlur/>}
+                    tooltipTitle={<Stack>
+                        <Box display={'flex'}>
+                            <Box flexGrow={1}>Compression</Box>
+                            <Box>{compressionLevel}</Box>
+                        </Box>
+                        <Slider
+                            aria-label="compression level"
+                            valueLabelDisplay="off"
+                            step={1}
+                            value={compressionLevel}
+                            min={0}
+                            max={9}
+                            onChange={this.handleCompressionLevelChange}
+                            sx={{width: 200}}
+                        />
+                    </Stack>}
+                    tooltipOpen
+                    tooltipPlacement={tooltipPlacement}
+                />
+            </SpeedDial>
+                <Dialog
+                    open={resetDialogOpen}
+                    keepMounted
+                    onClose={this.handleResetDialogClose}
+                >
+                    <DialogTitle>{'Do you wish to reset the VNC session? '}</DialogTitle>
+                    <DialogContent>
+                        <DialogContentText>
+                            If you broke the VNC session by mistakenly logging out in the VNC screen,
+                            or you wish to change your VNC password, you may proceed to reset your VNC settings.
+                        </DialogContentText>
+                    </DialogContent>
+                    <DialogActions>
+                        <Button onClick={this.handleResetDialogClose}>Cancel</Button>
+                        <LoadingButton
+                            id={'reset-button'}
+                            variant={'contained'}
+                            loading={resetting}
+                            loadingPosition="start"
+                            startIcon={<Refresh/>}
+                            onClick={this.handleResetDialogClose}
+                        >
+                            Reset
+                        </LoadingButton>
+                    </DialogActions>
+                </Dialog>
+            </div>
+        );
     }
 }
 

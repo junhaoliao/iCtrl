@@ -194,6 +194,21 @@ def change_vncpasswd():
 
     return 'success'
 
+@app.route('/vnc_reset', methods=['POST'])
+def reset_vnc():
+    session_id = request.json.get('session_id')
+    host, username, this_private_key_path = get_session_info(session_id)
+
+    vnc = VNC()
+    status, reason = vnc.connect(host=host, username=username, key_filename=this_private_key_path)
+    if status is False:
+        abort(403, description=reason)
+
+    status, reason = vnc.remove_vnc_settings()
+    if status is False:
+        abort(403, description=reason)
+
+    return 'success'
 
 @app.route('/sftp_ls/<session_id>')
 def sftp_ls(session_id):

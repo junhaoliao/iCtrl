@@ -1,7 +1,6 @@
 import React from 'react';
 import {
     Box,
-    Button,
     LinearProgress,
     Stack,
     Step,
@@ -13,6 +12,7 @@ import {
 } from '@material-ui/core';
 
 import {STEP_DONE} from '../../../actions/codes';
+import {LoadingButton} from '@material-ui/lab';
 
 function LinearProgressWithLabel(props) {
     return (
@@ -35,7 +35,8 @@ export default class Loading extends React.Component {
         super(props);
         this.state = {
             authInput: '',
-            authHelperText: ' '
+            authHelperText: ' ',
+            submitting: false
         };
     }
 
@@ -48,8 +49,17 @@ export default class Loading extends React.Component {
         });
     };
 
+    handleInputSubmit = (ev) => {
+        this.setState({
+            submitting: true
+        });
+        this.props.authentication.submitter(this.state.authInput);
+        ev.preventDefault();
+    };
+
     render() {
         const {currentStep, steps, authentication} = this.props;
+        const {submitting} = this.state;
         const progressValue = (currentStep === -1) ? 0 :
             ((currentStep === STEP_DONE) ? 100 : currentStep / (steps.length - 1) * 100);
         return (<div>
@@ -71,13 +81,11 @@ export default class Loading extends React.Component {
                                     <Typography color={'dimgrey'}
                                                 variant={'body2'}>{authentication.description}</Typography>
                                     <br/>
-                                    <form onSubmit={(ev) => {
-                                        authentication.submitter(this.state.authInput);
-                                        ev.preventDefault();
-                                    }}>
+                                    <form onSubmit={this.handleInputSubmit}>
                                         <Stack spacing={2} direction="row">
                                             <TextField
-                                                style={(!Boolean(authentication.validator)) && {visibility: 'hidden'}}
+                                                style={Boolean(authentication.validator) ? {} : {visibility: 'hidden'}}
+                                                disabled={submitting}
                                                 fullWidth
                                                 label="Password"
                                                 variant={'standard'}
@@ -89,16 +97,17 @@ export default class Loading extends React.Component {
                                                 helperText={this.state.authHelperText}
                                                 error={this.state.authHelperText !== ' '}
                                             />
-                                            <Button
+                                            <LoadingButton
                                                 type={'submit'}
                                                 style={{width: 150, height: 36, alignSelf: 'center'}}
                                                 variant={'contained'}
+                                                loading={submitting}
                                                 disabled={Boolean(authentication.validator) &&
-                                                    (this.state.authInput === '' ||
-                                                        this.state.authHelperText !== ' ')}
+                                                (this.state.authInput === '' ||
+                                                    this.state.authHelperText !== ' ')}
                                             >
                                                 {authentication.submitterName}
-                                            </Button>
+                                            </LoadingButton>
                                         </Stack>
                                     </form>
                                 </StepContent>}
