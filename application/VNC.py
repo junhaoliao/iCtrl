@@ -29,12 +29,24 @@ class VNC(Connection):
         return super().connect(*args, **kwargs)
 
     def get_vnc_password(self):
-        _, _, stdout, stderr = self.exec_command_blocking('xxd -p ~/.vnc/passwd')
+        _, _, stdout, _ = self.exec_command_blocking('xxd -p ~/.vnc/passwd')
         hexdump = stdout.readline()
         if hexdump == '':
             return False, ''
         else:
             return True, decrypt_passwd(bytearray.fromhex(hexdump))
+
+    def remove_vnc_settings(self):
+        remove_cmd_lst = [
+            "killall -q -w Xtigervnc",
+            "rm -rf ~/.vnc"
+        ]
+        _, _, _, stderr = self.exec_command_blocking(';'.join(remove_cmd_lst))
+        stderr_text = "\n".join(stderr)
+        if len(stderr_text):
+            return False, stderr_text
+
+        return True, ''
 
     def reset_vnc_password(self, password):
         hexed_passwd = obfuscate_password(password).hex()

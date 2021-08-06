@@ -103,6 +103,7 @@ export default class VNCViewer extends React.Component {
                 <Backdrop id={'speed-dial-backdrop'} open={speedDialOpen}/>
                 {showFab && !loading &&
                 <VNCSpeedDial
+                    session_id={this.session_id}
                     rfb={this.rfb}
                     speedDialOpen={speedDialOpen}
                     onSpeedDialClose={this.handleSpeedDialClose}

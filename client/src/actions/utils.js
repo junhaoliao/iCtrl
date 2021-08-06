@@ -13,7 +13,7 @@ export const htmlResponseToReason = (response) => {
 };
 
 // Reference: https://stackoverflow.com/questions/9038625/detect-if-device-is-ios
-export const iOS = () => {
+export const isIOS = () => {
     return [
             'iPad Simulator',
             'iPhone Simulator',
