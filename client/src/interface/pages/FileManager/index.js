@@ -25,7 +25,6 @@ import columns from './columns';
 import MemoryUsage from '../../components/MemoryUsage';
 import {sftp_dl, sftp_ls, sftp_rename, sftp_ul} from '../../../actions/sftp';
 import {isDir} from './utils';
-import {Helmet, HelmetProvider} from 'react-helmet-async';
 import {
     Add,
     Assignment,
@@ -42,6 +41,7 @@ import {
 } from '@material-ui/icons';
 import Button from '@material-ui/core/Button';
 import NewFolderDialog from './NewFolderDialog';
+import {changeFavicon} from '../../utils';
 
 const drawerWidth = 200;
 
@@ -86,10 +86,6 @@ export default class FileManager extends React.Component {
     loadDir = (path) => {
         sftp_ls(this, path);
     };
-
-    componentDidMount() {
-        this.loadDir('');
-    }
 
     handleSelectionModelChange = (selectionModel) => {
         this.selected = selectionModel;
@@ -256,16 +252,18 @@ export default class FileManager extends React.Component {
         u.click();
     };
 
+    componentDidMount() {
+        const {host, username} = this.props.profiles['sessions'][this.session_id];
+        document.title = `File Manager - ${username}@${host}`;
+
+        changeFavicon(`/favicon/fm/${this.session_id}`);
+
+        this.loadDir('');
+    }
+
     render() {
-        const {host, username} = this.props.profiles.sessions[this.session_id];
         return (
             <div style={{overflowY: 'hidden'}}>
-                <HelmetProvider>
-                    <Helmet>
-                        <title>{`File Manager - ${username}@${host}`}</title>
-                        <link rel="icon" href={`/favicon/fm/${this.session_id}`}/>
-                    </Helmet>
-                </HelmetProvider>
                 <Drawer open variant={'persistent'} anchor={'left'}>
                     <Button
                         id={'new-button'}

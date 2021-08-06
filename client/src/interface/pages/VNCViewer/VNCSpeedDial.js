@@ -213,7 +213,6 @@ export default class VNCSpeedDial extends React.Component {
             });
             resetVNC(this.props.session_id);
         }
-
     };
 
     render() {

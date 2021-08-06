@@ -48,4 +48,4 @@ export const TermSteps = [
         description:
             `Congrats!`
     }
-]
+];
