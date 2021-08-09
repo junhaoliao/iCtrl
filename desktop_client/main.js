@@ -19,19 +19,35 @@ const mainPort = getFreePort();
 
 const isMac = process.platform === 'darwin';
 
-/* launch the backend */
+/* launch the backend and disable the menu bar*/
 // the backend process handle
 let ictrl_be = null;
 if (isMac) {
     console.log(resolve(__dirname, 'ictrl_be'));
     ictrl_be = spawn('./ictrl_be', [mainPort], {cwd: resolve(__dirname, 'ictrl_be')});
+
+    // need to have a 'window' role in the menu on mac
+    //  to show all windows when right-clicking on the dock icon
+    const menuTemplate = [{
+        role: 'window',
+        submenu: [
+            {
+                role: 'minimize'
+            },
+            {
+                role: 'close'
+            }
+        ]
+    }];
+    Menu.setApplicationMenu(Menu.buildFromTemplate(menuTemplate));
 } else {
     // TODO: add support for Linux
     // Assuming Windows
     ictrl_be = spawn('ictrl_be.exe', [mainPort], {cwd: resolve(__dirname, 'ictrl_be')});
+
+    Menu.setApplicationMenu(null);
 }
 
-Menu.setApplicationMenu(null)
 
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
@@ -47,16 +63,16 @@ app.whenReady().then(() => {
         }
     });
 
-    mainWindow.setTitle('Loading... ')
+    mainWindow.setTitle('Loading... ');
 
     mainWindow.loadURL(`http://127.0.0.1:${mainPort}`);
     // need to reload on Mac because the first load times out very quickly
     mainWindow.webContents.on('did-fail-load', () => {
-        mainWindow.reload()
+        mainWindow.reload();
     });
 
     mainWindow.webContents.on('did-finish-load', () => {
-        mainWindow.show()
+        mainWindow.show();
         mainWindow.maximize();
     });
 
@@ -119,10 +135,10 @@ app.on('window-all-closed', () => {
     app.quit();
 });
 
-app.on('before-quit', ()=>{
+app.on('before-quit', () => {
     // kill the backend when the app exits
-    ictrl_be.kill('SIGKILL')
-})
+    ictrl_be.kill('SIGKILL');
+});
 
 // In this file you can include the rest of your app's specific main process
 // code. You can also put them in separate files and require them here.
