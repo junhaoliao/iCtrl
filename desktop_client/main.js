@@ -54,7 +54,7 @@ if (isMac) {
 // Some APIs can only be used after this event occurs.
 app.whenReady().then(() => {
     // Create the browser window.
-    const mainWindow = new BrowserWindow({
+    let mainWindow = new BrowserWindow({
         width: 800,
         height: 600,
         show: false,
@@ -76,8 +76,22 @@ app.whenReady().then(() => {
         mainWindow.maximize();
     });
 
-
-    if (!isMac) {
+    const openedWindows = {};
+    if (isMac) {
+        // list to keep track of all opened windows for minimization into the Dock's "Recent Applications"
+        openedWindows['main'] = mainWindow;
+        mainWindow.on('close', () => {
+            mainWindow = null;
+            delete openedWindows['main'];
+        });
+        mainWindow.on('show', () => {
+            for (let key in openedWindows) {
+                if (key !== 'main') {
+                    openedWindows[key].minimize();
+                }
+            }
+        });
+    } else {
         mainWindow.setAppDetails({
             appId: 'iCtrl'
         });
@@ -97,26 +111,43 @@ app.whenReady().then(() => {
         newWindow.loadURL(url);
 
         newWindow.once('ready-to-show', () => {
-            const url = newWindow.getURL();
-            if (!isMac) {
+            // improve recognition of each window in the taskbar
+            if (isMac) {
+                const newWindowKey = new Date().getTime();
+                openedWindows[newWindowKey] = newWindow;
+                newWindow.on('close', () => {
+                    delete openedWindows[newWindowKey];
+                    if (mainWindow) {
+                        mainWindow.show();
+                    }
+                });
+
+                newWindow.on('show', () => {
+                    for (let key in openedWindows) {
+                        if (openedWindows[key] !== newWindow) {
+                            openedWindows[key].minimize();
+                        }
+                    }
+                });
+            } else {
+                const url = newWindow.getURL();
                 newWindow.setAppDetails({
                     appId: url
                 });
-            }
-
-            const split = url.split('/');
-            const sessionId = split[split.length - 1];
-            const feature = split[split.length - 2];
-            get({
-                hostname: '127.0.0.1',
-                port: mainPort,
-                path: `/favicon/${feature}/${sessionId}`,
-            }, (res) => {
-                res.on('data', (data) => {
-                    const icon = nativeImage.createFromBuffer(data);
-                    newWindow.setIcon(icon);
+                const split = url.split('/');
+                const sessionId = split[split.length - 1];
+                const feature = split[split.length - 2];
+                get({
+                    hostname: '127.0.0.1',
+                    port: mainPort,
+                    path: `/favicon/${feature}/${sessionId}`,
+                }, (res) => {
+                    res.on('data', (data) => {
+                        const icon = nativeImage.createFromBuffer(data);
+                        newWindow.setIcon(icon);
+                    });
                 });
-            });
+            }
 
             newWindow.show();
             newWindow.maximize();
