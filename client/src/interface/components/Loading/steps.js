@@ -44,6 +44,11 @@ export const TermSteps = [
             'Detecting the load for the machine selected. This feature is exclusive to UofT servers. ',
     },
     {
+        label: 'Launching Shell',
+        description:
+            'Invoking a shell and setting up the I/O forwarding. ',
+    },
+    {
         label: 'Connected!',
         description:
             `Congrats!`

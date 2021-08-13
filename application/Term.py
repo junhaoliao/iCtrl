@@ -22,12 +22,15 @@ class Term(Connection):
 
     def __del__(self):
         print('Terminal::__del__')
-        self.channel.close()
+        if self.channel:
+            self.channel.close()
+
         super().__del__()
 
     def connect(self, *args, **kwargs):
-        super().connect(*args, **kwargs)
+        return super().connect(*args, **kwargs)
 
+    def launch_shell(self):
         try:
             self.channel = self.client.invoke_shell()
         except Exception as e:
@@ -68,7 +71,8 @@ class TerminalSocket(WebSocket):
             while True:
                 data = self.term.channel.recv(1024)
                 if not data:
-                    print("\r\n*** Shell EOF ***\r\n\r\n")
+                    print(f"\r\n*** {self.term.id}: Shell EOF ***\r\n\r\n")
+                    self.close()
                     break
                 self.sendMessage(data)
 

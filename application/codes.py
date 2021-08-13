@@ -1,6 +1,7 @@
 from enum import IntEnum, auto, unique
 
-STEP_DONE = 99
+# 31: 32(space) starts to be the first commonly used code in ASCII
+STEP_DONE = 31
 ERROR_GENERAL = 100
 
 
@@ -33,5 +34,14 @@ class VNCStep(IntEnum):
     DONE = STEP_DONE
 
 
+@unique
+class TermStep(IntEnum):
+    SSH_AUTH = 0
+    CHECK_LOAD = auto()
+    LAUNCH_SHELL = auto()
+    DONE = STEP_DONE
+
+
 class ICtrlStep:
     VNC = VNCStep
+    Term = TermStep
