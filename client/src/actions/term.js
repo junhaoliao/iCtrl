@@ -126,12 +126,14 @@ export const termConnect = async (TermViewer) => {
             setupCopyPaste(term, term_div, socket);
             setupResize(term, TermViewer.session_id, term_id);
 
-            /* focus on the terminal once everything finishes loading */
-            term.focus();
-
+            /* need to set the state 'loading' to false so that the term div is visible and can be focused on */
             TermViewer.setState({
                 loading: false
             });
+
+            /* focus on the terminal once everything finishes loading */
+            term.focus();
+
             return;
         } // if (done)
 
