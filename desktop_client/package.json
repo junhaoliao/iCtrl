@@ -1,7 +1,7 @@
 {
   "name": "ictrl-desktop-client",
-  "description": "Desktop client for iCtrl",
-  "version": "6.0.0-beta.0",
+  "description": "Desktop Client for iCtrl",
+  "version": "6.0.0-beta.1",
   "private": true,
   "main": "main.js",
   "repository": "https://github.com/junhaoliao/iCtrl",
@@ -59,7 +59,7 @@
         "ignore": "(.gitignore|assets*)",
         "win32metadata": {
           "ProductName": "iCtrl Desktop",
-          "FileDescription": "Desktop client for iCtrl",
+          "FileDescription": "Desktop Client for iCtrl",
           "CompanyName": "iCtrl"
         },
         "appCategoryType": "public.app-category.utilities",
