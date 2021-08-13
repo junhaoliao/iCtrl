@@ -97,23 +97,37 @@ def start_terminal():
     session_id = request.json.get('session_id')
     host, username, this_private_key_path = get_session_info(session_id)
 
-    term = Term()
-    status, reason = term.connect(host=host, username=username, key_filename=this_private_key_path)
-    if status is False:
-        abort(403, description=reason)
+    def generate():
+        yield int_to_bytes(ICtrlStep.Term.SSH_AUTH)
+        term = Term()
+        status, reason = term.connect(host=host, username=username, key_filename=this_private_key_path)
+        if status is False:
+            if reason.startswith('[Errno 60]') or reason.startswith('[Errno 64]') or reason == 'timed out':
+                yield int_to_bytes(ICtrlError.SSH.HOST_UNREACHABLE)
+            else:
+                print(reason)
+                # TODO: return the other specific codes
+                yield int_to_bytes(ICtrlError.SSH.GENERAL)
+            return
 
-    result = {
-        'port': TERMINAL_PORT,
-        'term_id': term.id
-    }
-    return json.dumps(result)
+        yield int_to_bytes(ICtrlStep.Term.CHECK_LOAD)
 
+        yield int_to_bytes(ICtrlStep.Term.LAUNCH_SHELL)
+        status, reason = term.launch_shell()
+        if status is False:
+            abort(403, description=reason)
+
+        yield int_to_bytes(ICtrlStep.Term.DONE)
+        result = {
+            'port': TERMINAL_PORT,
+            'term_id': term.id
+        }
+        yield json.dumps(result)
+
+    return app.response_class(generate(), mimetype='application/octet-stream')
 
 @app.route('/terminal_resize', methods=['PATCH'])
 def resize_terminal():
-    session_id = request.json.get('session_id')
-    host, username, this_private_key_path = get_session_info(session_id)
-
     term_id = request.json.get('term_id')
     if term_id not in terminal_connections:
         abort(403, description='invalid term_id')
@@ -140,7 +154,7 @@ def start_vnc():
         vnc = VNC()
         status, reason = vnc.connect(host=host, username=username, key_filename=this_private_key_path)
         if status is False:
-            if reason.startswith('[Errno 60]'):
+            if reason.startswith('[Errno 60]') or reason.startswith('[Errno 64]') or reason == 'timed out':
                 yield int_to_bytes(ICtrlError.SSH.HOST_UNREACHABLE)
             else:
                 # TODO: return the other specific codes

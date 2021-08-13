@@ -1,4 +1,4 @@
-export const STEP_DONE = 99;
+export const STEP_DONE = 31;
 const ERROR_GENERAL = 100;
 
 class VNCError {
@@ -30,6 +30,7 @@ const VNCStepCodes = {
 const TermStepCodes = {
     SSH_AUTH: 0,
     CHECK_LOAD: 1,
+    LAUNCH_SHELL: 2,
     DONE: STEP_DONE
 };
 

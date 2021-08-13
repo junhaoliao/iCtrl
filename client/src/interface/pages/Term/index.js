@@ -1,9 +1,9 @@
 import React from 'react';
 import 'xterm/css/xterm.css';
 import {termConnect} from '../../../actions/term';
-// import Loading from '../../components/Loading';
-// import {VNCSteps} from '../../components/Loading/steps';
 import {changeFavicon} from '../../utils';
+import {TermSteps} from '../../components/Loading/steps';
+import Loading from '../../components/Loading';
 
 export default class Term extends React.Component {
     constructor(props) {
@@ -12,11 +12,11 @@ export default class Term extends React.Component {
         this.session_id = params.session_id;
 
         this.resize_timeout = null;
-        // this.state = {
-        //     loading: false,
-        //     currentStep: -1,
-        //     authentication: null
-        // };
+        this.state = {
+            loading: true,
+            currentStep: -1,
+            authentication: null
+        };
     }
 
     componentDidMount() {
@@ -25,21 +25,28 @@ export default class Term extends React.Component {
 
         changeFavicon(`/favicon/terminal/${this.session_id}`);
 
-        termConnect(this);
+        termConnect(this).then();
     }
 
     render() {
-        // const {authentication, currentStep, loading} = this.state;
+        const {authentication, currentStep, loading} = this.state;
 
         return (
             <div>
-                {/*{loading &&*/}
-                {/*<Loading*/}
-                {/*    currentStep={currentStep}*/}
-                {/*    steps={VNCSteps}*/}
-                {/*    authentication={authentication}/>}*/}
+                {loading &&
+                <Loading
+                    currentStep={currentStep}
+                    steps={TermSteps}
+                    authentication={authentication}/>}
 
-                <div id="terminal" style={{position: 'absolute', top: 0, bottom: 0, left: 0, right: 0}}/>
+                <div id="terminal" style={{
+                    visibility: loading ? 'hidden' : 'visible',
+                    position: 'absolute',
+                    top: 0,
+                    bottom: 0,
+                    left: 0,
+                    right: 0
+                }}/>
             </div>
         );
     }

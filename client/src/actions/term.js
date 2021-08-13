@@ -3,6 +3,8 @@ import {Terminal} from 'xterm';
 import {WebglAddon} from 'xterm-addon-webgl';
 import {AttachAddon} from 'xterm-addon-attach';
 import {FitAddon} from 'xterm-addon-fit';
+import {ICtrlError, ICtrlStep} from './codes';
+import {SSHHostUnreachableRefresh} from '../interface/components/Loading/authentications';
 
 const setupDOM = () => {
     const term_div = document.getElementById('terminal');
@@ -92,20 +94,92 @@ const setupResize = (term, sessionID, term_id) => {
     };
 };
 
-export const termConnect = ({session_id: sessionID, setState}) => {
-    axios.post(`/terminal`, {
-        session_id: sessionID
-    }).then(({data: {term_id, port}}) => {
-        const {term, term_div} = setupDOM();
-        setupWebGL(term);
-        const socket = setupWebSocket(term, term_id, port);
-        setupCopyPaste(term, term_div, socket);
-        setupResize(term, sessionID, term_id);
+export const termConnect = async (TermViewer) => {
+    const options = {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({session_id: TermViewer.session_id})
+    };
 
-        /* focus on the terminal once everything finishes loading */
-        term.focus();
-    }).catch((error) => {
-        // POST "/terminal" error
-        console.log(error);
-    });
+    const response = await fetch(`/terminal`, options);
+    if (response.status !== 200) {
+        console.log(response.body);
+        return;
+    }
+
+    const reader = response.body.getReader();
+    // this will store all the data read from the stream
+    const data = [];
+    const readStream = ({value, done}) => {
+        // if the stream reading is done (end of stream),
+        //  ignore all the step codes and parse the final response as JSON
+        if (done) {
+            const resultArr = new Uint8Array(data.slice(data.indexOf(ICtrlStep.Term.DONE) + 1));
+            const decodedStr = new TextDecoder().decode(resultArr);
+            const {term_id, port} = JSON.parse(decodedStr);
+
+            const {term, term_div} = setupDOM();
+            setupWebGL(term);
+            const socket = setupWebSocket(term, term_id, port);
+            setupCopyPaste(term, term_div, socket);
+            setupResize(term, TermViewer.session_id, term_id);
+
+            /* focus on the terminal once everything finishes loading */
+            term.focus();
+
+            TermViewer.setState({
+                loading: false
+            });
+            return;
+        } // if (done)
+
+        // if the stream is not finished, push the values that was read into 'data'
+        data.push(...value);
+
+        // the stream is in this format:
+        // STEP1 | STEP2 | ... | _DONE_ | FINAL_RESPONSE
+        // from above we can see step 'DONE' serve as a divider of the step codes and the final response
+
+        // if the step 'DONE' is present in 'data'
+        if (data.includes(ICtrlStep.Term.DONE)) {
+            // update the current step to 'DONE' and wait for the whole stream to be transferred
+            TermViewer.setState({
+                currentStep: ICtrlStep.Term.DONE
+            });
+        } else {
+            // if the step 'DONE' is not present in 'data',
+            //  the last digit in the array must still be a step code
+            //  rather than part of the final response
+            const currentStep = value.slice(-1)[0];
+            if (currentStep < 100) {
+                // not an error
+                TermViewer.setState({
+                    currentStep: currentStep
+                });
+            } else {
+                TermViewer.setState({
+                    currentStep: data.slice(-2)[0]
+                });
+                // handle the errors / server requests
+                if (currentStep === ICtrlError.SSH.HOST_UNREACHABLE) {
+                    TermViewer.setState({
+                        authentication: SSHHostUnreachableRefresh
+                    });
+                } else {
+                    console.log(`Term error code: ${currentStep}`);
+                    console.log(data);
+                }
+
+                // stop reading the stream now that an error occurs
+                return;
+            }
+
+        }
+
+        reader.read().then(readStream);
+    };
+    // make the call to read the stream
+    reader.read().then(readStream);
 };

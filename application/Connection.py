@@ -67,9 +67,9 @@ class Connection:
     def connect(self, host, username, password=None, key_filename=None):
         try:
             if password is not None:
-                self.client.connect(host, username=username, password=password)
+                self.client.connect(host, username=username, password=password, timeout=15)
             elif key_filename is not None:
-                self.client.connect(host, username=username, key_filename=key_filename)
+                self.client.connect(host, username=username, key_filename=key_filename, timeout=15)
             else:
                 # TODO: read the docs and the RFC to check whether this is allowed
                 raise ValueError("Connection: no valid SSH auth given.")
