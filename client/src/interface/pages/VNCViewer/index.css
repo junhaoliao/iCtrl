@@ -38,7 +38,7 @@
     position: absolute;
     left: -40px;
     z-index: -1;
-    ime-mode: disabled
+    ime-mode: disabled;
 }
 
 #fab {
