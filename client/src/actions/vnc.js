@@ -5,6 +5,136 @@ import keysyms from '@novnc/novnc/core/input/keysymdef';
 import {SSHHostUnreachableRefresh, VNCAuthentication} from '../interface/components/Loading/authentications';
 import axios from 'axios';
 
+const setupDOM = (port, passwd) => {
+    /* Creating a new RFB object and start a new connection */
+    const url = `ws://127.0.0.1:${port}`;
+    const rfb = new RFB(
+        document.getElementById('screen'),
+        url,
+        {credentials: {password: passwd}});
+
+    /* Setup the VNC default options */
+    // Reference: https://github.com/novnc/noVNC/blob/master/docs/API.md
+
+    // resizeSession:
+    // Is a boolean indicating if a request to resize the remote session should be sent
+    //  whenever the container changes dimensions. Disabled by default.
+    rfb.resizeSession = true;
+
+    return rfb
+}
+
+const setupOnScreenKeyboard = (vncViewer) =>{
+    /* Setup touch keyboard */
+    // Reference: https://github.com/novnc/noVNC/blob/master/app/ui.js
+    vncViewer.keyboardElem = document.getElementById('textarea');
+    vncViewer.keyboardInputReset();
+
+    vncViewer.keyboardElem.addEventListener('input', (event) => {
+        const newValue = event.target.value;
+        const oldValue = vncViewer.lastKeyboardinput;
+
+        let newLen;
+        try {
+            // Try to check caret position since whitespace at the end
+            // will not be considered by value.length in some browsers
+            newLen = Math.max(event.target.selectionStart, newValue.length);
+        } catch (err) {
+            // selectionStart is undefined in Google Chrome
+            newLen = newValue.length;
+        }
+        const oldLen = oldValue.length;
+
+        let inputs = newLen - oldLen;
+        let backspaces = inputs < 0 ? -inputs : 0;
+
+        // Compare the old string with the new to account for
+        // text-corrections or other input that modify existing text
+        for (let i = 0; i < Math.min(oldLen, newLen); i++) {
+            if (newValue.charAt(i) !== oldValue.charAt(i)) {
+                inputs = newLen - i;
+                backspaces = oldLen - i;
+                break;
+            }
+        }
+
+        // Send the key events
+        for (let i = 0; i < backspaces; i++) {
+            vncViewer.rfb.sendKey(KeyTable.XK_BackSpace, 'Backspace');
+        }
+        for (let i = newLen - inputs; i < newLen; i++) {
+            const key = newValue.charCodeAt(i);
+            if (key === 10) {
+                vncViewer.rfb.sendKey(KeyTable.XK_Return);
+            } else {
+                vncViewer.rfb.sendKey(keysyms.lookup(key));
+            }
+        }
+
+        // Control the text content length in the keyboardinput element
+        if (newLen > 2 * 100) {
+            vncViewer.keyboardInputReset();
+        } else if (newLen < 1) {
+            // There always have to be some text in the keyboardinput
+            // element with which backspace can interact.
+            vncViewer.keyboardInputReset();
+            // This sometimes causes the keyboard to disappear for a second
+            // but it is required for the android keyboard to recognize that
+            // text has been added to the field
+            event.target.blur();
+            // This has to be ran outside of the input handler in order to work
+            setTimeout(event.target.focus.bind(event.target), 0);
+        } else {
+            vncViewer.lastKeyboardinput = newValue;
+        }
+    });
+
+    // prevent the default behaviour of the 'submit' event
+    vncViewer.keyboardElem.addEventListener('submit', () => false);
+
+    // TODO: add a toolbar and support the 'hide keyboard' feature
+    //  and prevent focus on click on the screen
+    // ref: https://github.com/novnc/noVNC/blob/7485e82b72d4d1356d95ecca2d109cbf49908b9d/app/ui.js#L251
+
+}
+
+const setupClipboard = (rfb) => {
+    /* Setup bi-directional clipboard forwarding */
+    // TODO: keep an eye on the official support discussed on https://github.com/novnc/noVNC/pull/1562
+    // remote -> local
+    rfb.addEventListener('clipboard', (ev) => {
+        try {
+            navigator.clipboard.writeText(ev.detail.text).then();
+        } catch (e) {
+            // 3 cases of navigator.clipboard failure:
+            // 1) not hosting over https on the server
+            // 2) TODO: show a tutorial to approve clipboard permission if this is the case
+            //    the user didn't approve clipboard permission
+            // 3) the browser is too old to support clipboard
+            console.log(e);
+        }
+    });
+
+    // local -> remote
+    // whenever the window gets focus (the user just switched from another tab/window),
+    let clipboardText = null;
+    window.onfocus = _ => {
+        try {
+            // compare the clipboard text with the previous one
+            // if they differ, submit the local clipbboard text to the remote
+            navigator.clipboard.readText().then((text) => {
+                if (clipboardText !== text) {
+                    clipboardText = text;
+                    rfb.clipboardPasteFrom(text);
+                }
+            });
+        } catch (e) {
+            // see above: 3 cases of navigator.clipboard failure
+            console.log(e);
+        }
+    };
+}
+
 export const vncConnect = async (vncViewer) => {
     const options = {
         method: 'POST',
@@ -33,129 +163,17 @@ export const vncConnect = async (vncViewer) => {
             const decodedStr = new TextDecoder().decode(resultArr);
             const {port, passwd} = JSON.parse(decodedStr);
 
-            // Creating a new RFB object will start a new connection
-            const url = `ws://127.0.0.1:${port}`;
-            vncViewer.rfb = new RFB(
-                document.getElementById('screen'),
-                url,
-                {credentials: {password: passwd}});
-
-            /* Setup the VNC default options */
-            // Reference: https://github.com/novnc/noVNC/blob/master/docs/API.md
-
-            // resizeSession:
-            // Is a boolean indicating if a request to resize the remote session should be sent
-            //  whenever the container changes dimensions. Disabled by default.
-            vncViewer.rfb.resizeSession = true;
+            vncViewer.rfb = setupDOM(port, passwd)
 
             // when the VNC session is successfully established
             vncViewer.rfb.addEventListener('connect', () => {
+                setupOnScreenKeyboard(vncViewer)
+                setupClipboard(vncViewer.rfb)
+
                 // hide the Loading element
                 vncViewer.setState({
                     loading: false
                 });
-
-                /* Setup touch keyboard */
-                // Reference: https://github.com/novnc/noVNC/blob/master/app/ui.js
-                vncViewer.keyboardElem = document.getElementById('textarea');
-                vncViewer.keyboardInputReset();
-
-                vncViewer.keyboardElem.addEventListener('input', (event) => {
-                    const newValue = event.target.value;
-                    const oldValue = vncViewer.lastKeyboardinput;
-
-                    let newLen;
-                    try {
-                        // Try to check caret position since whitespace at the end
-                        // will not be considered by value.length in some browsers
-                        newLen = Math.max(event.target.selectionStart, newValue.length);
-                    } catch (err) {
-                        // selectionStart is undefined in Google Chrome
-                        newLen = newValue.length;
-                    }
-                    const oldLen = oldValue.length;
-
-                    let inputs = newLen - oldLen;
-                    let backspaces = inputs < 0 ? -inputs : 0;
-
-                    // Compare the old string with the new to account for
-                    // text-corrections or other input that modify existing text
-                    for (let i = 0; i < Math.min(oldLen, newLen); i++) {
-                        if (newValue.charAt(i) !== oldValue.charAt(i)) {
-                            inputs = newLen - i;
-                            backspaces = oldLen - i;
-                            break;
-                        }
-                    }
-
-                    // Send the key events
-                    for (let i = 0; i < backspaces; i++) {
-                        vncViewer.rfb.sendKey(KeyTable.XK_BackSpace, 'Backspace');
-                    }
-                    for (let i = newLen - inputs; i < newLen; i++) {
-                        const key = newValue.charCodeAt(i);
-                        if (key === 10) {
-                            vncViewer.rfb.sendKey(KeyTable.XK_Return);
-                        } else {
-                            vncViewer.rfb.sendKey(keysyms.lookup(key));
-                        }
-                    }
-
-                    // Control the text content length in the keyboardinput element
-                    if (newLen > 2 * 100) {
-                        vncViewer.keyboardInputReset();
-                    } else if (newLen < 1) {
-                        // There always have to be some text in the keyboardinput
-                        // element with which backspace can interact.
-                        vncViewer.keyboardInputReset();
-                        // This sometimes causes the keyboard to disappear for a second
-                        // but it is required for the android keyboard to recognize that
-                        // text has been added to the field
-                        event.target.blur();
-                        // This has to be ran outside of the input handler in order to work
-                        setTimeout(event.target.focus.bind(event.target), 0);
-                    } else {
-                        vncViewer.lastKeyboardinput = newValue;
-                    }
-                });
-
-                // prevent the default behaviour of the 'submit' event
-                vncViewer.keyboardElem.addEventListener('submit', () => false);
-
-                /* Setup bi-directional clipboard forwarding */
-                // TODO: keep an eye on the official support discussed on https://github.com/novnc/noVNC/pull/1562
-                // remote -> local
-                vncViewer.rfb.addEventListener('clipboard', (ev) => {
-                    try {
-                        navigator.clipboard.writeText(ev.detail.text).then();
-                    } catch (e) {
-                        // 3 cases of navigator.clipboard failure:
-                        // 1) not hosting over https on the server
-                        // 2) TODO: show a tutorial to approve clipboard permission if this is the case
-                        //    the user didn't approve clipboard permission
-                        // 3) the browser is too old to support clipboard
-                        console.log(e);
-                    }
-                });
-
-                // local -> remote
-                // whenever the window gets focus (the user just switched from another tab/window),
-                let clipboardText = null;
-                window.onfocus = _ => {
-                    try {
-                        // compare the clipboard text with the previous one
-                        // if they differ, submit the local clipbboard text to the remote
-                        navigator.clipboard.readText().then((text) => {
-                            if (clipboardText !== text) {
-                                clipboardText = text;
-                                vncViewer.rfb.clipboardPasteFrom(text);
-                            }
-                        });
-                    } catch (e) {
-                        // see above: 3 cases of navigator.clipboard failure
-                        console.log(e);
-                    }
-                };
             });
 
             return;
