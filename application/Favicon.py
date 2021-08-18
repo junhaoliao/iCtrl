@@ -1,6 +1,13 @@
 from PIL import Image, ImageDraw, ImageFont
 
-from application.paths import FONT_ARIAL_PATH
+from application.paths import FONT_PATH
+
+# Ref: https://stackoverflow.com/questions/4014823/does-a-favicon-have-to-be-32%C3%9732-or-16%C3%9716
+ICON_SIZE = 228
+
+ICON_CIRCLE_POSITION = (14, 14, ICON_SIZE - 14, ICON_SIZE - 14)
+ICON_RECTANGLE_POSITION = [(ICON_SIZE - 88, ICON_SIZE - 88), (ICON_SIZE, ICON_SIZE)]
+ICON_FONT = ImageFont.truetype(FONT_PATH, 64)
 
 
 class Favicon:
@@ -27,22 +34,21 @@ class Favicon:
             self.short_text = text[:5]
 
         self.color = self.text_to_color(text)
-        self.im = Image.new('RGBA', (228, 228))
+        self.im = Image.new('RGBA', (ICON_SIZE, ICON_SIZE))
         self.draw = ImageDraw.Draw(self.im)
 
-        self.draw.ellipse((28, 28, 200, 200), fill=self.color)
-        font = ImageFont.truetype(FONT_ARIAL_PATH, 60)
-        w, h = self.draw.textsize(self.short_text, font=font)
-        self.draw.text(((228 - w) / 2, (228 - h) / 2), self.short_text, font=font)
+        self.draw.ellipse(ICON_CIRCLE_POSITION, fill=self.color)
+        w, h = self.draw.textsize(self.short_text, font=ICON_FONT)
+        self.draw.text(((ICON_SIZE - w) / 2, (ICON_SIZE - h) / 2), self.short_text, font=ICON_FONT)
 
     def VNC(self, temp):
-        self.draw.rectangle([(228 - 96, 228 - 96), (228, 228)], fill='#f08080')
+        self.draw.rectangle(ICON_RECTANGLE_POSITION, fill='#f08080')
         self.im.save(temp, format='png')
 
     def console(self, temp):
-        self.draw.rectangle([(228 - 96, 228 - 96), (228, 228)], fill='black')
+        self.draw.rectangle(ICON_RECTANGLE_POSITION, fill='black')
         self.im.save(temp, format='png')
 
     def file_manager(self, temp):
-        self.draw.rectangle([(228 - 96, 228 - 96), (228, 228)], fill='#1976d2')
+        self.draw.rectangle(ICON_RECTANGLE_POSITION, fill='#1976d2')
         self.im.save(temp, format='png')
