@@ -64,6 +64,7 @@ class TerminalSocket(WebSocket):
         if terminal_id not in terminal_connections:
             print(f'TerminalSocket: Requested terminal_id={terminal_id} does not exist.')
             self.close()
+            return
 
         self.term = terminal_connections[terminal_id]
 
