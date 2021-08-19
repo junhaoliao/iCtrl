@@ -250,6 +250,9 @@ export const resetVNC = (sessionID) => {
     }).then((_) => {
         window.location.reload();
     }).catch(error => {
+        // try to handle this gracefully as the error could be
+        //  some .nfsxxx... files not being deleted correctly
         console.log(error);
+        window.location.reload();
     });
 };
