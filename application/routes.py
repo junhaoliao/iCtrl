@@ -12,7 +12,7 @@ from application.Favicon import Favicon
 from application.SFTP import SFTP
 from application.Term import Term, terminal_connections, TERMINAL_PORT
 from application.VNC import VNC
-from application.codes import ICtrlStep, ICtrlError
+from application.codes import ICtrlStep, ICtrlError, ConnectionType
 from application.paths import PRIVATE_KEY_PATH
 from application.utils import int_to_bytes
 
@@ -22,10 +22,46 @@ UPLOAD_CHUNK_SIZE = 1024 * 1024
 def get_session_info(session_id):
     if session_id not in profiles['sessions']:
         abort(403, f'failed: session {session_id} does not exist')
+
     host = profiles['sessions'][session_id]['host']
     username = profiles['sessions'][session_id]['username']
     this_private_key_path = os.path.join(PRIVATE_KEY_PATH, session_id)
+
     return host, username, this_private_key_path
+
+
+def create_connection(session_id, conn_type):
+    host, username, this_private_key_path = get_session_info(session_id)
+
+    if conn_type == ConnectionType.GENERAL:
+        conn = Connection()
+    elif conn_type == ConnectionType.VNC:
+        conn = VNC()
+    elif conn_type == ConnectionType.TERM:
+        conn = Term()
+    elif conn_type == ConnectionType.SFTP:
+        conn = SFTP()
+    else:
+        raise TypeError(f'Invalid type: {conn_type}')
+
+    status, reason = conn.connect(host, username, key_filename=this_private_key_path)
+    if status is False:
+        if reason.startswith('[Errno 60]') \
+                or reason.startswith('[Errno 64]') \
+                or reason.startswith('[Errno 51]') \
+                or reason == 'timed out':
+            reason = int_to_bytes(ICtrlError.SSH.HOST_UNREACHABLE)
+        else:
+            print(reason)
+            # TODO: return the other specific codes
+            reason = int_to_bytes(ICtrlError.SSH.GENERAL)
+
+    return conn, reason
+
+
+def is_ecf(session_id):
+    host, _, _ = get_session_info(session_id)
+    return host.endswith('.ecf.utoronto.ca') or host.endswith('ecf.toronto.edu')
 
 
 @app.route('/profiles')
@@ -76,38 +112,29 @@ def handle_session():
 @app.route('/exec_blocking', methods=['POST'])
 def exec_blocking():
     session_id = request.json.get('session_id')
-    host, username, this_private_key_path = get_session_info(session_id)
-
     cmd = request.json.get('cmd')
 
-    conn = Connection()
-    status, reason = conn.connect(host, username, key_filename=this_private_key_path)
-    if status is False:
-        abort(403, description=reason)
+    conn, reason = create_connection(session_id, ConnectionType.GENERAL)
+    if reason != '':
+        abort(403, reason)
 
     status, _, stdout, stderr = conn.exec_command_blocking(cmd)
     if status is False:
         abort(500, 'exec failed')
 
-    return '\n'.join(stdout) + '\n'.join(stderr)
+    return '\n'.join(stdout) + '\n' + '\n'.join(stderr)
 
 
 @app.route('/terminal', methods=['POST'])
 def start_terminal():
     session_id = request.json.get('session_id')
-    host, username, this_private_key_path = get_session_info(session_id)
 
     def generate():
         yield int_to_bytes(ICtrlStep.Term.SSH_AUTH)
-        term = Term()
-        status, reason = term.connect(host=host, username=username, key_filename=this_private_key_path)
-        if status is False:
-            if reason.startswith('[Errno 60]') or reason.startswith('[Errno 64]') or reason == 'timed out':
-                yield int_to_bytes(ICtrlError.SSH.HOST_UNREACHABLE)
-            else:
-                print(reason)
-                # TODO: return the other specific codes
-                yield int_to_bytes(ICtrlError.SSH.GENERAL)
+
+        term, reason = create_connection(session_id, ConnectionType.TERM)
+        if reason != '':
+            yield reason
             return
 
         yield int_to_bytes(ICtrlStep.Term.CHECK_LOAD)
@@ -125,6 +152,7 @@ def start_terminal():
         yield json.dumps(result)
 
     return app.response_class(generate(), mimetype='application/octet-stream')
+
 
 @app.route('/terminal_resize', methods=['PATCH'])
 def resize_terminal():
@@ -146,25 +174,19 @@ def resize_terminal():
 @app.route('/vnc', methods=['POST'])
 def start_vnc():
     session_id = request.json.get('session_id')
-    host, username, this_private_key_path = get_session_info(session_id)
-    is_ecf = host.endswith('.ecf.utoronto.ca') or host.endswith('ecf.toronto.edu')
 
     def generate():
         yield int_to_bytes(ICtrlStep.VNC.SSH_AUTH)
-        vnc = VNC()
-        status, reason = vnc.connect(host=host, username=username, key_filename=this_private_key_path)
-        if status is False:
-            if reason.startswith('[Errno 60]') or reason.startswith('[Errno 64]') or reason == 'timed out':
-                yield int_to_bytes(ICtrlError.SSH.HOST_UNREACHABLE)
-            else:
-                # TODO: return the other specific codes
-                yield int_to_bytes(ICtrlError.SSH.GENERAL)
+        vnc, reason = create_connection(session_id, ConnectionType.VNC)
+        if reason != '':
+            yield reason
             return
 
         yield int_to_bytes(ICtrlStep.VNC.CHECK_LOAD)
 
         yield int_to_bytes(ICtrlStep.VNC.PARSE_PASSWD)
-        if is_ecf:
+        session_is_ecf = is_ecf(session_id)
+        if session_is_ecf:
             password = None
         else:
             status, password = vnc.get_vnc_password()
@@ -173,7 +195,7 @@ def start_vnc():
                 return
 
         yield int_to_bytes(ICtrlStep.VNC.LAUNCH_VNC)
-        if is_ecf:
+        if session_is_ecf:
             vnc_port = 1000
         else:
             vnc_port = vnc.launch_vnc()
@@ -194,11 +216,9 @@ def start_vnc():
 @app.route('/vncpasswd', methods=['POST'])
 def change_vncpasswd():
     session_id = request.json.get('session_id')
-    host, username, this_private_key_path = get_session_info(session_id)
 
-    vnc = VNC()
-    status, reason = vnc.connect(host=host, username=username, key_filename=this_private_key_path)
-    if status is False:
+    vnc, reason = create_connection(session_id, ConnectionType.VNC)
+    if reason != '':
         abort(403, description=reason)
 
     passwd = request.json.get('passwd')
@@ -208,14 +228,13 @@ def change_vncpasswd():
 
     return 'success'
 
+
 @app.route('/vnc_reset', methods=['POST'])
 def reset_vnc():
     session_id = request.json.get('session_id')
-    host, username, this_private_key_path = get_session_info(session_id)
 
-    vnc = VNC()
-    status, reason = vnc.connect(host=host, username=username, key_filename=this_private_key_path)
-    if status is False:
+    vnc, reason = create_connection(session_id, ConnectionType.VNC)
+    if reason != '':
         abort(403, description=reason)
 
     status, reason = vnc.remove_vnc_settings()
@@ -224,16 +243,15 @@ def reset_vnc():
 
     return 'success'
 
+
 @app.route('/sftp_ls/<session_id>')
 def sftp_ls(session_id):
-    host, username, this_private_key_path = get_session_info(session_id)
+    path = request.args.get('path')
 
-    sftp = SFTP()
-    status, reason = sftp.connect(host=host, username=username, key_filename=this_private_key_path)
-    if status is False:
+    sftp, reason = create_connection(session_id, ConnectionType.SFTP)
+    if reason != '':
         abort(403, description=reason)
 
-    path = request.args.get('path')
     status, cwd, file_list = sftp.ls(path)
     if status is False:
         abort(400, description=cwd)
@@ -248,15 +266,14 @@ def sftp_ls(session_id):
 
 @app.route('/sftp_dl/<session_id>')
 def sftp_dl(session_id):
-    host, username, this_private_key_path = get_session_info(session_id)
+    cwd = request.args.get('cwd')
+    args_files = request.args.get('files')
 
-    sftp = SFTP()
-    status, reason = sftp.connect(host=host, username=username, key_filename=this_private_key_path)
-    if status is False:
+    sftp, reason = create_connection(session_id, ConnectionType.SFTP)
+    if reason != '':
         abort(403, description=reason)
 
-    cwd = request.args.get('cwd')
-    files = json.loads(request.args.get('files'))
+    files = json.loads(args_files)
 
     sftp.sftp.chdir(cwd)
 
@@ -281,16 +298,13 @@ def sftp_dl(session_id):
 
 @app.route('/sftp_rename/<session_id>', methods=['PATCH'])
 def sftp_rename(session_id):
-    host, username, this_private_key_path = get_session_info(session_id)
-
-    sftp = SFTP()
-    status, reason = sftp.connect(host=host, username=username, key_filename=this_private_key_path)
-    if status is False:
-        abort(403, description=reason)
-
     cwd = request.json.get('cwd')
     old = request.json.get('old')
     new = request.json.get('new')
+
+    sftp, reason = create_connection(session_id, ConnectionType.SFTP)
+    if reason != '':
+        abort(403, description=reason)
 
     status, reason = sftp.rename(cwd, old, new)
     if not status:
@@ -301,16 +315,13 @@ def sftp_rename(session_id):
 
 @app.route('/sftp_chmod/<session_id>', methods=['PATCH'])
 def sftp_chmod(session_id):
-    host, username, this_private_key_path = get_session_info(session_id)
-
-    sftp = SFTP()
-    status, reason = sftp.connect(host=host, username=username, key_filename=this_private_key_path)
-    if status is False:
-        abort(403, description=reason)
-
     path = request.json.get('path')
     mode = request.json.get('mode')
     recursive = request.json.get('recursive')
+
+    sftp, reason = create_connection(session_id, ConnectionType.SFTP)
+    if reason != '':
+        abort(403, description=reason)
 
     status, reason = sftp.chmod(path, mode, recursive)
     if not status:
@@ -321,15 +332,12 @@ def sftp_chmod(session_id):
 
 @app.route('/sftp_mkdir/<session_id>', methods=['PUT'])
 def sftp_mkdir(session_id):
-    host, username, this_private_key_path = get_session_info(session_id)
-
-    sftp = SFTP()
-    status, reason = sftp.connect(host=host, username=username, key_filename=this_private_key_path)
-    if status is False:
-        abort(403, description=reason)
-
     cwd = request.json.get('cwd')
     name = request.json.get('name')
+
+    sftp, reason = create_connection(session_id, ConnectionType.SFTP)
+    if reason != '':
+        abort(403, description=reason)
 
     status, reason = sftp.mkdir(cwd, name)
     if status is False:
@@ -340,18 +348,14 @@ def sftp_mkdir(session_id):
 
 @app.route('/sftp_ul/<session_id>', methods=['POST'])
 def sftp_ul(session_id):
-    host, username, this_private_key_path = get_session_info(session_id)
-
-    sftp = SFTP()
-    status, reason = sftp.connect(host=host, username=username, key_filename=this_private_key_path)
-    if status is False:
-        abort(403, description=reason)
-
     cwd = request.headers.get('Cwd')
-
     # no need to use secure_filename because the user should be responsible for her/his input
     #  when not using the client
     relative_path = request.headers.get('Path')
+
+    sftp, reason = create_connection(session_id, ConnectionType.SFTP)
+    if reason != '':
+        abort(403, description=reason)
 
     p = Path(relative_path)
     request_filename = p.name
@@ -377,15 +381,12 @@ def sftp_ul(session_id):
 
 @app.route('/sftp_rm/<session_id>', methods=['POST'])
 def sftp_rm(session_id):
-    host, username, this_private_key_path = get_session_info(session_id)
-
-    sftp = SFTP()
-    status, reason = sftp.connect(host=host, username=username, key_filename=this_private_key_path)
-    if status is False:
-        abort(403, description=reason)
-
     cwd = request.json.get('cwd')
     files = request.json.get('files')
+
+    sftp, reason = create_connection(session_id, ConnectionType.SFTP)
+    if reason != '':
+        abort(403, description=reason)
 
     status, reason = sftp.rm(cwd, files)
     if not status:

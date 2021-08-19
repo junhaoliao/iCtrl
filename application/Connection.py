@@ -76,7 +76,7 @@ class Connection:
         except Exception as e:
             return False, str(e)
 
-        return True, ""
+        return True, ''
 
     @staticmethod
     def ssh_keygen(key_filename):
