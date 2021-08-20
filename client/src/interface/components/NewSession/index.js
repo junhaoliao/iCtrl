@@ -14,7 +14,8 @@ export default class NewSession extends React.Component {
         super(props);
         this.state = {
             error: null,
-            loading: false
+            loading: false,
+            hostValue: ''
         };
     }
 
@@ -95,7 +96,7 @@ export default class NewSession extends React.Component {
 
     render() {
         const {open} = this.props;
-        const {error, loading} = this.state;
+        const {error, loading, hostValue} = this.state;
         return (
             <Dialog
                 open={open}
@@ -117,6 +118,11 @@ export default class NewSession extends React.Component {
                             clearOnBlur={false}
                             freeSolo={true}
                             autoComplete={true}
+                            openOnFocus={true}
+                            value={hostValue}
+                            onInputChange={(_, newValue) => {
+                                this.setState({hostValue: newValue});
+                            }}
                             renderInput={(params) => (
                                 <TextField
                                     {...params}
