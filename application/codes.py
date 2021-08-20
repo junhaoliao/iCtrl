@@ -1,5 +1,14 @@
 from enum import IntEnum, auto, unique
 
+
+@unique
+class ConnectionType(IntEnum):
+    GENERAL = auto()
+    VNC = auto()
+    TERM = auto()
+    SFTP = auto()
+
+
 # 31: 32(space) starts to be the first commonly used code in ASCII
 STEP_DONE = 31
 ERROR_GENERAL = 100
