@@ -7,6 +7,9 @@ import {VNCSteps} from '../../components/Loading/steps';
 import VNCSpeedDial from './VNCSpeedDial';
 import {vncConnect} from '../../../actions/vnc';
 import {changeFavicon} from '../../utils';
+import Toolbar from '../../components/Toolbar';
+import KeyTable from '@novnc/novnc/core/input/keysym';
+
 
 export default class VNCViewer extends React.Component {
     constructor(props) {
@@ -31,7 +34,8 @@ export default class VNCViewer extends React.Component {
             currentStep: -1,
             authentication: null,
             showFab: true,
-            speedDialOpen: false
+            speedDialOpen: false,
+            showToolbar: false
         };
     }
 
@@ -61,7 +65,6 @@ export default class VNCViewer extends React.Component {
         this.setState({
             speedDialOpen: false
         });
-        this.rfb.focus();
     };
 
     handleSpeedDialClose = (ev) => {
@@ -80,6 +83,49 @@ export default class VNCViewer extends React.Component {
         this.rfb.focus();
     };
 
+    handleToolbarSendKey = (key, down) => {
+        switch (key) {
+            case 'Ctrl':
+                this.rfb.sendKey(KeyTable.XK_Control_L, 'ControlLeft', down);
+                break;
+            case '⌘':
+                this.rfb.sendKey(KeyTable.XK_Super_L, 'MetaLeft', down);
+                break;
+            case 'Alt':
+                this.rfb.sendKey(KeyTable.XK_Alt_L, 'AltLeft', down);
+                break;
+            case 'Tab':
+                this.rfb.sendKey(KeyTable.XK_Tab, "Tab");
+                break;
+            case 'Esc':
+                this.rfb.sendKey(KeyTable.XK_Escape, "Escape");
+                break;
+            case 'Delete':
+                this.rfb.sendKey(KeyTable.XK_Delete, 'Delete');
+                break;
+            case 'Ctrl+Alt+Delete':
+                this.rfb.sendCtrlAltDel()
+                break;
+            default:
+                console.log('Unexpected key pressed.');
+        }
+        this.keyboardElem.focus()
+    };
+
+    handleToolbarOpen = ()=>{
+        this.rfb.focusOnClick = false
+        this.setState({
+            showToolbar: true
+        })
+    }
+    handleToolbarHide = ()=>{
+        this.rfb.focusOnClick = true
+        this.setState({
+            showToolbar: false
+        })
+        this.rfb.focus()
+    }
+
     componentDidMount() {
         const {host, username} = this.props.profiles['sessions'][this.session_id];
         document.title = `VNC - ${username}@${host}`;
@@ -90,7 +136,7 @@ export default class VNCViewer extends React.Component {
 
     render() {
 
-        const {authentication, currentStep, loading, speedDialOpen, showFab} = this.state;
+        const {authentication, currentStep, loading, speedDialOpen, showFab, showToolbar} = this.state;
         return (<div>
                 <Backdrop id={'speed-dial-backdrop'} open={speedDialOpen}/>
                 {showFab && !loading &&
@@ -101,6 +147,7 @@ export default class VNCViewer extends React.Component {
                     onSpeedDialClose={this.handleSpeedDialClose}
                     onSpeedDialOpen={this.handleSpeedDialOpen}
                     closeSpeedDial={this.closeSpeedDial}
+                    onToolbarOpen={this.handleToolbarOpen}
                     onFabMove={() => {
                         this.fabMoved = true;
                     }}
@@ -113,11 +160,16 @@ export default class VNCViewer extends React.Component {
                     steps={VNCSteps}
                     authentication={authentication}/>}
 
-                <div style={{display: loading && 'none'}} id={'screen'}>
+                <div style={{display: loading && 'none'}} id={'screen'}
+                     className={showToolbar && 'screen-with-toolbar'}>
                     <textarea id={'textarea'} autoCapitalize="off"
                               autoComplete="off" spellCheck="false" tabIndex="-1"
                     />
                 </div>
+
+                {showToolbar &&
+                <Toolbar onToolbarSendKey={this.handleToolbarSendKey}
+                         onToolbarHide={this.handleToolbarHide}/>}
             </div>
         );
     }

@@ -7,7 +7,7 @@ import axios from 'axios';
 
 const setupDOM = (port, passwd) => {
     /* Creating a new RFB object and start a new connection */
-    const url = `ws://127.0.0.1:${port}`;
+    const url = `ws://192。168.2.15:${port}`;
     const rfb = new RFB(
         document.getElementById('screen'),
         url,
@@ -21,10 +21,10 @@ const setupDOM = (port, passwd) => {
     //  whenever the container changes dimensions. Disabled by default.
     rfb.resizeSession = true;
 
-    return rfb
-}
+    return rfb;
+};
 
-const setupOnScreenKeyboard = (vncViewer) =>{
+const setupOnScreenKeyboard = (vncViewer) => {
     /* Setup touch keyboard */
     // Reference: https://github.com/novnc/noVNC/blob/master/app/ui.js
     vncViewer.keyboardElem = document.getElementById('textarea');
@@ -96,7 +96,7 @@ const setupOnScreenKeyboard = (vncViewer) =>{
     //  and prevent focus on click on the screen
     // ref: https://github.com/novnc/noVNC/blob/7485e82b72d4d1356d95ecca2d109cbf49908b9d/app/ui.js#L251
 
-}
+};
 
 const setupClipboard = (rfb) => {
     /* Setup bi-directional clipboard forwarding */
@@ -133,7 +133,7 @@ const setupClipboard = (rfb) => {
             console.log(e);
         }
     };
-}
+};
 
 export const vncConnect = async (vncViewer) => {
     const options = {
@@ -163,12 +163,12 @@ export const vncConnect = async (vncViewer) => {
             const decodedStr = new TextDecoder().decode(resultArr);
             const {port, passwd} = JSON.parse(decodedStr);
 
-            vncViewer.rfb = setupDOM(port, passwd)
+            vncViewer.rfb = setupDOM(port, passwd);
 
             // when the VNC session is successfully established
             vncViewer.rfb.addEventListener('connect', () => {
-                setupOnScreenKeyboard(vncViewer)
-                setupClipboard(vncViewer.rfb)
+                setupOnScreenKeyboard(vncViewer);
+                setupClipboard(vncViewer.rfb);
 
                 // hide the Loading element
                 vncViewer.setState({
