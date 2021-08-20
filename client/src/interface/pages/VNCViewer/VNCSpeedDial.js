@@ -183,6 +183,7 @@ export default class VNCSpeedDial extends React.Component {
     };
 
     handleKeyboardOpen = (_) => {
+        this.props.onToolbarOpen()
         this.props.closeSpeedDial();
         if (isIOS()) {
             const canvas = document.getElementById('screen').lastElementChild.firstElementChild;

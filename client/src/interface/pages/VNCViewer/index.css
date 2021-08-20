@@ -1,5 +1,7 @@
-{/* Visible scrollbar on all webkit(mobile) devices */}
-{/* Reference: https://stackoverflow.com/questions/22907777/make-scrollbar-visible-in-mobile-browsers */}
+{ /* Visible scrollbar on all webkit(mobile) devices */
+}
+{ /* Reference: https://stackoverflow.com/questions/22907777/make-scrollbar-visible-in-mobile-browsers */
+}
 ::-webkit-scrollbar {
     -webkit-appearance: none;
 }
@@ -29,6 +31,10 @@
     left: 0;
 }
 
+.screen-with-toolbar {
+    bottom: 45px !important;
+}
+
 #textarea {
     width: 1px;
     height: 1px;
@@ -42,6 +48,7 @@
 }
 
 #fab {
+    touch-action: none;
     position: absolute;
     bottom: 38px;
     right: 0
