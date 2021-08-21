@@ -7,7 +7,7 @@ import axios from 'axios';
 
 const setupDOM = (port, passwd) => {
     /* Creating a new RFB object and start a new connection */
-    const url = `ws://192。168.2.15:${port}`;
+    const url = `ws://127.0.0.1:${port}`;
     const rfb = new RFB(
         document.getElementById('screen'),
         url,
