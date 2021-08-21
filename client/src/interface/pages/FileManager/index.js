@@ -73,7 +73,12 @@ export default class FileManager extends React.Component {
             newMenuAnchorEl: null,
             newFolderDialogOpen: false,
             uploadWindowCollapsed: false,
-            uploadProgress: []
+            uploadProgress: [],
+            sortModel:[
+                            {
+                                field: 'id',
+                                sort: 'asc',
+                            }]
         };
     }
 
@@ -252,6 +257,10 @@ export default class FileManager extends React.Component {
         u.click();
     };
 
+    handleSortModelChange = (model) => {
+        this.setState({sortModel: model})
+    }
+
     componentDidMount() {
         const {host, username} = this.props.profiles['sessions'][this.session_id];
         document.title = `File Manager - ${username}@${host}`;
@@ -262,6 +271,7 @@ export default class FileManager extends React.Component {
     }
 
     render() {
+        const {sortModel} = this.state
         return (
             <div style={{overflowY: 'hidden'}}>
                 <Drawer open variant={'persistent'} anchor={'left'}>
@@ -284,7 +294,7 @@ export default class FileManager extends React.Component {
                             [<MusicNote/>, 'Music', 'Music'],
                             [<PhotoLibrary/>, 'Pictures', 'Pictures'],
                             [<Computer/>, 'Root', '/'],
-                        ].map((item, index) => (
+                        ].map((item, _) => (
                             <ListItem
                                 button
                                 onClick={() => {
@@ -324,11 +334,8 @@ export default class FileManager extends React.Component {
                         onCellDoubleClick={this.handleCellDoubleClick}
                         onEditCellChange={this.handleEditCellChange}
                         onEditCellChangeCommitted={this.handleEditCellChangeCommitted}
-                        sortModel={[
-                            {
-                                field: 'id',
-                                sort: 'asc',
-                            }]}
+                        sortModel={sortModel}
+                        onSortModelChange={this.handleSortModelChange}
                         components={{
                             Toolbar: CustomToolbar,
                             NoRowsOverlay: (_ => (
