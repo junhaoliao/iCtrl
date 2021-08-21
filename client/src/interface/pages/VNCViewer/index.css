@@ -2,24 +2,24 @@
 }
 { /* Reference: https://stackoverflow.com/questions/22907777/make-scrollbar-visible-in-mobile-browsers */
 }
-::-webkit-scrollbar {
+#screen ::-webkit-scrollbar {
     -webkit-appearance: none;
 }
 
-::-webkit-scrollbar:vertical {
+#screen ::-webkit-scrollbar:vertical {
     width: 14px;
 }
 
-::-webkit-scrollbar:horizontal {
+#screen ::-webkit-scrollbar:horizontal {
     height: 32px;
 }
 
-::-webkit-scrollbar-thumb {
+#screen ::-webkit-scrollbar-thumb {
     background-color: rgba(0, 0, 0, 0.3);
     border: 2px solid #ffffff;
 }
 
-::-webkit-scrollbar-track {
+#screen ::-webkit-scrollbar-track {
     background-color: #ffffff;
 }
 
