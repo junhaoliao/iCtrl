@@ -34,12 +34,16 @@ export default class Term extends React.Component {
             case 'Ctrl':
                 this.ctrlKey = down;
                 break;
-            case '⌘':
-                this.metaKey = down;
-                break;
             case 'Alt':
                 this.altKey = down;
                 break;
+            case 'Shift':
+                this.shiftKey = down;
+                break;
+            case '⌘':
+                this.metaKey = down;
+                break;
+
             case 'Tab':
                 sendKey(this, {key: 'Tab', keyCode: 9});
                 break;
