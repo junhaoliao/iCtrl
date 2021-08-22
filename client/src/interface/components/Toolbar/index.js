@@ -74,13 +74,13 @@ export default class Toolbar extends React.Component {
         }
         return (
             <div id={'toolbar'}>
-                <IconButton
+                {handleToolbarHide && <IconButton
                     style={{marginLeft: 6}}
                     color={'info'}
                     onClick={handleToolbarHide}
                 >
                     <KeyboardArrowDown/>
-                </IconButton>
+                </IconButton>}
                 {
                     keyList.map((item) => (
                         <Chip key={item.label}
