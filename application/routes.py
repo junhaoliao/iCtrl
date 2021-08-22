@@ -184,6 +184,9 @@ def start_vnc():
 
         yield int_to_bytes(ICtrlStep.VNC.CHECK_LOAD)
 
+        # use5900: usually a RealVNC server listening on port 5900
+        #  which we don't know how to parse the password
+        use5900 = False
         yield int_to_bytes(ICtrlStep.VNC.PARSE_PASSWD)
         session_is_ecf = is_ecf(session_id)
         if session_is_ecf:
@@ -191,12 +194,18 @@ def start_vnc():
         else:
             status, password = vnc.get_vnc_password()
             if not status:
-                yield int_to_bytes(ICtrlError.VNC.PASSWD_MISSING)
-                return
+                use5900 = vnc.check_5900_open()
+                if use5900:
+                    password = None
+                else:
+                    yield int_to_bytes(ICtrlError.VNC.PASSWD_MISSING)
+                    return
 
         yield int_to_bytes(ICtrlStep.VNC.LAUNCH_VNC)
         if session_is_ecf:
             vnc_port = 1000
+        elif use5900:
+            vnc_port = 5900
         else:
             vnc_port = vnc.launch_vnc()
 
