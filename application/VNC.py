@@ -36,6 +36,11 @@ class VNC(Connection):
         else:
             return True, decrypt_passwd(bytearray.fromhex(hexdump))
 
+    def check_5900_open(self):
+        _, _, stdout, _ = self.exec_command_blocking('netstat -tln | grep :5900')
+        result = stdout.readline()
+        return result != ''
+
     def remove_vnc_settings(self):
         remove_cmd_lst = [
             "killall -q -w Xtigervnc",

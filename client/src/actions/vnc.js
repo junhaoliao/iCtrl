@@ -9,10 +9,15 @@ import {isIOS} from './utils';
 const setupDOM = (port, passwd) => {
     /* Creating a new RFB object and start a new connection */
     const url = `ws://127.0.0.1:${port}`;
-    const rfb = new RFB(
-        document.getElementById('screen'),
-        url,
-        {credentials: {password: passwd}});
+    const rfb = passwd ?
+        new RFB(
+            document.getElementById('screen'),
+            url,
+            {credentials: {password: passwd}}) :
+        new RFB(
+            document.getElementById('screen'),
+            url)
+    ;
 
     /* Setup the VNC default options */
     // Reference: https://github.com/novnc/noVNC/blob/master/docs/API.md
@@ -25,9 +30,26 @@ const setupDOM = (port, passwd) => {
     return rfb;
 };
 
+const setupCredentialsHandlers = (rfb) => {
+    rfb.addEventListener('credentialsrequired', (ev) => {
+        const credentials = {};
+        for (let type of ev.detail.types) {
+            credentials[type] = prompt(`[!! Any text enter below will be in PLAIN TEXT !!]\nPlease enter the VNC ${type}:`);
+        }
+        rfb.sendCredentials(credentials);
+    });
+
+    rfb.addEventListener('securityfailure', (ev) => {
+        if (!alert(`[Code ${ev.detail.status}] ${ev.detail.reason}\nClick OK to reload`)) {
+            window.location.reload();
+        }
+    });
+
+};
+
 const setupForwardBackwardKeys = (rfb) => {
-    window.addEventListener('auxclick', (ev)=>{
-        if (ev.button === 3){
+    window.addEventListener('auxclick', (ev) => {
+        if (ev.button === 3) {
             rfb.sendKey(KeyTable.XK_Alt_L, 'AltLeft', true);
             rfb.sendKey(KeyTable.XK_Left, 'ArrowLeft');
             rfb.sendKey(KeyTable.XK_Alt_L, 'AltLeft', false);
@@ -36,8 +58,8 @@ const setupForwardBackwardKeys = (rfb) => {
             rfb.sendKey(KeyTable.XK_Right, 'ArrowRight');
             rfb.sendKey(KeyTable.XK_Alt_L, 'AltLeft', false);
         }
-    })
-}
+    });
+};
 
 const setupOnScreenKeyboard = (vncViewer) => {
     /* Setup touch keyboard */
@@ -175,9 +197,11 @@ export const vncConnect = async (vncViewer) => {
 
             vncViewer.rfb = setupDOM(port, passwd);
 
+            setupCredentialsHandlers(vncViewer.rfb);
+
             // when the VNC session is successfully established
             vncViewer.rfb.addEventListener('connect', () => {
-                setupForwardBackwardKeys(vncViewer.rfb)
+                setupForwardBackwardKeys(vncViewer.rfb);
                 setupOnScreenKeyboard(vncViewer);
                 setupClipboard(vncViewer.rfb);
 
