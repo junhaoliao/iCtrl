@@ -25,19 +25,18 @@ export default class Toolbar extends React.Component {
                     sendKey(key, true);
                     pressed.add(key);
 
-                    const textarea = document.getElementsByTagName('textarea')[0];
                     const cancelAll = (_) => {
                         setTimeout(() => {
                             for (let pressedKey of pressed) {
                                 sendKey(pressedKey, false);
                             }
                             this.setState({pressed: new Set()});
-                            textarea.removeEventListener('keydown', cancelAll, true);
+                            window.removeEventListener('keydown', cancelAll, true);
                         }, 0);
 
                     };
-                    textarea.removeEventListener('keydown', cancelAll, true);
-                    textarea.addEventListener('keydown', cancelAll, true);
+                    window.removeEventListener('keydown', cancelAll, true);
+                    window.addEventListener('keydown', cancelAll, true);
                 } else {
                     // previously toggled
                     sendKey(key, false);

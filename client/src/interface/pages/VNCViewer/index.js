@@ -5,10 +5,11 @@ import './index.css';
 import Loading from '../../components/Loading';
 import {VNCSteps} from '../../components/Loading/steps';
 import VNCSpeedDial from './VNCSpeedDial';
-import {vncConnect} from '../../../actions/vnc';
+import {focusOnKeyboard, vncConnect} from '../../../actions/vnc';
 import {changeFavicon} from '../../utils';
 import Toolbar from '../../components/Toolbar';
 import KeyTable from '@novnc/novnc/core/input/keysym';
+import {isIOS} from '../../../actions/utils';
 
 
 export default class VNCViewer extends React.Component {
@@ -97,7 +98,6 @@ export default class VNCViewer extends React.Component {
             case '⌘':
                 this.rfb.sendKey(KeyTable.XK_Super_L, 'MetaLeft', down);
                 break;
-
             case 'Tab':
                 this.rfb.sendKey(KeyTable.XK_Tab, 'Tab');
                 break;
@@ -110,20 +110,31 @@ export default class VNCViewer extends React.Component {
             default:
                 console.log('Unexpected key pressed.');
         }
-        this.keyboardElem.focus();
+        focusOnKeyboard();
     };
 
     handleToolbarOpen = () => {
-        this.rfb.focusOnClick = false;
+        if (!isIOS()) {
+            this.rfb.focusOnClick = false;
+        }
+
         this.setState({
             showToolbar: true
         });
     };
+
     handleToolbarHide = () => {
         this.rfb.focusOnClick = true;
+
         this.setState({
             showToolbar: false
         });
+
+        // on iOS: disable on screen keyboard
+        const canvas = document.getElementById('screen').lastElementChild.firstElementChild;
+        canvas.setAttribute('contenteditable', 'false');
+
+        // on Android browsers: once the screen receive focus, the virtual keyboard will disappear
         this.rfb.focus();
     };
 

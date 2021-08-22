@@ -4,10 +4,11 @@ import KeyTable from '@novnc/novnc/core/input/keysym';
 import keysyms from '@novnc/novnc/core/input/keysymdef';
 import {SSHHostUnreachableRefresh, VNCAuthentication} from '../interface/components/Loading/authentications';
 import axios from 'axios';
+import {isIOS} from './utils';
 
 const setupDOM = (port, passwd) => {
     /* Creating a new RFB object and start a new connection */
-    const url = `ws://127.0.0.1:${port}`;
+    const url = `ws://192.168.2.15:${port}`;
     const rfb = new RFB(
         document.getElementById('screen'),
         url,
@@ -105,11 +106,6 @@ const setupOnScreenKeyboard = (vncViewer) => {
 
     // prevent the default behaviour of the 'submit' event
     vncViewer.keyboardElem.addEventListener('submit', () => false);
-
-    // TODO: add a toolbar and support the 'hide keyboard' feature
-    //  and prevent focus on click on the screen
-    // ref: https://github.com/novnc/noVNC/blob/7485e82b72d4d1356d95ecca2d109cbf49908b9d/app/ui.js#L251
-
 };
 
 const setupClipboard = (rfb) => {
@@ -270,4 +266,15 @@ export const resetVNC = (sessionID) => {
         console.log(error);
         window.location.reload();
     });
+};
+
+export const focusOnKeyboard = () => {
+    if (isIOS()) {
+        const canvas = document.getElementById('screen').lastElementChild.firstElementChild;
+        canvas.setAttribute('contenteditable', 'true');
+        canvas.focus();
+    } else {
+        const textarea = document.getElementById('textarea');
+        textarea.focus();
+    }
 };
