@@ -24,6 +24,20 @@ const setupDOM = (port, passwd) => {
     return rfb;
 };
 
+const setupForwardBackwardKeys = (rfb) => {
+    window.addEventListener('auxclick', (ev)=>{
+        if (ev.button === 3){
+            rfb.sendKey(KeyTable.XK_Alt_L, 'AltLeft', true);
+            rfb.sendKey(KeyTable.XK_Left, 'ArrowLeft');
+            rfb.sendKey(KeyTable.XK_Alt_L, 'AltLeft', false);
+        } else if (ev.button === 4) {
+            rfb.sendKey(KeyTable.XK_Alt_L, 'AltLeft', true);
+            rfb.sendKey(KeyTable.XK_Right, 'ArrowRight');
+            rfb.sendKey(KeyTable.XK_Alt_L, 'AltLeft', false);
+        }
+    })
+}
+
 const setupOnScreenKeyboard = (vncViewer) => {
     /* Setup touch keyboard */
     // Reference: https://github.com/novnc/noVNC/blob/master/app/ui.js
@@ -167,6 +181,7 @@ export const vncConnect = async (vncViewer) => {
 
             // when the VNC session is successfully established
             vncViewer.rfb.addEventListener('connect', () => {
+                setupForwardBackwardKeys(vncViewer.rfb)
                 setupOnScreenKeyboard(vncViewer);
                 setupClipboard(vncViewer.rfb);
 
