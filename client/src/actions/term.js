@@ -672,7 +672,12 @@ export const termConnect = async (TermViewer) => {
 
             const term_div = setupDOM(TermViewer);
 
-            setupWebGL(TermViewer.term);
+            if (!isMobile()) {
+                // setting WebGL should improve rendering speed
+                //  but it seems it is not well supported on most mobile browser
+                setupWebGL(TermViewer.term);
+            }
+
             const socket = setupWebSocket(TermViewer.term, term_id, port);
             setupCopyPaste(TermViewer.term, term_div, socket);
             setupResize(TermViewer.term, TermViewer.session_id, term_id);
