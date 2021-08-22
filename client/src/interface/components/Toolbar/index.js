@@ -23,6 +23,20 @@ export default class Toolbar extends React.Component {
                     // previously not toggled
                     sendKey(key, true);
                     pressed.add(key)
+
+                    const textarea = document.getElementsByTagName('textarea')[0]
+                    const cancelAll = (_)=>{
+                        setTimeout(()=>{
+                            for (let pressedKey of pressed){
+                            sendKey(pressedKey, false);
+                        }
+                        this.setState({pressed: new Set()})
+                        textarea.removeEventListener('keydown', cancelAll, true)
+                        },0)
+
+                    }
+                    textarea.removeEventListener('keydown', cancelAll, true)
+                    textarea.addEventListener('keydown', cancelAll, true)
                 } else {
                     // previously toggled
                     sendKey(key, false);
@@ -32,8 +46,10 @@ export default class Toolbar extends React.Component {
             case 'Tab':
             case 'Esc':
             case 'Delete':
-            case 'Ctrl+Alt+Delete':
                 sendKey(key)
+                break;
+            case 'Ctrl+Alt+Delete':
+                this.props.onCtrlAltDelete()
                 break;
             default:
                 break;
@@ -44,6 +60,17 @@ export default class Toolbar extends React.Component {
     render() {
         const {onToolbarHide:handleToolbarHide} = this.props;
         const {pressed} = this.state
+        const keyList = [
+                        {label: 'Ctrl'},
+                        {label: '⌘'},
+                        {label: 'Alt'},
+                        {label: 'Tab'},
+                        {label: 'Esc'},
+                        {label: 'Delete'},
+                    ];
+        if (this.props.onCtrlAltDelete){
+            keyList.push({label: 'Ctrl+Alt+Delete'})
+        }
         return (
             <div id={'toolbar'}>
                 <IconButton
@@ -54,15 +81,7 @@ export default class Toolbar extends React.Component {
                     <KeyboardArrowDown/>
                 </IconButton>
                 {
-                    [
-                        {label: 'Ctrl'},
-                        {label: '⌘'},
-                        {label: 'Alt'},
-                        {label: 'Tab'},
-                        {label: 'Esc'},
-                        {label: 'Delete'},
-                        {label: 'Ctrl+Alt+Delete'}
-                    ].map((item) => (
+                    keyList.map((item) => (
                         <Chip key={item.label}
                               label={item.label}
                               color="primary"
