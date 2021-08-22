@@ -23,11 +23,10 @@ import {
     Refresh,
     VisibilityOff
 } from '@material-ui/icons';
-import {isIOS} from '../../../actions/utils';
 
 import './index.css';
 import {LoadingButton} from '@material-ui/lab';
-import {resetVNC} from '../../../actions/vnc';
+import {focusOnKeyboard, resetVNC} from '../../../actions/vnc';
 
 export default class VNCSpeedDial extends React.Component {
     constructor(props) {
@@ -185,15 +184,7 @@ export default class VNCSpeedDial extends React.Component {
     handleKeyboardOpen = (_) => {
         this.props.onToolbarOpen()
         this.props.closeSpeedDial();
-        if (isIOS()) {
-            const canvas = document.getElementById('screen').lastElementChild.firstElementChild;
-            canvas.setAttribute('contenteditable', 'true');
-            canvas.focus();
-            canvas.setAttribute('contenteditable', 'false');
-        } else {
-            const textarea = document.getElementById('textarea');
-            textarea.focus();
-        }
+        focusOnKeyboard();
     };
 
     handleResetConnection = (_) => {
