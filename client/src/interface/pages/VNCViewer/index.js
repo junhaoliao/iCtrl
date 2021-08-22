@@ -95,36 +95,33 @@ export default class VNCViewer extends React.Component {
                 this.rfb.sendKey(KeyTable.XK_Alt_L, 'AltLeft', down);
                 break;
             case 'Tab':
-                this.rfb.sendKey(KeyTable.XK_Tab, "Tab");
+                this.rfb.sendKey(KeyTable.XK_Tab, 'Tab');
                 break;
             case 'Esc':
-                this.rfb.sendKey(KeyTable.XK_Escape, "Escape");
+                this.rfb.sendKey(KeyTable.XK_Escape, 'Escape');
                 break;
             case 'Delete':
                 this.rfb.sendKey(KeyTable.XK_Delete, 'Delete');
                 break;
-            case 'Ctrl+Alt+Delete':
-                this.rfb.sendCtrlAltDel()
-                break;
             default:
                 console.log('Unexpected key pressed.');
         }
-        this.keyboardElem.focus()
+        this.keyboardElem.focus();
     };
 
-    handleToolbarOpen = ()=>{
-        this.rfb.focusOnClick = false
+    handleToolbarOpen = () => {
+        this.rfb.focusOnClick = false;
         this.setState({
             showToolbar: true
-        })
-    }
-    handleToolbarHide = ()=>{
-        this.rfb.focusOnClick = true
+        });
+    };
+    handleToolbarHide = () => {
+        this.rfb.focusOnClick = true;
         this.setState({
             showToolbar: false
-        })
-        this.rfb.focus()
-    }
+        });
+        this.rfb.focus();
+    };
 
     componentDidMount() {
         const {host, username} = this.props.profiles['sessions'][this.session_id];
@@ -161,7 +158,7 @@ export default class VNCViewer extends React.Component {
                     authentication={authentication}/>}
 
                 <div style={{display: loading && 'none'}} id={'screen'}
-                     className={showToolbar && 'screen-with-toolbar'}>
+                     className={showToolbar ? 'screen-with-toolbar' : ''}>
                     <textarea id={'textarea'} autoCapitalize="off"
                               autoComplete="off" spellCheck="false" tabIndex="-1"
                     />
@@ -169,6 +166,9 @@ export default class VNCViewer extends React.Component {
 
                 {showToolbar &&
                 <Toolbar onToolbarSendKey={this.handleToolbarSendKey}
+                         onCtrlAltDelete={() => {
+                             this.rfb.sendCtrlAltDel();
+                         }}
                          onToolbarHide={this.handleToolbarHide}/>}
             </div>
         );
