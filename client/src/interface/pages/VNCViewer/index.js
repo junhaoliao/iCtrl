@@ -88,12 +88,16 @@ export default class VNCViewer extends React.Component {
             case 'Ctrl':
                 this.rfb.sendKey(KeyTable.XK_Control_L, 'ControlLeft', down);
                 break;
-            case '⌘':
-                this.rfb.sendKey(KeyTable.XK_Super_L, 'MetaLeft', down);
-                break;
             case 'Alt':
                 this.rfb.sendKey(KeyTable.XK_Alt_L, 'AltLeft', down);
                 break;
+            case 'Shift':
+                this.rfb.sendKey(KeyTable.XK_Shift_L, 'ShiftLeft', down);
+                break;
+            case '⌘':
+                this.rfb.sendKey(KeyTable.XK_Super_L, 'MetaLeft', down);
+                break;
+
             case 'Tab':
                 this.rfb.sendKey(KeyTable.XK_Tab, 'Tab');
                 break;

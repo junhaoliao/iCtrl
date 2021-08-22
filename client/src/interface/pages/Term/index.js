@@ -50,7 +50,7 @@ export default class Term extends React.Component {
                 sendKey(this, {key: 'Delete', keyCode: 46});
                 break;
             case 'Ctrl+Alt+Delete':
-                // this.term._core.coreService.triggerDataEvent(result.key, true);
+                console.log('Unexpected Ctrl+Alt+Delete pressed.');
                 break;
             default:
                 console.log('Unexpected key pressed.');
