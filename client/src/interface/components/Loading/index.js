@@ -115,7 +115,10 @@ export default class Loading extends React.Component {
                         ))}
                     </Stepper>
                     <br/><br/>
-                    <LinearProgressWithLabel variant="determinate" value={progressValue}/>
+                    <LinearProgressWithLabel
+                        variant="determinate"
+                        color={Boolean(authentication) ? 'error' : 'primary'}
+                        value={progressValue}/>
                 </div>
             </div>
 
