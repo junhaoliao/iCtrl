@@ -17,6 +17,7 @@ if not "%confirm%"=="y" (
 @echo on
 :: build the web client
 cd client
+call npm i --force
 call npm run build
 cd ..
 
@@ -28,4 +29,5 @@ pyinstaller --noconfirm --clean win64_ictrl_be.spec
 
 :: make the desktop client
 cd desktop_client
+call npm i
 call npm run publish
