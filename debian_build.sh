@@ -17,13 +17,13 @@ cd client || exit
 npm i --force
 npm run build
 cd ..
-#
-#echo ------------------------   Compile the Python Backend   ------------------------
-#source venv/bin/activate
-#pyinstaller --noconfirm --clean macOS_ictrl_be.spec
-#
-#echo ----------------- Compile and Publish the Electron Frontend --------------------
-#cd desktop_client || exit
-#npm i
-#npm run publish
-#cd ..
+
+echo ------------------------   Compile the Python Backend   ------------------------
+source venv/bin/activate
+pyinstaller --noconfirm --clean debian_ictrl_be.spec
+
+echo ----------------- Compile and Publish the Electron Frontend --------------------
+cd desktop_client || exit
+npm i
+npm run publish
+cd ..
