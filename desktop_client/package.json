@@ -38,7 +38,6 @@
   "devDependencies": {
     "@electron-forge/cli": "^6.0.0-beta.59",
     "@electron-forge/maker-deb": "^6.0.0-beta.59",
-    "@electron-forge/maker-rpm": "^6.0.0-beta.59",
     "@electron-forge/maker-squirrel": "^6.0.0-beta.59",
     "@electron-forge/maker-dmg": "^6.0.0-beta.59",
     "@electron-forge/publisher-github": "^6.0.0-beta.59",
@@ -55,6 +54,7 @@
     "forge": {
       "packagerConfig": {
         "name": "iCtrl Desktop",
+        "executableName": "ictrl-desktop-client",
         "icon": "assets/icon",
         "ignore": "(.gitignore|assets*)",
         "win32metadata": {
@@ -90,11 +90,17 @@
         },
         {
           "name": "@electron-forge/maker-deb",
-          "config": {}
-        },
-        {
-          "name": "@electron-forge/maker-rpm",
-          "config": {}
+          "config": {
+            "options": {
+              "categories": ["Utility"],
+              "description": "Desktop Client for iCtrl",
+              "genericName": "iCtrl Desktop",
+              "homepage": "https://ictrl.ca",
+              "icon": "assets/icon.ico",
+              "maintainer": "iCtrl Developers",
+              "productName": "iCtrl Desktop"
+            }
+          }
         }
       ],
       "publishers": [

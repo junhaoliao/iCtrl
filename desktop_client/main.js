@@ -18,12 +18,13 @@ const {getFreePort} = require('./utils');
 const mainPort = getFreePort();
 
 const isMac = process.platform === 'darwin';
+const isLinux = process.platform === 'linux';
+const isWindows = process.platform === 'win32';
 
 /* launch the backend and disable the menu bar*/
 // the backend process handle
 let ictrl_be = null;
 if (isMac) {
-    console.log(resolve(__dirname, 'ictrl_be'));
     ictrl_be = spawn('./ictrl_be', [mainPort], {cwd: resolve(__dirname, 'ictrl_be')});
 
     // need to have a 'window' role in the menu on mac
@@ -40,12 +41,15 @@ if (isMac) {
         ]
     }];
     Menu.setApplicationMenu(Menu.buildFromTemplate(menuTemplate));
-} else {
-    // TODO: add support for Linux
-    // Assuming Windows
+} else if (isWindows) {
     ictrl_be = spawn('ictrl_be.exe', [mainPort], {cwd: resolve(__dirname, 'ictrl_be')});
-
     Menu.setApplicationMenu(null);
+} else if (isLinux) {
+    ictrl_be = spawn('./ictrl_be', [mainPort], {cwd: resolve(__dirname, 'ictrl_be')});
+    Menu.setApplicationMenu(null);
+} else {
+    console.log(`OS: ${process.platform} not supported.`)
+    app.exit()
 }
 
 
@@ -91,7 +95,7 @@ app.whenReady().then(() => {
                 }
             }
         });
-    } else {
+    } else if (isWindows) {
         mainWindow.setAppDetails({
             appId: 'iCtrl'
         });
@@ -129,7 +133,7 @@ app.whenReady().then(() => {
                         }
                     }
                 });
-            } else {
+            } else if (isWindows) {
                 const url = newWindow.getURL();
                 newWindow.setAppDetails({
                     appId: url
