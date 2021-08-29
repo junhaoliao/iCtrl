@@ -40,8 +40,7 @@ class LocalProfile:
     def query(self):
         return self._profile
 
-    # TODO: support renaming a session
-    def add_session(self, host, username):
+    def add_session(self, host, username, conn=None):
         session = copy.deepcopy(_EMPTY_SESSION)
 
         session_id = uuid.uuid4().hex
@@ -49,9 +48,15 @@ class LocalProfile:
         session["host"] = host
         session["username"] = username
 
+        if conn is not None:
+            this_private_key_path = os.path.join(PRIVATE_KEY_PATH, session_id)
+            status, reason = conn.save_keys(key_filename=this_private_key_path, public_key_comment=this_private_key_path)
+            if not status:
+                return status, reason
+
         self.save_profile()
 
-        return session_id
+        return True, ''
 
     def delete_session(self, session_id):
         if session_id not in self._profile['sessions']:
@@ -93,4 +98,4 @@ class LocalProfile:
         username = self._profile['sessions'][session_id]['username']
         this_private_key_path = os.path.join(PRIVATE_KEY_PATH, session_id)
 
-        return host, username, this_private_key_path
+        return host, username, this_private_key_path, None

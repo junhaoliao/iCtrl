@@ -1,4 +1,3 @@
-import os
 from io import BytesIO
 
 from flask import request, abort, send_file
@@ -10,12 +9,11 @@ from ..features.Favicon import Favicon
 from ..features.SFTP import SFTP
 from ..features.Term import Term
 from ..features.VNC import VNC
-from ..paths import PRIVATE_KEY_PATH
 from ..utils import int_to_bytes
 
 
 def create_connection(session_id, conn_type):
-    host, username, this_private_key_path = profiles.get_session_info(session_id)
+    host, username, this_private_key_path, this_private_key_str = profiles.get_session_info(session_id)
     if host is None:
         abort(403, f'failed: session {session_id} does not exist')
 
@@ -30,7 +28,7 @@ def create_connection(session_id, conn_type):
     else:
         raise TypeError(f'Invalid type: {conn_type}')
 
-    status, reason = conn.connect(host, username, key_filename=this_private_key_path)
+    status, reason = conn.connect(host, username, key_filename=this_private_key_path, private_key_str=this_private_key_str)
     if status is False:
         if reason.startswith('[Errno 60]') \
                 or reason.startswith('[Errno 64]') \
@@ -46,7 +44,7 @@ def create_connection(session_id, conn_type):
 
 
 def is_ecf(session_id):
-    host, _, _ = profiles.get_session_info(session_id)
+    host, _, _, _ = profiles.get_session_info(session_id)
     return host.endswith('.ecf.utoronto.ca') or host.endswith('ecf.toronto.edu')
 
 
@@ -60,6 +58,7 @@ def handle_session():
     if request.method == 'POST':
         host = request.json.get('host')
         username = request.json.get('username')
+        # FIXME: password should be optional
         password = request.json.get("password")
 
         conn = Connection()
@@ -68,9 +67,8 @@ def handle_session():
         if status is False:
             abort(403, reason)
 
-        session_id = profiles.add_session(host, username)
-        this_private_key_path = os.path.join(PRIVATE_KEY_PATH, session_id)
-        status, reason = conn.save_keys(this_private_key_path)
+        # FIXME: password should be optional: only pass 'conn' if password is given
+        status, reason = profiles.add_session(host, username, conn)
         if status is False:
             abort(500, reason)
 
@@ -116,7 +114,7 @@ def exec_blocking():
 
 @app.route('/favicon/<feature>/<session_id>')
 def generate_favicon(feature, session_id):
-    host, _, _ = profiles.get_session_info(session_id)
+    host, _, _, _ = profiles.get_session_info(session_id)
     if host is None:
         abort(403, f'failed: session {session_id} does not exist')
 

@@ -3,7 +3,7 @@ import os
 from datetime import datetime
 from pathlib import Path
 
-from flask import request, abort
+from flask import request, abort, stream_with_context
 
 from .common import create_connection
 from .. import app
@@ -52,12 +52,12 @@ def sftp_dl(session_id):
         zip_mode = not is_reg
 
     if zip_mode:
-        r = app.response_class(sftp.zip_generator(cwd, files), mimetype='application/zip')
+        r = app.response_class(stream_with_context(sftp.zip_generator(cwd, files)), mimetype='application/zip')
         dt_str = datetime.now().strftime('_%Y%m%d_%H%M%S')
         zip_name = os.path.basename(cwd) + dt_str + '.zip'
         r.headers.set('Content-Disposition', 'attachment', filename=zip_name)
     else:
-        r = app.response_class(sftp.dl_generator(files[0]), mimetype='application/octet-stream')
+        r = app.response_class(stream_with_context(sftp.dl_generator(files[0])), mimetype='application/octet-stream')
         r.headers.set('Content-Disposition', 'attachment', filename=files[0])
         r.headers.set('Content-Length', size)
 

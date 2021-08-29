@@ -1,6 +1,6 @@
 import json
 
-from flask import request, abort
+from flask import request, abort, stream_with_context
 
 from .common import create_connection
 from .. import app
@@ -37,7 +37,7 @@ def start_terminal():
         }
         yield json.dumps(result)
 
-    return app.response_class(generate(), mimetype='application/octet-stream')
+    return app.response_class(stream_with_context(generate()), mimetype='application/octet-stream')
 
 
 @app.route('/terminal_resize', methods=['PATCH'])

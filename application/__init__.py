@@ -12,16 +12,23 @@ if getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS'):
 else:
     app = Flask(__name__, static_folder="../client/build")
 
+app.secret_key = os.getenv('SECRET_KEY', os.urandom(16))
+
 try:
-    _ = sys.argv[1]
+    APP_PORT = sys.argv[1]
+    APP_HOST = '127.0.0.1'
+
     from .LocalProfile import LocalProfile
 
     profiles = LocalProfile()
 except IndexError:
-    # fixme: change this
-    from .LocalProfile import LocalProfile
+    # TODO: change this to 80 in production mode
+    APP_PORT = 5000
+    APP_HOST = '0.0.0.0'
 
-    profiles = LocalProfile()
+    # fixme: change this
+    from .DBProfile import DBProfile
+    profiles = DBProfile(app)
 
 from .routes import *
 
