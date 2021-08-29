@@ -6,9 +6,9 @@ from typing import Optional
 from SimpleWebSocketServer import SimpleWebSocketServer, WebSocket
 from paramiko import Channel
 
-from application import app
-from application.Connection import Connection
-from application.utils import find_free_port
+from .Connection import Connection
+from .. import app
+from ..utils import find_free_port
 
 terminal_connections = {}
 
@@ -72,7 +72,7 @@ class TerminalSocket(WebSocket):
             while True:
                 data = self.term.channel.recv(1024)
                 if not data:
-                    print(f"\r\n*** {self.term.id}: Shell EOF ***\r\n\r\n")
+                    print(f"\r\n*** {terminal_id}: Shell EOF ***\r\n\r\n")
                     self.close()
                     break
                 self.sendMessage(data)

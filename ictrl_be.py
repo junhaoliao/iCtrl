@@ -1,7 +1,5 @@
 import sys
 
-from application import app
-
 if __name__ == '__main__':
     try:
         port = sys.argv[1]
@@ -10,4 +8,6 @@ if __name__ == '__main__':
         # TODO: change this to 80 in production mode
         port = 5000
         host = '0.0.0.0'
+
+    from application import app
     app.run(host=host, port=port)
