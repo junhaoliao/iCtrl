@@ -1,6 +1,7 @@
 import select
 import socketserver
 import threading
+from io import StringIO
 
 import paramiko
 
@@ -64,44 +65,65 @@ class Connection:
         self.client.close()
         del self.client
 
-    def connect(self, host, username, password=None, key_filename=None):
+    def connect(self, host, username, password=None, key_filename=None, private_key_str=None):
         try:
             if password is not None:
                 self.client.connect(host, username=username, password=password, timeout=15)
             elif key_filename is not None:
                 self.client.connect(host, username=username, key_filename=key_filename, timeout=15)
+            elif private_key_str is not None:
+                pkey = paramiko.RSAKey.from_private_key(StringIO(private_key_str))
+                self.client.connect(host, username=username, pkey=pkey, timeout=15)
             else:
                 # TODO: read the docs and the RFC to check whether this is allowed
                 raise ValueError("Connection: no valid SSH auth given.")
         except Exception as e:
+            # raise e
+            # print('Connection::connect() exception:')
             return False, str(e)
 
         return True, ''
 
     @staticmethod
-    def ssh_keygen(key_filename):
+    def ssh_keygen(key_filename=None, key_file_obj=None, public_key_comment=''):
         """ Generate and save an RSA SSH private key on the local machine, return a public key
-        :param key_filename: path to where the private key should be saved
+        :param key_filename: path to which the private key should be saved
+        :param key_file_obj: file object in which the private key should be saved
+        :param public_key_comment: comment to be added at the end of the public key record
         :return: passphrase of the public key
         """
         # 3072 is the default size of OpenSSH keys
         rsa_key = paramiko.RSAKey.generate(3072)
 
         # save the private key
-        rsa_key.write_private_key_file(key_filename)
+        if key_filename is not None:
+            rsa_key.write_private_key_file(key_filename)
+        elif key_file_obj is not None:
+            rsa_key.write_private_key(key_file_obj)
+        else:
+            raise ValueError('Neither key_filename nor key_file_obj is provided.')
 
         # ssh-rsa: key type
         # rsa_key.get_base64(): key phrase
-        return "ssh-rsa " + rsa_key.get_base64() + " " + key_filename
+        return "ssh-rsa " + rsa_key.get_base64() + " " + public_key_comment
 
-    def save_keys(self, key_filename):
+    def save_keys(self, key_filename=None, key_file_obj=None, public_key_comment=''):
         """ Generate an RSA SSH key. Save the private key on the local machine, and save the public one on the remote.
         Must be called only when the client is connected.
-        :param key_filename: path to where the private key should be saved
+        :param key_filename: path to which the private key should be saved
+        :param key_file_obj: file object in which the private key should be saved
+        :param public_key_comment: comment to be added at the end of the public key record
         :return: None
         """
-        # generate and save the private key on the local machine
-        pub_key = Connection.ssh_keygen(key_filename)
+        if key_filename is not None:
+            # generate key pairs and save the private key on the local machine
+            pub_key = Connection.ssh_keygen(key_filename=key_filename, public_key_comment=public_key_comment)
+        elif key_file_obj is not None:
+            # generate key pairs and save the private key in the key file object
+            pub_key = Connection.ssh_keygen(key_file_obj=key_file_obj, public_key_comment=public_key_comment)
+        else:
+            raise ValueError('Neither key_filename nor key_file_obj is provided.')
+
         # save the public key onto the remote server
         exit_status, _, _, _ = self.exec_command_blocking(
             "mkdir -p ~/.ssh && chmod 700 ~/.ssh && echo '%s' >>  ~/.ssh/authorized_keys" % pub_key)

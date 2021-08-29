@@ -1,6 +1,6 @@
 import json
 
-from flask import request, abort
+from flask import request, abort, stream_with_context
 
 from .common import create_connection, is_ecf
 from .. import app
@@ -57,7 +57,7 @@ def start_vnc():
         }
         yield json.dumps(result)
 
-    return app.response_class(generate(), mimetype='application/octet-stream')
+    return app.response_class(stream_with_context(generate()), mimetype='application/octet-stream')
 
 
 @app.route('/vncpasswd', methods=['POST'])
