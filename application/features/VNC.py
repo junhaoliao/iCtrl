@@ -3,9 +3,9 @@ import threading
 
 import websockify
 
-from application.Connection import Connection
-from application.utils import find_free_port
-from application.vncpasswd import decrypt_passwd, obfuscate_password
+from .Connection import Connection
+from .vncpasswd import decrypt_passwd, obfuscate_password
+from ..utils import find_free_port
 
 
 def websocket_proxy_thread(local_websocket_port, local_vnc_port):

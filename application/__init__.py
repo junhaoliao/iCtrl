@@ -4,8 +4,6 @@ import sys
 from flask import Flask, send_from_directory
 from werkzeug.serving import WSGIRequestHandler
 
-from application.Profile import Profile
-
 # enable persistent HTTP connections (keep-alive)
 WSGIRequestHandler.protocol_version = "HTTP/1.1"
 
@@ -14,9 +12,18 @@ if getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS'):
 else:
     app = Flask(__name__, static_folder="../client/build")
 
-profiles = Profile()
+try:
+    _ = sys.argv[1]
+    from .LocalProfile import LocalProfile
 
-from application.routes import *
+    profiles = LocalProfile()
+except IndexError:
+    # fixme: change this
+    from .LocalProfile import LocalProfile
+
+    profiles = LocalProfile()
+
+from .routes import *
 
 if not app.debug:
     # Reference: https://stackoverflow.com/questions/44209978/serving-a-front-end-created-with-create-react-app-with

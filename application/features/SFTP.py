@@ -5,7 +5,7 @@ from typing import Optional
 import zipstream
 from paramiko.sftp_client import SFTPClient
 
-from application.Connection import Connection
+from .Connection import Connection
 
 DL_CHUNK_SIZE = 1024 * 1024 * 4  # unit: bytes
 
