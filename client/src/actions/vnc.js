@@ -8,7 +8,7 @@ import {isIOS} from './utils';
 
 const setupDOM = (port, passwd) => {
     /* Creating a new RFB object and start a new connection */
-    const url = `ws://127.0.0.1:${port}`;
+    const url = `ws://${process.env.REACT_APP_DOMAIN_NAME || '127.0.0.1'}:${port}`;
     const rfb = passwd ?
         new RFB(
             document.getElementById('screen'),
