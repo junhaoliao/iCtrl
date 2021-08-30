@@ -23,7 +23,8 @@
     "xterm": "^4.14.0-beta.21",
     "xterm-addon-attach": "^0.7.0-beta.6",
     "xterm-addon-fit": "^0.6.0-beta.2",
-    "xterm-addon-webgl": "^0.12.0-beta.10"
+    "xterm-addon-webgl": "^0.12.0-beta.10",
+    "react-swipeable-views": "^0.14.0"
   },
   "scripts": {
     "start": "react-scripts start",
@@ -50,7 +51,4 @@
     ]
   },
   "proxy": "http://127.0.0.1:5000",
-  "dependencies": {
-    "react-swipeable-views": "^0.14.0"
-  }
 }
