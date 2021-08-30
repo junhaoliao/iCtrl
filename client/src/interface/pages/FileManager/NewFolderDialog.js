@@ -11,7 +11,7 @@ export default class NewFolderDialog extends React.Component {
 
         this.state = {
             cancelTokenSrc: null,
-            newFolderNameError: ''
+            newFolderNameError: '',
         };
     }
 
@@ -21,7 +21,7 @@ export default class NewFolderDialog extends React.Component {
 
     handleClose = (ev) => {
         this.setState({
-            newFolderNameError: ''
+            newFolderNameError: '',
         });
         if (ev.target.id !== 'create-button') {
             if (this.state.cancelTokenSrc) {
@@ -32,32 +32,32 @@ export default class NewFolderDialog extends React.Component {
             const newFolderName = document.getElementById('new-folder-name').value;
             if (newFolderName === '') {
                 this.setState({
-                    newFolderNameError: 'Folder name cannot be empty'
+                    newFolderNameError: 'Folder name cannot be empty',
                 });
                 return;
             }
 
             const cancelTokenSrc = axios.CancelToken.source();
             this.setState({
-                cancelTokenSrc: cancelTokenSrc
+                cancelTokenSrc: cancelTokenSrc,
             });
-            axios.put(`/sftp_mkdir/${this.props.sessionId}`, {
+            axios.put(`/api/sftp_mkdir/${this.props.sessionId}`, {
                 cwd: this.props.cwd,
-                name: newFolderName
+                name: newFolderName,
             }, {
-                cancelToken: cancelTokenSrc.token
+                cancelToken: cancelTokenSrc.token,
             }).then(_ => {
                 this.setState({
-                    cancelTokenSrc: null
+                    cancelTokenSrc: null,
                 });
                 this.props.onClose();
             }).catch(error => {
                 this.setState({
-                    cancelTokenSrc: null
+                    cancelTokenSrc: null,
                 });
                 if (error.response) {
                     this.setState({
-                        newFolderNameError: htmlResponseToReason(error.response.data)
+                        newFolderNameError: htmlResponseToReason(error.response.data),
                     });
                 } else {
                     if (error.message === 'canceled by the user') {
@@ -65,7 +65,7 @@ export default class NewFolderDialog extends React.Component {
                     }
                     // Something happened in setting up the request that triggered an Error
                     this.setState({
-                        newFolderNameError: error.message
+                        newFolderNameError: error.message,
                     });
                 }
             });

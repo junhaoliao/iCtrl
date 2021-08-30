@@ -1,7 +1,7 @@
 import os
 import sys
 
-from flask import Flask
+from flask import Flask, Blueprint
 from werkzeug.serving import WSGIRequestHandler
 
 # enable persistent HTTP connections (keep-alive)
@@ -28,7 +28,9 @@ except IndexError:
 
     # fixme: change this
     from .DBProfile import DBProfile
+
     profiles = DBProfile(app)
 
-from .routes import *
+api = Blueprint('api', __name__)
 
+from .routes import *

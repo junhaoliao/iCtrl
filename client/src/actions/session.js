@@ -1,11 +1,11 @@
 import axios from 'axios';
 
 export const session_ruptime = (cm, cancelToken) => {
-    axios.post('/exec_blocking', {
+    axios.post('/api/exec_blocking', {
         session_id: cm.props.session_id,
-        cmd: 'ruptime -aur | grep up'
+        cmd: 'ruptime -aur | grep up',
     }, {
-        cancelToken: cancelToken
+        cancelToken: cancelToken,
     }).then(res => {
         // parse response data (str) into json format
         const machineListJson = [];
@@ -38,9 +38,9 @@ export const session_ruptime = (cm, cancelToken) => {
 
 export const session_change_host = (sessionId, host, domain) => {
     console.log(domain);
-    axios.patch('/session', {
+    axios.patch('/api/session', {
         session_id: sessionId,
-        host: `${host}${domain}`
+        host: `${host}${domain}`,
     }).then(_ => {
         window.location.reload();
     }).catch(error => {

@@ -171,11 +171,11 @@ export const vncConnect = async (vncViewer) => {
     const options = {
         method: 'POST',
         headers: {
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
         },
-        body: JSON.stringify({session_id: vncViewer.session_id})
+        body: JSON.stringify({session_id: vncViewer.session_id}),
     };
-    const response = await fetch(`/vnc`, options);
+    const response = await fetch(`/api/vnc`, options);
     if (response.status !== 200) {
         console.log(response.body);
         return;
@@ -207,7 +207,7 @@ export const vncConnect = async (vncViewer) => {
 
                 // hide the Loading element
                 vncViewer.setState({
-                    loading: false
+                    loading: false,
                 });
             });
 
@@ -225,7 +225,7 @@ export const vncConnect = async (vncViewer) => {
         if (data.includes(ICtrlStep.VNC.DONE)) {
             // update the current step to 'DONE' and wait for the whole stream to be transferred
             vncViewer.setState({
-                currentStep: ICtrlStep.VNC.DONE
+                currentStep: ICtrlStep.VNC.DONE,
             });
         } else {
             // if the step 'DONE' is not present in 'data',
@@ -235,24 +235,24 @@ export const vncConnect = async (vncViewer) => {
             if (currentStep < 100) {
                 // not an error
                 vncViewer.setState({
-                    currentStep: currentStep
+                    currentStep: currentStep,
                 });
             } else {
                 vncViewer.setState({
-                    currentStep: data.slice(-2)[0]
+                    currentStep: data.slice(-2)[0],
                 });
                 // handle the errors / server requests
                 if (currentStep === ICtrlError.SSH.HOST_UNREACHABLE) {
                     vncViewer.setState({
-                        authentication: SSHHostUnreachableRefresh
+                        authentication: SSHHostUnreachableRefresh,
                     });
                 } else if (currentStep === ICtrlError.VNC.PASSWD_MISSING) {
                     // make a copy of the VNCAuthentication model
                     const myVNCAuthentication = Object.assign(VNCAuthentication);
                     myVNCAuthentication.submitter = (authInput) => {
-                        axios.post('/vncpasswd', {
+                        axios.post('/api/vncpasswd', {
                             session_id: vncViewer.session_id,
-                            passwd: authInput
+                            passwd: authInput,
                         }).then(response => {
                             window.location.reload();
                         }).catch(error => {
@@ -260,7 +260,7 @@ export const vncConnect = async (vncViewer) => {
                         });
                     };
                     vncViewer.setState({
-                        authentication: myVNCAuthentication
+                        authentication: myVNCAuthentication,
                     });
                 } else {
                     console.log(`VNC error code: ${currentStep}`);
@@ -280,8 +280,8 @@ export const vncConnect = async (vncViewer) => {
 };
 
 export const resetVNC = (sessionID) => {
-    axios.post('/vnc_reset', {
-        session_id: sessionID
+    axios.post('/api/vnc_reset', {
+        session_id: sessionID,
     }).then((_) => {
         window.location.reload();
     }).catch(error => {

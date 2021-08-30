@@ -3,7 +3,7 @@ import json
 from flask import request, abort, stream_with_context
 
 from .common import create_connection
-from .. import app
+from .. import api, app
 from ..codes import ICtrlStep, ConnectionType
 from ..features.Term import terminal_connections, TERMINAL_PORT
 from ..utils import int_to_bytes
@@ -11,7 +11,7 @@ from ..utils import int_to_bytes
 
 # FIXME: store term_id is cookie-based Flask 'session'
 
-@app.route('/terminal', methods=['POST'])
+@api.route('/terminal', methods=['POST'])
 def start_terminal():
     session_id = request.json.get('session_id')
 
@@ -40,7 +40,7 @@ def start_terminal():
     return app.response_class(stream_with_context(generate()), mimetype='application/octet-stream')
 
 
-@app.route('/terminal_resize', methods=['PATCH'])
+@api.route('/terminal_resize', methods=['PATCH'])
 def resize_terminal():
     term_id = request.json.get('term_id')
     if term_id not in terminal_connections:

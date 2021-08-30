@@ -1,17 +1,18 @@
-from flask import request, abort, send_file
+from flask import request, abort
 
-from .. import app, profiles
+from .. import api, profiles
+
 
 # TODO: review the need to remove the argument readings from the APIs, once we finish debugging
 
-@app.route('/status')
+@api.route('/userid')
 def index():
     user = profiles.get_user()
 
-    return f'Logged in as {user.id}'
+    return f'{user.id}'
 
 
-@app.route('/register', methods=['POST', 'GET'])
+@api.route('/register', methods=['POST', 'GET'])
 def register():
     try:
         if request.method == 'GET':
@@ -30,7 +31,7 @@ def register():
     return 'Registration Successful'
 
 
-@app.route('/login', methods=['POST', 'GET'])
+@api.route('/login', methods=['POST', 'GET'])
 def login():
     try:
         if request.method == 'GET':
@@ -47,7 +48,7 @@ def login():
     return 'logged in'
 
 
-@app.route('/logout')
+@api.route('/logout')
 def logout():
     profiles.logout()
 

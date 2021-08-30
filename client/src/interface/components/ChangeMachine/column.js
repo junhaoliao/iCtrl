@@ -23,7 +23,7 @@ const columns = [
         field: 'load15',
         headerName: '15-min Avg',
         flex: 1,
-    }
+    },
 ];
 
 export default columns;

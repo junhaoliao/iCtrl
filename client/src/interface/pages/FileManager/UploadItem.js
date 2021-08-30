@@ -15,7 +15,7 @@ const UploadItem = (props) => {
             loaded,
             totalSize,
             cancelTokenSrc,
-            cancelled
+            cancelled,
         } = fm.state.uploadProgress[uploadProgressIdx];
 
         const handleCancel = (_) => {
@@ -25,10 +25,10 @@ const UploadItem = (props) => {
                     ...uploadProgress.slice(0, uploadProgressIdx),
                     {
                         ...uploadProgress[uploadProgressIdx],
-                        cancelled: true
+                        cancelled: true,
                     },
-                    ...uploadProgress.slice(uploadProgressIdx + 1)
-                ]
+                    ...uploadProgress.slice(uploadProgressIdx + 1),
+                ],
             }));
         };
 

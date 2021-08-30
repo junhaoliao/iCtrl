@@ -6,7 +6,7 @@ export const SSHHostUnreachableRefresh = {
     submitterName: 'Refresh',
     submitter: () => {
         window.location.reload();
-    }
+    },
 };
 
 export const SSHNoKeyAuthentication = {
@@ -19,7 +19,7 @@ export const SSHNoKeyAuthentication = {
     submitterName: 'Confirm',
     submitter: (authInput) => {
         console.log('Virtual submitter not overridden: ', authInput);
-    }
+    },
 };
 
 export const VNCAuthentication = {
@@ -35,5 +35,5 @@ export const VNCAuthentication = {
     submitterName: 'Confirm',
     submitter: (authInput) => {
         console.log(authInput);
-    }
+    },
 };

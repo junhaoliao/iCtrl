@@ -23,3 +23,6 @@ with open('ictrl.conf', 'r') as config_file:
             pass
 
 # now import the application
+from application import app as application, api
+
+application.register_blueprint(api)

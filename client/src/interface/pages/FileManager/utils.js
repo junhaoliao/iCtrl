@@ -35,7 +35,7 @@ export const permissionFormatter = (params) => {
         (mode & constants.S_IXGRP) ? 'x' : '-',
         (mode & constants.S_IROTH) ? 'r' : '-',
         (mode & constants.S_IWOTH) ? 'w' : '-',
-        (mode & constants.S_IXOTH) ? 'x' : '-'
+        (mode & constants.S_IXOTH) ? 'x' : '-',
     ];
     return mode_str_arr.join('');
 };

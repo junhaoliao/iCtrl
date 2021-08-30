@@ -8,7 +8,7 @@ const UploadList = (props) => {
     const children = [];
     uploadItems.forEach((_, idx) => {
         children.push(
-            <UploadItem key={idx} fm={fm} uploadProgressIdx={idx}/>
+            <UploadItem key={idx} fm={fm} uploadProgressIdx={idx}/>,
         );
         if (idx !== uploadItems.length - 1) {
             children.push(<Divider key={`divider-${idx}`}/>);

@@ -11,7 +11,7 @@ import {
     SpeedDial,
     SpeedDialAction,
     SpeedDialIcon,
-    Stack
+    Stack,
 } from '@material-ui/core';
 import {
     Fullscreen,
@@ -21,7 +21,7 @@ import {
     Keyboard,
     LensBlur,
     Refresh,
-    VisibilityOff
+    VisibilityOff,
 } from '@material-ui/icons';
 
 import './index.css';
@@ -41,7 +41,7 @@ export default class VNCSpeedDial extends React.Component {
             qualityLevel: 6,
             compressionLevel: 2,
             resetDialogOpen: false,
-            resetting: false
+            resetting: false,
         };
     }
 
@@ -84,13 +84,13 @@ export default class VNCSpeedDial extends React.Component {
         if (pointX < window.innerWidth / 2) {
             if (this.state.tooltipPlacement === 'left') {
                 this.setState({
-                    tooltipPlacement: 'right'
+                    tooltipPlacement: 'right',
                 });
             }
         } else {
             if (this.state.tooltipPlacement === 'right') {
                 this.setState({
-                    tooltipPlacement: 'left'
+                    tooltipPlacement: 'left',
                 });
             }
         }
@@ -98,7 +98,7 @@ export default class VNCSpeedDial extends React.Component {
         if (pointY < window.innerHeight / 2) {
             if (this.state.speedDialDirection === 'up') {
                 this.setState({
-                    speedDialDirection: 'down'
+                    speedDialDirection: 'down',
                 });
             }
             let newTop = pointY - width / 2;
@@ -120,7 +120,7 @@ export default class VNCSpeedDial extends React.Component {
         } else {
             if (this.state.speedDialDirection === 'down') {
                 this.setState({
-                    speedDialDirection: 'up'
+                    speedDialDirection: 'up',
                 });
             }
             let newBottom = window.innerHeight - pointY - width / 2;
@@ -146,7 +146,7 @@ export default class VNCSpeedDial extends React.Component {
     handleQualityLevelChange = (ev) => {
         const value = ev.target.value;
         this.setState({
-            qualityLevel: value
+            qualityLevel: value,
         });
         this.props.rfb.qualityLevel = value;
     };
@@ -154,7 +154,7 @@ export default class VNCSpeedDial extends React.Component {
     handleCompressionLevelChange = (ev) => {
         const value = ev.target.value;
         this.setState({
-            compressionLevel: value
+            compressionLevel: value,
         });
         this.props.rfb.compressionLevel = value;
     };
@@ -162,7 +162,7 @@ export default class VNCSpeedDial extends React.Component {
     handleToggleResize = (_) => {
         const newResizeSession = !this.state.resizeSession;
         this.setState({
-            resizeSession: newResizeSession
+            resizeSession: newResizeSession,
         });
         this.props.rfb.resizeSession = newResizeSession;
     };
@@ -171,18 +171,18 @@ export default class VNCSpeedDial extends React.Component {
         if (Boolean(document.fullscreenElement)) {
             document.exitFullscreen().then();
             this.setState({
-                isFullscreen: false
+                isFullscreen: false,
             });
         } else {
             document.body.requestFullscreen().then();
             this.setState({
-                isFullscreen: true
+                isFullscreen: true,
             });
         }
     };
 
     handleKeyboardOpen = (_) => {
-        this.props.onToolbarOpen()
+        this.props.onToolbarOpen();
         this.props.closeSpeedDial();
         focusOnKeyboard();
     };
@@ -190,18 +190,18 @@ export default class VNCSpeedDial extends React.Component {
     handleResetConnection = (_) => {
         this.props.closeSpeedDial();
         this.setState({
-            resetDialogOpen: true
+            resetDialogOpen: true,
         });
     };
 
     handleResetDialogClose = (ev) => {
         if (ev.target.id !== 'reset-button') {
             this.setState({
-                resetDialogOpen: false
+                resetDialogOpen: false,
             });
         } else {
             this.setState({
-                resetting: true
+                resetting: true,
             });
             resetVNC(this.props.session_id);
         }
@@ -212,7 +212,7 @@ export default class VNCSpeedDial extends React.Component {
             speedDialOpen,
             onSpeedDialClose: handleSpeedDialClose,
             onSpeedDialOpen: handleSpeedDialOpen,
-            onFabHide: handleFabHide
+            onFabHide: handleFabHide,
         } = this.props;
         const {
             speedDialDirection,
@@ -222,7 +222,7 @@ export default class VNCSpeedDial extends React.Component {
             resizeSession,
             isFullscreen,
             resetDialogOpen,
-            resetting
+            resetting,
         } = this.state;
 
         return (

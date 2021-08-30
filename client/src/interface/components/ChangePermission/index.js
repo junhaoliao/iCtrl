@@ -14,7 +14,7 @@ import {
     TableHead,
     TableRow,
     TextField,
-    Tooltip
+    Tooltip,
 } from '@material-ui/core';
 
 import './index.css';
@@ -31,7 +31,7 @@ export default class ChangePermission extends React.Component {
             mode: null,
             modeCheck: null,
             modeInput: null,
-            applyRecursively: false
+            applyRecursively: false,
         };
     }
 
@@ -50,7 +50,7 @@ export default class ChangePermission extends React.Component {
         }
 
         this.props.fm.setState({
-            changePermissionOpen: false
+            changePermissionOpen: false,
         });
     };
 
@@ -59,7 +59,7 @@ export default class ChangePermission extends React.Component {
         this.setState({
             mode: this.state.mode ^ bit,
             modeCheck: this.state.modeCheck ^ bit,
-            modeInput: (this.state.modeCheck ^ bit).toString(8).padStart(3, '0')
+            modeInput: (this.state.modeCheck ^ bit).toString(8).padStart(3, '0'),
         });
     };
 
@@ -73,18 +73,18 @@ export default class ChangePermission extends React.Component {
         }
         this.setState({
             modeInput: value,
-            modeCheck: parseInt(value.padEnd(3, '0'), 8)
+            modeCheck: parseInt(value.padEnd(3, '0'), 8),
         });
     };
     handleModeInputBlur = (_) => {
         if (this.state.modeInput.length !== 3) {
             this.setState({
                 modeCheck: (this.state.mode & 0o777),
-                modeInput: (this.state.mode & 0o777).toString(8).padStart(3, '0')
+                modeInput: (this.state.mode & 0o777).toString(8).padStart(3, '0'),
             });
         } else {
             this.setState({
-                mode: (this.state.mode & 0xfe00) | this.state.modeCheck
+                mode: (this.state.mode & 0xfe00) | this.state.modeCheck,
             });
         }
     };
@@ -94,7 +94,7 @@ export default class ChangePermission extends React.Component {
             name: _name,
             mode: _mode,
             modeCheck: (_mode & 0o777),
-            modeInput: (_mode & 0o777).toString(8).padStart(3, '0')
+            modeInput: (_mode & 0o777).toString(8).padStart(3, '0'),
         });
     };
 
@@ -130,7 +130,7 @@ export default class ChangePermission extends React.Component {
             rows_list.push(
                 <TableRow key={`row_${i}`}>
                     {row}
-                </TableRow>
+                </TableRow>,
             );
         }
 

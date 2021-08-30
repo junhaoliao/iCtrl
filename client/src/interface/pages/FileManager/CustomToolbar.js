@@ -13,7 +13,7 @@ import {
     Menu,
     MenuItem,
     OutlinedInput,
-    Tooltip
+    Tooltip,
 } from '@material-ui/core';
 import {ArrowUpward, Delete, GetApp, KeyboardArrowRight, Visibility, VisibilityOff} from '@material-ui/icons';
 
@@ -26,28 +26,28 @@ export default class CustomToolbar extends React.Component {
 
         this.state = {
             densityMenuAnchorEl: null,
-            deleteAllPromptOpen: false
+            deleteAllPromptOpen: false,
         };
     }
 
     handleClose = (_) => {
         this.setState({
-            densityMenuAnchorEl: null
+            densityMenuAnchorEl: null,
         });
     };
 
     handleMenuOpen = (ev) => {
         this.setState({
-            densityMenuAnchorEl: ev.currentTarget
+            densityMenuAnchorEl: ev.currentTarget,
         });
     };
 
     handleDensityChange = (ev) => {
         this.props.fm.setState({
-            density: ev.currentTarget.getAttribute('aria-label')
+            density: ev.currentTarget.getAttribute('aria-label'),
         });
         this.setState({
-            densityMenuAnchorEl: null
+            densityMenuAnchorEl: null,
         });
     };
 
@@ -69,13 +69,13 @@ export default class CustomToolbar extends React.Component {
     handleDeleteAllPrompt = (ev) => {
         if (ev.target.id !== 'button_proceed_delete') {
             this.setState({
-                deleteAllPromptOpen: false
+                deleteAllPromptOpen: false,
             });
             return;
         }
         sftp_rm(this.props.fm, this.props.fm.session_id, this.props.fm.state.cwd, this.props.fm.selected);
         this.setState({
-            deleteAllPromptOpen: false
+            deleteAllPromptOpen: false,
         });
     };
 
@@ -85,7 +85,7 @@ export default class CustomToolbar extends React.Component {
             return;
         }
         this.setState({
-            deleteAllPromptOpen: true
+            deleteAllPromptOpen: true,
         });
     };
 
@@ -104,7 +104,7 @@ export default class CustomToolbar extends React.Component {
 
     handleCwdInputChange = (ev) => {
         this.props.fm.setState({
-            cwdInput: ev.target.value
+            cwdInput: ev.target.value,
         });
     };
     handleCwdInputBlur = (ev) => {
@@ -113,7 +113,7 @@ export default class CustomToolbar extends React.Component {
         }
         this.props.fm.setState({
             cwdInput: this.props.fm.state.cwd,
-            cwdInputErr: null
+            cwdInputErr: null,
         });
     };
 

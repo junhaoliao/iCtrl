@@ -23,23 +23,23 @@ const columns = [
                 </Stack>
 
             );
-        }
+        },
     },
     {
         field: 'size', headerName: 'Size', width: 90,
-        valueFormatter: (params) => (humanFileSize(params.value))
+        valueFormatter: (params) => (humanFileSize(params.value)),
     },
     {
         field: 'atime', headerName: 'Date Accessed', width: 186,
-        valueFormatter: dateFormatter
+        valueFormatter: dateFormatter,
     },
     {
         field: 'mtime', headerName: 'Date Modified', width: 186,
-        valueFormatter: dateFormatter
+        valueFormatter: dateFormatter,
     },
     {
         field: 'mode', headerName: 'Permission', width: 132,
-        valueFormatter: permissionFormatter
+        valueFormatter: permissionFormatter,
     },
 ];
 export default columns;

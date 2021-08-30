@@ -13,7 +13,7 @@ import {
     MenuItem,
     Paper,
     Snackbar,
-    Typography
+    Typography,
 } from '@material-ui/core';
 import {DataGrid} from '@material-ui/data-grid';
 
@@ -37,20 +37,24 @@ import {
     Home,
     MusicNote,
     PhotoLibrary,
-    UploadFile
+    UploadFile,
 } from '@material-ui/icons';
 import Button from '@material-ui/core/Button';
 import NewFolderDialog from './NewFolderDialog';
 import {changeFavicon} from '../../utils';
+import {updateTitle} from '../../../actions/common';
 
 const drawerWidth = 200;
 
 export default class FileManager extends React.Component {
     constructor(props) {
         super(props);
+
+        document.title = 'File Manager';
+
         this.changePermission = React.createRef();
         const {
-            match: {params}
+            match: {params},
         } = props;
 
         this.session_id = params.session_id;
@@ -74,11 +78,11 @@ export default class FileManager extends React.Component {
             newFolderDialogOpen: false,
             uploadWindowCollapsed: false,
             uploadProgress: [],
-            sortModel:[
-                            {
-                                field: 'id',
-                                sort: 'asc',
-                            }]
+            sortModel: [
+                {
+                    field: 'id',
+                    sort: 'asc',
+                }],
         };
     }
 
@@ -187,7 +191,7 @@ export default class FileManager extends React.Component {
         this.setState({
             filesDisplaying: this.state.filesDisplaying.filter((row) => {
                 return row.id !== old_name;
-            })
+            }),
         });
 
         sftp_rename(this, this.session_id, this.state.cwd, old_name, new_name);
@@ -209,14 +213,14 @@ export default class FileManager extends React.Component {
 
         this.setState({
             alertOpen: false,
-            alertMsg: null
+            alertMsg: null,
         });
     };
 
     showAlert = (msg) => {
         this.setState({
             alertMsg: msg,
-            alertOpen: true
+            alertOpen: true,
         });
     };
 
@@ -258,20 +262,19 @@ export default class FileManager extends React.Component {
     };
 
     handleSortModelChange = (model) => {
-        this.setState({sortModel: model})
-    }
+        this.setState({sortModel: model});
+    };
 
     componentDidMount() {
-        const {host, username} = this.props.profiles['sessions'][this.session_id];
-        document.title = `File Manager - ${username}@${host}`;
+        updateTitle(this.session_id, 'File Manager');
 
-        changeFavicon(`/favicon/fm/${this.session_id}`);
+        changeFavicon(`/api/favicon/fm/${this.session_id}`);
 
         this.loadDir('');
     }
 
     render() {
-        const {sortModel} = this.state
+        const {sortModel} = this.state;
         return (
             <div style={{overflowY: 'hidden'}}>
                 <Drawer open variant={'persistent'} anchor={'left'}>
@@ -340,10 +343,10 @@ export default class FileManager extends React.Component {
                             Toolbar: CustomToolbar,
                             NoRowsOverlay: (_ => (
                                 <div style={{margin: 'auto'}}>Empty Directory</div>
-                            ))
+                            )),
                         }}
                         componentsProps={{
-                            toolbar: {fm: this}
+                            toolbar: {fm: this},
                         }}
                         onSelectionModelChange={this.handleSelectionModelChange}
                     />
@@ -353,7 +356,7 @@ export default class FileManager extends React.Component {
                     autoHideDuration={5000}
                     onClose={this.handleAlertClose}
                     anchorOrigin={{vertical: 'bottom', horizontal: 'center'}}
-                    transitionDuration={{enter: 2 * duration.enteringScreen, exit: 2 * duration.leavingScreen,}}
+                    transitionDuration={{enter: 2 * duration.enteringScreen, exit: 2 * duration.leavingScreen}}
                 >
                     <Alert elevation={6} variant="filled" severity={'error'}>
                         {this.state.alertMsg}

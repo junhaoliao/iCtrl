@@ -10,19 +10,20 @@ import {changeFavicon} from '../../utils';
 import Toolbar from '../../components/Toolbar';
 import KeyTable from '@novnc/novnc/core/input/keysym';
 import {isIOS} from '../../../actions/utils';
+import {updateTitle} from '../../../actions/common';
 
 
 export default class VNCViewer extends React.Component {
     constructor(props) {
         super(props);
+
+        document.title = 'VNC';
+
         const {
             match: {params},
-            profiles: {sessions}
         } = props;
 
         this.session_id = params.session_id;
-        this.username = sessions[this.session_id].username;
-        this.host = sessions[this.session_id].host;
 
         this.rfb = null;
         this.lastKeyboardinput = null;
@@ -36,7 +37,7 @@ export default class VNCViewer extends React.Component {
             authentication: null,
             showFab: true,
             speedDialOpen: false,
-            showToolbar: false
+            showToolbar: false,
         };
     }
 
@@ -58,13 +59,13 @@ export default class VNCViewer extends React.Component {
 
         this.speedDialOpenTime = new Date().getTime();
         this.setState({
-            speedDialOpen: true
+            speedDialOpen: true,
         });
     };
 
     closeSpeedDial = () => {
         this.setState({
-            speedDialOpen: false
+            speedDialOpen: false,
         });
     };
 
@@ -79,7 +80,7 @@ export default class VNCViewer extends React.Component {
     handleFabHide = () => {
         this.setState({
             showFab: false,
-            speedDialOpen: false
+            speedDialOpen: false,
         });
         this.rfb.focus();
     };
@@ -119,7 +120,7 @@ export default class VNCViewer extends React.Component {
         }
 
         this.setState({
-            showToolbar: true
+            showToolbar: true,
         });
     };
 
@@ -127,7 +128,7 @@ export default class VNCViewer extends React.Component {
         this.rfb.focusOnClick = true;
 
         this.setState({
-            showToolbar: false
+            showToolbar: false,
         });
 
         // on iOS: disable on screen keyboard
@@ -139,10 +140,9 @@ export default class VNCViewer extends React.Component {
     };
 
     componentDidMount() {
-        const {host, username} = this.props.profiles['sessions'][this.session_id];
-        document.title = `VNC - ${username}@${host}`;
+        updateTitle(this.session_id, 'VNC');
 
-        changeFavicon(`/favicon/vnc/${this.session_id}`);
+        changeFavicon(`/api/favicon/vnc/${this.session_id}`);
         vncConnect(this).then();
     }
 
