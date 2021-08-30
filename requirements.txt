@@ -1,5 +1,7 @@
+wheel
 bcrypt
 flask
+Flask-SQLAlchemy
 paramiko
 Pillow
 psycopg2-binary
