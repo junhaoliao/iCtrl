@@ -1,0 +1,21 @@
+.log-in-wrapper {
+    flex: 1;
+    height: 50%;
+    /* background-color: #e99a25; */
+}
+
+.log-in-box {
+
+}
+
+.sign-up-box {
+
+}
+
+.input-wrapper {
+    margin-bottom: 20px;
+}
+
+.submit-button {
+    width: -webkit-fill-available;
+}

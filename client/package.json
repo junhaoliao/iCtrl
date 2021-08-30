@@ -49,5 +49,8 @@
       "last 1 safari version"
     ]
   },
-  "proxy": "http://127.0.0.1:5000"
+  "proxy": "http://127.0.0.1:5000",
+  "dependencies": {
+    "react-swipeable-views": "^0.14.0"
+  }
 }
