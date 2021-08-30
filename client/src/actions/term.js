@@ -574,7 +574,7 @@ const setupWebGL = (term) => {
 };
 
 const setupWebSocket = (term, term_id, port) => {
-    const socket = new WebSocket(`ws://127.0.0.1:${port}/${term_id}`);
+    const socket = new WebSocket(`ws://${process.env.REACT_APP_DOMAIN_NAME || '127.0.0.1'}:${port}/${term_id}`);
 
     socket.onopen = (_) => {
         const attachAddon = new AttachAddon(socket);
