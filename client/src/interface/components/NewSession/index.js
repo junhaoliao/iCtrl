@@ -15,7 +15,7 @@ export default class NewSession extends React.Component {
         this.state = {
             error: null,
             loading: false,
-            hostValue: ''
+            hostValue: '',
         };
     }
 
@@ -26,29 +26,29 @@ export default class NewSession extends React.Component {
 
         if (host.length === 0) {
             this.setState({
-                error: `The 'Host' field cannot be empty`
+                error: `The 'Host' field cannot be empty`,
             });
             return;
         } else if (username.length === 0) {
             this.setState({
-                error: `The 'Username' field cannot be empty`
+                error: `The 'Username' field cannot be empty`,
             });
             return;
         }
 
         this.setState({
             error: null,
-            loading: true
+            loading: true,
         });
 
-        axios.post('/session', {
-            host, username, password
+        axios.post('/api/session', {
+            host, username, password,
         }).then(_ => {
             window.location.reload();
         }).catch(error => {
             this.setState({
                 error: htmlResponseToReason(error.response.data),
-                loading: false
+                loading: false,
             });
         });
     }
@@ -58,7 +58,7 @@ export default class NewSession extends React.Component {
             this.handleSubmit();
         } else {
             this.setState({
-                error: null
+                error: null,
             });
             this.props.onAddNewSessionClose();
         }

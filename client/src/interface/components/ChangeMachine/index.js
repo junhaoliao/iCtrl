@@ -1,6 +1,6 @@
 /* eslint-disable react-hooks/rules-of-hooks */
 import React from 'react';
-import {Button, Dialog, DialogActions, DialogContent, DialogTitle,} from '@material-ui/core';
+import {Button, Dialog, DialogActions, DialogContent, DialogTitle} from '@material-ui/core';
 import {DataGrid} from '@material-ui/data-grid';
 import columns from './column';
 import {session_change_host, session_ruptime} from '../../../actions/session';
@@ -29,7 +29,7 @@ export default class ChangeMachine extends React.Component {
 
     handleSelectionModelChange = (selectionModel) => {
         this.setState({
-            selectedHost: selectionModel[0]
+            selectedHost: selectionModel[0],
         });
     };
 

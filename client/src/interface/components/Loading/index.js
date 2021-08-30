@@ -8,7 +8,7 @@ import {
     StepLabel,
     Stepper,
     TextField,
-    Typography
+    Typography,
 } from '@material-ui/core';
 
 import {STEP_DONE} from '../../../actions/codes';
@@ -36,7 +36,7 @@ export default class Loading extends React.Component {
         this.state = {
             authInput: '',
             authHelperText: ' ',
-            submitting: false
+            submitting: false,
         };
     }
 
@@ -45,13 +45,13 @@ export default class Loading extends React.Component {
 
         this.setState({
             authInput: newAuthInput,
-            authHelperText: this.props.authentication.validator(newAuthInput)
+            authHelperText: this.props.authentication.validator(newAuthInput),
         });
     };
 
     handleInputSubmit = (ev) => {
         this.setState({
-            submitting: true
+            submitting: true,
         });
         this.props.authentication.submitter(this.state.authInput);
         ev.preventDefault();

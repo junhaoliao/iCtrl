@@ -15,7 +15,7 @@ class SSHError {
 
 export const ICtrlError = {
     VNC: VNCError,
-    SSH: SSHError
+    SSH: SSHError,
 };
 
 const VNCStepCodes = {
@@ -24,17 +24,17 @@ const VNCStepCodes = {
     PARSE_PASSWD: 2,
     LAUNCH_VNC: 3,
     CREATE_TUNNEL: 4,
-    DONE: STEP_DONE
+    DONE: STEP_DONE,
 };
 
 const TermStepCodes = {
     SSH_AUTH: 0,
     CHECK_LOAD: 1,
     LAUNCH_SHELL: 2,
-    DONE: STEP_DONE
+    DONE: STEP_DONE,
 };
 
 export const ICtrlStep = {
     VNC: VNCStepCodes,
-    Term: TermStepCodes
+    Term: TermStepCodes,
 };

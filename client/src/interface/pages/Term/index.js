@@ -6,10 +6,14 @@ import {TermSteps} from '../../components/Loading/steps';
 import Loading from '../../components/Loading';
 import Toolbar from '../../components/Toolbar';
 import {isMobile} from '../../../actions/utils';
+import {updateTitle} from '../../../actions/common';
 
 export default class Term extends React.Component {
     constructor(props) {
         super(props);
+
+        document.title = 'Terminal';
+
         const {match: {params}} = this.props;
         this.session_id = params.session_id;
 
@@ -23,7 +27,7 @@ export default class Term extends React.Component {
         this.state = {
             loading: true,
             currentStep: -1,
-            authentication: null
+            authentication: null,
         };
     }
 
@@ -62,10 +66,9 @@ export default class Term extends React.Component {
     };
 
     componentDidMount() {
-        const {host, username} = this.props.profiles['sessions'][this.session_id];
-        document.title = `Terminal - ${username}@${host}`;
+        updateTitle(this.session_id, 'Terminal');
 
-        changeFavicon(`/favicon/terminal/${this.session_id}`);
+        changeFavicon(`/api/favicon/terminal/${this.session_id}`);
 
         termConnect(this).then();
     }
@@ -85,12 +88,12 @@ export default class Term extends React.Component {
                     visibility: loading ? 'hidden' : 'visible',
                     position: 'absolute',
                     top: 0,
-                    bottom: isMobile()?45:0,
+                    bottom: isMobile() ? 45 : 0,
                     left: 0,
-                    right: 0
+                    right: 0,
                 }}/>
                 {isMobile() &&
-                    <Toolbar onToolbarSendKey={this.handleToolbarSendKey}/>
+                <Toolbar onToolbarSendKey={this.handleToolbarSendKey}/>
                 }
             </div>
         );

@@ -15,8 +15,9 @@ import {
     ListItemSecondaryAction,
     ListItemText,
     Menu,
+    Skeleton,
     Tooltip,
-    Typography
+    Typography,
 } from '@material-ui/core';
 import AddCircleIcon from '@material-ui/icons/AddCircle';
 import BackgroundLetterAvatar from '../../components/BackgroundLetterAvatar';
@@ -36,11 +37,15 @@ import {canChangeMachine} from '../../../actions/utils';
 export default class Dashboard extends React.Component {
     constructor(props) {
         super(props);
+        document.title = 'iCtrl - Dashboard';
+
         this.state = {
             addNewSessionOpen: false,
             changeMachineSessionId: null,
             anchorEl: null,
             anchorSessionId: null,
+            loading_sessions: true,
+            sessions: {},
         };
     }
 
@@ -71,8 +76,8 @@ export default class Dashboard extends React.Component {
                 window.open(`/fm/${sessionId}`, '_blank');
                 break;
             case 'delete':
-                axios.delete(`/session`, {
-                    params: {session_id: sessionId}
+                axios.delete(`/api/session`, {
+                    params: {session_id: sessionId},
                 }).then(response => {
                     console.log(response.data);
                     window.location.reload();
@@ -88,33 +93,43 @@ export default class Dashboard extends React.Component {
     handleMenuOpen = (ev, session_id) => {
         this.setState({
             anchorEl: ev.target,
-            anchorSessionId: session_id
+            anchorSessionId: session_id,
         });
     };
 
     handleMenuClose = (_) => {
         this.setState({
             anchorEl: null,
-            anchorSessionId: null
+            anchorSessionId: null,
         });
     };
 
     handleMenuClick = (sessionId, type) => {
         this.setState({
             anchorEl: null,
-            anchorSessionId: null
+            anchorSessionId: null,
         });
         this.handleFeatureClick(sessionId, type);
     };
 
     handleAddNewSessionClose = (_) => {
         this.setState({
-            addNewSessionOpen: false
+            addNewSessionOpen: false,
         });
     };
 
     componentDidMount() {
-        document.title = 'iCtrl - Dashboard';
+        axios.get('/api/profiles')
+            .then(response => {
+                this.setState({
+                    loading_sessions: false,
+                    sessions: response.data.sessions,
+                });
+            })
+            .catch(error => {
+                // possibly not logged in
+                window.location = '/';
+            });
     }
 
     render() {
@@ -122,11 +137,12 @@ export default class Dashboard extends React.Component {
             anchorEl,
             anchorSessionId,
             changeMachineSessionId,
-            addNewSessionOpen
+            addNewSessionOpen,
+            loading_sessions,
+            sessions,
         } = this.state;
 
         const sessionList = [];
-        const sessions = this.props.profiles['sessions'];
         const changeMachineHost = Boolean(changeMachineSessionId) ? sessions[changeMachineSessionId].host : null;
 
         for (const [key, value] of Object.entries(sessions)) {
@@ -201,7 +217,7 @@ export default class Dashboard extends React.Component {
                             </IconButton>
                         </Tooltip>
                     </ListItemSecondaryAction>
-                </ListItem>
+                </ListItem>,
             );
         }
 
@@ -217,17 +233,31 @@ export default class Dashboard extends React.Component {
                 <Divider/>
 
                 {/* Display a greyed-out logo when there is no session configured */}
-                {sessionList.length !== 0 ?
-                    <List>
-                        {sessionList}
-                    </List> :
-                    <div style={{display: 'flex', flexDirection: 'column', marginTop: '22vh'}}>
-                        <img style={{margin: 'auto', height: '20vh', marginBottom: '8vh', filter: 'grayscale(75%)'}}
-                             src={logo} alt="Logo"/>
-                        <h4 style={{margin: 'auto', textAlign: 'center', color: 'grey'}}>No Session Found<br/>
-                            Please click on <AddCircleIcon
-                                style={{color: 'orange', position: 'relative', top: '6px'}}/> to add a new session</h4>
-                    </div>
+                {loading_sessions ?
+                    [...Array(3)]
+                        .map((e, i) =>
+                            <Skeleton key={`skeleton-${i}`} variant="rectangular" height={75} style={{marginTop: 8}}/>,
+                        )
+                    :
+                    (sessionList.length !== 0 ?
+                            <List>
+                                {sessionList}
+                            </List> :
+                            <div style={{display: 'flex', flexDirection: 'column', marginTop: '22vh'}}>
+                                <img style={{
+                                    margin: 'auto',
+                                    height: '20vh',
+                                    marginBottom: '8vh',
+                                    filter: 'grayscale(75%)',
+                                }}
+                                     src={logo} alt="Logo"/>
+                                <h4 style={{margin: 'auto', textAlign: 'center', color: 'grey'}}>No Session Found<br/>
+                                    Please click on <AddCircleIcon
+                                        style={{color: 'orange', position: 'relative', top: '6px'}}/> to add a new
+                                    session
+                                </h4>
+                            </div>
+                    )
                 }
 
                 <NewSession open={addNewSessionOpen} onAddNewSessionClose={this.handleAddNewSessionClose}/>

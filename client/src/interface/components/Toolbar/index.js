@@ -8,7 +8,7 @@ export default class Toolbar extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            pressed: new Set()
+            pressed: new Set(),
         };
     }
 
@@ -87,7 +87,7 @@ export default class Toolbar extends React.Component {
                               label={item.label}
                               color="primary"
                               style={{
-                                  marginLeft: 12
+                                  marginLeft: 12,
                               }}
                               variant={pressed.has(item.label) ? 'filled' : 'outlined'}
                               onClick={() => {

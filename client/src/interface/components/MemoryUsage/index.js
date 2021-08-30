@@ -28,14 +28,14 @@ export default class MemoryUsage extends React.Component {
             used: 0,
             usedUnit: '',
             quota: 0,
-            quotaUnit: ''
+            quotaUnit: '',
         };
     }
 
     componentDidMount() {
         sftp_quota(
             this.props.fm,
-            this
+            this,
         );
     }
 
@@ -44,7 +44,7 @@ export default class MemoryUsage extends React.Component {
             used,
             usedUnit,
             quota,
-            quotaUnit
+            quotaUnit,
         } = this.state;
         const loading = (quota === 0);
         const loadFailed = (quota === null);

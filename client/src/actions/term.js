@@ -103,42 +103,42 @@ const KEYCODE_KEY_MAPPINGS = {
     219: ['[', '{'],
     220: ['\\', '|'],
     221: [']', '}'],
-    222: ['\'', '"']
+    222: ['\'', '"'],
 };
 
 const KEY_KEYCODE_MAPPINGS = {
     ' ': 32,
 
-    '3':51,
-    '4':52,
-    '5':53,
-    '6':54,
-    '7':55,
-    '8':56,
+    '3': 51,
+    '4': 52,
+    '5': 53,
+    '6': 54,
+    '7': 55,
+    '8': 56,
 
-    '#':51,
-    '$':52,
-    '%':53,
-    '^':54,
-    '&':55,
-    '*':56,
+    '#': 51,
+    '$': 52,
+    '%': 53,
+    '^': 54,
+    '&': 55,
+    '*': 56,
 
-    '[':219,
-    '\\':220,
-    ']':221,
+    '[': 219,
+    '\\': 220,
+    ']': 221,
 
-    '{':219,
-    '|':220,
-    '}':221
+    '{': 219,
+    '|': 220,
+    '}': 221,
 
-}
+};
 
 // TODO: support the other keys
 const evaluateKeyboardEvent = (
     ev,
     applicationCursorMode,
     isMac,
-    macOptionIsMeta
+    macOptionIsMeta,
 ) => {
     const result = {
         type: 0, // KeyboardResultType.SEND_KEY,
@@ -146,7 +146,7 @@ const evaluateKeyboardEvent = (
         // canceled at the end of keyDown
         cancel: false,
         // The new key even to emit
-        key: undefined
+        key: undefined,
     };
     const modifiers = (ev.shiftKey ? 1 : 0) | (ev.altKey ? 2 : 0) | (ev.ctrlKey ? 4 : 0) | (ev.metaKey ? 8 : 0);
     switch (ev.keyCode) {
@@ -456,7 +456,7 @@ const evaluateKeyboardEvent = (
                 if (ev.keyCode === 65) { // cmd + a
                     result.type = 1; // KeyboardResultType.SELECT_ALL;
                 }
-            } else if (ev.key===' '||(ev.key && !ev.ctrlKey && !ev.altKey && !ev.metaKey && ev.keyCode >= 48 && ev.key.length === 1)) {
+            } else if (ev.key === ' ' || (ev.key && !ev.ctrlKey && !ev.altKey && !ev.metaKey && ev.keyCode >= 48 && ev.key.length === 1)) {
                 // Include only keys that that result in a _single_ character; don't include num lock, volume up, etc.
                 result.key = ev.key;
             } else if (ev.key && ev.ctrlKey) {
@@ -470,43 +470,43 @@ const evaluateKeyboardEvent = (
 };
 
 export const sendKey = (TermViewer, ev) => {
-    console.log(ev)
-    if (ev.keyCode === 229){
+    console.log(ev);
+    if (ev.keyCode === 229) {
         const oldValue = TermViewer.term.textarea.value;
-        TermViewer.term.textarea.setSelectionRange(oldValue.length, oldValue.length)
-        setTimeout(()=>{
+        TermViewer.term.textarea.setSelectionRange(oldValue.length, oldValue.length);
+        setTimeout(() => {
             const newValue = TermViewer.term.textarea.value;
-            if (newValue === '_'){
-                sendKey(TermViewer, {key: 'Backspace', keyCode: 8})
+            if (newValue === '_') {
+                sendKey(TermViewer, {key: 'Backspace', keyCode: 8});
             } else {
                 const diff = newValue.replace(oldValue, '');
 
                 if (diff.length === 1) {
-                    const charCode = diff.charCodeAt(0)
+                    const charCode = diff.charCodeAt(0);
                     // try our best to match the char with the keycodes
                     //  so that the ctrl/alt/shift combinations will work
-                    if (charCode >= 65 && charCode <= 90){
-                        sendKey(TermViewer, {key: diff, keyCode: charCode})
+                    if (charCode >= 65 && charCode <= 90) {
+                        sendKey(TermViewer, {key: diff, keyCode: charCode});
                     } else if (charCode >= 97 && charCode <= 122) {
-                        sendKey(TermViewer, {key: diff, keyCode: charCode - 97 + 65})
+                        sendKey(TermViewer, {key: diff, keyCode: charCode - 97 + 65});
                     } else if (diff in KEY_KEYCODE_MAPPINGS) {
-                        sendKey(TermViewer, {key: diff, keyCode: KEY_KEYCODE_MAPPINGS[diff]})
+                        sendKey(TermViewer, {key: diff, keyCode: KEY_KEYCODE_MAPPINGS[diff]});
                     } else {
                         TermViewer.term._core.coreService.triggerDataEvent(diff, true);
                     }
                 } else {
-                  TermViewer.term._core.coreService.triggerDataEvent(diff, true);
+                    TermViewer.term._core.coreService.triggerDataEvent(diff, true);
                 }
             }
 
-            TermViewer.term.textarea.value = '__'
-            TermViewer.term.textarea.setSelectionRange(1,1)
-        },0)
+            TermViewer.term.textarea.value = '__';
+            TermViewer.term.textarea.setSelectionRange(1, 1);
+        }, 0);
         return false;
-    } else if (ev.key==='ArrowLeft'){
-        TermViewer.term.textarea.setSelectionRange(2,2)
-    } else if (ev.key === 'ArrowRight'){
-        TermViewer.term.textarea.setSelectionRange(0,0)
+    } else if (ev.key === 'ArrowLeft') {
+        TermViewer.term.textarea.setSelectionRange(2, 2);
+    } else if (ev.key === 'ArrowRight') {
+        TermViewer.term.textarea.setSelectionRange(0, 0);
     }
     const options = {
         ctrlKey: ev.ctrlKey || TermViewer.ctrlKey,
@@ -514,13 +514,13 @@ export const sendKey = (TermViewer, ev) => {
         metaKey: ev.metaKey || TermViewer.metaKey,
         altKey: ev.altKey || TermViewer.altKey,
         key: ev.key,
-        keyCode: ev.keyCode
+        keyCode: ev.keyCode,
     };
     const result = evaluateKeyboardEvent(
         options,
         TermViewer.term._core.coreService.decPrivateModes.applicationCursorKeys,
         TermViewer.term._core.browser.isMac,
-        TermViewer.term._core.options.macOptionIsMeta
+        TermViewer.term._core.options.macOptionIsMeta,
     );
     if (!result.key) {
         return true;
@@ -551,8 +551,8 @@ const setupDOM = (TermViewer) => {
 
     if (isMobile()) {
         // give some text so that both 'ArrowLeft' and 'ArrowRight' can be triggered
-        TermViewer.term.textarea.value = '__'
-        TermViewer.term.textarea.setSelectionRange(1,1)
+        TermViewer.term.textarea.value = '__';
+        TermViewer.term.textarea.setSelectionRange(1, 1);
 
         TermViewer.term.attachCustomKeyEventHandler((ev) => {
             if (ev.type !== 'keydown') {
@@ -624,11 +624,11 @@ const setupResize = (term, sessionID, term_id) => {
         //  thus saving network bandwidth among the client, the server, and the target
         clearTimeout(resize_timeout);
         resize_timeout = setTimeout(() => {
-            axios.patch(`/terminal_resize`, {
+            axios.patch(`/api/terminal_resize`, {
                 session_id: sessionID,
                 term_id: term_id,
                 w: cols,
-                h: rows
+                h: rows,
             }).then(_ => {
                 term.scrollToBottom();
             }).catch(error => {
@@ -648,12 +648,12 @@ export const termConnect = async (TermViewer) => {
     const options = {
         method: 'POST',
         headers: {
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
         },
-        body: JSON.stringify({session_id: TermViewer.session_id})
+        body: JSON.stringify({session_id: TermViewer.session_id}),
     };
 
-    const response = await fetch(`/terminal`, options);
+    const response = await fetch(`/api/terminal`, options);
     if (response.status !== 200) {
         console.log(response.body);
         return;
@@ -684,7 +684,7 @@ export const termConnect = async (TermViewer) => {
 
             /* need to set the state 'loading' to false so that the term div is visible and can be focused on */
             TermViewer.setState({
-                loading: false
+                loading: false,
             });
 
             /* focus on the terminal once everything finishes loading */
@@ -704,7 +704,7 @@ export const termConnect = async (TermViewer) => {
         if (data.includes(ICtrlStep.Term.DONE)) {
             // update the current step to 'DONE' and wait for the whole stream to be transferred
             TermViewer.setState({
-                currentStep: ICtrlStep.Term.DONE
+                currentStep: ICtrlStep.Term.DONE,
             });
         } else {
             // if the step 'DONE' is not present in 'data',
@@ -714,16 +714,16 @@ export const termConnect = async (TermViewer) => {
             if (currentStep < 100) {
                 // not an error
                 TermViewer.setState({
-                    currentStep: currentStep
+                    currentStep: currentStep,
                 });
             } else {
                 TermViewer.setState({
-                    currentStep: data.slice(-2)[0]
+                    currentStep: data.slice(-2)[0],
                 });
                 // handle the errors / server requests
                 if (currentStep === ICtrlError.SSH.HOST_UNREACHABLE) {
                     TermViewer.setState({
-                        authentication: SSHHostUnreachableRefresh
+                        authentication: SSHHostUnreachableRefresh,
                     });
                 } else {
                     console.log(`Term error code: ${currentStep}`);

@@ -5,19 +5,19 @@ export const sftp_ls = (fm, path) => {
     fm.setState({
         loading: true,
         alertMsg: null,
-        alertOpen: false
+        alertOpen: false,
     });
-    axios.get(`/sftp_ls/${fm.session_id}`, {
+    axios.get(`/api/sftp_ls/${fm.session_id}`, {
         params: {
-            path: path
-        }
+            path: path,
+        },
     }).then(response => {
         fm.files = response.data.files;
         fm.setState({
             cwd: response.data.cwd,
             cwdInput: response.data.cwd,
             filesDisplaying: fm.showHidden ? fm.files : fm.nonHiddenFiles(),
-            loading: false
+            loading: false,
         });
     }).catch(error => {
         if (error.response) {
@@ -32,7 +32,7 @@ export const sftp_ls = (fm, path) => {
 export const sftp_dl = (session_id, cwd, files) => {
     const a = document.createElement('a');
     a.download = '';
-    a.href = `/sftp_dl/${session_id}?` +
+    a.href = `/api/sftp_dl/${session_id}?` +
         `cwd=${cwd}&` +
         `files=${JSON.stringify(files)}`;
     a.click();
@@ -49,18 +49,18 @@ export const sftp_ul = (fm, session_id, cwd, file, isDirectory) => {
             loaded: 0,
             totalSize: file.size,
             cancelTokenSrc: cancelTokenSrc,
-            cancelled: false
-        }]
+            cancelled: false,
+        }],
     });
     const startTime = new Date().getTime();
     axios.post(
-        `/sftp_ul/${session_id}`,
+        `/api/sftp_ul/${session_id}`,
         file,
         {
             cancelToken: cancelTokenSrc.token,
             headers: {
                 Cwd: cwd,
-                Path: isDirectory ? (file.webkitRelativePath) : (file.name)
+                Path: isDirectory ? (file.webkitRelativePath) : (file.name),
             },
             onUploadProgress: progressEvent => {
                 const percentage = Math.floor(progressEvent.loaded * 100 / progressEvent.total);
@@ -76,12 +76,12 @@ export const sftp_ul = (fm, session_id, cwd, file, isDirectory) => {
                             ...uploadProgress[uploadProgressIdx],
                             progress: percentage,
                             speed: speed,
-                            loaded: progressEvent.loaded
+                            loaded: progressEvent.loaded,
                         },
-                        ...uploadProgress.slice(uploadProgressIdx + 1)
-                    ]
+                        ...uploadProgress.slice(uploadProgressIdx + 1),
+                    ],
                 }));
-            }
+            },
         }).then(_ => {
         fm.loadDir(fm.state.cwd);
     }).catch(error => {
@@ -95,10 +95,10 @@ export const sftp_ul = (fm, session_id, cwd, file, isDirectory) => {
 };
 
 export const sftp_rename = (fm, session_id, cwd, old_name, new_name) => {
-    axios.patch(`/sftp_rename/${session_id}`, {
+    axios.patch(`/api/sftp_rename/${session_id}`, {
         cwd: cwd,
         old: old_name,
-        new: new_name
+        new: new_name,
     }).then(_ => {
         fm.loadDir(fm.state.cwd);
     }).catch(error => {
@@ -107,10 +107,10 @@ export const sftp_rename = (fm, session_id, cwd, old_name, new_name) => {
 };
 
 export const sftp_rm = (fm, session_id, cwd, files) => {
-    axios.post(`/sftp_rm/${session_id}`,
+    axios.post(`/api/sftp_rm/${session_id}`,
         {
             cwd: cwd,
-            files: files
+            files: files,
         }).then(_ => {
         fm.loadDir(fm.state.cwd);
     }).catch(error => {
@@ -126,12 +126,12 @@ export const sftp_rm = (fm, session_id, cwd, files) => {
 
 export const sftp_chmod = (fm, cwd, name, mode, recursive) => {
     fm.setState({
-        loading: true
+        loading: true,
     });
-    axios.patch(`/sftp_chmod/${fm.session_id}`, {
+    axios.patch(`/api/sftp_chmod/${fm.session_id}`, {
         path: `${cwd}/${name}`,
         mode: mode,
-        recursive: recursive
+        recursive: recursive,
     }).then(_ => {
         fm.loadDir(cwd);
     }).catch(error => {
@@ -148,9 +148,9 @@ export const sftp_chmod = (fm, cwd, name, mode, recursive) => {
 export const sftp_quota = (fm, ms) => {
     // load silently as much as possible
     // because not all machines support quota checking
-    axios.post('/exec_blocking', {
+    axios.post('/api/exec_blocking', {
         session_id: fm.session_id,
-        cmd: 'quota -s | tail -n 1'
+        cmd: 'quota -s | tail -n 1',
     }).then(res => {
         const mem = res.data.match(/[0-9]+[a-zA-Z]+/g);
         ms.setState({

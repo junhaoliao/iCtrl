@@ -6,13 +6,13 @@ from pathlib import Path
 from flask import request, abort, stream_with_context
 
 from .common import create_connection
-from .. import app
+from .. import api, app
 from ..codes import ConnectionType
 
 UPLOAD_CHUNK_SIZE = 1024 * 1024
 
 
-@app.route('/sftp_ls/<session_id>')
+@api.route('/sftp_ls/<session_id>')
 def sftp_ls(session_id):
     path = request.args.get('path')
 
@@ -32,7 +32,7 @@ def sftp_ls(session_id):
     return json.dumps(result)
 
 
-@app.route('/sftp_dl/<session_id>')
+@api.route('/sftp_dl/<session_id>')
 def sftp_dl(session_id):
     cwd = request.args.get('cwd')
     args_files = request.args.get('files')
@@ -64,7 +64,7 @@ def sftp_dl(session_id):
     return r
 
 
-@app.route('/sftp_rename/<session_id>', methods=['PATCH'])
+@api.route('/sftp_rename/<session_id>', methods=['PATCH'])
 def sftp_rename(session_id):
     cwd = request.json.get('cwd')
     old = request.json.get('old')
@@ -81,7 +81,7 @@ def sftp_rename(session_id):
     return 'success'
 
 
-@app.route('/sftp_chmod/<session_id>', methods=['PATCH'])
+@api.route('/sftp_chmod/<session_id>', methods=['PATCH'])
 def sftp_chmod(session_id):
     path = request.json.get('path')
     mode = request.json.get('mode')
@@ -98,7 +98,7 @@ def sftp_chmod(session_id):
     return 'success'
 
 
-@app.route('/sftp_mkdir/<session_id>', methods=['PUT'])
+@api.route('/sftp_mkdir/<session_id>', methods=['PUT'])
 def sftp_mkdir(session_id):
     cwd = request.json.get('cwd')
     name = request.json.get('name')
@@ -114,7 +114,7 @@ def sftp_mkdir(session_id):
     return 'success'
 
 
-@app.route('/sftp_ul/<session_id>', methods=['POST'])
+@api.route('/sftp_ul/<session_id>', methods=['POST'])
 def sftp_ul(session_id):
     cwd = request.headers.get('Cwd')
     # no need to use secure_filename because the user should be responsible for her/his input
@@ -147,7 +147,7 @@ def sftp_ul(session_id):
     return 'success'
 
 
-@app.route('/sftp_rm/<session_id>', methods=['POST'])
+@api.route('/sftp_rm/<session_id>', methods=['POST'])
 def sftp_rm(session_id):
     cwd = request.json.get('cwd')
     files = request.json.get('files')

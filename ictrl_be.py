@@ -1,5 +1,5 @@
 if __name__ == '__main__':
-    from application import app, APP_HOST, APP_PORT
+    from application import api, app, APP_HOST, APP_PORT
 
     if not app.debug:
         import os
@@ -17,4 +17,5 @@ if __name__ == '__main__':
             else:
                 return send_from_directory(app.static_folder, 'index.html')
 
+    app.register_blueprint(api, url_prefix='/api')
     app.run(host=APP_HOST, port=APP_PORT)

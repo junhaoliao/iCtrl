@@ -1,14 +1,14 @@
+import os
 import re
 import uuid
-import os
 from io import StringIO
 
 import bcrypt
 import sqlalchemy
+from flask import session as flask_session, abort
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import validates
-from flask import session as flask_session, abort
 
 
 class DBProfile:
@@ -181,13 +181,13 @@ class DBProfile:
         return True, ''
 
     def get_session(self, session_id):
-        user = self.get_user()
+        Session = self.tables['Session']
 
-        for session in user.sessions:
-            if session.id.hex == session_id:
-                return session
+        if 'userid' not in flask_session:
+            abort(403, 'You are not logged in')
+        userid = flask_session['userid']
 
-        return None
+        return Session.query.filter_by(id=session_id, user_id=userid).first()
 
     def delete_session(self, session_id):
         session = self.get_session(session_id)

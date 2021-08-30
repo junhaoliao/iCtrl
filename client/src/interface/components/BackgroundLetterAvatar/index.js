@@ -26,7 +26,7 @@ const BackgroundLetterAvatar = (props) => {
 
     return (<Avatar sx={{
         backgroundColor: stringToColor(name),
-        fontSize: 'small'
+        fontSize: 'small',
     }}>
         {hostname === '192' ? name.substr(-5, 5) : hostname}
     </Avatar>);

@@ -1,8 +1,9 @@
+import json
 from io import BytesIO
 
 from flask import request, abort, send_file
 
-from .. import app, profiles
+from .. import api, profiles
 from ..codes import ICtrlError, ConnectionType
 from ..features.Connection import Connection
 from ..features.Favicon import Favicon
@@ -48,14 +49,22 @@ def is_ecf(session_id):
     return host.endswith('.ecf.utoronto.ca') or host.endswith('ecf.toronto.edu')
 
 
-@app.route('/profiles')
+@api.route('/profiles')
 def get_profiles():
     return profiles.query()
 
 
-@app.route('/session', methods=['POST', 'PATCH', 'DELETE'])
+@api.route('/session', methods=['GET', 'POST', 'PATCH', 'DELETE'])
 def handle_session():
-    if request.method == 'POST':
+    if request.method == 'GET':
+        session_id = request.args.get('id')
+        host, username, _, _ = profiles.get_session_info(session_id)
+
+        return json.dumps({
+            'host': host,
+            'username': username
+        })
+    elif request.method == 'POST':
         host = request.json.get('host')
         username = request.json.get('username')
         # FIXME: password should be optional
@@ -96,7 +105,7 @@ def handle_session():
         abort(405)
 
 
-@app.route('/exec_blocking', methods=['POST'])
+@api.route('/exec_blocking', methods=['POST'])
 def exec_blocking():
     session_id = request.json.get('session_id')
     cmd = request.json.get('cmd')
@@ -112,7 +121,7 @@ def exec_blocking():
     return '\n'.join(stdout) + '\n' + '\n'.join(stderr)
 
 
-@app.route('/favicon/<feature>/<session_id>')
+@api.route('/favicon/<feature>/<session_id>')
 def generate_favicon(feature, session_id):
     host, _, _, _ = profiles.get_session_info(session_id)
     if host is None:

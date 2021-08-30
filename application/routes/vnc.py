@@ -3,12 +3,12 @@ import json
 from flask import request, abort, stream_with_context
 
 from .common import create_connection, is_ecf
-from .. import app
+from .. import api, app
 from ..codes import ICtrlStep, ICtrlError, ConnectionType
 from ..utils import int_to_bytes
 
 
-@app.route('/vnc', methods=['POST'])
+@api.route('/vnc', methods=['POST'])
 def start_vnc():
     session_id = request.json.get('session_id')
 
@@ -60,7 +60,7 @@ def start_vnc():
     return app.response_class(stream_with_context(generate()), mimetype='application/octet-stream')
 
 
-@app.route('/vncpasswd', methods=['POST'])
+@api.route('/vncpasswd', methods=['POST'])
 def change_vncpasswd():
     session_id = request.json.get('session_id')
 
@@ -76,7 +76,7 @@ def change_vncpasswd():
     return 'success'
 
 
-@app.route('/vnc_reset', methods=['POST'])
+@api.route('/vnc_reset', methods=['POST'])
 def reset_vnc():
     session_id = request.json.get('session_id')
 

@@ -8,7 +8,7 @@ import {
     DialogTitle,
     IconButton,
     Toolbar,
-    Typography
+    Typography,
 } from '@material-ui/core';
 import {Close, ExpandLess, ExpandMore} from '@material-ui/icons';
 import {makeStyles} from '@material-ui/styles';
@@ -18,11 +18,11 @@ const useStyles = makeStyles((theme) => ({
     root: {
         background: '#1976d2',
         color: 'white',
-        flexGrow: 1
+        flexGrow: 1,
     },
     title: {
-        flexGrow: 1
-    }
+        flexGrow: 1,
+    },
 }));
 
 
@@ -39,7 +39,7 @@ const UploadToolbar = (props) => {
             item.cancelTokenSrc.cancel();
         });
         fm.setState({
-            uploadProgress: []
+            uploadProgress: [],
         });
     };
 
@@ -53,7 +53,7 @@ const UploadToolbar = (props) => {
         });
         if (!shouldPrompt) {
             fm.setState({
-                uploadProgress: []
+                uploadProgress: [],
             });
         } else {
             setCancelAllPromptOpen(true);
@@ -61,7 +61,7 @@ const UploadToolbar = (props) => {
     };
     const handleUploadWindowCollapse = (ev) => {
         fm.setState({
-            uploadWindowCollapsed: !fm.state.uploadWindowCollapsed
+            uploadWindowCollapsed: !fm.state.uploadWindowCollapsed,
         });
     };
 
