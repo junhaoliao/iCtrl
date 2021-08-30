@@ -1,0 +1,31 @@
+.home-page-background {
+    height: 100vh;
+    width: 100vw;
+    /* background-color: #000000; */
+    position: fixed;
+}
+
+.home-page-main-wrapper {
+    display: flex;
+    flex-direction: row;
+    height: -webkit-fill-available;
+    margin: 50px;
+    background-color: #FFFFFF;
+    align-items: center;
+}
+
+.ictrl-logo {
+    /* height: 100px;
+    width: 100px; */
+    flex: 3;
+    /* margin: 100px; */
+    max-width: 50vw;
+    max-height: 50vh;
+}
+
+.split {
+    background-color: #c2c2c2;
+    margin: 0 50px;
+    height: 80%;
+    width: 2px;
+}
