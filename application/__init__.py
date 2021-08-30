@@ -1,7 +1,7 @@
 import os
 import sys
 
-from flask import Flask, send_from_directory
+from flask import Flask
 from werkzeug.serving import WSGIRequestHandler
 
 # enable persistent HTTP connections (keep-alive)
@@ -32,13 +32,3 @@ except IndexError:
 
 from .routes import *
 
-if not app.debug:
-    # Reference: https://stackoverflow.com/questions/44209978/serving-a-front-end-created-with-create-react-app-with
-    # -flask
-    @app.route('/', defaults={'path': ''})
-    @app.route('/<path:path>')
-    def serve(path):
-        if path != "" and os.path.exists(os.path.join(app.static_folder, path)):
-            return send_from_directory(app.static_folder, path)
-        else:
-            return send_from_directory(app.static_folder, 'index.html')

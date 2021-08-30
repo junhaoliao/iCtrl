@@ -7,3 +7,5 @@
 **/*.pyc
 
 /build
+
+/ictrl.conf
