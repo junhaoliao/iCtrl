@@ -4,11 +4,13 @@ import {
     Tabs,
     Tab,
     Box,
-    Typography,
-    TextField
+    TextField,
 } from '@material-ui/core';
+import { Visibility, VisibilityOff } from '@material-ui/icons';
 import SwipeableViews from 'react-swipeable-views';
 import { LoadingButton } from '@material-ui/lab';
+import { htmlResponseToReason } from '../../../actions/utils';
+import axios from 'axios';
 
 import './index.css';
 
@@ -20,6 +22,10 @@ export default class LogIn extends React.Component {
             value: 0,
             index: 0,
             loading: false,
+            username: '',
+            email: '',
+            password: '',
+            logInTab: true,
         };
     }
 
@@ -56,22 +62,71 @@ export default class LogIn extends React.Component {
 
     handleLogInTab = () => {
         // Click on LogIn tab
+        // If clicking the tab when currently on it, cannot get the value of sign in box
+        const { logInTab } = this.state;
+        if (logInTab === false) {
+            const username = document.getElementById('sign-up-user').value;
+            username !== this.state.username && this.setState({ username });
+
+            const email = document.getElementById('sign-up-email').value;
+            email !== this.state.email && this.setState({ email });
+
+            const password = document.getElementById('sign-up-password').value;
+            password !== this.state.password && this.setState({ password });
+
+            this.setState({ logInTab: true });
+        }
+
     }
 
     handleSignUpTab = () => {
         // Click on SignUp tab
+        const { logInTab } = this.state;
+        if (logInTab === true) {
+            const username = document.getElementById('log-in-user').value;
+            username !== this.state.username && this.setState({ username });
+
+            const password = document.getElementById('log-in-password').value;
+            password !== this.state.password && this.setState({ password });
+
+            this.setState({ logInTab: false });
+        }
+
     }
 
     handleButtonClick = (ev) => {
         if (ev.target && ev.target.id === 'button-log-in') {
             // Click on LogIn button
+            const username = document.getElementById('log-in-user').value || '';
+            const password = document.getElementById('log-in-password').value || '';
+            console.log(username, password);
+            axios.post('/login', {
+                username, password
+            }).catch(error => {
+                this.setState({
+                    error: htmlResponseToReason(error.response.data),
+                    loading: false,
+                });
+            });
         } else if (ev.target && ev.target.id === 'button-sign-up') {
-            // Click on SignUp button 
+            // Click on SignUp button
+            const username = document.getElementById('sign-up-user').value || '';
+            const email = document.getElementById('sign-up-email').value || '';
+            const password = document.getElementById('sign-up-password').value || '';
+            console.log(username, email, password);
+            axios.post('/register', {
+                username, password, email
+            }).catch(error => {
+                this.setState({
+                    error: htmlResponseToReason(error.response.data),
+                    loading: false,
+                });
+            });
         }
     }
 
     render() {
-        const { value, loading } = this.state;
+        const { value, loading, username, email, password } = this.state;
 
         return (
             <div className="log-in-wrapper">
@@ -107,7 +162,7 @@ export default class LogIn extends React.Component {
                                             required
                                             id="log-in-user"
                                             label="UserName/Email"
-                                            defaultValue=""
+                                            defaultValue={username || ""}
                                             variant="outlined"
                                             style={{ width: '100%' }}
                                         />
@@ -117,16 +172,17 @@ export default class LogIn extends React.Component {
                                             required
                                             id="log-in-password"
                                             label="PassWord"
-                                            defaultValue=""
+                                            defaultValue={password || ""}
                                             variant="outlined"
+                                            type="password"
                                             style={{ width: '100%' }}
                                         />
                                     </div>
                                     <LoadingButton variant={'contained'}
-                                        id={'button-save'}
+                                        id={'button-log-in'}
                                         loading={loading}
                                         loadingIndicator={'Saving...'}
-                                        onClick={this.handleButtonClick}
+                                        onClick={(e) => this.handleButtonClick(e)}
                                         className="submit-button">
                                         Log In
                                     </LoadingButton>
@@ -148,7 +204,7 @@ export default class LogIn extends React.Component {
                                             required
                                             id="sign-up-user"
                                             label="UserName"
-                                            defaultValue=""
+                                            defaultValue={username || ""}
                                             variant="outlined"
                                             style={{ width: '100%' }}
                                         />
@@ -158,7 +214,7 @@ export default class LogIn extends React.Component {
                                             required
                                             id="sign-up-email"
                                             label="Email"
-                                            defaultValue=""
+                                            defaultValue={email || ""}
                                             variant="outlined"
                                             style={{ width: '100%' }}
                                         />
@@ -168,16 +224,17 @@ export default class LogIn extends React.Component {
                                             required
                                             id="sign-up-password"
                                             label="PassWord"
-                                            defaultValue=""
+                                            defaultValue={password || ""}
                                             variant="outlined"
+                                            type="password"
                                             style={{ width: '100%' }}
                                         />
                                     </div>
                                     <LoadingButton variant={'contained'}
-                                        id={'button-save'}
+                                        id={'button-sign-up'}
                                         loading={loading}
                                         loadingIndicator={'Saving...'}
-                                        onClick={this.handleButtonClick}
+                                        onClick={(e) => this.handleButtonClick(e)}
                                         className="submit-button">
                                         Sign Up
                                     </LoadingButton>
