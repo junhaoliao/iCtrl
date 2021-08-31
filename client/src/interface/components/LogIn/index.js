@@ -1,15 +1,8 @@
 import React from 'react';
-import {
-    AppBar,
-    Tabs,
-    Tab,
-    Box,
-    TextField,
-} from '@material-ui/core';
-import { Visibility, VisibilityOff } from '@material-ui/icons';
+import {AppBar, Box, Tab, Tabs, TextField,} from '@material-ui/core';
 import SwipeableViews from 'react-swipeable-views';
-import { LoadingButton } from '@material-ui/lab';
-import { htmlResponseToReason } from '../../../actions/utils';
+import {LoadingButton} from '@material-ui/lab';
+import {htmlResponseToReason} from '../../../actions/utils';
 import axios from 'axios';
 
 import './index.css';
@@ -46,11 +39,11 @@ export default class LogIn extends React.Component {
                 console.log('nothing');
                 break;
         }
-    }
+    };
 
     handleChange = (event, newValue) => {
         // console.log(newValue)
-        this.setState({ value: newValue })
+        this.setState({value: newValue});
     };
 
     a11yProps = (index) => {
@@ -63,36 +56,36 @@ export default class LogIn extends React.Component {
     handleLogInTab = () => {
         // Click on LogIn tab
         // If clicking the tab when currently on it, cannot get the value of sign in box
-        const { logInTab } = this.state;
+        const {logInTab} = this.state;
         if (logInTab === false) {
             const username = document.getElementById('sign-up-user').value;
-            username !== this.state.username && this.setState({ username });
+            username !== this.state.username && this.setState({username});
 
             const email = document.getElementById('sign-up-email').value;
-            email !== this.state.email && this.setState({ email });
+            email !== this.state.email && this.setState({email});
 
             const password = document.getElementById('sign-up-password').value;
-            password !== this.state.password && this.setState({ password });
+            password !== this.state.password && this.setState({password});
 
-            this.setState({ logInTab: true });
+            this.setState({logInTab: true});
         }
 
-    }
+    };
 
     handleSignUpTab = () => {
         // Click on SignUp tab
-        const { logInTab } = this.state;
+        const {logInTab} = this.state;
         if (logInTab === true) {
             const username = document.getElementById('log-in-user').value;
-            username !== this.state.username && this.setState({ username });
+            username !== this.state.username && this.setState({username});
 
             const password = document.getElementById('log-in-password').value;
-            password !== this.state.password && this.setState({ password });
+            password !== this.state.password && this.setState({password});
 
-            this.setState({ logInTab: false });
+            this.setState({logInTab: false});
         }
 
-    }
+    };
 
     handleButtonClick = (ev) => {
         if (ev.target && ev.target.id === 'button-log-in') {
@@ -100,22 +93,27 @@ export default class LogIn extends React.Component {
             const username = document.getElementById('log-in-user').value || '';
             const password = document.getElementById('log-in-password').value || '';
             console.log(username, password);
-            axios.post('/login', {
+            axios.post('/api/login', {
                 username, password
-            }).catch(error => {
-                this.setState({
-                    error: htmlResponseToReason(error.response.data),
-                    loading: false,
+            }).then(response => {
+                window.location = '/dashboard';
+            })
+                .catch(error => {
+                    this.setState({
+                        error: htmlResponseToReason(error.response.data),
+                        loading: false,
+                    });
                 });
-            });
         } else if (ev.target && ev.target.id === 'button-sign-up') {
             // Click on SignUp button
             const username = document.getElementById('sign-up-user').value || '';
             const email = document.getElementById('sign-up-email').value || '';
             const password = document.getElementById('sign-up-password').value || '';
             console.log(username, email, password);
-            axios.post('/register', {
+            axios.post('/api/register', {
                 username, password, email
+            }).then(response => {
+                window.location = '/';
             }).catch(error => {
                 this.setState({
                     error: htmlResponseToReason(error.response.data),
@@ -123,10 +121,10 @@ export default class LogIn extends React.Component {
                 });
             });
         }
-    }
+    };
 
     render() {
-        const { value, loading, username, email, password } = this.state;
+        const {value, loading, username, email, password} = this.state;
 
         return (
             <div className="log-in-wrapper">
@@ -139,14 +137,13 @@ export default class LogIn extends React.Component {
                         variant="fullWidth"
                         aria-label="full width tabs example"
                     >
-                        <Tab label="Log In" {...this.a11yProps(0)} onClick={() => this.handleLogInTab()} />
-                        <Tab label="Sign Up" {...this.a11yProps(1)} onClick={() => this.handleSignUpTab()} />
+                        <Tab label="Log In" {...this.a11yProps(0)} onClick={() => this.handleLogInTab()}/>
+                        <Tab label="Sign Up" {...this.a11yProps(1)} onClick={() => this.handleSignUpTab()}/>
                     </Tabs>
                 </AppBar>
                 <SwipeableViews
-                    axis='x-reverse'
+                    axis="x-reverse"
                     index={value}
-                    style={{ height: '80%', alignContent: 'center' }}
                 >
                     <div
                         role="tabpanel"
@@ -161,29 +158,30 @@ export default class LogIn extends React.Component {
                                         <TextField
                                             required
                                             id="log-in-user"
-                                            label="UserName/Email"
-                                            defaultValue={username || ""}
+                                            label="Username / Email"
+                                            defaultValue={username || ''}
                                             variant="outlined"
-                                            style={{ width: '100%' }}
+                                            fullWidth={true}
+
                                         />
                                     </div>
                                     <div className="input-wrapper">
                                         <TextField
                                             required
                                             id="log-in-password"
-                                            label="PassWord"
-                                            defaultValue={password || ""}
+                                            label="Password"
+                                            defaultValue={password || ''}
                                             variant="outlined"
                                             type="password"
-                                            style={{ width: '100%' }}
+                                            fullWidth={true}
                                         />
                                     </div>
                                     <LoadingButton variant={'contained'}
-                                        id={'button-log-in'}
-                                        loading={loading}
-                                        loadingIndicator={'Saving...'}
-                                        onClick={(e) => this.handleButtonClick(e)}
-                                        className="submit-button">
+                                                   id={'button-log-in'}
+                                                   loading={loading}
+                                                   loadingIndicator={'Saving...'}
+                                                   onClick={(e) => this.handleButtonClick(e)}
+                                                   className="submit-button">
                                         Log In
                                     </LoadingButton>
                                 </div>
@@ -203,10 +201,10 @@ export default class LogIn extends React.Component {
                                         <TextField
                                             required
                                             id="sign-up-user"
-                                            label="UserName"
-                                            defaultValue={username || ""}
+                                            label="Username"
+                                            defaultValue={username || ''}
                                             variant="outlined"
-                                            style={{ width: '100%' }}
+                                            fullWidth={true}
                                         />
                                     </div>
                                     <div className="input-wrapper">
@@ -214,28 +212,28 @@ export default class LogIn extends React.Component {
                                             required
                                             id="sign-up-email"
                                             label="Email"
-                                            defaultValue={email || ""}
+                                            defaultValue={email || ''}
                                             variant="outlined"
-                                            style={{ width: '100%' }}
+                                            fullWidth={true}
                                         />
                                     </div>
                                     <div className="input-wrapper">
                                         <TextField
                                             required
                                             id="sign-up-password"
-                                            label="PassWord"
-                                            defaultValue={password || ""}
+                                            label="Password"
+                                            defaultValue={password || ''}
                                             variant="outlined"
                                             type="password"
-                                            style={{ width: '100%' }}
+                                            fullWidth={true}
                                         />
                                     </div>
                                     <LoadingButton variant={'contained'}
-                                        id={'button-sign-up'}
-                                        loading={loading}
-                                        loadingIndicator={'Saving...'}
-                                        onClick={(e) => this.handleButtonClick(e)}
-                                        className="submit-button">
+                                                   id={'button-sign-up'}
+                                                   loading={loading}
+                                                   loadingIndicator={'Saving...'}
+                                                   onClick={(e) => this.handleButtonClick(e)}
+                                                   className="submit-button">
                                         Sign Up
                                     </LoadingButton>
                                 </div>
@@ -244,6 +242,6 @@ export default class LogIn extends React.Component {
                     </div>
                 </SwipeableViews>
             </div>
-        )
+        );
     }
 }
