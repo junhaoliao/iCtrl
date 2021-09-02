@@ -3,7 +3,7 @@ import threading
 import uuid
 from typing import Optional
 
-from SimpleWebSocketServer import SimpleWebSocketServer, WebSocket
+from SimpleWebSocketServer import SimpleSSLWebSocketServer, WebSocket, SimpleWebSocketServer
 from paramiko import Channel
 
 from .Connection import Connection
@@ -91,5 +91,16 @@ class TerminalSocket(WebSocket):
 # if we are in debug mode, run the server in the second round
 if not app.debug or os.environ.get("WERKZEUG_RUN_MAIN") == "true":
     TERMINAL_PORT = find_free_port()
-    terminal_server = SimpleWebSocketServer('', TERMINAL_PORT, TerminalSocket)
+    if os.environ.get('SSL_CERT_PATH') is None:
+        # no certificate provided, run in non-encrypted mode
+        # FIXME: consider using a self-signing certificate for local connections
+        terminal_server = SimpleWebSocketServer('', TERMINAL_PORT, TerminalSocket)
+    else:
+        import ssl
+
+        terminal_server = SimpleSSLWebSocketServer('', TERMINAL_PORT, TerminalSocket,
+                                                   certfile=os.environ.get('SSL_CERT_PATH'),
+                                                   keyfile=os.environ.get('SSL_KEY_PATH'),
+                                                   version=ssl.PROTOCOL_TLS)
+
     threading.Thread(target=terminal_server.serveforever).start()
