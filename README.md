@@ -1,6 +1,6 @@
 # iCtrl
 
-**SSH Remote Desktop Client / Web Service**
+**SSH Remote Desktop Client / Web Service** (Previously known as **UG_Remote**)
 
 ## Config the Flask Application with Apache2
 
