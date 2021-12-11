@@ -105,7 +105,13 @@
         </div>
         <div class="ui huge secondary button"
              onclick="download('Mac')">
-            <i class="apple icon"></i>Download
+            <i class="apple icon"></i>
+            Intel Download
+        </div>
+        <div class="ui huge secondary button"
+             onclick="download('MacM1')">
+            <i class="apple icon"></i>
+             M1 Download
         </div>
     </div>
     <div class="view_source_bug_report">
@@ -123,6 +129,8 @@
             download_link ='https://github.com/junhaoliao/iCtrl/releases/latest/download/ictrl-desktop-setup.exe'
         } else if (platform === "Mac") {
             download_link = 'https://github.com/junhaoliao/iCtrl/releases/latest/download/ictrl-desktop-setup.dmg'
+        } else if (platform === 'MacM1') {
+            download_link = 'https://github.com/junhaoliao/iCtrl/releases/latest/download/ictrl-desktop-setup-arm64.dmg'
         }
         location.href = download_link
 
