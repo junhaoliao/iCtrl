@@ -1,11 +1,11 @@
 import React from 'react';
 
 import {
-    // Input,
     AppBar,
     Toolbar,
     Typography,
-    Button
+    Button,
+    Box, Divider, Hidden
 } from '@material-ui/core';
 import axios from 'axios';
 import ictrlLogo from '../../../icons/logo.png';
@@ -16,9 +16,6 @@ import './index.css';
 export default class Home extends React.Component {
     constructor(props) {
         super(props);
-        this.state = {
-            counter: 1,
-        };
     }
 
     componentDidMount() {
@@ -29,39 +26,44 @@ export default class Home extends React.Component {
             .catch(_ => {
                 // do nothing for now
             });
-
-        // TODO: remove this
-        setInterval(() => {
-            this.setState({
-                counter: this.state.counter + 1,
-            });
-        }, 100);
     }
 
     render() {
         return (
-            <div className="home-page-background">
-                <AppBar position="static">
+            <div>
+                <AppBar position="static" color={'info'}>
                     <Toolbar>
-                        <img src={ictrlLogo} style={{height: 30, width: 30, marginRight: 10}} alt="" />
-                        <Typography style={{flex: 1}} variant="h6">
+                        <img src={ictrlLogo} style={{background: 'white', height: 30, width: 30, marginRight: 10}}
+                             alt=""/>
+                        <Typography style={{flex: 1, fontWeight: 'bold'}} variant="h6">
                             iCtrl
                         </Typography>
-                        <Button color="inherit">Team</Button>
+                        <Button color={'inherit'}>About</Button>
                     </Toolbar>
                 </AppBar>
-                {/* <h1>I'm the Home Page</h1>
-                <h1>Counter: </h1>
-                <Input value={this.state.counter}/>
-                <div style={{height: 100}}/>
-                <h1>I'm also the Login Page</h1>
-                <h1>I'm also the Signup Page</h1> */}
-                <div className="home-page-main-wrapper">
-                    <div style={{ flex: 2, height: '80%' }}>
-                        <img src={ictrlLogo} className="ictrl-logo" alt="" />
-                    </div>
-                    <div className="split" />
-                    <LogIn />
+
+                <Box sx={{display:'flex'}}>
+                    <Hidden mdDown>
+                        <Box sx={{flex:5, alignSelf:'center', alignItems:'center'}}>
+                            <img style={{display:'block', maxWidth: '240px', marginLeft:'auto', marginRight:'auto'}}
+                            src={ictrlLogo} alt=""/>
+                            <br/><br/>
+                            <Typography
+                                align={'center'}
+                                variant={'h5'}>
+                                Connect to uoft engineering labs in 5 seconds.
+                            </Typography>
+                        </Box>
+                    </Hidden>
+
+                    <Divider orientation="vertical" flexItem/>
+
+                    <Box sx={{flex:3}}>
+                        <LogIn/>
+                    </Box>
+                </Box>
+                <div>
+                    Intro
                 </div>
             </div>
         );
