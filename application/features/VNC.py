@@ -1,3 +1,4 @@
+import os
 import re
 import threading
 
@@ -9,12 +10,22 @@ from ..utils import find_free_port
 
 
 def websocket_proxy_thread(local_websocket_port, local_vnc_port):
-    proxy_server = websockify.LibProxyServer(listen_port=local_websocket_port, target_host='',
-                                             target_port=local_vnc_port,
-                                             run_once=True)
-    proxy_server.serve_forever()
-    proxy_server.server_close()
+    if os.environ.get('SSL_CERT_PATH') is None:
+        # no certificate provided, run in non-encrypted mode
+        # FIXME: consider using a self-signing certificate for local connections
+        proxy_server = websockify.LibProxyServer(listen_port=local_websocket_port, target_host='',
+                                                 target_port=local_vnc_port,
+                                                 run_once=True)
+        proxy_server.serve_forever()
+        proxy_server.server_close()
+    else:
+        import subprocess
 
+        subprocess.run(["/var/www/ictrl/application/websockify-other/c/websockify",
+                        local_websocket_port, f':{local_vnc_port}',
+                        '--run-once', '--ssl-only',
+                        '--cert', os.environ.get('SSL_CERT_PATH'),
+                        '--key', os.environ.get('SSL_KEY_PATH')])
 
 class VNC(Connection):
     def __init__(self):
