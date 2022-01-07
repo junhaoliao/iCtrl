@@ -40,6 +40,13 @@ pip install -r requirements.txt
 cd client
 npm i
 npm run build
+
+# build websockify for ssh tunnel
+git submodule init
+git submodule update
+sudo apt install libssl-dev -y
+cd application/websockify-other/c
+make
 ```
 
 ### Install and Enable the Apache 2 module 'mod_wsgi'
@@ -96,6 +103,8 @@ sudo a2ensite ictrl
    Providers such as [Let's Encrypt](https://letsencrypt.org/) can be used. 
 2. Copy the certs to the site directory to avoid permission issues
 ```Shell
+cd /var/www/ictrl
+
 sudo cp /etc/letsencrypt/live/junhao.ca/fullchain.pem .
 sudo cp /etc/letsencrypt/live/junhao.ca/privkey.pem .
 
