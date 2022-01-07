@@ -4,8 +4,6 @@ import './index.css';
 
 import {
     AppBar,
-    Box,
-    Divider,
     Hidden,
     IconButton,
     List,
@@ -121,6 +119,13 @@ export default class Dashboard extends React.Component {
         });
     };
 
+    handleLogout = () => {
+        axios.get('/api/logout')
+            .finally(_ => {
+                window.location = '/';
+            })
+    }
+
     componentDidMount() {
         axios.get('/api/profiles')
             .then(response => {
@@ -229,18 +234,22 @@ export default class Dashboard extends React.Component {
 
         return (
             <>
-                <AppBar position="static">
+                <AppBar position="static" color={'info'}>
                     <Toolbar>
                         <Typography variant="h5" component="div" sx={{flexGrow: 1}}>
                             Dashboard
                         </Typography>
-                        <IconButton onClick={this.handleAddNewSession} size={'large'}>
-                        <AddBoxIcon style={{color: 'white'}} fontSize="large"/>
-                        </IconButton>
+                        <Tooltip title="Add new session">
+                            <IconButton onClick={this.handleAddNewSession} size={'large'}>
+                                <AddBoxIcon style={{color: 'white'}} fontSize="large"/>
+                            </IconButton>
+                        </Tooltip>
                         {!isLocal &&
-                                                <IconButton onClick={this.handleAddNewSession} size={'large'}>
-                            <LogoutIcon style={{color: 'white'}} fontSize="large"/>
-                        </IconButton>
+                            <Tooltip title="Log out">
+                                <IconButton edge={"end"} onClick={this.handleLogout} size={'large'}>
+                                    <LogoutIcon style={{color: 'white'}} fontSize="large"/>
+                                </IconButton>
+                            </Tooltip>
                         }
 
                     </Toolbar>
