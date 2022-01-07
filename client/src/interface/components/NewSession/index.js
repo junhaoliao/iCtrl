@@ -160,7 +160,8 @@ export default class NewSession extends React.Component {
                   openOnFocus={true}
                   value={hostValue}
                   onInputChange={(_, newValue) => {
-                    this.setState({hostValue: newValue});
+                    this.setState({hostValue: newValue,
+                    passwordPrompt: null});
                   }}
                   renderInput={(params) => (
                       <TextField
