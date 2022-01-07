@@ -13,6 +13,26 @@ cd /var/www
 git clone https://github.com/junhaoliao/iCtrl.git ictrl
 ```
 
+### Install Dependencies and build web page
+```bash
+cd /var/www/ictrl
+
+# create a Python3 virtual environment
+python3 -m pip install --user virtualenv
+python3 -m virtualenv venv
+
+# activate the virual environment
+source venv/bin/activate
+
+# install all backend depedencies
+pip install -r requirements.txt
+
+# install frontend dependencies
+cd client
+npm i
+npm run build
+```
+
 ### Add a user named "ictrl" to respect the permission of the other users on the same server
 ```Shell
 sudo useradd ictrl
@@ -71,7 +91,12 @@ sudo a2ensite ictrl
 ### Configure HTTPS / WSS
 1. Generate An SSL Cert 
    Providers such as [Let's Encrypt](https://letsencrypt.org/) can be used. 
-2. Make a Symbolic Link to the Site Directory so that we don't expose the path to the cert
+2. Copy the certs to the site directory to avoid permission issues
 ```Shell
-# well it is exposed in this docs anyways... 
+sudo cp /etc/letsencrypt/live/junhao.ca/fullchain.pem .
+sudo cp /etc/letsencrypt/live/junhao.ca/privkey.pem .
+
+sudo chown www-data:www-data fullchain.pem privkey.pem
 ```
+
+### Initialization of the Database
