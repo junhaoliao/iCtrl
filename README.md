@@ -18,6 +18,7 @@ The tool is provided in two variants: a web service and a desktop client. You ca
 3. Verify your account by checking your [Uoft email inbox](https://mail.utoronto.ca)
 4. Log in with your credentials
 
+
 ### Option II. Desktop Client
 1. Go to https://desktop.ictrl.ca
 2. Download the desktop client for your platform (Mac or Windows)
@@ -26,12 +27,21 @@ The tool is provided in two variants: a web service and a desktop client. You ca
 
 Now you can add a new session by clicking the "+" (Plus) button in the upper right corner of the opened app window. 
 
+## Special thanks to ...
+- The following open-source libraries
+   - **Paramiko**: https://www.paramiko.org/
+   - **NoVNC**: https://github.com/novnc/noVNC
+   - **Websockify**: https://github.com/novnc/websockify-other and https://github.com/novnc/websockify
+   - **simple-websocket-server**: https://github.com/junhaoliao/simple-websocket-server \
+     previously maintained at: https://github.com/dpallot/simple-websocket-server (no longer active)
+   - **Material UI**: https://mui.com/
+- **Richard Junjie Shen**, a graduated Uoft Architecture Student, who designed the logo
+
 ## Authors
 - Junhao Liao
 - Kruzer Yizhong Xu
 - Kevin Haoran Zhang
 - Leo Jiaxing Li
-- Richard Junjie Shen (Logo)
 
 ## Docs
  - [Deployment](https://github.com/junhaoliao/iCtrl/blob/main/docs/deployment.md)
