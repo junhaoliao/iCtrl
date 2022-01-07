@@ -67,3 +67,11 @@ ictrl.conf Content:
 ```Shell
 sudo a2ensite ictrl
 ```
+
+### Configure HTTPS / WSS
+1. Generate An SSL Cert 
+   Providers such as [Let's Encrypt](https://letsencrypt.org/) can be used. 
+2. Make a Symbolic Link to the Site Directory so that we don't expose the path to the cert
+```Shell
+# well it is exposed in this docs anyways... 
+```
