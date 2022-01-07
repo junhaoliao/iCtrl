@@ -1,0 +1,55 @@
+.nav-bar {
+    position: fixed;
+    background-color: rgba(0, 0, 0, 0);
+    width: -webkit-fill-available;
+    z-index: 999;
+    top: 0;
+}
+
+.background-image {
+    width: -webkit-fill-available;
+    position: fixed;
+    top: 0;
+    z-index: -1;
+}
+
+.login-wrapper {
+    position: fixed;
+    top: 100px;
+    right: 100px;
+    width: 30%;
+    height: 520px;
+    background-color: #FFFFFF;
+    padding: 10px;
+    border-radius: 10px;
+    z-index: -1;
+}
+
+.main-content {
+    /* display: flex; */
+    height: 2000px; /* testting */
+    margin: 700px 100px 0;
+    background-color: #FFFFFF;
+    box-shadow: 0px 0px 30px 1px black;
+    border-radius: 10px;
+}
+
+.title {
+    width: 70%;
+    margin: 0 auto;
+    padding-top: 50px;
+    font-size: 30px;
+    height: 70px;
+    font-weight: 600;
+}
+
+.swiper-wrapper {
+    height: 300px;
+}
+
+.single-swiper-container {
+    background-color: #4400ff;
+    width: 80%;
+    height: 100%;
+    margin: 0 auto;
+}
