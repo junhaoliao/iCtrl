@@ -22,10 +22,11 @@ def websocket_proxy_thread(local_websocket_port, local_vnc_port):
         import subprocess
 
         subprocess.run(["/var/www/ictrl/application/websockify-other/c/websockify",
-                        local_websocket_port, f':{local_vnc_port}',
+                        f'{local_websocket_port}', f':{local_vnc_port}',
                         '--run-once', '--ssl-only',
                         '--cert', os.environ.get('SSL_CERT_PATH'),
                         '--key', os.environ.get('SSL_KEY_PATH')])
+
 
 class VNC(Connection):
     def __init__(self):
