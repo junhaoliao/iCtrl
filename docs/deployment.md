@@ -13,9 +13,18 @@ cd /var/www
 git clone https://github.com/junhaoliao/iCtrl.git ictrl
 ```
 
+### Add a user named "ictrl" to respect the permission of the other users on the same server
+```Shell
+sudo useradd ictrl
+sudo usermod -a -G www-data ictrl
+```
+
 ### Install Dependencies and build web page
 ```bash
 cd /var/www/ictrl
+
+# run as user ictrl
+sudo su ictrl
 
 # create a Python3 virtual environment
 python3 -m pip install --user virtualenv
@@ -31,12 +40,6 @@ pip install -r requirements.txt
 cd client
 npm i
 npm run build
-```
-
-### Add a user named "ictrl" to respect the permission of the other users on the same server
-```Shell
-sudo useradd ictrl
-sudo usermod -a -G www-data ictrl
 ```
 
 ### Install and Enable the Apache 2 module 'mod_wsgi'
