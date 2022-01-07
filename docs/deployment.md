@@ -10,10 +10,10 @@
 # enter a shell path such as "/bin/bash"
 
 cd /var/www
-git clone https://github.com/junhaoliao/iCtrl.git ictrl_srv
+git clone https://github.com/junhaoliao/iCtrl.git ictrl
 ```
 
-### Add a user named "ictrl_srv" to respect the permission of the other users on the same server
+### Add a user named "ictrl" to respect the permission of the other users on the same server
 ```Shell
 sudo useradd ictrl
 sudo usermod -a -G www-data ictrl
