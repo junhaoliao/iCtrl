@@ -50,7 +50,8 @@ class LocalProfile:
 
         if conn is not None:
             this_private_key_path = os.path.join(PRIVATE_KEY_PATH, session_id)
-            status, reason = conn.save_keys(key_filename=this_private_key_path, public_key_comment=this_private_key_path)
+            status, reason = conn.save_keys(key_filename=this_private_key_path,
+                                            public_key_comment=this_private_key_path)
             if not status:
                 return status, reason
 
