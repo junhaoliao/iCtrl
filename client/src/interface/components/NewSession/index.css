@@ -1,8 +1,5 @@
 .new-session-content-wrapper {
-    margin-top: 0px;
-    margin-right: 30px;
-    margin-left: 30px;
-    margin-bottom: 12px;
+    margin: 0 30px 12px;
 }
 
 .new-session-content-wrapper > * {
