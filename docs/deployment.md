@@ -15,8 +15,8 @@ git clone https://github.com/junhaoliao/iCtrl.git ictrl_srv
 
 ### Add a user named "ictrl_srv" to respect the permission of the other users on the same server
 ```Shell
-sudo useradd ictrl_srv
-sudo usermod -a -G www-data ictrl_srv
+sudo useradd ictrl
+sudo usermod -a -G www-data ictrl
 ```
 
 ### Install and Enable the Apache 2 module 'mod_wsgi'
