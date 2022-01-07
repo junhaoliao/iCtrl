@@ -1,0 +1,3 @@
+[submodule "application/websockify-other"]
+	path = application/websockify-other
+	url = https://github.com/novnc/websockify-other.git
