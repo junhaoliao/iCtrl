@@ -1,6 +1,6 @@
 # iCtrl
 
-**SSH Remote Desktop Client / Web Service** (Previously known as **UG_Remote**)
+**SSH Remote Web Service / Desktop Client** (Previously known as **UG_Remote**)
 
 ## Disclaimer
 Your SSH hosts and credentials will be stored locally on the computer you run the program with. 
@@ -9,6 +9,22 @@ Although we have been trying to protect your information with honest efforts, we
 Please do not use the program on a public computer. 
 We are not responsible for any unintended use of our program, including but not limited to Acedemic Misconduct, loss of data when the APIs are called with unofficial web clients, and any hacking behaviour that utilises our tool. However, if you suspect there is any security hazard, you are more than welcome to email support@ictrl.ca , and we will try our best to address such issues. 
 
+## Instructions
+The tool is provided in two variants: a web service and a desktop client. You can pick from one of the below options to best suit your need.
+
+### Option I. Web Service
+1. Go to https://ictrl.ca
+2. Under the "Sign Up" tab, egister an account with Uoft email
+3. Verify your account by checking your [Uoft email inbox](https://mail.utoronto.ca)
+4. Log in with your credentials
+
+### Option II. Desktop Client
+1. Go to https://desktop.ictrl.ca
+2. Download the desktop client for your platform (Mac or Windows)
+3. i. On a Mac computer, you can open the DMG file and drag the app into the "Application" folder. Then you can find the installed app in LaunchPad or "Applications" in Finder. \
+   ii. On a Windows computer, the installer download might be blocked. Check your browser settings and click on "Keep Anyways" to download the installer. Once the download is finished, double click on the installer, and the app will be installed in your user directory. You can find the installed app in the Start Menu. 
+
+Now you can add a new session by clicking the "+" (Plus) button in the upper right corner of the opened app window. 
 
 ## Authors
 - Junhao Liao
