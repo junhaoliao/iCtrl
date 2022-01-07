@@ -22,10 +22,6 @@ with open('/var/www/ictrl/ictrl.conf', 'r') as config_file:
         except ValueError:
             pass
 
-# setup the SSL certificate and key path
-os.environ['SSL_CERT_PATH'] = '/var/www/ictrl/fullchain.pem'
-os.environ['SSL_KEY_PATH'] = '/var/www/ictrl/privkey.pem'
-
 # now import the application
 from application import app as application, api
 

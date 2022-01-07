@@ -2,7 +2,7 @@ import copy
 import json
 import uuid
 
-from .paths import *
+from application.paths import *
 
 _PROFILE_VERSION = 1  # in case the schema changes in the future
 
