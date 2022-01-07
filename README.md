@@ -25,7 +25,11 @@ We are not responsible for any irresponsible use of our program.
 ```
 sudo apt update
 sudo apt install libapache2-mod-wsgi-py3 -y
-sudo a2enmod mod-wsgi
+
+# enable the wsgi module
+ sudo a2enmod wsgi
+# alternatively, use this on some other distributions
+# sudo a2enmod mod-wsgi
 ```
 
 ### Apache2 Configuration Example
