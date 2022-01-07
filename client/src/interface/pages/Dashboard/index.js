@@ -3,8 +3,8 @@ import React from 'react';
 import './index.css';
 
 import {
+    AppBar,
     Box,
-    Container,
     Divider,
     Hidden,
     IconButton,
@@ -16,16 +16,18 @@ import {
     ListItemText,
     Menu,
     Skeleton,
+    Toolbar,
     Tooltip,
     Typography,
 } from '@material-ui/core';
-import AddCircleIcon from '@material-ui/icons/AddCircle';
+import AddBoxIcon from '@material-ui/icons/AddBox';
 import BackgroundLetterAvatar from '../../components/BackgroundLetterAvatar';
 import StorageIcon from '@material-ui/icons/Storage';
 import {ConsoleIcon, FileManagerIcon, RemoteDesktopIcon} from '../../../icons';
 import MoreVertIcon from '@material-ui/icons/MoreVert';
 import DeleteIcon from '@material-ui/icons/Delete';
 import ChangeMachine from '../../components/ChangeMachine';
+import LogoutIcon from '@material-ui/icons/Logout';
 
 import MenuItem from '@material-ui/core/MenuItem';
 import NewSession from '../../components/NewSession';
@@ -46,6 +48,7 @@ export default class Dashboard extends React.Component {
             anchorSessionId: null,
             loading_sessions: true,
             sessions: {},
+            isLocal: true
         };
     }
 
@@ -121,9 +124,11 @@ export default class Dashboard extends React.Component {
     componentDidMount() {
         axios.get('/api/profiles')
             .then(response => {
+                const {sessions, version} = response.data;
                 this.setState({
                     loading_sessions: false,
-                    sessions: response.data.sessions,
+                    sessions: sessions,
+                    isLocal: Boolean(version)
                 });
             })
             .catch(error => {
@@ -140,6 +145,7 @@ export default class Dashboard extends React.Component {
             addNewSessionOpen,
             loading_sessions,
             sessions,
+            isLocal
         } = this.state;
 
         const sessionList = [];
@@ -189,11 +195,11 @@ export default class Dashboard extends React.Component {
                     <ListItemSecondaryAction>
                         <Hidden smDown>
                             {showCM &&
-                            <Tooltip title="Change Machine" aria-label="change machine">
-                                <IconButton onClick={() => this.handleFeatureClick(key, 'CM')}>
-                                    <StorageIcon style={{color: '#4caf50'}} fontSize={'large'}/>
-                                </IconButton>
-                            </Tooltip>
+                                <Tooltip title="Change Machine" aria-label="change machine">
+                                    <IconButton onClick={() => this.handleFeatureClick(key, 'CM')}>
+                                        <StorageIcon style={{color: '#4caf50'}} fontSize={'large'}/>
+                                    </IconButton>
+                                </Tooltip>
                             }
                             <Tooltip title="VNC" aria-label="VNC">
                                 <IconButton onClick={() => this.handleFeatureClick(key, 'vnc')}>
@@ -222,15 +228,23 @@ export default class Dashboard extends React.Component {
         }
 
         return (
-            <Container maxWidth={'lg'}>
-                <br/><br/>
-                <Box display="flex">
-                    <Typography className={'no_select'} flexGrow={1} variant={'h3'}>Dashboard</Typography>
-                    <IconButton onClick={this.handleAddNewSession} size={'large'}>
-                        <AddCircleIcon style={{color: 'darkorange'}} fontSize="large"/>
-                    </IconButton>
-                </Box>
-                <Divider/>
+            <>
+                <AppBar position="static">
+                    <Toolbar>
+                        <Typography variant="h5" component="div" sx={{flexGrow: 1}}>
+                            Dashboard
+                        </Typography>
+                        <IconButton onClick={this.handleAddNewSession} size={'large'}>
+                        <AddBoxIcon style={{color: 'white'}} fontSize="large"/>
+                        </IconButton>
+                        {!isLocal &&
+                                                <IconButton onClick={this.handleAddNewSession} size={'large'}>
+                            <LogoutIcon style={{color: 'white'}} fontSize="large"/>
+                        </IconButton>
+                        }
+
+                    </Toolbar>
+                </AppBar>
 
                 {/* Display a greyed-out logo when there is no session configured */}
                 {loading_sessions ?
@@ -252,8 +266,8 @@ export default class Dashboard extends React.Component {
                                 }}
                                      src={logo} alt="Logo"/>
                                 <h4 style={{margin: 'auto', textAlign: 'center', color: 'grey'}}>No Session Found<br/>
-                                    Please click on <AddCircleIcon
-                                        style={{color: 'orange', position: 'relative', top: '6px'}}/> to add a new
+                                    Please click on <AddBoxIcon
+                                        style={{color: 'grey', position: 'relative', top: '6px'}}/> to add a new
                                     session
                                 </h4>
                             </div>
@@ -262,11 +276,11 @@ export default class Dashboard extends React.Component {
 
                 <NewSession open={addNewSessionOpen} onAddNewSessionClose={this.handleAddNewSessionClose}/>
                 {Boolean(changeMachineSessionId) &&
-                <ChangeMachine
-                    session_id={changeMachineSessionId}
-                    domain={changeMachineHost.substr(changeMachineHost.indexOf('.'))}
-                    onChangeMenuClose={this.handleChangeMachineClose}/>}
-            </Container>
+                    <ChangeMachine
+                        session_id={changeMachineSessionId}
+                        domain={changeMachineHost.substr(changeMachineHost.indexOf('.'))}
+                        onChangeMenuClose={this.handleChangeMachineClose}/>}
+            </>
         );
     }
 
