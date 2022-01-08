@@ -144,7 +144,7 @@ app.whenReady().then(() => {
                 get({
                     hostname: '127.0.0.1',
                     port: mainPort,
-                    path: `/favicon/${feature}/${sessionId}`,
+                    path: `/api/favicon/${feature}/${sessionId}`,
                 }, (res) => {
                     res.on('data', (data) => {
                         const icon = nativeImage.createFromBuffer(data);
