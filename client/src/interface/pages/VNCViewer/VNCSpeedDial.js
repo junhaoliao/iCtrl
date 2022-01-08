@@ -226,9 +226,8 @@ export default class VNCSpeedDial extends React.Component {
         } = this.state;
 
         return (
-            <div><SpeedDial
+            <><SpeedDial
                 id={'fab'}
-                className={'no_select'}
                 icon={<SpeedDialIcon/>}
                 open={speedDialOpen}
                 direction={speedDialDirection}
@@ -364,7 +363,7 @@ export default class VNCSpeedDial extends React.Component {
                         </LoadingButton>
                     </DialogActions>
                 </Dialog>
-            </div>
+            </>
         );
     }
 }

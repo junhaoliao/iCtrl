@@ -21,7 +21,7 @@ function LinearProgressWithLabel(props) {
 }
 
 
-export default class MemoryUsage extends React.Component {
+export default class QuotaUsage extends React.Component {
     constructor(props) {
         super(props);
         this.state = {

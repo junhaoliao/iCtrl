@@ -140,15 +140,15 @@ export default class NewSession extends React.Component {
             maxWidth={'xs'}
             aria-labelledby="new session"
         >
-          <DialogTitle className={'no_select'}>Create New Session</DialogTitle>
+          <DialogTitle>Create New Session</DialogTitle>
 
           <div className={'new-session-content-wrapper'}>
             <Box display={'flex'}>
               <Tooltip flexGrow={1}
                        title={'[Required] host name of the target SSH server'}>
-                <Typography className={'no_select'}
-                            variant={'subtitle1'}>Host<span
-                    style={{color: 'red'}}>*</span></Typography>
+                <Typography variant={'subtitle1'}>
+                  Host<span style={{color: 'red'}}>*</span>
+                </Typography>
               </Tooltip>
               <Autocomplete
                   id={'host'}
@@ -179,8 +179,9 @@ export default class NewSession extends React.Component {
             </Box>
             <Box display={'flex'}>
               <Tooltip flexGrow={1} title={'[Required] username for login'}>
-                <Typography className={'no_select'} variant={'subtitle1'}>Username<span
-                    style={{color: 'red'}}>*</span></Typography>
+                <Typography variant={'subtitle1'}>
+                  Username<span style={{color: 'red'}}>*</span>
+                </Typography>
               </Tooltip>
               <TextField id={'username'}
                          autoComplete={'new-password'}
@@ -194,8 +195,9 @@ export default class NewSession extends React.Component {
             <Box display={'flex'}>
               <Tooltip flexGrow={1} title={'[Optional] password for login. ' +
                   'If left empty, you will need to enter the password at the next login. '}>
-                <Typography className={'no_select'}
-                            variant={'subtitle1'}>Password</Typography>
+                <Typography variant={'subtitle1'}>
+                  Password
+                </Typography>
               </Tooltip>
               <TextField id={'password'}
                          type={'password'}

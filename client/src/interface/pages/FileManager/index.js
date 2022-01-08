@@ -22,7 +22,7 @@ import UploadToolbar from './UploadToolbar';
 import UploadList from './UploadList';
 import ChangePermission from '../../components/ChangePermission';
 import columns from './columns';
-import MemoryUsage from '../../components/MemoryUsage';
+import QuotaUsage from '../../components/QuotaUsage';
 import {sftp_dl, sftp_ls, sftp_rename, sftp_ul} from '../../../actions/sftp';
 import {isDir} from './utils';
 import {
@@ -319,7 +319,7 @@ export default class FileManager extends React.Component {
                             <ListItemText primary="Storage"/>
                         </ListItem>
                         <ListItem>
-                            <MemoryUsage fm={this}/>
+                            <QuotaUsage fm={this}/>
                         </ListItem>
                     </List>
                 </Drawer>
