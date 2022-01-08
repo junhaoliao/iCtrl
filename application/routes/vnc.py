@@ -22,7 +22,7 @@ def start_vnc():
             return
 
         yield int_to_bytes(ICtrlStep.VNC.CHECK_LOAD)
-        if no_load_check is False:
+        if vnc.is_uoft() and no_load_check is False:
             status, _, stdout, _ = vnc.exec_command_blocking('uptime')
             if status is False:
                 abort(500, 'exec failed')

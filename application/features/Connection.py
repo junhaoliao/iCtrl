@@ -59,6 +59,7 @@ class Connection:
     def __init__(self):
         self.client = paramiko.SSHClient()
         self.client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+        self.host = ""
 
     def __del__(self):
         print('Connection::__del__')
@@ -81,6 +82,8 @@ class Connection:
             # raise e
             # print('Connection::connect() exception:')
             return False, str(e)
+
+        self.host = host
 
         return True, ''
 
@@ -155,3 +158,12 @@ class Connection:
     def port_forward(self, *args):
         forwarding_thread = threading.Thread(target=self._port_forward_thread, args=args)
         forwarding_thread.start()
+
+    def is_eecg(self):
+        return 'eecg' in self.host
+
+    def is_ecf(self):
+        return 'ecf' in self.host
+
+    def is_uoft(self):
+        return self.is_eecg() or self.is_ecf()

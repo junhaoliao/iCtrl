@@ -26,7 +26,7 @@ def start_terminal():
             return
 
         yield int_to_bytes(ICtrlStep.Term.CHECK_LOAD)
-        if no_load_check is False:
+        if term.is_uoft() and no_load_check is False:
             status, _, stdout, _ = term.exec_command_blocking('uptime')
             if status is False:
                 abort(500, 'exec failed')
