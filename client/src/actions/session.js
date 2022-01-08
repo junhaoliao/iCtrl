@@ -58,7 +58,7 @@ export const hostList = () => {
     for (let i = 132; i <= 180; i++) {
         list.push(`ug${i}.eecg.toronto.edu`);
     }
-    for (let i = 201; i <= 251; i++) {
+    for (let i = 201; i <= 249; i++) {
         list.push(`ug${i}.eecg.toronto.edu`);
     }
 

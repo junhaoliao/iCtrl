@@ -63,7 +63,10 @@ export default class Home extends React.Component {
                     </Box>
                 </Box>
                 <div>
-                    Intro
+                    The system is still in so-called "alpha" testing.
+                    Any registered account and created sessions might be cleared before January 10th.
+                    You are welcomed to try our desktop version at this moment:
+                    <a href={"https://desktop.ictrl.ca"}>https://desktop.ictrl.ca</a>
                 </div>
             </div>
         );
