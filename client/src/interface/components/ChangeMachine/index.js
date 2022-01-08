@@ -14,6 +14,12 @@ export default class ChangeMachine extends React.Component {
         this.state = {
             selectedHost: null,
             machineList: [],
+            sortModel:[
+                            {field: 'userNum', sort: 'asc'},
+                            {field: 'load15', sort: 'asc'},
+                            {field: 'load5', sort: 'asc'},
+                            {field: 'load1', sort: 'asc'},
+                        ]
         };
     }
 
@@ -46,12 +52,18 @@ export default class ChangeMachine extends React.Component {
         this.props.onChangeMenuClose();
     };
 
+    handleSortModelChange = (newModel, _) => {
+        this.setState({
+            sortModel: newModel
+        })
+    }
+
     componentDidMount() {
         session_ruptime(this, this.cancelTokenSrc.token);
     }
 
     render() {
-        const {machineList} = this.state;
+        const {machineList, sortModel} = this.state;
 
         return (
             <Dialog
@@ -68,13 +80,10 @@ export default class ChangeMachine extends React.Component {
                         pageSize={100}
                         rowsPerPageOptions={[]}
                         loading={!machineList.length}
-                        sortModel={[
-                            {field: 'userNum', sort: 'asc'},
-                            {field: 'load15', sort: 'asc'},
-                            {field: 'load5', sort: 'asc'},
-                            {field: 'load1', sort: 'asc'},
-                        ]}
+                        sortModel={sortModel}
                         hideFooter={machineList.length <= 100}
+                        hideFooterSelectedRowCount={true}
+                        onSortModelChange={this.handleSortModelChange}
                         onSelectionModelChange={this.handleSelectionModelChange}
                         onRowDoubleClick={this.handleRowDoubleClick}
                         onStateChange={this.handleStateChange}
