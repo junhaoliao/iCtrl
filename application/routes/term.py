@@ -1,10 +1,11 @@
 import json
+import re
 
 from flask import request, abort, stream_with_context
 
 from .common import create_connection
 from .. import api, app
-from ..codes import ICtrlStep, ConnectionType
+from ..codes import ICtrlStep, ConnectionType, ICtrlError
 from ..features.Term import terminal_connections, TERMINAL_PORT
 from ..utils import int_to_bytes
 
@@ -14,6 +15,7 @@ from ..utils import int_to_bytes
 @api.route('/terminal', methods=['POST'])
 def start_terminal():
     session_id = request.json.get('session_id')
+    no_load_check = request.json.get('no_load_check')
 
     def generate():
         yield int_to_bytes(ICtrlStep.Term.SSH_AUTH)
@@ -24,6 +26,19 @@ def start_terminal():
             return
 
         yield int_to_bytes(ICtrlStep.Term.CHECK_LOAD)
+        if no_load_check is False:
+            status, _, stdout, _ = term.exec_command_blocking('uptime')
+            if status is False:
+                abort(500, 'exec failed')
+
+            output = stdout.readlines()[0].split(',')
+
+            user_count, = re.findall(r'\d+', output[2])
+            load1, = re.findall(r"\d+\.\d+", output[3])
+
+            if int(user_count) > 0 or float(load1) > 0.2:
+                yield int_to_bytes(ICtrlError.SSH.OVER_LOADED)
+                return
 
         yield int_to_bytes(ICtrlStep.Term.LAUNCH_SHELL)
         status, reason = term.launch_shell()

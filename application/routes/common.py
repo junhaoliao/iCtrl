@@ -86,13 +86,22 @@ def handle_session():
     elif request.method == 'PATCH':
         session_id = request.json.get('session_id')
         host = request.json.get('host')
+        domain = request.json.get('domain')
 
+        # terminate old sessions with the best effort
+        # noinspection PyBroadException
         try:
             conn, _ = create_connection(session_id, ConnectionType.GENERAL)
             conn.exec_command_blocking('vncserver -kill ":*"')
         except Exception:
-            # terminate old sessions with best effort
             pass
+
+        if domain is  None:
+            # find the domain when the domain is not specified
+            full_host_name, _, _, _ = profiles.get_session_info(session_id)
+            domain = full_host_name[full_host_name.find('.'):]
+
+        host += domain
 
         status, reason = profiles.change_host(session_id, host)
         if not status:

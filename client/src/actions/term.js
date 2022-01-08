@@ -652,7 +652,10 @@ export const termConnect = async (TermViewer) => {
         headers: {
             'Content-Type': 'application/json',
         },
-        body: JSON.stringify({session_id: TermViewer.session_id}),
+        body: JSON.stringify({
+            session_id: TermViewer.session_id,
+            no_load_check: TermViewer.noLoadCheck
+        }),
     };
 
     const response = await fetch(`/api/terminal`, options);
@@ -726,6 +729,10 @@ export const termConnect = async (TermViewer) => {
                 if (currentStep === ICtrlError.SSH.HOST_UNREACHABLE) {
                     TermViewer.setState({
                         authentication: SSHHostUnreachableRefresh,
+                    });
+                } else if (currentStep === ICtrlError.SSH.OVER_LOADED) {
+                    TermViewer.setState({
+                        isOverloaded: true,
                     });
                 } else {
                     console.log(`Term error code: ${currentStep}`);

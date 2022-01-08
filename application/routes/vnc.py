@@ -1,4 +1,5 @@
 import json
+import re
 
 from flask import request, abort, stream_with_context
 
@@ -11,6 +12,7 @@ from ..utils import int_to_bytes
 @api.route('/vnc', methods=['POST'])
 def start_vnc():
     session_id = request.json.get('session_id')
+    no_load_check = request.json.get('no_load_check')
 
     def generate():
         yield int_to_bytes(ICtrlStep.VNC.SSH_AUTH)
@@ -20,6 +22,19 @@ def start_vnc():
             return
 
         yield int_to_bytes(ICtrlStep.VNC.CHECK_LOAD)
+        if no_load_check is False:
+            status, _, stdout, _ = vnc.exec_command_blocking('uptime')
+            if status is False:
+                abort(500, 'exec failed')
+
+            output = stdout.readlines()[0].split(',')
+
+            user_count, = re.findall(r'\d+', output[2])
+            load1, = re.findall(r"\d+\.\d+", output[3])
+
+            if int(user_count) > 0 or float(load1) > 0.2:
+                yield int_to_bytes(ICtrlError.SSH.OVER_LOADED)
+                return
 
         yield int_to_bytes(ICtrlStep.VNC.PARSE_PASSWD)
         # use5900: usually a RealVNC server listening on port 5900

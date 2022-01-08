@@ -24,6 +24,7 @@ export default class VNCViewer extends React.Component {
         } = props;
 
         this.session_id = params.session_id;
+        this.noLoadCheck = window.location.toString().includes('no_load_check');
 
         this.rfb = null;
         this.lastKeyboardinput = null;
@@ -38,6 +39,7 @@ export default class VNCViewer extends React.Component {
             showFab: true,
             speedDialOpen: false,
             showToolbar: false,
+            isOverloaded: false
         };
     }
 
@@ -148,7 +150,7 @@ export default class VNCViewer extends React.Component {
 
     render() {
 
-        const {authentication, currentStep, loading, speedDialOpen, showFab, showToolbar} = this.state;
+        const {authentication, currentStep, loading, speedDialOpen, showFab, showToolbar, isOverloaded} = this.state;
         return (<div>
                 <Backdrop id={'speed-dial-backdrop'} open={speedDialOpen}/>
                 {showFab && !loading &&
@@ -168,9 +170,12 @@ export default class VNCViewer extends React.Component {
 
                 {loading &&
                 <Loading
+                    sessionId={this.session_id}
                     currentStep={currentStep}
                     steps={VNCSteps}
-                    authentication={authentication}/>}
+                    authentication={authentication}
+                    isOverloaded={isOverloaded}/>
+                }
 
                 <div style={{display: loading && 'none'}} id={'screen'}
                      className={showToolbar ? 'screen-with-toolbar' : ''}>

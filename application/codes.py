@@ -26,6 +26,7 @@ class SSHError(IntEnum):
     HOST_UNREACHABLE = auto()
     AUTH_MISSING = auto()
     AUTH_WRONG = auto()
+    OVER_LOADED = auto()
 
 
 class ICtrlError:

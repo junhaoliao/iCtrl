@@ -40,7 +40,8 @@ export const session_change_host = (sessionId, host, domain) => {
     console.log(domain);
     axios.patch('/api/session', {
         session_id: sessionId,
-        host: `${host}${domain}`,
+        host: host,
+        domain: domain
     }).then(_ => {
         window.location.reload();
     }).catch(error => {

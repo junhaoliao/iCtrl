@@ -16,6 +16,7 @@ export default class Term extends React.Component {
 
         const {match: {params}} = this.props;
         this.session_id = params.session_id;
+        this.noLoadCheck = window.location.toString().includes('no_load_check');
 
         this.resize_timeout = null;
 
@@ -28,6 +29,7 @@ export default class Term extends React.Component {
             loading: true,
             currentStep: -1,
             authentication: null,
+            isOverloaded: false
         };
     }
 
@@ -74,15 +76,18 @@ export default class Term extends React.Component {
     }
 
     render() {
-        const {authentication, currentStep, loading} = this.state;
+        const {authentication, currentStep, loading, isOverloaded} = this.state;
 
         return (
             <div>
                 {loading &&
                 <Loading
+                    sessionId={this.session_id}
                     currentStep={currentStep}
                     steps={TermSteps}
-                    authentication={authentication}/>}
+                    authentication={authentication}
+                    isOverloaded={isOverloaded}
+                />}
 
                 <div id="terminal" style={{
                     visibility: loading ? 'hidden' : 'visible',
