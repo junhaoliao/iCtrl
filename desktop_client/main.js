@@ -69,7 +69,7 @@ app.whenReady().then(() => {
 
     mainWindow.setTitle('Loading... ');
 
-    mainWindow.loadURL(`http://127.0.0.1:${mainPort}`);
+    mainWindow.loadURL(`http://127.0.0.1:${mainPort}/dashboard`);
     // need to reload on Mac because the first load times out very quickly
     mainWindow.webContents.on('did-fail-load', () => {
         mainWindow.reload();
