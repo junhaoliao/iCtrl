@@ -174,7 +174,10 @@ export const vncConnect = async (vncViewer) => {
         headers: {
             'Content-Type': 'application/json',
         },
-        body: JSON.stringify({session_id: vncViewer.session_id}),
+        body: JSON.stringify({
+            session_id: vncViewer.session_id,
+            no_load_check: vncViewer.noLoadCheck
+        }),
     };
     const response = await fetch(`/api/vnc`, options);
     if (response.status !== 200) {
@@ -262,6 +265,10 @@ export const vncConnect = async (vncViewer) => {
                     };
                     vncViewer.setState({
                         authentication: myVNCAuthentication,
+                    });
+                } else if (currentStep === ICtrlError.SSH.OVER_LOADED) {
+                    vncViewer.setState({
+                        isOverloaded: true,
                     });
                 } else {
                     console.log(`VNC error code: ${currentStep}`);

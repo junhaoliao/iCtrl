@@ -11,6 +11,7 @@ class SSHError {
     static HOST_UNREACHABLE = this.GENERAL + 1;
     static AUTH_MISSING = this.GENERAL + 2;
     static AUTH_WRONG = this.GENERAL + 3;
+    static OVER_LOADED = this.GENERAL + 4;
 }
 
 export const ICtrlError = {
