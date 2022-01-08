@@ -7,9 +7,17 @@ import bcrypt
 import sqlalchemy
 from flask import session as flask_session, abort
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import types
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import validates
 
+
+class LowerCaseText(types.TypeDecorator):
+
+    impl = types.String
+
+    def process_bind_param(self, value, dialect):
+        return value.lower()
 
 class DBProfile:
     def __init__(self, app):
@@ -26,7 +34,7 @@ class DBProfile:
             id = db.Column(db.Integer, primary_key=True)
             sessions = db.relationship('Session', backref='user', lazy=True)
 
-            username = db.Column(db.String, unique=True, nullable=False)
+            username = db.Column(LowerCaseText, unique=True, nullable=False)
 
             @validates('username')
             def validate_username(self, key, username):
