@@ -87,6 +87,13 @@ def handle_session():
         session_id = request.json.get('session_id')
         host = request.json.get('host')
 
+        try:
+            conn, _ = create_connection(session_id, ConnectionType.GENERAL)
+            conn.exec_command_blocking('vncserver -kill ":*"')
+        except Exception:
+            # terminate old sessions with best effort
+            pass
+
         status, reason = profiles.change_host(session_id, host)
         if not status:
             abort(403, reason)
