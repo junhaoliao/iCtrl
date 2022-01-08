@@ -4,7 +4,7 @@ export const VNCSteps = [
         description: 'Connecting to the remote SSH machine with stored credentials (if any)...',
     },
     {
-        label: '[Not Enabled] Load Check',
+        label: 'Load Check',
         description:
             'Detecting the load for the machine selected. This feature is exclusive to UofT servers. ',
     },
@@ -39,7 +39,7 @@ export const TermSteps = [
         description: 'Connecting to the remote SSH machine with stored credentials (if any)...',
     },
     {
-        label: '[Not Enabled] Load Check',
+        label: 'Load Check',
         description:
             'Detecting the load for the machine selected. This feature is exclusive to UofT servers. ',
     },
