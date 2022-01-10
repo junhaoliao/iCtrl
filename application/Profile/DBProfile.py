@@ -11,15 +11,23 @@ from sqlalchemy import types
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import validates
 
+from ..email_utils import send_email
+
+from cachetools import TTLCache
+
+ACTIVATION_TTL_SECOND = 1800
+RESEND_TTL_SECOND = 30
+
 
 class LowerCaseText(types.TypeDecorator):
-
     impl = types.String
 
     def process_bind_param(self, value, dialect):
         return value.lower()
 
+
 class DBProfile:
+
     def __init__(self, app):
         db_passwd = os.environ['DBPASSWD']
         db_address = os.environ['DBADDR']
@@ -27,6 +35,12 @@ class DBProfile:
 
         self.db = db = SQLAlchemy(app)
         self.salt = bcrypt.gensalt()
+
+        self.activation_cache = TTLCache(maxsize=1024, ttl=ACTIVATION_TTL_SECOND)
+        self.resend_cache = TTLCache(maxsize=1024, ttl=RESEND_TTL_SECOND)
+
+        with open('application/resources/activation_email_template.html', 'r') as f:
+            self.activation_email_body_template = f.read()
 
         class User(db.Model):
             __table_args__ = {"schema": "ictrl"}
@@ -58,11 +72,6 @@ class DBProfile:
             # more to be added...
             activation_type = db.Column(db.Integer, nullable=False, default=0)
 
-        class UserPendingActivation(db.Model):
-            __table_args__ = {"schema": "ictrl"}
-            id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-            user_id = db.Column(db.Integer, db.ForeignKey('ictrl.user.id'), nullable=False)
-
         class Session(db.Model):
             __table_args__ = {"schema": "ictrl"}
 
@@ -75,7 +84,6 @@ class DBProfile:
 
         self.tables = {
             'User': User,
-            'UserPendingActivation': UserPendingActivation,
             'Session': Session
         }
 
@@ -126,7 +134,6 @@ class DBProfile:
 
     def add_user(self, username, password, email):
         User = self.tables['User']
-        UserPendingActivation = self.tables['UserPendingActivation']
 
         # hash the password before storing
         password = password.encode('ascii')
@@ -137,18 +144,49 @@ class DBProfile:
             self.db.session.add(user)
             self.save_profile()
 
-            activation = UserPendingActivation(user_id=user.id)
-            self.db.session.add(activation)
-            print(activation.id)
-            # FIXME: send activation email
+            code = uuid.uuid4()
+            self.activation_cache[user.id] = code
+            self.send_activation_email(email, user.id, code)
 
-            self.save_profile()
         except AssertionError as e:
             abort(403, e)
         except sqlalchemy.exc.IntegrityError as e:
             abort(403, e)
 
         return True, ''
+
+    def send_activation_email(self, email):
+        sender_email = 'notifications.ictrl@gmail.com'
+        sender_password = 'iCtrl2022'
+
+        User = self.tables['User']
+        user = User.query.filter_by(email=email).first()
+        if user is None:
+            abort(403, 'Cannot find any matching record')
+        if self.resend_cache.get(str(user.id), None):
+            abort(429, 'Too soon to resend')
+        code = uuid.uuid4()
+        self.activation_cache[str(user.id)] = str(code)
+        self.resend_cache[str(user.id)] = True
+        body = self.activation_email_body_template.format(userid=user.id,
+                                                          code=code,
+                                                          expire_min=int(ACTIVATION_TTL_SECOND / 60))
+        send_email(sender_email, sender_password, email, 'Activate Your iCtrl Account', body)
+        return True
+
+    def activate_user(self, userid, code):
+        cached_code = self.activation_cache.get(userid, None)
+        if not cached_code:
+            return False
+        if cached_code == code:
+            User = self.tables['User']
+            user = User.query.filter_by(id=userid).first()
+            if user is None:
+                abort(403, 'Cannot find any matching record')
+            user.activation_type = 1
+            self.save_profile()
+            return True
+        return False
 
     def get_user(self):
         User = self.tables['User']
