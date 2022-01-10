@@ -100,6 +100,9 @@ class DBProfile:
         if user is None:
             abort(403, 'Cannot find any matching record')
 
+        if user.activation_type == 0:
+            abort(401, 'Account not activated')
+
         hashed_password = user.password.encode('ascii')
         if not bcrypt.checkpw(password, hashed_password):
             abort(403, 'Cannot find any matching record')
