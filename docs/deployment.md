@@ -112,3 +112,34 @@ sudo chown www-data:www-data fullchain.pem privkey.pem
 ```
 
 ### Initialization of the Database
+1. Install the PSQL DBMS
+    ```Shell
+    sudo apt update
+    sudo apt install postgresql postgresql-contrib -y
+    ```
+2. Change the DB user password
+    ```Shell
+    # take a note of the password because we need to put it in a configuration 
+    # (see Configure the iCtrl Backend Server)
+    sudo passwd postgresql
+    ```
+
+3. Edit `/etc/postgresql/14/main/pg_hba.conf` to allow local connections
+
+    Find the lines and make sure the authentication METHOD is set to trust.
+    ```
+    # IPv4 local connections:
+    host    all             all             127.0.0.1/32            trust
+    ```
+
+### Configure the iCtrl Backend Server
+Edit `/var/www/ictrl/ictrl.conf`. An example configuration is shown below
+```
+# setup DB password and url
+DBPASSWD=THE_PASSWORD_YOU_SET_IN_"Initialization of the Database"
+DBADDR=localhost:5432
+
+# setup the SSL certificate and key path
+SSL_CERT_PATH=/var/www/ictrl/fullchain.pem
+SSL_KEY_PATH=/var/www/ictrl/privkey.pem
+```
