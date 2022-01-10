@@ -10,3 +10,4 @@ pyinstaller
 git+git://github.com/junhaoliao/simple-websocket-server#egg=SimpleWebSocketServer
 websockify
 zipstream-new
+cachetools
