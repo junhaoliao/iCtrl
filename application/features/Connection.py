@@ -1,6 +1,7 @@
 import select
 import socketserver
 import threading
+import typing
 from io import StringIO
 
 import paramiko
@@ -8,6 +9,7 @@ import paramiko
 
 class Handler(socketserver.BaseRequestHandler):
     def handle(self):
+        self.server: ForwardServer
         try:
             chan = self.server.ssh_transport.open_channel(
                 "direct-tcpip",
@@ -53,6 +55,8 @@ class Handler(socketserver.BaseRequestHandler):
 class ForwardServer(socketserver.ThreadingTCPServer):
     daemon_threads = True
     allow_reuse_address = True
+    ssh_transport: paramiko.transport
+    chain_port: int
 
 
 class Connection:
@@ -61,23 +65,56 @@ class Connection:
         self.client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
         self.host = ""
 
+        self._jump_client: typing.Optional[paramiko.SSHClient] = None
+        self._jump_channel: typing.Optional[paramiko.Channel] = None
+
     def __del__(self):
-        print('Connection::__del__')
         self.client.close()
         del self.client
 
-    def connect(self, host, username, password=None, key_filename=None, private_key_str=None):
+        if self._jump_client is not None:
+            self._jump_channel.close()
+            self._jump_client.close()
+            del self._jump_client
+
+    def _client_connect(self, client: paramiko.SSHClient,
+                        host, username,
+                        password=None, key_filename=None, private_key_str=None):
+        if password is not None:
+            client.connect(host, username=username, password=password, timeout=15, sock=self._jump_channel)
+        elif key_filename is not None:
+            client.connect(host, username=username, key_filename=key_filename, timeout=15, sock=self._jump_channel)
+        elif private_key_str is not None:
+            pkey = paramiko.RSAKey.from_private_key(StringIO(private_key_str))
+            client.connect(host, username=username, pkey=pkey, timeout=15, sock=self._jump_channel)
+        else:
+            raise ValueError("Connection: no valid SSH auth given.")
+
+    def _init_jump_channel(self, host, username, **auth_methods):
+        """
+        init jump client channel only if the target is an ECF machine which normally requires a VPN connection
+        The remote.ecf.utoronto.ca host doesn't require VPN to access and therefore can be used as a jump server
+
+        :param host:
+        :param username:
+        :param auth_methods:
+        :return:
+        """
+        if (host.endswith('ecf.utoronto.ca') or host.endswith('ecf.toronto.edu')) and not host.startswith('remote'):
+            if self._jump_client is not None:
+                raise ValueError("API misuse: should not invoke connect twice on the same Connection object")
+
+            self._jump_client = paramiko.SSHClient()
+            self._jump_client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+            self._client_connect(self._jump_client, 'remote.ecf.utoronto.ca', username, **auth_methods)
+            self._jump_channel = self._jump_client.get_transport().open_channel('direct-tcpip',
+                                                                                (host, 22),
+                                                                                ('0.0.0.0', 22))
+
+    def connect(self, host: str, username: str, **auth_methods):
         try:
-            if password is not None:
-                self.client.connect(host, username=username, password=password, timeout=15)
-            elif key_filename is not None:
-                self.client.connect(host, username=username, key_filename=key_filename, timeout=15)
-            elif private_key_str is not None:
-                pkey = paramiko.RSAKey.from_private_key(StringIO(private_key_str))
-                self.client.connect(host, username=username, pkey=pkey, timeout=15)
-            else:
-                # TODO: read the docs and the RFC to check whether this is allowed
-                raise ValueError("Connection: no valid SSH auth given.")
+            self._init_jump_channel(host, username, **auth_methods)
+            self._client_connect(self.client, host, username, **auth_methods)
         except Exception as e:
             # raise e
             # print('Connection::connect() exception:')

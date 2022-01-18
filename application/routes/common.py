@@ -29,7 +29,8 @@ def create_connection(session_id, conn_type):
     else:
         raise TypeError(f'Invalid type: {conn_type}')
 
-    status, reason = conn.connect(host, username, key_filename=this_private_key_path, private_key_str=this_private_key_str)
+    status, reason = conn.connect(host, username,
+                                  key_filename=this_private_key_path, private_key_str=this_private_key_str)
     if status is False:
         if reason.startswith('[Errno 60]') \
                 or reason.startswith('[Errno 64]') \
@@ -72,7 +73,7 @@ def handle_session():
 
         conn = Connection()
 
-        status, reason = conn.connect(host, username, password)
+        status, reason = conn.connect(host, username, password=password)
         if status is False:
             abort(403, reason)
 
