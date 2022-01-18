@@ -13,11 +13,11 @@ from sqlalchemy.orm import validates
 
 
 class LowerCaseText(types.TypeDecorator):
-
     impl = types.String
 
     def process_bind_param(self, value, dialect):
         return value.lower()
+
 
 class DBProfile:
     def __init__(self, app):
