@@ -7,7 +7,7 @@ Your SSH hosts and credentials will be stored locally on the computer you run th
 Although we have been trying to protect your information with honest efforts, we are not cyber security experts and cannot guarantee the program is 100% bug-free. 
 
 Please do not use the program on a public computer. 
-We are not responsible for any unintended use of our program, including but not limited to Acedemic Misconduct, loss of data when the APIs are called with unofficial web clients, and any hacking behaviour that utilises our tool. However, if you suspect there is any security hazard, you are more than welcome to email support@ictrl.ca , and we will try our best to address such issues. 
+We are not responsible for any unintended use of our program, including but not limited to Acedemic Misconduct, loss of data when the APIs are called with unofficial web clients, and any hacking behaviour that utilises our tool. However, if you suspect there is any security vulnerability, you are more than welcome to email support@ictrl.ca , and we will try our best to address such issues. 
 
 ## Instructions
 The tool is provided in two variants: a web service and a desktop client. You can pick from one of the below options to best suit your need.
