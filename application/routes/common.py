@@ -1,5 +1,4 @@
 import json
-from io import BytesIO
 
 from flask import request, abort, send_file
 
@@ -97,7 +96,7 @@ def handle_session():
         except Exception:
             pass
 
-        if domain is  None:
+        if domain is None:
             # find the domain when the domain is not specified
             full_host_name, _, _, _ = profiles.get_session_info(session_id)
             domain = full_host_name[full_host_name.find('.'):]
