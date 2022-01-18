@@ -14,7 +14,7 @@ import {
 import axios from 'axios';
 
 import './index.css';
-import {hostList} from '../../../actions/session';
+import {hostAddressList} from '../../../actions/session';
 import {LoadingButton} from '@material-ui/lab';
 import {htmlResponseToReason} from '../../../actions/utils';
 
@@ -152,7 +152,7 @@ export default class NewSession extends React.Component {
               </Tooltip>
               <Autocomplete
                   id={'host'}
-                  options={hostList()}
+                  options={hostAddressList}
                   clearOnBlur={false}
                   freeSolo={true}
                   size={'small'}
