@@ -15,6 +15,7 @@ export const session_ruptime = (cm, cancelToken) => {
                 const host = machineInfo[0].split(' ')[0];
 
                 // filter out the non-student hosts
+                // FIXME: should actually check if the host is inside hostList()
                 if (host.match(/^ug\d+/) || host.match(/^p\d+/) || host === 'remote') {
                     const machineJson = {
                         'id': host,
@@ -64,7 +65,7 @@ export const hostList = () => {
     }
 
     // ECF Computers
-    for (let i = 1; i <= 196; i++) {
+    for (let i = 1; i <= 185; i++) {
         list.push(`p${i}.ecf.utoronto.ca`);
     }
     list.push('remote.ecf.utoronto.ca');
