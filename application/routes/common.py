@@ -144,16 +144,6 @@ def generate_favicon(feature, session_id):
     if host is None:
         abort(403, f'failed: session {session_id} does not exist')
 
-    temp = BytesIO()
-    icon = Favicon(host)
-    if feature == 'vnc':
-        icon.VNC(temp)
-    elif feature == 'terminal':
-        icon.console(temp)
-    elif feature == 'fm':
-        icon.file_manager(temp)
-    else:
-        abort(400, f'Invalid feature {feature}')
+    icon = Favicon.generate(host, feature)
 
-    temp.seek(0)
-    return send_file(temp, mimetype='image/png')
+    return send_file(icon, mimetype='image/png')
