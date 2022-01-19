@@ -1,5 +1,16 @@
 # Deployment of iCtrl on a Ubuntu Server (22.04) with Apache2
 
+### Install Dependencies
+```Shell
+sudo apt update
+sudo apt install apache2 python3-pip libapache2-mod-wsgi-py3 -y
+
+# enable the wsgi module
+sudo a2enmod wsgi
+# alternatively, use this on some other distributions
+# sudo a2enmod mod-wsgi
+```
+
 ### Clone the Repository into the /var/www directory
 ```Shell
 # with appropriate permissions (e.g. logged-in as root / www-data)
@@ -47,18 +58,6 @@ git submodule update
 sudo apt install libssl-dev -y
 cd application/websockify-other/c
 make
-```
-
-### Install and Enable the Apache 2 module 'mod_wsgi'
-
-```Shell
-sudo apt update
-sudo apt install libapache2-mod-wsgi-py3 -y
-
-# enable the wsgi module
-sudo a2enmod wsgi
-# alternatively, use this on some other distributions
-# sudo a2enmod mod-wsgi
 ```
 
 ### Apache2 Configuration Example
