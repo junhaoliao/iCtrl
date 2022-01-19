@@ -3,7 +3,7 @@
 ### Install Dependencies
 ```Shell
 sudo apt update
-sudo apt install git apache2 python3-pip libapache2-mod-wsgi-py3 -y
+sudo apt install git apache2 python3-pip libapache2-mod-wsgi-py3 libssl-dev -y
 
 # enable the wsgi module
 sudo a2enmod wsgi
@@ -54,16 +54,16 @@ npm i
 npm run build
 
 # build websockify for ssh tunnel
+cd /var/www/ictrl
 git submodule init
 git submodule update
-sudo apt install libssl-dev -y
 cd application/websockify-other/c
 make
 ```
 
 ### Apache2 Configuration Example
 
-To add a config:
+Add a config:
 
 ```Shell
 sudo nano /etc/apache2/sites-available/ictrl.conf
