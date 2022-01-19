@@ -45,6 +45,9 @@ source venv/bin/activate
 # install all backend depedencies
 pip install -r requirements.txt
 
+# if Node.js is not installed, follow
+# https://github.com/nodesource/distributions/blob/master/README.md#debinstall
+
 # install frontend dependencies
 cd client
 npm i
