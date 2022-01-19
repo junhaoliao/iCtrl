@@ -3,7 +3,7 @@
 ### Install Dependencies
 ```Shell
 sudo apt update
-sudo apt install apache2 python3-pip libapache2-mod-wsgi-py3 -y
+sudo apt install git apache2 python3-pip libapache2-mod-wsgi-py3 -y
 
 # enable the wsgi module
 sudo a2enmod wsgi
@@ -11,31 +11,29 @@ sudo a2enmod wsgi
 # sudo a2enmod mod-wsgi
 ```
 
+### Add a user named "ictrl" to respect the permission of the other users on the same server
+```Shell
+sudo useradd ictrl
+sudo usermod -a -G www-data ictrl
+
+# change the default shell of ictrl to "/bin/bash"
+sudo chsh ictrl
+```
+
 ### Clone the Repository into the /var/www directory
 ```Shell
-# with appropriate permissions (e.g. logged-in as root / www-data)
-# if logging-in as www-data gives the following message:
-# "This account is currently not available."
-# We can change the default shell of www-data to make it available:
-#   sudo chsh www-data
-# enter a shell path such as "/bin/bash"
+sudo chown -R www-data:www-data /var/www
+sudo chmod -R 775 /var/www
 
 cd /var/www
 git clone https://github.com/junhaoliao/iCtrl.git ictrl
 ```
 
-### Add a user named "ictrl" to respect the permission of the other users on the same server
-```Shell
-sudo useradd ictrl
-sudo usermod -a -G www-data ictrl
-```
-
 ### Install Dependencies and build web page
-```bash
-cd /var/www/ictrl
+```Shell
+# with appropriate permissions (e.g. logged-in as ictrl)
 
-# run as user ictrl
-sudo su ictrl
+cd /var/www/ictrl
 
 # create a Python3 virtual environment
 python3 -m pip install --user virtualenv
