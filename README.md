@@ -15,7 +15,7 @@ The tool is provided in two variants: a web service and a desktop client. You ca
 
 ### Option I. Web Service
 1. Go to https://ictrl.ca
-2. Under the "Sign Up" tab, egister an account with Uoft email
+2. Under the "Sign Up" tab, register an account with Uoft email
 3. Verify your account by checking your [Uoft email inbox](https://mail.utoronto.ca)
 4. Log in with your credentials
 
