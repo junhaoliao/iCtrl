@@ -73,14 +73,15 @@ class VNC(Connection):
             #         -w: wait until the processes to die then continue to the next cmd
             # cp /etc/vnc/xstartup ~/.vnc
             #  : provide a xstartup file to prevent the VNC settings dialog from popping up
-            "killall -q -w Xtigervnc",
+            "killall -q -w xvfb-run Xtigervnc",
             "rm -rf ~/.vnc",
             "mkdir ~/.vnc",
+            f"printf '{VNC.read_xstartup()}' > ~/.vnc/xstartup",
             "cp /etc/vnc/xstartup ~/.vnc  >& /dev/null",
-            "cp /cad2/ece297s/public/vnc/xstartup ~/.vnc  >& /dev/null",
             "echo '%s'| xxd -r -p > ~/.vnc/passwd" % hexed_passwd,
             "chmod 600 ~/.vnc/passwd",
         ]
+        print(f"printf '{VNC.read_xstartup()}' > ~/.vnc/xstartup")
         _, _, _, stderr = self.exec_command_blocking(';'.join(reset_cmd_lst))
         for line in stderr:
             if "Disk quota exceeded" in line:
@@ -133,3 +134,17 @@ class VNC(Connection):
         proxy_thread.start()
 
         return local_websocket_port
+
+    @staticmethod
+    def read_xstartup():
+        """
+        TODO: read from an actual file instead
+        1. Launch a gnome-session so that the VNC config window doesn't show up
+        2. To address the bug described at https://bugzilla.redhat.com/show_bug.cgi?id=1710949
+           xterm: write to /var/run/utmp
+            so that uptime & ruptime can get the correct login count
+           xvfb-run: run in the background / don't show GUI
+        """
+        return "#\\!/bin/sh\\n" \
+               "gnome-session &\\n" \
+               "xvfb-run -a xterm &\\n"
