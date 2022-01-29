@@ -22,8 +22,17 @@ echo ------------------------   Compile the Python Backend   -------------------
 source venv/bin/activate
 pyinstaller --noconfirm --clean macOS_ictrl_be.spec
 
-echo ----------------- Compile and Publish the Electron Frontend --------------------
+echo ----------------- Compile the Electron Frontend --------------------
 cd desktop_client || exit
 npm i
-npm run publish
+npm run make
 cd ..
+
+echo ----------------- Publish the Application --------------------
+cd  "./desktop_client/out/iCtrl Desktop-darwin-$(arch)" || exit
+ditto -c -k --sequesterRsrc --keepParent --zlibCompressionLevel 9 "./iCtrl Desktop.app" "ictrl-desktop-darwin-$(arch).zip"
+cd ../../..
+node publish/mac_publish.js junhaoliao api_test \
+ "./desktop_client/out/iCtrl Desktop-darwin-$(arch)/ictrl-desktop-darwin-$(arch).zip" "ictrl-desktop-darwin-$(arch).zip"
+node publish/mac_publish.js junhaoliao api_test \
+ "./desktop_client/out/make/ictrl-desktop-setup.dmg" "ictrl-desktop-darwin-$(arch).dmg"

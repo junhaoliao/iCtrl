@@ -1,7 +1,7 @@
 {
   "name": "ictrl-desktop-client",
   "description": "Desktop Client for iCtrl",
-  "version": "6.0.2",
+  "version": "6.0.3",
   "private": true,
   "main": "main.js",
   "repository": "https://github.com/junhaoliao/iCtrl",
