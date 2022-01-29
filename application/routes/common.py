@@ -1,4 +1,5 @@
 import json
+import threading
 
 from flask import request, abort, send_file
 
@@ -88,11 +89,15 @@ def handle_session():
         host = request.json.get('host')
         domain = request.json.get('domain')
 
-        # terminate old sessions with the best effort
+        # terminate old sessions with best efforts
         # noinspection PyBroadException
         try:
+            kill_cmd_list = [
+                'vncserver -kill ":*"',
+                'killall -q -w xvfb-run Xtigervnc'
+            ]
             conn, _ = create_connection(session_id, ConnectionType.GENERAL)
-            conn.exec_command_blocking('vncserver -kill ":*"')
+            threading.Thread(target=conn.exec_command_blocking, args=[';'.join(kill_cmd_list)]).start()
         except Exception:
             pass
 

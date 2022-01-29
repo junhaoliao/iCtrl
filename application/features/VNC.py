@@ -49,13 +49,13 @@ class VNC(Connection):
             return True, decrypt_passwd(bytearray.fromhex(hexdump))
 
     def check_5900_open(self):
-        _, _, stdout, _ = self.exec_command_blocking('netstat -tln | grep :5900')
+        _, _, stdout, _ = self.exec_command_blocking('ss -tulpn | grep LISTEN | grep :5900')
         result = stdout.readline()
         return result != ''
 
     def remove_vnc_settings(self):
         remove_cmd_lst = [
-            "killall -q -w Xtigervnc",
+            "killall -q -w xvfb-run Xtigervnc",
             "rm -rf ~/.vnc"
         ]
         _, _, _, stderr = self.exec_command_blocking(';'.join(remove_cmd_lst))
@@ -101,14 +101,19 @@ class VNC(Connection):
 
         # FIXME: handle disk quota issue when launching vncserver
         relaunch = False
+        relaunch_cmd_list = [
+            'vncserver -kill ":*"',
+            'killall -q -w xvfb-run Xtigervnc',
+            'vncserver'
+        ]
         if len(ports_by_me) > 1:
             # TODO: might recover the valid ones
             # more than one VNC servers are listening and therefore all killed above to prevent unexpected results
-            _, _, stdout, _ = self.exec_command_blocking('vncserver -kill ":*"; vncserver')
+            _, _, stdout, _ = self.exec_command_blocking(';'.join(relaunch_cmd_list))
             relaunch = True
         elif len(ports_by_me) == 0:
             # no valid VNC server is listening
-            _, _, stdout, _ = self.exec_command_blocking('vncserver')
+            _, _, stdout, _ = self.exec_command_blocking(';'.join(relaunch_cmd_list))
             relaunch = True
 
         vnc_port = None
