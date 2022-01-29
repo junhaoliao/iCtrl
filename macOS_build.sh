@@ -1,3 +1,12 @@
+#!/bin/zsh
+
+if [ "$(arch)" = "arm64" ]
+then
+  cpu_arch="arm64"
+else
+  cpu_arch="x64"
+fi
+
 echo ------------------------   Check Uncommitted Changes    ------------------------
 echo If you see any lines below, there are uncommitted changes:
 git status -s
@@ -29,10 +38,10 @@ npm run make
 cd ..
 
 echo ----------------- Publish the Application --------------------
-cd  "./desktop_client/out/iCtrl Desktop-darwin-$(arch)" || exit
-ditto -c -k --sequesterRsrc --keepParent --zlibCompressionLevel 9 "./iCtrl Desktop.app" "ictrl-desktop-darwin-$(arch).zip"
+cd  "./desktop_client/out/iCtrl Desktop-darwin-$cpu_arch" || exit
+ditto -c -k --sequesterRsrc --keepParent --zlibCompressionLevel 9 "./iCtrl Desktop.app" "ictrl-desktop-darwin-$cpu_arch.zip"
 cd ../../..
 node publish/mac_publish.js junhaoliao iCtrl \
- "./desktop_client/out/iCtrl Desktop-darwin-$(arch)/ictrl-desktop-darwin-$(arch).zip" "ictrl-desktop-darwin-$(arch).zip"
+ "./desktop_client/out/iCtrl Desktop-darwin-$cpu_arch/ictrl-desktop-darwin-$cpu_arch.zip" "ictrl-desktop-darwin-$cpu_arch.zip"
 node publish/mac_publish.js junhaoliao iCtrl \
- "./desktop_client/out/make/ictrl-desktop-setup.dmg" "ictrl-desktop-darwin-$(arch).dmg"
+ "./desktop_client/out/make/ictrl-desktop-setup.dmg" "ictrl-desktop-darwin-$cpu_arch.dmg"
