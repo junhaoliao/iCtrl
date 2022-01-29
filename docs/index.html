@@ -44,6 +44,7 @@
 
         .github-button-div {
             position: fixed;
+            top: 1vh;
             right: 1vw;
         }
 
@@ -109,7 +110,7 @@
             Intel Download
         </div>
         <div class="ui huge secondary button"
-             onclick="download('MacM1')">
+             onclick="download('ARM_Mac')">
             <i class="apple icon"></i>
              M1 Download
         </div>
@@ -124,13 +125,13 @@
 </div>
 <script>
     const download = (platform) => {
-        let download_link;
+        let download_link = 'https://github.com/junhaoliao/iCtrl/releases/latest/download/';
         if (platform === "Windows") {
-            download_link ='https://github.com/junhaoliao/iCtrl/releases/latest/download/ictrl-desktop-setup.exe'
+            download_link +='ictrl-desktop-setup.exe'
         } else if (platform === "Mac") {
-            download_link = 'https://github.com/junhaoliao/iCtrl/releases/latest/download/ictrl-desktop-setup.dmg'
-        } else if (platform === 'MacM1') {
-            download_link = 'https://github.com/junhaoliao/iCtrl/releases/latest/download/ictrl-desktop-setup-arm64.dmg'
+            download_link += 'ictrl-desktop-darwin-x64.dmg'
+        } else if (platform === 'ARM_Mac') {
+            download_link += 'ictrl-desktop-darwin-arm64.dmg'
         }
         location.href = download_link
 
