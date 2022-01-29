@@ -32,7 +32,7 @@ echo ----------------- Publish the Application --------------------
 cd  "./desktop_client/out/iCtrl Desktop-darwin-$(arch)" || exit
 ditto -c -k --sequesterRsrc --keepParent --zlibCompressionLevel 9 "./iCtrl Desktop.app" "ictrl-desktop-darwin-$(arch).zip"
 cd ../../..
-node publish/mac_publish.js junhaoliao api_test \
+node publish/mac_publish.js junhaoliao iCtrl \
  "./desktop_client/out/iCtrl Desktop-darwin-$(arch)/ictrl-desktop-darwin-$(arch).zip" "ictrl-desktop-darwin-$(arch).zip"
-node publish/mac_publish.js junhaoliao api_test \
+node publish/mac_publish.js junhaoliao iCtrl \
  "./desktop_client/out/make/ictrl-desktop-setup.dmg" "ictrl-desktop-darwin-$(arch).dmg"
