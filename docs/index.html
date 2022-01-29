@@ -116,9 +116,9 @@
         </div>
     </div>
     <div class="view_source_bug_report">
-        <span><a href="https://github.com/junhaoliao/iCtrl">View on GitHub</a></span>
+        <span><a target="_blank" href="https://github.com/junhaoliao/iCtrl">View on GitHub</a></span>
         &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        <span><a href="https://github.com/junhaoliao/iCtrl/issues">Bug Report&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</a>
+        <span><a target="_blank" href="https://github.com/junhaoliao/iCtrl/issues">Bug Report&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</a>
 </span>
     </div>
     <div class="copyright"><a href="https://junhao.ca">Copyright (C) 2020-2022 iCtrl Developers</a></div>
@@ -144,7 +144,10 @@
 
     const downloaded_give_star = (yesno) => {
         if (yesno === true) {
-            location.href = 'https://github.com/junhaoliao/iCtrl';
+            const a = document.createElement("a");
+            a.href = 'https://github.com/junhaoliao/iCtrl';
+            a.target = '_blank';
+            a.click();
         }
 
         document.getElementById('downloaded_dimmer').classList.remove('active');
