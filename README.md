@@ -36,7 +36,7 @@ Now you can add a new session by clicking the "+" (Plus) button in the upper rig
    - **simple-websocket-server**: https://github.com/junhaoliao/simple-websocket-server \
      previously maintained at: https://github.com/dpallot/simple-websocket-server (no longer active)
    - **Material UI**: https://mui.com/
-- **Richard Junjie Shen**, a graduated Uoft Architecture Student, who designed the logo
+- **Richard Junjie Shen**, a graduated Uoft Architecture undergraduate student, who designed the logo
 
 ## Authors
 - Junhao Liao
