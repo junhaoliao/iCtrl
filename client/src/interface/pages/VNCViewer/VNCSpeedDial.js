@@ -6,22 +6,23 @@ import {
     DialogActions,
     DialogContent,
     DialogContentText,
-    DialogTitle,
+    DialogTitle, IconButton,
     Slider,
     SpeedDial,
     SpeedDialAction,
     SpeedDialIcon,
-    Stack,
+    Stack, Typography,
 } from '@material-ui/core';
 import {
+    Add,
     Fullscreen,
     FullscreenExit,
     Height,
     HighQuality,
     Keyboard,
     LensBlur,
-    Refresh,
-    VisibilityOff,
+    Refresh, Remove,
+    VisibilityOff, ZoomIn,
 } from '@material-ui/icons';
 
 import './index.css';
@@ -42,6 +43,7 @@ export default class VNCSpeedDial extends React.Component {
             compressionLevel: 2,
             resetDialogOpen: false,
             resetting: false,
+            zoomLevel: 100
         };
     }
 
@@ -142,6 +144,20 @@ export default class VNCSpeedDial extends React.Component {
         }
     };
 
+    handleZoomLevelChange = (operation) => {
+        let zoomLevel = this.state.zoomLevel;
+        if (operation === 'zoom-out'){
+            zoomLevel -= 25;
+        } else if (operation === 'zoom-in'){
+            zoomLevel += 25;
+        }
+        this.props.rfb.zoomLevel = zoomLevel/100;
+
+        this.setState({
+            zoomLevel: zoomLevel,
+        });
+    };
+
 
     handleQualityLevelChange = (ev) => {
         const value = ev.target.value;
@@ -218,6 +234,7 @@ export default class VNCSpeedDial extends React.Component {
             speedDialDirection,
             tooltipPlacement,
             qualityLevel,
+            zoomLevel,
             compressionLevel,
             resizeSession,
             isFullscreen,
@@ -280,7 +297,7 @@ export default class VNCSpeedDial extends React.Component {
                 <SpeedDialAction
                     key={'toggle-resize'}
                     icon={<Height/>}
-                    tooltipTitle={<div id={'auto-resize-tooltip-title'}>Auto Resize:
+                    tooltipTitle={<div id={'auto-resize-tooltip-title'}>Auto Resize
                         {resizeSession ?
                             <div id={'auto-resize-enabled-text'}>Enabled</div> :
                             <div id={'auto-resize-disabled-text'}>Disabled</div>
@@ -289,6 +306,21 @@ export default class VNCSpeedDial extends React.Component {
                     tooltipOpen
                     tooltipPlacement={tooltipPlacement}
                     onClick={this.handleToggleResize}
+                />
+                <br/>
+                <SpeedDialAction
+                    key={'zoom'}
+                    icon={<ZoomIn/>}
+                    tooltipTitle={<Stack>
+                        <Stack direction={"row"} sx={{width: 200}}>
+                            <Typography flexGrow={1}>Zoom Level</Typography>
+                            <IconButton size={'small'} onClick={()=>{this.handleZoomLevelChange('zoom-out');}}><Remove/></IconButton>
+                            <Typography align={'center'}>{zoomLevel} %</Typography>
+                            <IconButton size={'small'} edge={'end'} onClick={()=>{this.handleZoomLevelChange('zoom-in');}}><Add/></IconButton>
+                        </Stack>
+                    </Stack>}
+                    tooltipOpen
+                    tooltipPlacement={tooltipPlacement}
                 />
                 <br/>
                 <SpeedDialAction
