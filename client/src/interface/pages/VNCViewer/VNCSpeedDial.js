@@ -270,7 +270,7 @@ export default class VNCSpeedDial extends React.Component {
                     key={'toggle-fullscreen'}
                     icon={isFullscreen ? <FullscreenExit/> : <Fullscreen/>}
                     tooltipTitle={<div style={{width: isFullscreen ? 108 : 119}}>
-                        {isFullscreen ? 'Exit' : 'Enter'} Fullscreen
+                        {isFullscreen ? 'Exit' : 'Enter'} Full Screen
                     </div>}
                     tooltipOpen
                     tooltipPlacement={tooltipPlacement}
