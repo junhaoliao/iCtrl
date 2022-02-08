@@ -3,7 +3,7 @@ import re
 
 from flask import request, abort, stream_with_context
 
-from .common import create_connection, is_ecf
+from .common import create_connection
 from .. import api, app
 from ..codes import ICtrlStep, ICtrlError, ConnectionType
 from ..utils import int_to_bytes
@@ -22,26 +22,15 @@ def start_vnc():
             return
 
         yield int_to_bytes(ICtrlStep.VNC.CHECK_LOAD)
-        if vnc.is_uoft() and no_load_check is False:
-            status, _, stdout, _ = vnc.exec_command_blocking('uptime')
-            if status is False:
-                abort(500, 'exec failed')
-
-            output = stdout.readlines()[0].split(',')
-
-            user_count, = re.findall(r'\d+', output[2])
-            load1, = re.findall(r"\d+\.\d+", output[3])
-
-            if int(user_count) > 0 or float(load1) > 0.2:
-                yield int_to_bytes(ICtrlError.SSH.OVER_LOADED)
-                return
+        if vnc.is_uoft() and no_load_check is False and vnc.is_load_high():
+            yield int_to_bytes(ICtrlError.SSH.OVER_LOADED)
+            return
 
         yield int_to_bytes(ICtrlStep.VNC.PARSE_PASSWD)
         # use5900: usually a RealVNC server listening on port 5900
         #  which we don't know how to parse the password
         use5900 = False
-        session_is_ecf = is_ecf(session_id)
-        if session_is_ecf:
+        if vnc.is_ecf():
             password = None
         else:
             status, password = vnc.get_vnc_password()
@@ -54,7 +43,7 @@ def start_vnc():
                     return
 
         yield int_to_bytes(ICtrlStep.VNC.LAUNCH_VNC)
-        if session_is_ecf:
+        if vnc.is_ecf():
             vnc_port = 1000
         elif use5900:
             vnc_port = 5900

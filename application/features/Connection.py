@@ -1,3 +1,4 @@
+import re
 import select
 import socketserver
 import threading
@@ -204,3 +205,29 @@ class Connection:
 
     def is_uoft(self):
         return self.is_eecg() or self.is_ecf()
+
+    def is_load_high(self):
+        # FIXME: might replace `uptime` with some command that find the users of all running processes on the same
+        #  computer
+        status, _, stdout, _ = self.exec_command_blocking('uptime && who | grep $USER')
+        if status is False:
+            return True
+
+        output = stdout.readlines()
+
+        uptime_output = output[0].strip().split(',')
+        user_count, = re.findall(r'\d+', uptime_output[-4])
+        load1, = re.findall(r"\d+\.\d+", uptime_output[-3])
+
+        # cast string to int
+        user_count = int(user_count)
+        load1 = float(load1)
+
+        # skip check if I'm the only user (the `who|grep` command doesn't produce any output)
+        # FIXME: need to recognize my terminal sessions as well
+        if user_count == 1 and len(output) == 2:
+            return False
+        elif user_count > 0 or load1 > 0.2:
+            return True
+
+        return False
