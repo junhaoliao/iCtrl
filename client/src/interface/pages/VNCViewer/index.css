@@ -58,13 +58,13 @@
     z-index: 1;
 }
 
-#auto-resize-tooltip-title {
-    width: 94px;
+.speed-dial-action-title {
+    font-weight: bold;
+    width: max-content;
 }
 
 #auto-resize-enabled-text {
     color: green;
-    font-weight: bold;
 }
 
 #auto-resize-disabled-text {
