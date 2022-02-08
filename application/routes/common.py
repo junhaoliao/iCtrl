@@ -45,11 +45,6 @@ def create_connection(session_id, conn_type):
     return conn, reason
 
 
-def is_ecf(session_id):
-    host, _, _, _ = profiles.get_session_info(session_id)
-    return host.endswith('.ecf.utoronto.ca') or host.endswith('ecf.toronto.edu')
-
-
 @api.route('/profiles')
 def get_profiles():
     return profiles.query()
