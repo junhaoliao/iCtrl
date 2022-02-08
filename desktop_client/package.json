@@ -76,7 +76,9 @@
           "config": {
             "name": "ictrl-desktop-client",
             "setupIcon": "assets/installer_icon.ico",
-            "setupExe": "ictrl-desktop-setup.exe"
+            "setupExe": "ictrl-desktop-setup.exe",
+            "certificateFile": "C:\\Users\\Junhao\\OneDrive\\ECE496\\certs\\junhao_ca.pfx",
+            "certificatePassword": ""
           }
         },
         {
