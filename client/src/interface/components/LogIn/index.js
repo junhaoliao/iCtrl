@@ -50,7 +50,7 @@ export default class LogIn extends React.Component {
 
         const username = document.getElementById('log-in-username').value;
         const password = document.getElementById('log-in-password').value;
-        console.log(username, password);
+
         axios.post('/api/login', {
             username, password
         }).then(response => {
