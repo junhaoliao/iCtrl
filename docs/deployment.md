@@ -139,6 +139,10 @@ Edit `/var/www/ictrl/ictrl.conf`. An example configuration is shown below
 DBPASSWD=THE_PASSWORD_YOU_SET_IN_"Initialization of the Database"
 DBADDR=localhost:5432
 
+# setup email credentials for verifications
+SENDER_EMAIL=<EMAIL_ADDRESS>
+SENDER_PASSWD=<EMAIL_PASSWORD>
+
 # setup the SSL certificate and key path
 SSL_CERT_PATH=/var/www/ictrl/fullchain.pem
 SSL_KEY_PATH=/var/www/ictrl/privkey.pem
