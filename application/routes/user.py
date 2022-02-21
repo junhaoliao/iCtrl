@@ -55,28 +55,28 @@ def logout():
     return f'logged out'
 
 
-@api.route('/resend', methods=['GET'])
+@api.route('/resend_activation', methods=['POST'])
 def resend():
     try:
-        email = request.args['email']
+        email = request.json['username']
         profiles.send_activation_email(email)
     except KeyError as e:
         abort(403, f'{e} is missing')
     return 'sent'
 
 
-@api.route('/activate', methods=['POST', 'GET'])
+@api.route('/activate', methods=['GET'])
 def activate():
     try:
-        if request.method == 'GET':
-            userid = request.args['userid']
-            code = request.args['code']
-        else:
-            userid = request.json['userid']
-            code = request.json['code']
+        userid = request.args['userid']
+        code = request.args['code']
+
         if profiles.activate_user(userid, code):
-            return 'activated'
+            return 'Your account has been activated. '
     except KeyError as e:
         abort(403, f'{e} is missing')
 
-    return 'failed to activate'
+    return 'Failed to activate. ' \
+           'Your activation link might have been expired or replaced. Please visit ' \
+           '<a href="https://ictrl.ca">https://ictrl.ca</a> ' \
+           'to login / register. '

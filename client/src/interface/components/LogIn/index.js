@@ -1,180 +1,278 @@
-import React, {Children} from 'react';
-import {AppBar, Box, Tab, Tabs, TextField, Typography,} from '@material-ui/core';
-import SwipeableViews from 'react-swipeable-views';
-import {LoadingButton} from '@material-ui/lab';
+import React from 'react';
+import {AppBar, Collapse, InputAdornment, Tab, Tabs, TextField} from '@material-ui/core';
+import {Alert, LoadingButton} from '@material-ui/lab';
 import {htmlResponseToReason} from '../../../actions/utils';
 import axios from 'axios';
+import {TransitionGroup} from 'react-transition-group';
 
 import './index.css';
+import {AccountBox, Check, Email, Password} from '@material-ui/icons';
 
-const TabPanel = (props) => {
-    const {children, currentIndex, index} = props;
-
-    return (
-        <div
-            role="tabpanel"
-            hidden={currentIndex !== index}
-            id={`tabpanel-${index}`}
-        >
-            {currentIndex === index && (
-                <Box sx={{p: 5}}>
-                    {React.Children.map(children, child => (
-                        React.cloneElement(child, {style: {...child.props.style, marginBottom: '45px'}})
-                    ))}
-                </Box>
-            )}
-        </div>
-    );
-}
+const status = ['login', 'signup'];
 
 export default class LogIn extends React.Component {
-    constructor(props) {
-        super(props);
+  constructor(props) {
+    super(props);
 
-        this.state = {
-            curIdx: 0,
-            loading: false
-        };
-    }
-
-    handleTabChange = (_, newValue) => {
-        this.setState({curIdx: newValue});
+    this.state = {
+      currentTabIndex: 0,
+      loading: false,
+      errorElem: null,
     };
+  }
 
-    handleChangeIndex = (newValue) => {
-        this.setState({curIdx: newValue});
-    };
+  handleTabChange = (_, newValue) => {
+    this.setState({currentTabIndex: newValue, errorElem: null});
+  };
 
-    handleLogIn = () => {
-        this.setState({loading: true})
+  handleResendActivation = () => {
+    const resendButton = document.getElementById('resend-button');
+    resendButton.setAttribute('disabled', 'true');
 
-        const username = document.getElementById('log-in-username').value;
-        const password = document.getElementById('log-in-password').value;
-        console.log(username, password);
-        axios.post('/api/login', {
-            username, password
-        }).then(response => {
-            window.location = '/dashboard';
-        })
-            .catch(error => {
-                this.setState({
-                    error: htmlResponseToReason(error.response.data),
-                    loading: false,
-                });
-            });
-    };
+    const username = document.getElementById('username').value;
 
-    handleSignUp = () => {
-        this.setState({loading: true})
-        const username = document.getElementById('sign-up-username').value;
-        const email = document.getElementById('sign-up-email').value;
-        const password = document.getElementById('sign-up-password').value;
+    axios.post('/api/resend_activation', {
+      username: username,
+    }).then(response => {
+      this.setState({
+        resendRequesting: false,
+        errorElem: <Alert severity="info">
+          Please check your email inbox to activate your account.
+        </Alert>,
+      });
+    }).catch(error => {
+      this.setState({
+        resendRequesting: false, errorElem: <Alert severity="error">
+          {htmlResponseToReason(error.response.data, true)}
+        </Alert>,
+      });
+    });
+  };
 
-        axios.post('/api/register', {
-            username, password, email
-        }).then(response => {
-            // FIXME: add sign up status
-            window.location = '/';
-        }).catch(error => {
-            this.setState({
-                error: htmlResponseToReason(error.response.data),
-                loading: false,
-            });
+  handleRecoverUsername = () => {
+    // FIXME: implement this
+    //  should send an email to inform the user of her/his username
+    alert('not implemented');
+  };
+
+  handleLogIn = () => {
+    this.setState({
+      loading: true,
+      errorElem: null,
+    });
+
+    const username = document.getElementById('username').value;
+    const password = document.getElementById('password').value;
+
+    axios.post('/api/login', {
+      username, password,
+    }).then(_ => {
+      window.location = '/dashboard';
+    }).catch(error => {
+      this.setState({
+        loading: false,
+      });
+      const resp = htmlResponseToReason(error.response.data, true);
+      if (resp === 'ACCOUNT_WRONG_USERNAME') {
+        this.setState({
+          errorElem: <Alert severity="error">
+            Sorry we can't find your account. <br/>
+            Please check your username or <button onClick={() => {
+            this.handleTabChange(null, 1);
+          }}>
+            register
+          </button> a new account.
+          </Alert>,
         });
+      } else if (resp === 'ACCOUNT_NOT_ACTIVATED') {
+        this.setState({
+          errorElem: <Alert severity="warning">
+            Your account has not been activated yet.<br/>
+            Please check your email inbox or <button
+              id={'resend-button'}
+              onClick={this.handleResendActivation}
+          >
+            resend
+          </button> the
+            activation email.
+          </Alert>,
+        });
+      } else {
+        this.setState({
+          errorElem: resp,
+        });
+      }
+    });
+  };
+
+  handleSignUp = () => {
+    this.setState({loading: true, errorElem: null});
+
+    const username = document.getElementById('username').value;
+    const email = document.getElementById('email').value;
+    const password = document.getElementById('password').value;
+    const confirmPassword = document.getElementById('confirm-password').value;
+
+    if (password !== confirmPassword) {
+      this.setState({
+        loading: false,
+        errorElem: <Alert severity="error">
+          "Password" and "Confirm Password" don't match.
+        </Alert>,
+      });
+      return;
     }
 
-    render() {
-        const {curIdx, loading} = this.state;
+    axios.post('/api/register', {
+      username, password, email,
+    }).then(response => {
+      this.setState({
+        loading: false,
+        errorElem: <Alert severity="info">
+          If your email address is valid, an activation link has been sent. Please check your email inbox or junk box.
+        </Alert>,
+      });
+    }).catch(error => {
+      this.setState({loading: false});
 
-        return (
-            <div>
-                <AppBar position="static" color="">
-                    <Tabs
-                        value={curIdx}
-                        onChange={this.handleTabChange}
-                        indicatorColor="primary"
-                        textColor="primary"
-                        variant="fullWidth"
-                        aria-label="full width tabs"
-                    >
-                        <Tab label="Log In" id={'login-tab'}/>
-                        <Tab label="Sign Up" id={'signup-tab'}/>
-                    </Tabs>
-                </AppBar>
-                <SwipeableViews
-                    axis="x"
-                    index={curIdx}
-                    onChangeIndex={this.handleChangeIndex}
-                >
-                    <TabPanel currentIndex={curIdx} index={0}>
-                        <TextField
-                            required
-                            id="log-in-username"
-                            label="Username / Email"
-                            variant="filled"
-                            autoComplete={'username'}
-                            fullWidth={true}
-                        />
-                        <TextField
-                            required
-                            id="log-in-password"
-                            label="Password"
-                            variant="filled"
-                            type="password"
-                            autoComplete={'current-password'}
-                            fullWidth={true}
-                        />
-                        <LoadingButton variant={'contained'}
-                                       loading={loading}
-                                       loadingIndicator={'Logging in...'}
-                                       onClick={this.handleLogIn}
-                                       fullWidth
-                                       color={'info'}
-                                       size={'large'}
-                        >
-                            Log In
-                        </LoadingButton>
-                    </TabPanel>
-                    <TabPanel currentIndex={curIdx} index={1}>
-                        <TextField
-                            required
-                            id="sign-up-username"
-                            label="Username"
-                            variant="filled"
-                            autoComplete={'new-password'}
-                            fullWidth={true}
-                        />
-                        <TextField
-                            required
-                            id="sign-up-email"
-                            label="Email"
-                            variant="filled"
-                            type={'email'}
-                            autoComplete={'email'}
-                            fullWidth={true}
-                        />
-                        <TextField
-                            required
-                            id="sign-up-password"
-                            label="Password"
-                            variant="filled"
-                            type="password"
-                            autoComplete={'new-password'}
-                            fullWidth={true}
-                        />
-                        <LoadingButton variant={'contained'}
-                                       loading={loading}
-                                       loadingIndicator={'Signing up...'}
-                                       onClick={this.handleSignUp}
-                                       fullWidth
-                                       color={'info'}
-                                       size={'large'}
-                        >
-                            Sign Up
-                        </LoadingButton>
-                    </TabPanel>
-                </SwipeableViews>
-            </div>
-        );
-    }
+      const resp = htmlResponseToReason(error.response.data, true);
+      if (resp === 'ACCOUNT_DUPLICATE_USERNAME') {
+        this.setState({
+          errorElem: <Alert severity="warning">
+            The entered username already exists. Do you want to <button onClick={() => {
+            this.handleTabChange(null, 0);
+          }}>login</button> instead?
+          </Alert>,
+        });
+      } else if (resp === 'ACCOUNT_DUPLICATE_EMAIL') {
+        this.setState({
+
+          errorElem: <Alert severity="warning">
+            The entered email already exists. Do you want to <button onClick={this.handleRecoverUsername}>
+            recover
+          </button> your username?
+          </Alert>,
+        });
+      } else {
+        this.setState({
+
+          errorElem: <Alert severity="error">
+            {resp}
+          </Alert>,
+        });
+      }
+    });
+  };
+
+  render() {
+    const {currentTabIndex, loading, errorElem} = this.state;
+    const currentStatus = status[currentTabIndex];
+
+    return (
+        <div>
+          <AppBar position="static" color="">
+            <Tabs
+                value={currentTabIndex}
+                onChange={this.handleTabChange}
+                indicatorColor="primary"
+                textColor="primary"
+                variant="fullWidth"
+                aria-label="full width login signup tabs"
+            >
+              <Tab label="Log In"/>
+              <Tab label="Sign Up"/>
+            </Tabs>
+          </AppBar>
+          <TransitionGroup id={'login-container'}>
+            <TextField
+                required={true}
+                fullWidth={true}
+                variant={'standard'}
+                id={'username'}
+                label={'Username'}
+                autoComplete={'username'}
+                InputProps={{
+                  startAdornment: (
+                      <InputAdornment position="start">
+                        <AccountBox/>
+                      </InputAdornment>
+                  ),
+                }}
+            />
+            {currentStatus === 'signup' && <Collapse><TextField
+                required={true}
+                fullWidth={true}
+                variant={'standard'}
+                id="email"
+                label="Email"
+                autoComplete={'email'}
+                InputProps={{
+                  startAdornment: (
+                      <InputAdornment position="start">
+                        <Email/>
+                      </InputAdornment>
+                  ),
+                }}
+            /></Collapse>}
+            <TextField
+                required={true}
+                fullWidth={true}
+                variant={'standard'}
+                id={'password'}
+                label={'Password'}
+                type={'password'}
+                autoComplete={currentStatus === 'login' ? 'current-password' : 'new-password'}
+                InputProps={{
+                  startAdornment: (
+                      <InputAdornment position="start">
+                        <Password/>
+                      </InputAdornment>
+                  ),
+                }}
+            />
+            {currentStatus === 'signup' && <Collapse><TextField
+                required={true}
+                fullWidth={true}
+                variant={'standard'}
+                id="confirm-password"
+                label="Confirm Password"
+                type={'password'}
+                autoComplete={'new-password'}
+                InputProps={{
+                  startAdornment: (
+                      <InputAdornment position="start">
+                        <Check/>
+                      </InputAdornment>
+                  ),
+                }}
+            /></Collapse>}
+            {errorElem && <Collapse>{errorElem}
+            </Collapse>}
+            {
+              currentStatus === 'login' ? <LoadingButton
+                  variant={'contained'}
+                  loading={loading}
+                  loadingIndicator={'Logging in...'}
+                  onClick={this.handleLogIn}
+                  fullWidth
+                  color={'info'}
+                  size={'large'}
+              >
+                Log In
+              </LoadingButton> : <LoadingButton
+                  variant={'contained'}
+                  loading={loading}
+                  loadingIndicator={'Signing up...'}
+                  onClick={this.handleSignUp}
+                  fullWidth
+                  color={'info'}
+                  size={'large'}
+              >
+                Sign Up
+              </LoadingButton>
+            }
+          </TransitionGroup>
+        </div>
+    );
+  }
 }

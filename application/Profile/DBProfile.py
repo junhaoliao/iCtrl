@@ -1,43 +1,47 @@
 import os
 import re
 import uuid
+from enum import IntEnum
 from io import StringIO
 
 import bcrypt
 import sqlalchemy
+from cachetools import TTLCache
 from flask import session as flask_session, abort
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import types
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import validates
 
-from ..email_utils import send_email
+from ..utils import send_email, validate_password
 
-from cachetools import TTLCache
-
-ACTIVATION_TTL_SECOND = 1800
-RESEND_TTL_SECOND = 30
+ACTIVATION_TTL_SECOND = 60 * 30
+RESEND_COOLDOWN_TTL_SECOND = 30
 
 
-class LowerCaseText(types.TypeDecorator):
-    impl = types.String
-
-    def process_bind_param(self, value, dialect):
-        return value.lower()
+# provide different services depending on the type:
+# 0: not activated (first time email not verified)
+# 1: normal user
+# more to be added...
+class ActivationType(IntEnum):
+    NOT_ACTIVATED = 0
+    NORMAL_USER = 1
 
 
 class DBProfile:
-
     def __init__(self, app):
         db_passwd = os.environ['DBPASSWD']
         db_address = os.environ['DBADDR']
         app.config["SQLALCHEMY_DATABASE_URI"] = f"postgresql://postgres:{db_passwd}@{db_address}"
+        app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
         self.db = db = SQLAlchemy(app)
         self.salt = bcrypt.gensalt()
 
+        # key: user_id, value: activation code
         self.activation_cache = TTLCache(maxsize=1024, ttl=ACTIVATION_TTL_SECOND)
-        self.resend_cache = TTLCache(maxsize=1024, ttl=RESEND_TTL_SECOND)
+
+        # key: user_id, value: True (to indicate the entry exists; can be any dummy value)
+        self.resend_cooldown = TTLCache(maxsize=1024, ttl=RESEND_COOLDOWN_TTL_SECOND)
 
         with open('application/resources/activation_email_template.html', 'r') as f:
             self.activation_email_body_template = f.read()
@@ -48,29 +52,33 @@ class DBProfile:
             id = db.Column(db.Integer, primary_key=True)
             sessions = db.relationship('Session', backref='user', lazy=True)
 
-            username = db.Column(LowerCaseText, unique=True, nullable=False)
+            username = db.Column(db.String, unique=True, nullable=False)
 
             @validates('username')
             def validate_username(self, key, username):
                 assert re.match("^[A-Za-z0-9_-]+$", username), \
                     'User name should contain only letters, numbers, underscores and dashes'
-                return username
+                return username.lower()
 
+            # this field is for the hashed passwords
+            # for the password requirements verifications, please see "self.add_user"
             password = db.Column(db.String, nullable=False)
 
             email = db.Column(db.String, unique=True, nullable=False)
 
             @validates('email')
             def validate_email(self, key, email):
+                email = email.lower()
+
                 assert re.match(r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b', email), \
                     f'Invalid email address: "{email}"'
+
+                # FIXME: remove this utoronto mail restriction in the future
+                assert email.endswith('utoronto.ca'), "Currently, only Uoft emails are supported"
+
                 return email
 
-            # provide different services depending on the type:
-            # 0: not activated (first time email not verified)
-            # 1: normal user
-            # more to be added...
-            activation_type = db.Column(db.Integer, nullable=False, default=0)
+            activation_type = db.Column(db.Integer, nullable=False, default=ActivationType.NOT_ACTIVATED)
 
         class Session(db.Model):
             __table_args__ = {"schema": "ictrl"}
@@ -82,30 +90,27 @@ class DBProfile:
             username = db.Column(db.String, nullable=False)
             private_key = db.Column(db.Text, nullable=True)
 
-        self.tables = {
-            'User': User,
-            'Session': Session
-        }
+        self.User = User
+        self.Session = Session
 
         # db.drop_all()
         db.engine.execute("CREATE SCHEMA IF NOT EXISTS ictrl;")
         db.create_all()
 
     def login(self, username, password):
-        User = self.tables['User']
-
+        username = username.lower()
         password = password.encode('ascii')
 
-        user = User.query.filter_by(username=username).first()
+        user = self.User.query.filter_by(username=username).first()
         if user is None:
-            abort(403, 'Cannot find any matching record')
+            abort(403, 'ACCOUNT_WRONG_USERNAME')
 
-        if user.activation_type == 0:
-            abort(401, 'Account not activated')
+        if user.activation_type == ActivationType.NOT_ACTIVATED:
+            abort(401, 'ACCOUNT_NOT_ACTIVATED')
 
         hashed_password = user.password.encode('ascii')
         if not bcrypt.checkpw(password, hashed_password):
-            abort(403, 'Cannot find any matching record')
+            abort(403, 'ACCOUNT_WRONG_PASSWORD')
 
         flask_session.clear()
         flask_session['userid'] = user.id
@@ -136,80 +141,66 @@ class DBProfile:
         return _profile
 
     def add_user(self, username, password, email):
-        User = self.tables['User']
+        password_ok, password_reason = validate_password(password)
+        if not password_ok:
+            abort(422, password_reason)
 
         # hash the password before storing
         password = password.encode('ascii')
         hashed_password = bcrypt.hashpw(password, self.salt).decode('ascii')
 
         try:
-            user = User(username=username, password=hashed_password, email=email)
+            user = self.User(username=username, password=hashed_password, email=email)
             self.db.session.add(user)
             self.save_profile()
 
-            code = uuid.uuid4()
-            self.activation_cache[user.id] = code
-            self.send_activation_email(email, user.id, code)
-
+            self.send_activation_email(username)
         except AssertionError as e:
-            abort(403, e)
+            # fails the validations as imposed by "@validates" above
+            abort(422, e)
         except sqlalchemy.exc.IntegrityError as e:
+            error_info = e.orig.args[0]
+            if 'user_username_key' in error_info:
+                abort(422, 'ACCOUNT_DUPLICATE_USERNAME')
+            elif 'user_email_key' in error_info:
+                abort(422, 'ACCOUNT_DUPLICATE_EMAIL')
+
             abort(403, e)
 
         return True, ''
 
-    def send_activation_email(self, email):
-        sender_email = 'notifications.ictrl@gmail.com'
-        sender_password = 'iCtrl2022'
-
-        User = self.tables['User']
-        user = User.query.filter_by(email=email).first()
-        if user is None:
-            abort(403, 'Cannot find any matching record')
-        if self.resend_cache.get(str(user.id), None):
-            abort(429, 'Too soon to resend')
-        code = uuid.uuid4()
-        self.activation_cache[str(user.id)] = str(code)
-        self.resend_cache[str(user.id)] = True
-        body = self.activation_email_body_template.format(userid=user.id,
-                                                          code=code,
-                                                          expire_min=int(ACTIVATION_TTL_SECOND / 60))
-        send_email(sender_email, sender_password, email, 'Activate Your iCtrl Account', body)
-        return True
-
     def activate_user(self, userid, code):
         cached_code = self.activation_cache.get(userid, None)
+
         if not cached_code:
             return False
-        if cached_code == code:
-            User = self.tables['User']
-            user = User.query.filter_by(id=userid).first()
+        elif cached_code == code:
+            user = self.User.query.filter_by(id=userid).first()
             if user is None:
-                abort(403, 'Cannot find any matching record')
-            user.activation_type = 1
+                abort(403, f'Cannot find any matching user with userid={userid}')
+
+            user.activation_type = ActivationType.NORMAL_USER
             self.save_profile()
+
             return True
+
         return False
 
     def get_user(self):
-        User = self.tables['User']
-
         if 'userid' not in flask_session:
             abort(403, 'You are not logged in')
         userid = flask_session['userid']
 
-        user = User.query.filter_by(id=userid).first()
+        user = self.User.query.filter_by(id=userid).first()
         if user is None:
             abort(403, 'Cannot find any matching record')
 
         return user
 
     def add_session(self, host, username, conn=None):
-        Session = self.tables['Session']
-
         user = self.get_user()
         try:
-            session = Session(id=uuid.uuid4(), user=user, host=host, username=username)
+            session = self.Session(id=uuid.uuid4(), user=user, host=host, username=username)
 
             if conn is not None:
                 key_file_obj = StringIO()
@@ -230,13 +221,11 @@ class DBProfile:
         return True, ''
 
     def get_session(self, session_id):
-        Session = self.tables['Session']
-
         if 'userid' not in flask_session:
             abort(403, 'You are not logged in')
         userid = flask_session['userid']
 
-        return Session.query.filter_by(id=session_id, user_id=userid).first()
+        return self.Session.query.filter_by(id=session_id, user_id=userid).first()
 
     def delete_session(self, session_id):
         session = self.get_session(session_id)
@@ -267,3 +256,25 @@ class DBProfile:
             return None, None, None
 
         return session.host, session.username, None, session.private_key
+
+    def send_activation_email(self, username):
+        user = self.User.query.filter_by(username=username).first()
+        if user is None:
+            abort(403, f'Cannot find any matching user with username={username}')
+        elif self.resend_cooldown.get(str(user.id), None):
+            abort(429, f'Too soon to resend. Please check your email junk box or try again in '
+                       f'{RESEND_COOLDOWN_TTL_SECOND} seconds. ')
+
+        user_id = str(user.id)
+        code = str(uuid.uuid4())
+        self.activation_cache[user_id] = code
+        self.resend_cooldown[user_id] = True
+
+        body = self.activation_email_body_template.format(
+            username=username,
+            userid=user_id,
+            code=code,
+            expire_min=int(ACTIVATION_TTL_SECOND / 60))
+        send_email(user.email, 'Activate Your iCtrl Account', body)
+
+        return True

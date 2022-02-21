@@ -26,3 +26,7 @@ with open('/var/www/ictrl/ictrl.conf', 'r') as config_file:
 from application import app as application, api
 
 application.register_blueprint(api)
+
+# FIX_ME: testing code: comment out before publishing
+# application.register_blueprint(api, url_prefix='/api')
+# application.run(host='0.0.0.0', port=5000)
