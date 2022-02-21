@@ -3,18 +3,19 @@
 **SSH Remote Web Service / Desktop Client** (Previously known as **UG_Remote**)
 
 ## Disclaimer
-Your SSH hosts and credentials will be stored locally on the computer you run the program with. 
+If you are using the desktop client, your SSH hosts and credentials will be stored locally on the computer you run the program with. 
+In the web service, we store the hosts and credentials in a database on our server. 
 Although we have been trying to protect your information with honest efforts, we are not cyber security experts and cannot guarantee the program is 100% bug-free. 
 
 Please do not use the program on a public computer. 
-We are not responsible for any unintended use of our program, including but not limited to Acedemic Misconduct, loss of data when the APIs are called with unofficial web clients, and any hacking behaviour that utilises our tool. However, if you suspect there is any security hazard, you are more than welcome to email support@ictrl.ca , and we will try our best to address such issues. 
+We are not responsible for any unintended use of our program, including but not limited to Academic Misconduct, loss of data when the APIs are called with unofficial web clients, and any hacking behaviour that utilises our tool. However, if you suspect there is any security vulnerability, you are more than welcome to email support@ictrl.ca , and we will try our best to address such issues. 
 
 ## Instructions
 The tool is provided in two variants: a web service and a desktop client. You can pick from one of the below options to best suit your need.
 
 ### Option I. Web Service
 1. Go to https://ictrl.ca
-2. Under the "Sign Up" tab, egister an account with Uoft email
+2. Under the "Sign Up" tab, register an account with Uoft email
 3. Verify your account by checking your [Uoft email inbox](https://mail.utoronto.ca)
 4. Log in with your credentials
 
@@ -35,7 +36,7 @@ Now you can add a new session by clicking the "+" (Plus) button in the upper rig
    - **simple-websocket-server**: https://github.com/junhaoliao/simple-websocket-server \
      previously maintained at: https://github.com/dpallot/simple-websocket-server (no longer active)
    - **Material UI**: https://mui.com/
-- **Richard Junjie Shen**, a graduated Uoft Architecture Student, who designed the logo
+- **Richard Junjie Shen**, a graduated Uoft Architecture undergraduate student, who designed the logo
 
 ## Authors
 - Junhao Liao

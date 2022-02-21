@@ -1,3 +1,5 @@
+from io import BytesIO
+
 from PIL import Image, ImageDraw, ImageFont
 
 from ..paths import FONT_PATH
@@ -6,7 +8,7 @@ from ..paths import FONT_PATH
 ICON_SIZE = 228
 
 ICON_CIRCLE_POSITION = (14, 14, ICON_SIZE - 14, ICON_SIZE - 14)
-ICON_RECTANGLE_POSITION = [(ICON_SIZE - 88, ICON_SIZE - 88), (ICON_SIZE, ICON_SIZE)]
+ICON_RECTANGLE_POSITION = ((ICON_SIZE - 88, ICON_SIZE - 88), (ICON_SIZE, ICON_SIZE))
 ICON_FONT = ImageFont.truetype(FONT_PATH, 64)
 
 
@@ -27,13 +29,13 @@ class Favicon:
 
         return ''.join(color_list)
 
-    def __init__(self, text):
-        if text.startswith('192'):
-            self.short_text = text[-5:]
+    def __init__(self, host):
+        if host.startswith('192'):
+            self.short_text = host[-5:]
         else:
-            self.short_text = text[:5]
+            self.short_text = host[:5]
 
-        self.color = self.text_to_color(text)
+        self.color = self.text_to_color(host)
         self.im = Image.new('RGBA', (ICON_SIZE, ICON_SIZE))
         self.draw = ImageDraw.Draw(self.im)
 
@@ -41,7 +43,7 @@ class Favicon:
         w, h = self.draw.textsize(self.short_text, font=ICON_FONT)
         self.draw.text(((ICON_SIZE - w) / 2, (ICON_SIZE - h) / 2), self.short_text, font=ICON_FONT)
 
-    def VNC(self, temp):
+    def vnc(self, temp):
         self.draw.rectangle(ICON_RECTANGLE_POSITION, fill='#f08080')
         self.im.save(temp, format='png')
 
@@ -52,3 +54,21 @@ class Favicon:
     def file_manager(self, temp):
         self.draw.rectangle(ICON_RECTANGLE_POSITION, fill='#1976d2')
         self.im.save(temp, format='png')
+
+    @staticmethod
+    def generate(host, feature):
+        result = BytesIO()
+
+        icon = Favicon(host)
+        if feature == 'vnc':
+            icon.vnc(result)
+        elif feature == 'terminal':
+            icon.console(result)
+        elif feature == 'fm':
+            icon.file_manager(result)
+        else:
+            raise ValueError(f"Invalid feature: {feature}")
+
+        result.seek(0)
+
+        return result

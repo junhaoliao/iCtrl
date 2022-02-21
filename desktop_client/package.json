@@ -1,7 +1,7 @@
 {
   "name": "ictrl-desktop-client",
   "description": "Desktop Client for iCtrl",
-  "version": "6.0.0",
+  "version": "6.0.5",
   "private": true,
   "main": "main.js",
   "repository": "https://github.com/junhaoliao/iCtrl",
@@ -76,7 +76,9 @@
           "config": {
             "name": "ictrl-desktop-client",
             "setupIcon": "assets/installer_icon.ico",
-            "setupExe": "ictrl-desktop-setup.exe"
+            "setupExe": "ictrl-desktop-setup.exe",
+            "certificateFile": "C:\\Users\\Junhao\\OneDrive\\ECE496\\certs\\junhao_ca.pfx",
+            "certificatePassword": ""
           }
         },
         {

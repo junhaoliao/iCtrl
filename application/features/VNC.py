@@ -49,13 +49,13 @@ class VNC(Connection):
             return True, decrypt_passwd(bytearray.fromhex(hexdump))
 
     def check_5900_open(self):
-        _, _, stdout, _ = self.exec_command_blocking('netstat -tln | grep :5900')
+        _, _, stdout, _ = self.exec_command_blocking('ss -tulpn | grep LISTEN | grep :5900')
         result = stdout.readline()
         return result != ''
 
     def remove_vnc_settings(self):
         remove_cmd_lst = [
-            "killall -q -w Xtigervnc",
+            "killall -q -w xvfb-run Xtigervnc",
             "rm -rf ~/.vnc"
         ]
         _, _, _, stderr = self.exec_command_blocking(';'.join(remove_cmd_lst))
@@ -73,14 +73,15 @@ class VNC(Connection):
             #         -w: wait until the processes to die then continue to the next cmd
             # cp /etc/vnc/xstartup ~/.vnc
             #  : provide a xstartup file to prevent the VNC settings dialog from popping up
-            "killall -q -w Xtigervnc",
+            "killall -q -w xvfb-run Xtigervnc",
             "rm -rf ~/.vnc",
             "mkdir ~/.vnc",
+            f"printf '{VNC.read_xstartup()}' > ~/.vnc/xstartup",
             "cp /etc/vnc/xstartup ~/.vnc  >& /dev/null",
-            "cp /cad2/ece297s/public/vnc/xstartup ~/.vnc  >& /dev/null",
             "echo '%s'| xxd -r -p > ~/.vnc/passwd" % hexed_passwd,
             "chmod 600 ~/.vnc/passwd",
         ]
+        print(f"printf '{VNC.read_xstartup()}' > ~/.vnc/xstartup")
         _, _, _, stderr = self.exec_command_blocking(';'.join(reset_cmd_lst))
         for line in stderr:
             if "Disk quota exceeded" in line:
@@ -100,14 +101,19 @@ class VNC(Connection):
 
         # FIXME: handle disk quota issue when launching vncserver
         relaunch = False
+        relaunch_cmd_list = [
+            'vncserver -kill ":*"',
+            'killall -q -w xvfb-run Xtigervnc',
+            'vncserver'
+        ]
         if len(ports_by_me) > 1:
             # TODO: might recover the valid ones
             # more than one VNC servers are listening and therefore all killed above to prevent unexpected results
-            _, _, stdout, _ = self.exec_command_blocking('vncserver -kill ":*"; vncserver')
+            _, _, stdout, _ = self.exec_command_blocking(';'.join(relaunch_cmd_list))
             relaunch = True
         elif len(ports_by_me) == 0:
             # no valid VNC server is listening
-            _, _, stdout, _ = self.exec_command_blocking('vncserver')
+            _, _, stdout, _ = self.exec_command_blocking(';'.join(relaunch_cmd_list))
             relaunch = True
 
         vnc_port = None
@@ -133,3 +139,17 @@ class VNC(Connection):
         proxy_thread.start()
 
         return local_websocket_port
+
+    @staticmethod
+    def read_xstartup():
+        """
+        TODO: read from an actual file instead
+        1. Launch a gnome-session so that the VNC config window doesn't show up
+        2. To address the bug described at https://bugzilla.redhat.com/show_bug.cgi?id=1710949
+           xterm: write to /var/run/utmp
+            so that uptime & ruptime can get the correct login count
+           xvfb-run: run in the background / don't show GUI
+        """
+        return "#\\!/bin/sh\\n" \
+               "gnome-session &\\n" \
+               "xvfb-run -a xterm &\\n"

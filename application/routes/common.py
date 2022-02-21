@@ -1,5 +1,5 @@
 import json
-from io import BytesIO
+import threading
 
 from flask import request, abort, send_file
 
@@ -29,7 +29,8 @@ def create_connection(session_id, conn_type):
     else:
         raise TypeError(f'Invalid type: {conn_type}')
 
-    status, reason = conn.connect(host, username, key_filename=this_private_key_path, private_key_str=this_private_key_str)
+    status, reason = conn.connect(host, username,
+                                  key_filename=this_private_key_path, private_key_str=this_private_key_str)
     if status is False:
         if reason.startswith('[Errno 60]') \
                 or reason.startswith('[Errno 64]') \
@@ -42,11 +43,6 @@ def create_connection(session_id, conn_type):
             reason = int_to_bytes(ICtrlError.SSH.GENERAL)
 
     return conn, reason
-
-
-def is_ecf(session_id):
-    host, _, _, _ = profiles.get_session_info(session_id)
-    return host.endswith('.ecf.utoronto.ca') or host.endswith('ecf.toronto.edu')
 
 
 @api.route('/profiles')
@@ -72,7 +68,7 @@ def handle_session():
 
         conn = Connection()
 
-        status, reason = conn.connect(host, username, password)
+        status, reason = conn.connect(host, username, password=password)
         if status is False:
             abort(403, reason)
 
@@ -88,15 +84,19 @@ def handle_session():
         host = request.json.get('host')
         domain = request.json.get('domain')
 
-        # terminate old sessions with the best effort
+        # terminate old sessions with best efforts
         # noinspection PyBroadException
         try:
+            kill_cmd_list = [
+                'vncserver -kill ":*"',
+                'killall -q -w xvfb-run Xtigervnc'
+            ]
             conn, _ = create_connection(session_id, ConnectionType.GENERAL)
-            conn.exec_command_blocking('vncserver -kill ":*"')
+            threading.Thread(target=conn.exec_command_blocking, args=[';'.join(kill_cmd_list)]).start()
         except Exception:
             pass
 
-        if domain is  None:
+        if domain is None:
             # find the domain when the domain is not specified
             full_host_name, _, _, _ = profiles.get_session_info(session_id)
             domain = full_host_name[full_host_name.find('.'):]
@@ -143,16 +143,6 @@ def generate_favicon(feature, session_id):
     if host is None:
         abort(403, f'failed: session {session_id} does not exist')
 
-    temp = BytesIO()
-    icon = Favicon(host)
-    if feature == 'vnc':
-        icon.VNC(temp)
-    elif feature == 'terminal':
-        icon.console(temp)
-    elif feature == 'fm':
-        icon.file_manager(temp)
-    else:
-        abort(400, f'Invalid feature {feature}')
+    icon = Favicon.generate(host, feature)
 
-    temp.seek(0)
-    return send_file(temp, mimetype='image/png')
+    return send_file(icon, mimetype='image/png')
