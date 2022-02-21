@@ -1,5 +1,4 @@
 import json
-import re
 
 from flask import request, abort, stream_with_context
 
@@ -26,19 +25,9 @@ def start_terminal():
             return
 
         yield int_to_bytes(ICtrlStep.Term.CHECK_LOAD)
-        if term.is_uoft() and no_load_check is False:
-            status, _, stdout, _ = term.exec_command_blocking('uptime')
-            if status is False:
-                abort(500, 'exec failed')
-
-            output = stdout.readlines()[0].split(',')
-
-            user_count, = re.findall(r'\d+', output[2])
-            load1, = re.findall(r"\d+\.\d+", output[3])
-
-            if int(user_count) > 0 or float(load1) > 0.2:
-                yield int_to_bytes(ICtrlError.SSH.OVER_LOADED)
-                return
+        if term.is_uoft() and no_load_check is False and term.is_load_high():
+            yield int_to_bytes(ICtrlError.SSH.OVER_LOADED)
+            return
 
         yield int_to_bytes(ICtrlStep.Term.LAUNCH_SHELL)
         status, reason = term.launch_shell()

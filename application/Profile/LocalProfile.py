@@ -100,3 +100,11 @@ class LocalProfile:
         this_private_key_path = os.path.join(PRIVATE_KEY_PATH, session_id)
 
         return host, username, this_private_key_path, None
+
+    @staticmethod
+    def get_user():
+        class DummyUser:
+            id = 0
+
+        dummy_user = DummyUser()
+        return dummy_user

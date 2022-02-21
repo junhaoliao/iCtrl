@@ -15,7 +15,7 @@ export const session_ruptime = (cm, cancelToken) => {
                 const host = machineInfo[0].split(' ')[0];
 
                 // filter out the non-student hosts
-                if (host.match(/^ug\d+/) || host.match(/^p\d+/) || host === 'remote') {
+                if (EECGHostList.includes(host) || ECFHostList.includes(host)) {
                     const machineJson = {
                         'id': host,
                         'userNum': parseInt(machineInfo[1]),
@@ -49,25 +49,45 @@ export const session_change_host = (sessionId, host, domain) => {
     });
 };
 
-export const hostList = () => {
+const generateEECGHostList = () => {
     const list = [];
 
     // EECG Computers
     for (let i = 52; i <= 75; i++) {
-        list.push(`ug${i}.eecg.toronto.edu`);
+        list.push(`ug${i}`);
     }
     for (let i = 132; i <= 180; i++) {
-        list.push(`ug${i}.eecg.toronto.edu`);
+        list.push(`ug${i}`);
     }
     for (let i = 201; i <= 249; i++) {
-        list.push(`ug${i}.eecg.toronto.edu`);
+        list.push(`ug${i}`);
     }
 
+    return list;
+}
+
+const generateECFHostList = () => {
+    const list = [];
+
     // ECF Computers
-    for (let i = 1; i <= 196; i++) {
-        list.push(`p${i}.ecf.utoronto.ca`);
+    for (let i = 1; i <= 185; i++) {
+        list.push(`p${i}`);
     }
-    list.push('remote.ecf.utoronto.ca');
+    list.push('remote');
+
+    return list;
+}
+
+const EECGHostList = generateEECGHostList();
+const ECFHostList = generateECFHostList();
+
+const generateHostAddressList = () => {
+    const list = [];
+
+    list.push(...EECGHostList.map((hostname) => (`${hostname}.eecg.toronto.edu`)));
+    list.push(...ECFHostList.map((hostname) => (`${hostname}.ecf.utoronto.ca`)));
 
     return list;
 };
+
+export const hostAddressList = generateHostAddressList();
