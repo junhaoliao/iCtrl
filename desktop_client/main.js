@@ -3,7 +3,8 @@ const {handleSquirrelEvent} = require('./squirrel_event');
 
 // this should be placed at top of main.js to handle setup events quickly
 if (handleSquirrelEvent()) {
-  // squirrel event handled and app will exit in 1000ms, so don't do anything else
+  // squirrel event handled and app will exit in 1000ms, so don't do anything
+  // else
   return;
 }
 
@@ -13,14 +14,15 @@ const {spawn} = require('child_process');
 const {resolve} = require('path');
 
 const gotTheLock = app.requestSingleInstanceLock();
-if (!gotTheLock){
-    console.log('Found another instance running. Exiting...');
+if (!gotTheLock) {
+  console.log('Found another instance running. Exiting...');
 
-    app.quit();
-    process.exit();
+  app.quit();
+  process.exit();
 }
 
-const {getFreePort} = require('./utils');
+const {getFreePort, humanFileSize} = require('./utils');
+const ProgressBar = require('./ProgressBar');
 const mainPort = getFreePort();
 
 const isMac = process.platform === 'darwin';
@@ -94,60 +96,105 @@ const windowOptions = {
 let mainWindow = null;
 
 const createDashboardWindow = () => {
-    // Create the dashboard window.
-    mainWindow = new BrowserWindow(windowOptions);
+  // Create the dashboard window.
+  mainWindow = new BrowserWindow(windowOptions);
 
-    // load dashboard
-    mainWindow.setTitle('Loading... ');
-    mainWindow.loadURL(`http://127.0.0.1:${mainPort}/dashboard`);
-    // need to reload on Mac because the first load times out very quickly
-    mainWindow.webContents.on('did-fail-load', () => {
-        mainWindow.reload();
+  // load dashboard
+  mainWindow.setTitle('Loading... ');
+  mainWindow.loadURL(`http://127.0.0.1:${mainPort}/dashboard`);
+  // need to reload on Mac because the first load times out very quickly
+  mainWindow.webContents.on('did-fail-load', () => {
+    mainWindow.reload();
+  });
+  mainWindow.webContents.on('did-finish-load', () => {
+    mainWindow.show();
+    mainWindow.maximize();
+  });
+
+  if (isWindows) {
+    mainWindow.setAppDetails({
+      appId: 'iCtrl',
     });
-    mainWindow.webContents.on('did-finish-load', () => {
-        mainWindow.show();
-        mainWindow.maximize();
-    });
+  }
+
+  mainWindow.webContents.on('new-window', (event, url) => {
+    event.preventDefault();
+
+    const newWindow = new BrowserWindow(windowOptions);
+    newWindow.loadURL(url);
 
     if (isWindows) {
-        mainWindow.setAppDetails({
-            appId: 'iCtrl',
-        });
+      setupNewWindowIcon(url, newWindow);
     }
+    newWindow.show();
+    newWindow.maximize();
 
-    mainWindow.webContents.on('new-window', (event, url) => {
-        event.preventDefault();
+    newWindow.webContents.session.on('will-download',
+        (event, item, webContents) => {
+          const totalBytes = item.getTotalBytes();
+          const fileName = item.getFilename();
+          const indeterminate = totalBytes === 0;
+          const progressBar = indeterminate ? new ProgressBar({
+                indeterminate: true,
+                text: `Downloading ${fileName}`,
+              },
+              `Downloading ${fileName}`,
 
-        const newWindow = new BrowserWindow(windowOptions);
-        newWindow.loadURL(url);
+          ) : new ProgressBar({
+                indeterminate: false,
+                text: `Downloading ${fileName}`,
+                maximum: totalBytes,
+              },
+              `Downloading ${fileName}`,
 
-        if (isWindows) {
-            setupNewWindowIcon(url, newWindow);
-        }
-        newWindow.show();
-        newWindow.maximize();
-    });
+          );
 
-    mainWindow.on('close', () => {
-        mainWindow = null;
-    });
+          let poppedAtLeastOnce = false;
+          item.on('updated', (event, state) => {
+            if (state === 'progressing') {
+              const receivedBytes = item.getReceivedBytes();
+              const totalBytes = item.getTotalBytes();
+              const completedSaveDialog = item.getSavePath() !== '';
+
+              const receivedBytesString = humanFileSize(receivedBytes);
+              const totalBytesString = humanFileSize(totalBytes);
+
+              progressBar.value = receivedBytes;
+              progressBar.maximum = totalBytes;
+              progressBar.detail = `${receivedBytesString} / ${totalBytesString} downloaded`;
+              if (!poppedAtLeastOnce && completedSaveDialog) {
+                progressBar.show();
+                poppedAtLeastOnce = true;
+              }
+            }
+          });
+          item.once('done', (event, state) => {
+            progressBar.close();
+          });
+        });
+  });
+
+  mainWindow.on('close', () => {
+    mainWindow = null;
+  });
 };
 
 app.whenReady().then(() => {
-    createDashboardWindow();
-    // Open the DevTools.
+  createDashboardWindow();
+  // Open the DevTools.
   // mainWindow.webContents.openDevTools()
 });
 
 // Show dashboard in this instance if the user tries to launch another instance
 // The other instance will exit if it finds an already running instance: see
 //  app.requestSingleInstanceLock() above
-app.on('second-instance', (event, commandLine, workingDirectory, additionalData)=>{
-    if (mainWindow=== null){
+app.on('second-instance',
+    (event, commandLine, workingDirectory, additionalData) => {
+      if (mainWindow === null) {
         createDashboardWindow();
-    }
-    mainWindow.show();
-})
+      }
+      mainWindow.show();
+    });
 
 // Quit when all windows are closed
 app.on('window-all-closed', () => {
