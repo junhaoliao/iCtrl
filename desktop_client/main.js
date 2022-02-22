@@ -12,8 +12,15 @@ const {app, BrowserWindow, Menu} = require('electron');
 const {spawn} = require('child_process');
 const {resolve} = require('path');
 
-const {getFreePort} = require('./utils');
+const gotTheLock = app.requestSingleInstanceLock();
+if (!gotTheLock){
+    console.log('Found another instance running. Exiting...');
 
+    app.quit();
+    process.exit();
+}
+
+const {getFreePort} = require('./utils');
 const mainPort = getFreePort();
 
 const isMac = process.platform === 'darwin';
@@ -48,32 +55,13 @@ if (isMac) {
   app.exit();
 }
 
-const setupNewWindowRecognitionMac = (openedWindows, newWindow, mainWindow) => {
-  const newWindowKey = new Date().getTime();
-  openedWindows[newWindowKey] = newWindow;
-  newWindow.on('close', () => {
-    delete openedWindows[newWindowKey];
-    if (mainWindow) {
-      mainWindow.show();
-    }
-  });
-
-  newWindow.on('show', () => {
-    for (let key in openedWindows) {
-      if (openedWindows[key] !== newWindow) {
-        openedWindows[key].minimize();
-      }
-    }
-  });
-};
-
-function setupNewWindowIcon(url, newWindow) {
+const setupNewWindowIcon = (url, newWindow) => {
   const {nativeImage} = require('electron');
   const {get} = require('http');
 
-  const split = url.split('/');
-  const sessionId = split[split.length - 1];
-  const feature = split[split.length - 2];
+  const url_split = url.split('/');
+  const sessionId = url_split[url_split.length - 1];
+  const feature = url_split[url_split.length - 2];
   get({
     hostname: '127.0.0.1',
     port: mainPort,
@@ -90,28 +78,6 @@ function setupNewWindowIcon(url, newWindow) {
       newWindow.setIcon(icon);
     });
   });
-}
-
-const setupNewWindowRecognitionWindows = newWindow => {
-  const url = newWindow.getURL();
-  newWindow.setAppDetails({
-    appId: url,
-  });
-  setupNewWindowIcon(url, newWindow);
-};
-
-const setupNewWindowReadyToShow = (newWindow, openedWindows, mainWindow) => {
-  newWindow.once('ready-to-show', () => {
-    // improve recognition of each window in the taskbar
-    if (isMac) {
-      setupNewWindowRecognitionMac(openedWindows, newWindow, mainWindow);
-    } else if (isWindows) {
-      setupNewWindowRecognitionWindows(newWindow);
-    }
-
-    newWindow.show();
-    newWindow.maximize();
-  });
 };
 
 // This method will be called when Electron has finished
@@ -125,55 +91,63 @@ const windowOptions = {
     nativeWindowOpen: true,
   },
 };
-app.whenReady().then(() => {
-  // Create the browser window.
-  let mainWindow = new BrowserWindow(windowOptions);
+let mainWindow = null;
 
-  // load backend dashboard
-  mainWindow.setTitle('Loading... ');
-  mainWindow.loadURL(`http://127.0.0.1:${mainPort}/dashboard`).then();
-  // need to reload on Mac because the first load times out very quickly
-  mainWindow.webContents.on('did-fail-load', () => {
-    mainWindow.reload();
-  });
-  mainWindow.webContents.on('did-finish-load', () => {
-    mainWindow.show();
-    mainWindow.maximize();
-  });
+const createDashboardWindow = () => {
+    // Create the dashboard window.
+    mainWindow = new BrowserWindow(windowOptions);
 
-  const openedWindows = {};
-  if (isMac) {
-    // list to keep track of all opened windows for minimization into the Dock's "Recent Applications"
-    openedWindows['main'] = mainWindow;
-    mainWindow.on('close', () => {
-      mainWindow = null;
-      delete openedWindows['main'];
+    // load dashboard
+    mainWindow.setTitle('Loading... ');
+    mainWindow.loadURL(`http://127.0.0.1:${mainPort}/dashboard`);
+    // need to reload on Mac because the first load times out very quickly
+    mainWindow.webContents.on('did-fail-load', () => {
+        mainWindow.reload();
     });
-    mainWindow.on('show', () => {
-      for (let key in openedWindows) {
-        if (key !== 'main') {
-          openedWindows[key].minimize();
+    mainWindow.webContents.on('did-finish-load', () => {
+        mainWindow.show();
+        mainWindow.maximize();
+    });
+
+    if (isWindows) {
+        mainWindow.setAppDetails({
+            appId: 'iCtrl',
+        });
+    }
+
+    mainWindow.webContents.on('new-window', (event, url) => {
+        event.preventDefault();
+
+        const newWindow = new BrowserWindow(windowOptions);
+        newWindow.loadURL(url);
+
+        if (isWindows) {
+            setupNewWindowIcon(url, newWindow);
         }
-      }
+        newWindow.show();
+        newWindow.maximize();
     });
-  } else if (isWindows) {
-    mainWindow.setAppDetails({
-      appId: 'iCtrl',
+
+    mainWindow.on('close', () => {
+        mainWindow = null;
     });
-  }
+};
 
-  mainWindow.webContents.on('new-window', (event, url) => {
-    event.preventDefault();
-
-    const newWindow = new BrowserWindow(windowOptions);
-    newWindow.loadURL(url).then();
-    setupNewWindowReadyToShow(newWindow, openedWindows, mainWindow);
-
-  });
-
-  // Open the DevTools.
+app.whenReady().then(() => {
+    createDashboardWindow();
+    // Open the DevTools.
   // mainWindow.webContents.openDevTools()
 });
+
+// Show dashboard in this instance if the user tries to launch another instance
+// The other instance will exit if it finds an already running instance: see
+//  app.requestSingleInstanceLock() above
+app.on('second-instance', (event, commandLine, workingDirectory, additionalData)=>{
+    if (mainWindow=== null){
+        createDashboardWindow();
+    }
+    mainWindow.show();
+})
 
 // Quit when all windows are closed
 app.on('window-all-closed', () => {
