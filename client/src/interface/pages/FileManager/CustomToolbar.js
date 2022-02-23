@@ -52,9 +52,9 @@ export default class CustomToolbar extends React.Component {
     };
 
     handleHiddenFiles = (_) => {
-        this.props.fm.showHidden = !this.props.fm.showHidden;
+        const {showHidden} = this.props.fm.state;
         this.props.fm.setState({
-            filesDisplaying: this.props.fm.showHidden ? this.props.fm.files : this.props.fm.nonHiddenFiles(),
+            showHidden: !showHidden
         });
     };
 
@@ -107,7 +107,11 @@ export default class CustomToolbar extends React.Component {
             cwdInput: ev.target.value,
         });
     };
+
     handleCwdInputBlur = (ev) => {
+        if (ev === undefined){
+            return;
+        }
         if (ev.relatedTarget && ev.relatedTarget.id === 'enter_button') {
             return;
         }
@@ -130,14 +134,21 @@ export default class CustomToolbar extends React.Component {
 
     render() {
         const pluralSelection = this.props.fm.selected.length > 1;
+        const {loading, showHidden} = this.props.fm.state;
+
         return (<GridToolbarContainer>
             <Tooltip title={'Go to Parent Folder'}>
-                <IconButton aria-label={'up'} onClick={this.handleUpOneLevel} color={'primary'}>
+                <span><IconButton
+                    disabled={loading}
+                    aria-label={'up'}
+                    onClick={this.handleUpOneLevel}
+                    color={'primary'}>
                     <ArrowUpward/>
-                </IconButton>
+                </IconButton></span>
             </Tooltip>
 
             <OutlinedInput
+                disabled={loading}
                 fullWidth
                 style={{height: 40}}
                 autoComplete={'new-password'}
@@ -148,7 +159,9 @@ export default class CustomToolbar extends React.Component {
                 error={Boolean(this.props.fm.state.cwdInputErr)}
                 endAdornment={
                     <InputAdornment position="end">
-                        <IconButton color={'primary'} id={'enter_button'} edge={'end'}
+                        <IconButton
+                            disabled={loading}
+                            color={'primary'} id={'enter_button'} edge={'end'}
                                     aria-label={'enter'}
                                     onClick={this.handleCwdSubmit}>
                             <KeyboardArrowRight/>
@@ -158,27 +171,39 @@ export default class CustomToolbar extends React.Component {
                 inputProps={{'aria-label': 'current-directory'}}/>
 
             <Tooltip title={'Density'}>
-                <IconButton color={'primary'} onClick={this.handleMenuOpen}>
+                <span><IconButton
+                    disabled={loading}
+                    color={'primary'}
+                    onClick={this.handleMenuOpen}>
                     <DensityIcon/>
-                </IconButton>
+                </IconButton></span>
             </Tooltip>
 
-            <Tooltip title={`${this.props.fm.showHidden ? 'Hide' : 'Show'} Hidden Files`}>
-                <IconButton color={'primary'} onClick={this.handleHiddenFiles}>
-                    {this.props.fm.showHidden ? <VisibilityOff/> : <Visibility/>}
-                </IconButton>
+            <Tooltip title={`${showHidden ? 'Hide' : 'Show'} Hidden Files`}>
+                <span><IconButton
+                    disabled={loading}
+                    color={'primary'}
+                    onClick={this.handleHiddenFiles}>
+                    {showHidden ? <VisibilityOff/> : <Visibility/>}
+                </IconButton></span>
             </Tooltip>
 
             <Tooltip title={'Delete'}>
-                <IconButton color={'primary'} onClick={this.handleDelete}>
+                <span><IconButton
+                    disabled={loading}
+                    color={'primary'}
+                    onClick={this.handleDelete}>
                     <Delete/>
-                </IconButton>
+                </IconButton></span>
             </Tooltip>
 
             <Tooltip title={'Download'}>
-                <IconButton color={'primary'} onClick={this.handleDownload}>
+                <span><IconButton
+                    disabled={loading}
+                    color={'primary'}
+                    onClick={this.handleDownload}>
                     <GetApp/>
-                </IconButton>
+                </IconButton></span>
             </Tooltip>
 
             <Menu

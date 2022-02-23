@@ -25,7 +25,6 @@ def sftp_ls(session_id):
         abort(400, description=cwd)
 
     result = {
-        'status': status,
         'cwd': cwd,
         'files': file_list
     }

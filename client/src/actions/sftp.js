@@ -12,13 +12,18 @@ export const sftp_ls = (fm, path) => {
             path: path,
         },
     }).then(response => {
-        fm.files = response.data.files;
+        const {files, cwd} = response.data
         fm.setState({
-            cwd: response.data.cwd,
-            cwdInput: response.data.cwd,
-            filesDisplaying: fm.showHidden ? fm.files : fm.nonHiddenFiles(),
+            files: files,
             loading: false,
         });
+        if (path[0] !== '/'){
+            // only update cwd if path is in home dir
+            fm.setState({
+                cwd: cwd,
+                cwdInput: cwd,
+            })
+        }
     }).catch(error => {
         if (error.response) {
             fm.showAlert(htmlResponseToReason(error.response.data));
