@@ -24,7 +24,7 @@ import ChangePermission from '../../components/ChangePermission';
 import columns from './columns';
 import QuotaUsage from '../../components/QuotaUsage';
 import {sftp_dl, sftp_ls, sftp_rename, sftp_ul} from '../../../actions/sftp';
-import {isDir} from './utils';
+import {isDir, isLnk} from './utils';
 import {
     Add,
     Assignment,
@@ -150,13 +150,14 @@ export default class FileManager extends React.Component {
     this.clearSelection(ev.api);
     const mode = ev.row.mode;
 
-    const ir_dir = isDir(mode);
-    if (ir_dir) {
-      this.loadDir(`${cwd}/${name}`);
+    const is_dir = isDir(mode);
+    const is_lnk = isLnk(mode);
+    if (is_dir || is_lnk) {
+      // avoid two '/'s when loading at root
+      this.loadDir(`${cwd==='/'?'':cwd}/${name}`);
     } else {
       sftp_dl(this.session_id, cwd, [name]);
     }
-
   };
 
   handleCellEditCommit = (ev) => {
@@ -269,7 +270,7 @@ export default class FileManager extends React.Component {
 
   render() {
     const {sortModel, files, showHidden, loading} = this.state;
-    const filesToShow = showHidden ? files : this.getNonHiddenFiles(files);
+    const filesToShow = loading?[]:(showHidden ? files : this.getNonHiddenFiles(files));
 
     return (
         <div style={{overflowY: 'hidden'}}>
