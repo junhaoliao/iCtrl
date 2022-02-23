@@ -73,6 +73,9 @@ export default class CustomToolbar extends React.Component {
             });
             return;
         }
+        this.props.fm.setState({
+            loading: true
+        })
         sftp_rm(this.props.fm, this.props.fm.session_id, this.props.fm.state.cwd, this.props.fm.selected);
         this.setState({
             deleteAllPromptOpen: false,
