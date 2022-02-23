@@ -130,7 +130,7 @@ export default class FileManager extends React.Component {
         this.handleChangePermission(ev.row.id, ev.row.mode);
       }
       ev.api.selectRow(id);
-    }, 200);
+    }, 500);
   };
 
   handleChangePermission = (name, mode) => {
@@ -161,7 +161,6 @@ export default class FileManager extends React.Component {
   };
 
   handleCellEditCommit = (ev) => {
-    console.log(ev);
     this.handleChangeName(ev.id, ev.value);
   };
 
@@ -189,9 +188,8 @@ export default class FileManager extends React.Component {
       return;
     }
 
-    // remove the old row and do a POST to change the name
+    // do a POST to change the name
     this.setState({
-      files: [],
       loading: true,
     });
 
