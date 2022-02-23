@@ -16,7 +16,7 @@ terminal_connections = {}
 class Term(Connection):
     def __init__(self):
         self.id = None
-        self.channel = Optional[Channel]
+        self.channel: Optional[Channel] = None
 
         super().__init__()
 

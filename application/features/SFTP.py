@@ -8,6 +8,7 @@ from paramiko.sftp_client import SFTPClient
 from .Connection import Connection
 
 DL_CHUNK_SIZE = 1024 * 1024 * 4  # unit: bytes
+DL_CACHE_SIZE = int(128 / 4)  # unit: count
 
 
 class SFTP(Connection):
@@ -70,7 +71,7 @@ class SFTP(Connection):
             offset = 0
             while file_size > 0:
                 read_chunks = []
-                for _ in range(4):
+                for _ in range(DL_CACHE_SIZE):
                     if file_size <= 0:
                         break
                     chunk_size = min(file_size, DL_CHUNK_SIZE)
