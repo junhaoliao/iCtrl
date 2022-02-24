@@ -9,7 +9,7 @@ import '../../../index.css';
 
 const columns = [
     {
-        field: 'id', headerName: 'Name', flex: 1,
+        field: 'id', headerName: 'Name', flex: 1, minWidth: 200,
         renderCell: (params) => {
             const is_dir = isDir(params.getValue(params.value, 'mode'));
             const is_lnk = isLnk(params.getValue(params.value, 'mode'));
@@ -26,15 +26,15 @@ const columns = [
         },
     },
     {
-        field: 'size', headerName: 'Size', width: 90,
+        field: 'size', headerName: 'Size', width: 100,
         valueFormatter: (params) => (humanFileSize(params.value)),
     },
     {
-        field: 'atime', headerName: 'Date Accessed', width: 186,
+        field: 'atime', headerName: 'Date Accessed', width: 190,
         valueFormatter: dateFormatter,
     },
     {
-        field: 'mtime', headerName: 'Date Modified', width: 186,
+        field: 'mtime', headerName: 'Date Modified', width: 190,
         valueFormatter: dateFormatter,
     },
     {

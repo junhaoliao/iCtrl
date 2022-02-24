@@ -52,6 +52,6 @@
       "last 1 safari version"
     ]
   },
-  "proxy": "http://localhost:5000",
-  "//": "https://ictrl.ca"
+  "//": "http://localhost:5000",
+  "proxy": "https://ictrl.ca"
 }
