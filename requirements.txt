@@ -11,3 +11,4 @@ git+git://github.com/junhaoliao/simple-websocket-server#egg=SimpleWebSocketServe
 websockify
 zipstream-new
 SQLAlchemy
+cachetools
