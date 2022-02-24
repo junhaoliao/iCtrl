@@ -123,7 +123,7 @@ class DBProfile:
                          length=32,
                          salt=SESSION_CRYPT_SALT,
                          iterations=1000000)
-        flask_session['session_crypt_key'] = base64.urlsafe_b64encode(kdf.derive(password))
+        flask_session['session_crypt_key'] = base64.urlsafe_b64encode(kdf.derive(password_bytes))
 
         return True
 
