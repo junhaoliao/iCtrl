@@ -43,7 +43,7 @@ class DBProfile:
         # key: user_id, value: True (to indicate the entry exists; can be any dummy value)
         self.resend_cooldown = TTLCache(maxsize=1024, ttl=RESEND_COOLDOWN_TTL_SECOND)
 
-        with open('application/resources/activation_email_template.html', 'r') as f:
+        with open('/var/www/ictrl/application/resources/activation_email_template.html', 'r') as f:
             self.activation_email_body_template = f.read()
 
         class User(db.Model):

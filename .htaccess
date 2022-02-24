@@ -1,5 +1,5 @@
 Options -MultiViews
-RewriteEngine Off
+RewriteEngine On
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteRule ^ /index.html [QSA,L]
-DirectoryIndex maintenance.html index.html
+#DirectoryIndex maintenance.html index.html
