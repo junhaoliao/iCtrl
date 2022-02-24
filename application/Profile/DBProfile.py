@@ -268,7 +268,8 @@ class DBProfile:
             return None, None, None
 
         f = Fernet(flask_session['session_crypt_key'])
-        clear_private_key = f.decrypt(session.private_key).decode('ascii')
+        crypt_key_bytes = session.private_key.encode('ascii')
+        clear_private_key = f.decrypt(crypt_key_bytes).decode('ascii')
 
         return session.host, session.username, None, clear_private_key
 
