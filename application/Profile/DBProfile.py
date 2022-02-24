@@ -1,3 +1,4 @@
+import base64
 import os
 import re
 import uuid
@@ -11,12 +12,15 @@ from flask import session as flask_session, abort
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import validates
-
+from cryptography.fernet import Fernet
+from cryptography.hazmat.primitives import hashes
+from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 from ..utils import send_email, validate_password
 
 ACTIVATION_TTL_SECOND = 60 * 30
 RESEND_COOLDOWN_TTL_SECOND = 30
 
+SESSION_CRYPT_SALT = b'>@\x05[N%\xcf]+\x82\xc3\xcd\xde\xa6a\xeb'
 
 # provide different services depending on the type:
 # 0: not activated (first time email not verified)
@@ -99,7 +103,7 @@ class DBProfile:
 
     def login(self, username, password):
         username = username.lower()
-        password = password.encode('ascii')
+        password_bytes = password.encode('ascii')
 
         user = self.User.query.filter_by(username=username).first()
         if user is None:
@@ -108,12 +112,18 @@ class DBProfile:
         if user.activation_type == ActivationType.NOT_ACTIVATED:
             abort(401, 'ACCOUNT_NOT_ACTIVATED')
 
-        hashed_password = user.password.encode('ascii')
-        if not bcrypt.checkpw(password, hashed_password):
+        hashed_password_bytes = user.password.encode('ascii')
+        if not bcrypt.checkpw(password_bytes, hashed_password_bytes):
             abort(403, 'ACCOUNT_WRONG_PASSWORD')
 
         flask_session.clear()
         flask_session['userid'] = user.id
+
+        kdf = PBKDF2HMAC(algorithm=hashes.SHA256(),
+                         length=32,
+                         salt=SESSION_CRYPT_SALT,
+                         iterations=1000000)
+        flask_session['session_crypt_key'] = base64.urlsafe_b64encode(kdf.derive(password))
 
         return True
 
@@ -209,7 +219,9 @@ class DBProfile:
                 if not status:
                     return status, reason
 
-                session.private_key = key_file_obj.getvalue()
+                clear_private_key = key_file_obj.getvalue().encode('ascii')
+                f = Fernet(flask_session['session_crypt_key'])
+                session.private_key = f.encrypt(clear_private_key)
 
             self.db.session.add(session)
             self.save_profile()
@@ -255,7 +267,10 @@ class DBProfile:
         if session is None:
             return None, None, None
 
-        return session.host, session.username, None, session.private_key
+        f = Fernet(flask_session['session_crypt_key'])
+        clear_private_key = f.decrypt(session.private_key).decode('ascii')
+
+        return session.host, session.username, None, clear_private_key
 
     def send_activation_email(self, username):
         user = self.User.query.filter_by(username=username).first()

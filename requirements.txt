@@ -12,3 +12,4 @@ websockify
 zipstream-new
 SQLAlchemy
 cachetools
+cryptography
