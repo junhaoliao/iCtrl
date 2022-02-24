@@ -1,15 +1,27 @@
 import React from 'react';
-import {AppBar, Collapse, InputAdornment, ListItem, Tab, Tabs, TextField, List, ListItemIcon, ListItemText} from '@material-ui/core';
-import {Alert, LoadingButton} from '@material-ui/lab';
+import {
+  Alert,
+  AppBar,
+  Collapse,
+  InputAdornment,
+  List,
+  ListItem,
+  ListItemIcon,
+  ListItemText,
+  Tab,
+  Tabs,
+  TextField,
+} from '@material-ui/core';
+import {LoadingButton} from '@material-ui/lab';
 import {htmlResponseToReason} from '../../../actions/utils';
 import axios from 'axios';
 import {TransitionGroup} from 'react-transition-group';
 
 import './index.css';
-import {AccountBox, Check, Email, Password, CheckCircleOutline, HighlightOff} from '@material-ui/icons';
+import {AccountBox, Check, Email, HighlightOff, Password} from '@material-ui/icons';
+import {hasLowerCase, hasNumeral, hasSpecialSymbols, hasUpperCase, special_symbols} from './utils';
 
 const status = ['login', 'signup'];
-const special_symbols = ['!', '@', '#', '$', '%', '^', '&', '*', '(', ')', '-', '+']
 
 export default class LogIn extends React.Component {
   constructor(props) {
@@ -23,7 +35,7 @@ export default class LogIn extends React.Component {
       usernameValid: false,
       emailValid: false,
       passwordValid: false,
-      confirmPasswordValid: false
+      confirmPasswordValid: false,
     };
   }
 
@@ -58,7 +70,13 @@ export default class LogIn extends React.Component {
   handleRecoverUsername = () => {
     // FIXME: implement this
     //  should send an email to inform the user of her/his username
-    alert('not implemented');
+    alert('Please contact support@ictrl.ca');
+  };
+
+  handleRecoverPassword = () => {
+    // FIXME: implement this
+    //  should send a link for password recovery
+    alert('Please contact support@ictrl.ca');
   };
 
   handleLogIn = () => {
@@ -79,7 +97,16 @@ export default class LogIn extends React.Component {
         loading: false,
       });
       const resp = htmlResponseToReason(error.response.data, true);
-      if (resp === 'ACCOUNT_WRONG_USERNAME') {
+      if(resp === 'ACCOUNT_WRONG_PASSWORD'){
+        this.setState({
+          errorElem: <Alert severity="error">
+            Wrong password. <br/>
+            Please try again or click <button onClick={this.handleRecoverPassword}>
+            Forgot password
+          </button> to reset it.
+          </Alert>,
+        });
+      } else if (resp === 'ACCOUNT_WRONG_USERNAME') {
         this.setState({
           errorElem: <Alert severity="error">
             Sorry we can't find your account. <br/>
@@ -105,7 +132,9 @@ export default class LogIn extends React.Component {
         });
       } else {
         this.setState({
-          errorElem: resp,
+          errorElem: <Alert severity="error">
+            {resp}
+          </Alert>,
         });
       }
     });
@@ -161,7 +190,6 @@ export default class LogIn extends React.Component {
         });
       } else {
         this.setState({
-
           errorElem: <Alert severity="error">
             {resp}
           </Alert>,
@@ -170,82 +198,60 @@ export default class LogIn extends React.Component {
     });
   };
 
-  hasLowerCase = (str) => {
-    return str.toUpperCase() !== str;
- }
-
-  hasUpperCase = (str) => {
-    return str.toLowerCase() !== str;
-  }
-
-  hasSpecialSymbols = (str) => {
-    let hasSymbol = false;
-    special_symbols.forEach((item, _) => {
-      if (str.indexOf(item) > 0) {
-        hasSymbol = true;
-      }
-    });
-    return hasSymbol;
-  }
-
   handlePasswordInputChange = (ev) => {
     const password = ev.target.value;
-    const alertList = [];
+    const passwordErrorList = [];
 
-    if (password.length < 6) {
-      const alert = 'Password length should be at least 6 characters';
-      alertList.push(alert);
-    }
-    if (password.length > 32) {
-      const alert = 'Password length should not exceed 32 characters';
-      alertList.push(alert);
-    }
-    if (!password.match(/\d+/g)) {
-      const alert = 'Password should have at least one numeral';
-      alertList.push(alert);
-    }
-    if (!this.hasUpperCase(password)) {
-      const alert = 'Password should have at least one uppercase letter';
-      alertList.push(alert);
-    }
-    if (!this.hasLowerCase(password)) {
-      const alert = 'Password should have at least one lowercase letter';
-      alertList.push(alert);
-    }
-    if (!this.hasSpecialSymbols(password)) {
-      const alert = `Password should have at least one of the symbols: ${special_symbols.join()}`;
-      alertList.push(alert);
-    }
+    const checks = [
+      {pass: password.length >= 6, prompt: 'Password length should be at least 6 characters'},
+      {pass: password.length <= 32, prompt: 'Password length should not exceed 32 characters'},
+      {pass: hasNumeral(password), prompt: 'Password should have at least one numeral'},
+      {pass: hasUpperCase(password), prompt: 'Password should have at least one uppercase letter'},
+      {pass: hasLowerCase(password), prompt: 'Password should have at least one lowercase letter'},
+      {pass: hasSpecialSymbols(password), prompt: `Password should have at least one of the symbols: ${special_symbols.join('')}`},
+    ]
+    checks.forEach(({pass, prompt}) => {
+      if (!pass){
+        passwordErrorList.push(prompt)
+      }
+    })
 
-    // console.log(alertList)
     this.setState({
-      passwordErrorList: alertList,
-      passwordValid: ev.target.value.length > 0 && alertList.length === 0
+      passwordErrorList: passwordErrorList,
+      passwordValid: ev.target.value.length > 0 && passwordErrorList.length === 0,
     });
-  }
+  };
 
   handleConfirmPasswordInputChange = (ev) => {
     const password = document.getElementById('password').value;
-    const confirmPassword = ev.target.value
+    const confirmPassword = ev.target.value;
     let {passwordErrorList} = this.state;
     const prompt = `Passwords don't match`;
 
-
     if (password !== confirmPassword) {
-      if(!passwordErrorList.includes(prompt)){
-        passwordErrorList = [...passwordErrorList, prompt]
+      if (!passwordErrorList.includes(prompt)) {
+        passwordErrorList = [...passwordErrorList, prompt];
       }
     } else {
-      passwordErrorList = passwordErrorList.filter(e=> e!==prompt);
+      passwordErrorList = passwordErrorList.filter(e => e !== prompt);
     }
     this.setState({
       passwordErrorList: passwordErrorList,
-      confirmPasswordValid: ev.target.value.length > 0 && passwordErrorList.length === 0
+      confirmPasswordValid: ev.target.value.length > 0 && passwordErrorList.length === 0,
     });
-  }
+  };
 
   render() {
-    const {currentTabIndex, loading, errorElem, passwordErrorList, usernameValid, emailValid, passwordValid, confirmPasswordValid} = this.state;
+    const {
+      currentTabIndex,
+      loading,
+      errorElem,
+      passwordErrorList,
+      usernameValid,
+      emailValid,
+      passwordValid,
+      confirmPasswordValid,
+    } = this.state;
     const currentStatus = status[currentTabIndex];
     const canSignUp = usernameValid && emailValid && passwordValid && confirmPasswordValid;
 
@@ -273,7 +279,7 @@ export default class LogIn extends React.Component {
                 label={'Username'}
                 autoComplete={'username'}
                 onChange={(ev) => {
-                  this.setState({usernameValid: ev.target.value.length > 0})
+                  this.setState({usernameValid: ev.target.value.length > 0});
                 }}
                 InputProps={{
                   startAdornment: (
@@ -291,7 +297,7 @@ export default class LogIn extends React.Component {
                 label="Email"
                 autoComplete={'email'}
                 onChange={(ev) => {
-                  this.setState({emailValid: ev.target.value.length > 0})
+                  this.setState({emailValid: ev.target.value.length > 0});
                 }}
                 InputProps={{
                   startAdornment: (
@@ -334,29 +340,33 @@ export default class LogIn extends React.Component {
                       </InputAdornment>
                   ),
                 }}
-            /></Collapse>}
+            /></Collapse>
+            }
             {currentStatus === 'signup' && passwordErrorList.length > 0 &&
-            <Collapse>
-              <Alert icon={false} severity="warning">
-                <List>
-                  <TransitionGroup>
-                    {passwordErrorList.map((item, _) => (
-                      <Collapse>
-                        <ListItem>
-                          <ListItemIcon>
-                            <HighlightOff style={{color: 'rgb(102, 60, 0)'}} />
-                          </ListItemIcon>
-                          <ListItemText
-                              primary={<div style={{fontWeight: 600}}>{item}</div>}/>
-                        </ListItem>
-                      </Collapse>
-                    ))}
-                  </TransitionGroup>
-                </List>
-              </Alert>
-            </Collapse>}
-            {errorElem && <Collapse>{errorElem}
-            </Collapse>}
+                <Collapse>
+                  <Alert icon={false} severity="warning">
+                    <List>
+                      <TransitionGroup>
+                        {passwordErrorList.map((item, _) => (
+                            <Collapse key={item}>
+                              <ListItem>
+                                <ListItemIcon>
+                                  <HighlightOff style={{color: 'rgb(102, 60, 0)'}}/>
+                                </ListItemIcon>
+                                <ListItemText
+                                    primary={<div style={{fontWeight: 600, fontSize: 14}}>{item}</div>}/>
+                              </ListItem>
+                            </Collapse>
+                        ))}
+                      </TransitionGroup>
+                    </List>
+                  </Alert>
+                </Collapse>
+            }
+            {errorElem && <Collapse>
+              {errorElem}
+            </Collapse>
+            }
             {
               currentStatus === 'login' ? <LoadingButton
                   variant={'contained'}
