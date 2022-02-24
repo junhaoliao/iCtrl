@@ -221,7 +221,7 @@ class DBProfile:
 
                 clear_private_key = key_file_obj.getvalue().encode('ascii')
                 f = Fernet(flask_session['session_crypt_key'])
-                session.private_key = f.encrypt(clear_private_key)
+                session.private_key = f.encrypt(clear_private_key).decode('ascii')
 
             self.db.session.add(session)
             self.save_profile()
