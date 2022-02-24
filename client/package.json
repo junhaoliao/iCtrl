@@ -24,7 +24,8 @@
     "xterm": "^4.17.0",
     "xterm-addon-attach": "^0.7.0-beta.11",
     "xterm-addon-fit": "^0.6.0-beta.8",
-    "xterm-addon-webgl": "^0.12.0-beta.24"
+    "xterm-addon-webgl": "^0.12.0-beta.24",
+    "react-transition-group": "^4.4.2"
   },
   "scripts": {
     "start": "react-scripts start",
