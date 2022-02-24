@@ -12,12 +12,12 @@ import {
   Tooltip,
   Typography,
 } from '@material-ui/core';
+import GitHubButton from 'react-github-btn';
 import axios from 'axios';
 import ictrlLogo from '../../../icons/logo.png';
 import LogIn from '../../components/LogIn';
 
 import './index.css';
-import {addScript} from '../../utils';
 
 export default class Home extends React.Component {
   constructor(props) {
@@ -72,8 +72,6 @@ export default class Home extends React.Component {
     }).catch(_ => {
       this.updateDownloadCount();
     });
-
-    addScript('https://buttons.github.io/buttons.js');
   }
 
   render() {
@@ -89,9 +87,8 @@ export default class Home extends React.Component {
               <Typography style={{flex: 1, fontWeight: 'bold'}} variant="h6">
                 iCtrl
               </Typography>
-              <a aria-label="Star junhaoliao/iCtrl on GitHub" className="github-button" data-icon="octicon-star"
-                 data-show-count="true"
-                 data-size="large" href="https://github.com/junhaoliao/iCtrl">Star</a>
+              <GitHubButton href="https://github.com/junhaoliao/iCtrl" data-size="large" data-show-count="true"
+                            aria-label="Star junhaoliao/iCtrl on GitHub">Star</GitHubButton>
             </Toolbar>
           </AppBar>
 
@@ -115,26 +112,26 @@ export default class Home extends React.Component {
                 <br/><br/>
 
                 <Stack direction={'row'} alignItems={'center'} spacing={3} justifyContent={'center'}>
-                  <Tooltip title={countSum>0?`Total Download: ${countSum}`:null}>
+                  <Tooltip title={countSum > 0 ? `Total Download: ${countSum}` : null}>
                     <Typography>
-                    Desktop Client:
+                      Desktop Client:
                     </Typography>
                   </Tooltip>
                   <ButtonGroup>
-                    <Tooltip title={windowsCount>0?`Download: ${windowsCount}`:null}>
+                    <Tooltip title={windowsCount > 0 ? `Download: ${windowsCount}` : null}>
                       <Button id={'download-windows'} onClick={this.handleDesktopDownload}>
-                      Windows
-                    </Button>
+                        Windows
+                      </Button>
                     </Tooltip>
-                    <Tooltip title={macIntelCount>0?`Download: ${macIntelCount}`:null}>
+                    <Tooltip title={macIntelCount > 0 ? `Download: ${macIntelCount}` : null}>
                       <Button id={'download-mac-intel'} onClick={this.handleDesktopDownload}>
-                      Intel Mac
-                    </Button>
+                        Intel Mac
+                      </Button>
                     </Tooltip>
-                    <Tooltip title={macARMCount>0?`Download: ${macARMCount}`:null}>
+                    <Tooltip title={macARMCount > 0 ? `Download: ${macARMCount}` : null}>
                       <Button id={'download-mac-arm'} onClick={this.handleDesktopDownload}>
-                      M1 Mac
-                    </Button>
+                        M1 Mac
+                      </Button>
                     </Tooltip>
                   </ButtonGroup>
                 </Stack>
