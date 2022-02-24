@@ -1,14 +1,15 @@
 import React from 'react';
-import {AppBar, Collapse, InputAdornment, Tab, Tabs, TextField} from '@material-ui/core';
+import {AppBar, Collapse, InputAdornment, ListItem, Tab, Tabs, TextField, List, ListItemIcon, ListItemText} from '@material-ui/core';
 import {Alert, LoadingButton} from '@material-ui/lab';
 import {htmlResponseToReason} from '../../../actions/utils';
 import axios from 'axios';
 import {TransitionGroup} from 'react-transition-group';
 
 import './index.css';
-import {AccountBox, Check, Email, Password} from '@material-ui/icons';
+import {AccountBox, Check, Email, Password, CheckCircleOutline, HighlightOff} from '@material-ui/icons';
 
 const status = ['login', 'signup'];
+const special_symbols = ['!', '@', '#', '$', '%', '^', '&', '*', '(', ')', '-', '+']
 
 export default class LogIn extends React.Component {
   constructor(props) {
@@ -18,6 +19,11 @@ export default class LogIn extends React.Component {
       currentTabIndex: 0,
       loading: false,
       errorElem: null,
+      passwordErrorList: [],
+      usernameValid: false,
+      emailValid: false,
+      passwordValid: false,
+      confirmPasswordValid: false
     };
   }
 
@@ -164,9 +170,84 @@ export default class LogIn extends React.Component {
     });
   };
 
+  hasLowerCase = (str) => {
+    return str.toUpperCase() !== str;
+ }
+
+  hasUpperCase = (str) => {
+    return str.toLowerCase() !== str;
+  }
+
+  hasSpecialSymbols = (str) => {
+    let hasSymbol = false;
+    special_symbols.forEach((item, _) => {
+      if (str.indexOf(item) > 0) {
+        hasSymbol = true;
+      }
+    });
+    return hasSymbol;
+  }
+
+  handlePasswordInputChange = (ev) => {
+    const password = ev.target.value;
+    const alertList = [];
+
+    if (password.length < 6) {
+      const alert = 'Password length should be at least 6 characters';
+      alertList.push(alert);
+    }
+    if (password.length > 32) {
+      const alert = 'Password length should not exceed 32 characters';
+      alertList.push(alert);
+    }
+    if (!password.match(/\d+/g)) {
+      const alert = 'Password should have at least one numeral';
+      alertList.push(alert);
+    }
+    if (!this.hasUpperCase(password)) {
+      const alert = 'Password should have at least one uppercase letter';
+      alertList.push(alert);
+    }
+    if (!this.hasLowerCase(password)) {
+      const alert = 'Password should have at least one lowercase letter';
+      alertList.push(alert);
+    }
+    if (!this.hasSpecialSymbols(password)) {
+      const alert = `Password should have at least one of the symbols: ${special_symbols.join()}`;
+      alertList.push(alert);
+    }
+
+    // console.log(alertList)
+    this.setState({
+      passwordErrorList: alertList,
+      passwordValid: ev.target.value.length > 0 && alertList.length === 0
+    });
+  }
+
+  handleConfirmPasswordInputChange = (ev) => {
+    const password = document.getElementById('password').value;
+    const confirmPassword = ev.target.value
+    let {passwordErrorList} = this.state;
+    const prompt = `Passwords don't match`;
+
+
+    if (password !== confirmPassword) {
+      if(!passwordErrorList.includes(prompt)){
+        passwordErrorList = [...passwordErrorList, prompt]
+      }
+    } else {
+      passwordErrorList = passwordErrorList.filter(e=> e!==prompt);
+    }
+    this.setState({
+      passwordErrorList: passwordErrorList,
+      confirmPasswordValid: ev.target.value.length > 0 && passwordErrorList.length === 0
+    });
+  }
+
   render() {
-    const {currentTabIndex, loading, errorElem} = this.state;
+    const {currentTabIndex, loading, errorElem, passwordErrorList, usernameValid, emailValid, passwordValid, confirmPasswordValid} = this.state;
     const currentStatus = status[currentTabIndex];
+    const canSignUp = usernameValid && emailValid && passwordValid && confirmPasswordValid;
 
     return (
         <div>
@@ -191,6 +272,9 @@ export default class LogIn extends React.Component {
                 id={'username'}
                 label={'Username'}
                 autoComplete={'username'}
+                onChange={(ev) => {
+                  this.setState({usernameValid: ev.target.value.length > 0})
+                }}
                 InputProps={{
                   startAdornment: (
                       <InputAdornment position="start">
@@ -206,6 +290,9 @@ export default class LogIn extends React.Component {
                 id="email"
                 label="Email"
                 autoComplete={'email'}
+                onChange={(ev) => {
+                  this.setState({emailValid: ev.target.value.length > 0})
+                }}
                 InputProps={{
                   startAdornment: (
                       <InputAdornment position="start">
@@ -221,6 +308,7 @@ export default class LogIn extends React.Component {
                 id={'password'}
                 label={'Password'}
                 type={'password'}
+                onChange={this.handlePasswordInputChange}
                 autoComplete={currentStatus === 'login' ? 'current-password' : 'new-password'}
                 InputProps={{
                   startAdornment: (
@@ -238,6 +326,7 @@ export default class LogIn extends React.Component {
                 label="Confirm Password"
                 type={'password'}
                 autoComplete={'new-password'}
+                onChange={this.handleConfirmPasswordInputChange}
                 InputProps={{
                   startAdornment: (
                       <InputAdornment position="start">
@@ -246,6 +335,26 @@ export default class LogIn extends React.Component {
                   ),
                 }}
             /></Collapse>}
+            {currentStatus === 'signup' && passwordErrorList.length > 0 &&
+            <Collapse>
+              <Alert icon={false} severity="warning">
+                <List>
+                  <TransitionGroup>
+                    {passwordErrorList.map((item, _) => (
+                      <Collapse>
+                        <ListItem>
+                          <ListItemIcon>
+                            <HighlightOff style={{color: 'rgb(102, 60, 0)'}} />
+                          </ListItemIcon>
+                          <ListItemText
+                              primary={<div style={{fontWeight: 600}}>{item}</div>}/>
+                        </ListItem>
+                      </Collapse>
+                    ))}
+                  </TransitionGroup>
+                </List>
+              </Alert>
+            </Collapse>}
             {errorElem && <Collapse>{errorElem}
             </Collapse>}
             {
@@ -267,6 +376,7 @@ export default class LogIn extends React.Component {
                   fullWidth
                   color={'info'}
                   size={'large'}
+                  disabled={!canSignUp}
               >
                 Sign Up
               </LoadingButton>
