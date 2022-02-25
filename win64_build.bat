@@ -31,3 +31,4 @@ pyinstaller --noconfirm --clean win64_ictrl_be.spec
 cd desktop_client
 call npm i
 call npm run publish
+cd ..
