@@ -124,6 +124,9 @@ const createDashboardWindow = () => {
     newWindow.loadURL(url);
 
     if (isWindows) {
+      newWindow.setAppDetails({
+          appId: url
+      });
       setupNewWindowIcon(url, newWindow);
     }
     newWindow.show();
