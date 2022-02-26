@@ -1,19 +1,21 @@
 import React from 'react';
 
 import {
-    Alert,
-    Divider,
-    Drawer,
-    duration,
-    List,
-    ListItem,
-    ListItemIcon,
-    ListItemText,
-    Menu,
-    MenuItem,
-    Paper,
-    Snackbar,
-    Typography,
+  Alert,
+  Divider,
+  Drawer,
+  duration,
+  Hidden,
+  List,
+  ListItem,
+  ListItemIcon,
+  ListItemText,
+  Menu,
+  MenuItem,
+  Paper,
+  Snackbar,
+  SwipeableDrawer,
+  Typography,
 } from '@material-ui/core';
 import {DataGrid} from '@material-ui/data-grid';
 
@@ -26,17 +28,17 @@ import QuotaUsage from '../../components/QuotaUsage';
 import {sftp_dl, sftp_ls, sftp_rename, sftp_ul} from '../../../actions/sftp';
 import {isDir, isLnk} from './utils';
 import {
-    Add,
-    Assignment,
-    CloudDownload,
-    Computer,
-    CreateNewFolder,
-    DesktopMac,
-    DriveFolderUpload,
-    Home,
-    MusicNote,
-    PhotoLibrary,
-    UploadFile,
+  Add,
+  Assignment,
+  CloudDownload,
+  Computer,
+  CreateNewFolder,
+  DesktopMac,
+  DriveFolderUpload,
+  Home,
+  MusicNote,
+  PhotoLibrary,
+  UploadFile,
 } from '@material-ui/icons';
 import Button from '@material-ui/core/Button';
 import NewFolderDialog from './NewFolderDialog';
@@ -80,6 +82,7 @@ export default class FileManager extends React.Component {
           field: 'id',
           sort: 'asc',
         }],
+      sideBarOpen: true,
     };
   }
 
@@ -97,6 +100,14 @@ export default class FileManager extends React.Component {
     sftp_ls(this, path);
   };
 
+  handleSideBarOpen = (ev) => {
+    this.setState({sideBarOpen: true});
+  };
+
+  handleSideBarClose = (ev) => {
+    this.setState({sideBarOpen: false});
+  };
+
   handleSelectionModelChange = (selectionModel) => {
     this.selected = selectionModel;
   };
@@ -107,30 +118,36 @@ export default class FileManager extends React.Component {
   };
 
   handleCellClick = (ev) => {
-    this.api = ev.api;
-    const curr_selected = this.selected;
+    const isMobile = document.body.clientWidth < 768;
+    const id = ev.row.id;
+    const mode = ev.row.mode;
 
-    this.clearSelection(ev.api);
-    this.clickTimeout = setTimeout(() => {
-      const id = ev.row.id;
-      this.setState({id: ev.row.id, mode: ev.row.mode});
-      if (ev.field === 'id' && curr_selected.length === 1 &&
-          curr_selected.includes(id)) {
-        ev.api.setCellMode(id, 'id', 'edit');
+    if (isMobile) {
+        this.enterSelection(ev.api, id, mode);
+    } else {
+      const curr_selected = this.selected;
 
-        document.body.onkeydown = (kd_ev) => {
-          if (kd_ev.key === 'Enter') {
-            ev.api.commitCellChange({id: id, field: 'id'});
-            ev.api.setCellMode(id, 'id', 'view');
-          }
-        };
-        return;
-      } else if (ev.field === 'mode' && curr_selected.length === 1 &&
-          curr_selected.includes(id)) {
-        this.handleChangePermission(ev.row.id, ev.row.mode);
-      }
-      ev.api.selectRow(id);
-    }, 500);
+      this.clearSelection(ev.api);
+      this.clickTimeout = setTimeout(() => {
+        this.setState({id: id, mode: mode});
+        if (ev.field === 'id' && curr_selected.length === 1 &&
+            curr_selected.includes(id)) {
+          ev.api.setCellMode(id, 'id', 'edit');
+
+          document.body.onkeydown = (kd_ev) => {
+            if (kd_ev.key === 'Enter') {
+              ev.api.commitCellChange({id: id, field: 'id'});
+              ev.api.setCellMode(id, 'id', 'view');
+            }
+          };
+          return;
+        } else if (ev.field === 'mode' && curr_selected.length === 1 &&
+            curr_selected.includes(id)) {
+          this.handleChangePermission(ev.row.id, ev.row.mode);
+        }
+        ev.api.selectRow(id);
+      }, 500);
+    }
   };
 
   handleChangePermission = (name, mode) => {
@@ -139,25 +156,27 @@ export default class FileManager extends React.Component {
     this.setState({changePermissionOpen: true});
   };
 
-  handleCellDoubleClick = (ev) => {
+  enterSelection = (api, name, mode) => {
     const {cwd} = this.state;
+    this.clearSelection(api);
+
+    if (isDir(mode) || isLnk(mode)) {
+      // avoid two '/'s when loading at root
+      this.loadDir(`${cwd === '/' ? '' : cwd}/${name}`);
+    } else {
+      sftp_dl(this.session_id, cwd, [name]);
+    }
+  }
+
+  handleCellDoubleClick = (ev) => {
     const name = ev.row.id;
+    const mode = ev.row.mode;
 
     if (ev.field === '__check__' || ev.api.getCellMode(name, 'id') === 'edit') {
       return;
     }
 
-    this.clearSelection(ev.api);
-    const mode = ev.row.mode;
-
-    const is_dir = isDir(mode);
-    const is_lnk = isLnk(mode);
-    if (is_dir || is_lnk) {
-      // avoid two '/'s when loading at root
-      this.loadDir(`${cwd==='/'?'':cwd}/${name}`);
-    } else {
-      sftp_dl(this.session_id, cwd, [name]);
-    }
+    this.enterSelection(ev.api, name, mode);
   };
 
   handleCellEditCommit = (ev) => {
@@ -267,61 +286,87 @@ export default class FileManager extends React.Component {
   }
 
   render() {
-    const {sortModel, files, showHidden, loading} = this.state;
-    const filesToShow = loading?[]:(showHidden ? files : this.getNonHiddenFiles(files));
+    const {sortModel, files, showHidden, loading, sideBarOpen} = this.state;
+    const filesToShow = loading ?
+        [] :
+        (showHidden ? files : this.getNonHiddenFiles(files));
+
+    const drawerChildren = <>
+      <Button
+          disabled={loading}
+          id={'new-button'}
+          onClick={this.handleNewMenuOpen}
+          color={'primary'}
+          style={{
+            marginTop: 5,
+            height: 40,
+            marginLeft: 16,
+            marginRight: 16,
+            marginBottom: 8,
+          }}
+          variant={'contained'}
+          startIcon={<Add/>}>
+        <Typography variant={'subtitle1'}
+                    fontWeight={'bolder'}>New</Typography>
+      </Button>
+      <Divider/>
+      <List style={{width: drawerWidth}}>
+        {[
+          [<Home/>, 'Home', ''],
+          [<DesktopMac/>, 'Desktop', 'Desktop'],
+          [<Assignment/>, 'Documents', 'Documents'],
+          [<CloudDownload/>, 'Downloads', 'Downloads'],
+          [<MusicNote/>, 'Music', 'Music'],
+          [<PhotoLibrary/>, 'Pictures', 'Pictures'],
+          [<Computer/>, 'Root', '/'],
+        ].map((item, _) => (
+            <ListItem
+                button
+                disabled={loading}
+                onClick={() => {
+                  this.loadDir(item[2]);
+                }}
+                key={item[1]}>
+              <ListItemIcon>
+                {item[0]}
+              </ListItemIcon>
+              <ListItemText
+                  primary={item[1]}/>
+            </ListItem>
+        ))}
+        <Divider/>
+        <ListItem>
+          <QuotaUsage fm={this}/>
+        </ListItem>
+      </List>
+    </>;
 
     return (
         <div style={{overflowY: 'hidden'}}>
-          <Drawer open variant={'persistent'} anchor={'left'}>
-            <Button
-                disabled={loading}
-                id={'new-button'}
-                onClick={this.handleNewMenuOpen}
-                color={'primary'}
-                style={{
-                  marginTop: 5,
-                  height: 40,
-                  marginLeft: 16,
-                  marginRight: 16,
-                  marginBottom: 8,
-                }}
-                variant={'contained'}
-                startIcon={<Add/>}>
-              <Typography variant={'subtitle1'}
-                          fontWeight={'bolder'}>New</Typography>
-            </Button>
-            <Divider/>
-            <List style={{width: drawerWidth}}>
-              {[
-                [<Home/>, 'Home', ''],
-                [<DesktopMac/>, 'Desktop', 'Desktop'],
-                [<Assignment/>, 'Documents', 'Documents'],
-                [<CloudDownload/>, 'Downloads', 'Downloads'],
-                [<MusicNote/>, 'Music', 'Music'],
-                [<PhotoLibrary/>, 'Pictures', 'Pictures'],
-                [<Computer/>, 'Root', '/'],
-              ].map((item, _) => (
-                  <ListItem
-                      button
-                      disabled={loading}
-                      onClick={() => {
-                        this.loadDir(item[2]);
-                      }}
-                      key={item[1]}>
-                    <ListItemIcon>
-                      {item[0]}
-                    </ListItemIcon>
-                    <ListItemText
-                        primary={item[1]}/>
-                  </ListItem>
-              ))}
-              <Divider/>
-              <ListItem>
-                <QuotaUsage fm={this}/>
-              </ListItem>
-            </List>
-          </Drawer>
-          <div style={{marginLeft: `${drawerWidth}px`, height: '100vh'}}>
+          <Hidden smUp>
+            <SwipeableDrawer
+                open={sideBarOpen}
+                onOpen={this.handleSideBarOpen}
+                onClose={this.handleSideBarClose}
+                anchor={'left'}
+                disableSwipeToOpen={true}
+            >
+              {drawerChildren}
+            </SwipeableDrawer>
+          </Hidden>
+          <Hidden smDown>
+            <Drawer
+                open={true}
+                anchor={'left'}
+                variant={'permanent'}
+            >
+              {drawerChildren}
+            </Drawer>
+          </Hidden>
+          <div style={{
+            marginLeft: sideBarOpen ? `${drawerWidth}px` : 0,
+            height: '100vh',
+          }}>
             <DataGrid
                 rows={filesToShow}
                 density={this.state.density}
@@ -369,12 +414,12 @@ export default class FileManager extends React.Component {
             <div style={{position: 'fixed', bottom: 55, right: 15}}>
               <UploadToolbar fm={this}/>
               {!this.state.uploadWindowCollapsed &&
-              <Paper id="upload_paper"
-                     style={{maxHeight: 180, overflowY: 'auto'}}
-                     variant="outlined"
-                     square>
-                <UploadList fm={this}/>
-              </Paper>}
+                  <Paper id="upload_paper"
+                         style={{maxHeight: 180, overflowY: 'auto'}}
+                         variant="outlined"
+                         square>
+                    <UploadList fm={this}/>
+                  </Paper>}
             </div>
           </Snackbar>
           <ChangePermission
