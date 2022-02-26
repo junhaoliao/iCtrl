@@ -2,25 +2,25 @@ const columns = [
   {
     field: 'id',
     headerName: 'Host',
-    minWidth: 115,
+    minWidth: 120,
     flex: 1,
   },
   {
     field: 'userNum',
     headerName: 'User Count',
-    minWidth: 160,
+    minWidth: 180,
     flex: 1,
   },
   {
     field: 'load1',
     headerName: '1-min Avg',
-    minWidth: 150,
+    minWidth: 160,
     flex: 1,
   },
   {
     field: 'load5',
     headerName: '5-min Avg',
-    minWidth: 150,
+    minWidth: 160,
     flex: 1,
   },
   {
