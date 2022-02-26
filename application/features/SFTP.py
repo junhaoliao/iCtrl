@@ -19,7 +19,8 @@ class SFTP(Connection):
 
     def __del__(self):
         print('SFTP::__del__')
-        self.sftp.close()
+        if self.sftp is not None:
+            self.sftp.close()
         super().__del__()
 
     def connect(self, *args, **kwargs):
