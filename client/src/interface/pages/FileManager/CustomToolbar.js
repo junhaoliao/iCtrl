@@ -204,6 +204,7 @@ export default class CustomToolbar extends React.Component {
           }
           inputProps={{'aria-label': 'current-directory'}}/>
 
+      <Hidden smDown>
       <Tooltip title={'Density'}>
                 <span><IconButton
                     disabled={loading}
@@ -212,6 +213,7 @@ export default class CustomToolbar extends React.Component {
                     <DensityIcon/>
                 </IconButton></span>
       </Tooltip>
+      </Hidden>
 
       <Tooltip title={`${showHidden ? 'Hide' : 'Show'} Hidden Files`}>
                 <span><IconButton
