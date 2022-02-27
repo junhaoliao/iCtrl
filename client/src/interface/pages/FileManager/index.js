@@ -123,7 +123,7 @@ export default class FileManager extends React.Component {
     const mode = ev.row.mode;
 
     if (isMobile) {
-        this.enterSelection(ev.api, id, mode);
+      this.enterSelection(ev.api, id, mode);
     } else {
       const curr_selected = this.selected;
 
@@ -151,8 +151,22 @@ export default class FileManager extends React.Component {
   };
 
   handleChangePermission = (name, mode) => {
-    this.changePermission.current.update_id_mode(this.state.cwd, name, mode,
-        this.session_id);
+    if (mode === undefined){
+      const {files} = this.state;
+      for (const item of files) {
+        if (item.id === name){
+          mode = item.mode;
+          break;
+        }
+      }
+    }
+
+    this.changePermission.current.updateRef(
+        this.state.cwd,
+        name,
+        mode,
+        this.session_id,
+    );
     this.setState({changePermissionOpen: true});
   };
 
@@ -166,7 +180,7 @@ export default class FileManager extends React.Component {
     } else {
       sftp_dl(this.session_id, cwd, [name]);
     }
-  }
+  };
 
   handleCellDoubleClick = (ev) => {
     const name = ev.row.id;
@@ -183,16 +197,16 @@ export default class FileManager extends React.Component {
     this.handleChangeName(ev.id, ev.value);
   };
 
-  handleChangeName = (old_name, new_name) => {
+  handleChangeName = (oldName, newName) => {
     const {cwd} = this.state;
 
     // no name change
-    if (old_name === new_name) {
+    if (oldName === newName) {
       return;
     }
 
     // given name empty
-    if (new_name === '') {
+    if (newName === '') {
       this.showAlert('File name cannot be empty.');
       this.loadDir(cwd);
       return;
@@ -200,7 +214,7 @@ export default class FileManager extends React.Component {
 
     // check whether there is already a file or directory with the same name
     const duplicate_check = this.state.files.filter((row) => {
-      return row.id === new_name;
+      return row.id === newName;
     });
     if (duplicate_check.length !== 0) {
       this.showAlert('File name duplicated!');
@@ -212,7 +226,7 @@ export default class FileManager extends React.Component {
       loading: true,
     });
 
-    sftp_rename(this, this.session_id, this.state.cwd, old_name, new_name);
+    sftp_rename(this, this.session_id, this.state.cwd, oldName, newName);
   };
 
   handleAlertClose = (ev) => {

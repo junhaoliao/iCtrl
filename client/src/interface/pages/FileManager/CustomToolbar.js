@@ -2,35 +2,38 @@ import React from 'react';
 
 import {GridToolbarContainer} from '@material-ui/data-grid';
 import {
-    Button,
-    Dialog,
-    DialogActions,
-    DialogContent,
-    DialogContentText,
-    DialogTitle,
-    Hidden,
-    IconButton,
-    InputAdornment,
-    Menu,
-    MenuItem,
-    OutlinedInput,
-    Tooltip,
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+  Hidden,
+  IconButton,
+  InputAdornment,
+  Menu,
+  MenuItem,
+  OutlinedInput,
+  TextField,
+  Tooltip,
 } from '@material-ui/core';
 import {
-    ArrowUpward,
-    Delete,
-    GetApp,
-    KeyboardArrowRight,
-    Visibility,
-    VisibilityOff,
+  ArrowUpward,
+  Delete,
+  DriveFileRenameOutline,
+  GetApp,
+  KeyboardArrowRight,
+  PermIdentity,
+  Visibility,
+  VisibilityOff,
 } from '@material-ui/icons';
 import MenuIcon from '@material-ui/icons/Menu';
 
 import {
-    DensityComfortableIcon,
-    DensityCompactIcon,
-    DensityIcon,
-    DensityStandardIcon,
+  DensityComfortableIcon,
+  DensityCompactIcon,
+  DensityIcon,
+  DensityStandardIcon,
 } from '../../../icons';
 import {sftp_dl, sftp_rm} from '../../../actions/sftp';
 
@@ -39,6 +42,7 @@ export default class CustomToolbar extends React.Component {
     super(props);
 
     this.state = {
+      renamePromptOpen: false,
       densityMenuAnchorEl: null,
       deleteAllPromptOpen: false,
     };
@@ -76,6 +80,29 @@ export default class CustomToolbar extends React.Component {
     });
   };
 
+  handleRename = (_) => {
+    const {fm} = this.props;
+    if (fm.selected.length !== 1) {
+      fm.showAlert('Please select only 1 file to rename. ');
+      return;
+    }
+
+    this.setState({
+      renamePromptOpen: true,
+    });
+  };
+
+  handleChangePermissions = (_) => {
+    const {fm} = this.props;
+    if (fm.selected.length !== 1) {
+      fm.showAlert('Please select only 1 file to change permissions. ');
+      return;
+    }
+
+    const name = fm.selected[0];
+    fm.handleChangePermission(name);
+  };
+
   handleDownload = (_) => {
     if (this.props.fm.selected.length === 0) {
       this.props.fm.showAlert('No files selected for download. ');
@@ -83,6 +110,19 @@ export default class CustomToolbar extends React.Component {
     }
     sftp_dl(this.props.fm.session_id, this.props.fm.state.cwd,
         this.props.fm.selected);
+  };
+
+  handleRenamePrompt = (ev) => {
+    if (ev.target.id === 'button-rename-proceed') {
+      const {fm} = this.props;
+      const oldName = fm.selected[0];
+      const newName = document.getElementById('rename-newname').value;
+      fm.handleChangeName(oldName, newName);
+    }
+
+    this.setState({
+      renamePromptOpen: false,
+    });
   };
 
   handleDeleteAllPrompt = (ev) => {
@@ -156,22 +196,28 @@ export default class CustomToolbar extends React.Component {
   };
 
   render() {
-    const pluralSelection = this.props.fm.selected.length > 1;
-    const {loading, showHidden} = this.props.fm.state;
+    const {fm} = this.props;
+    const pluralSelection = fm.selected.length > 1;
+    const {loading, showHidden} = fm.state;
 
-    return (<GridToolbarContainer>
-      <Hidden smUp>
-        <Tooltip title={'Show Side Bar'}>
-          <IconButton
-              aria-label={'sidebar'}
-              onClick={this.handleShowSideBar}
-              color={'primary'}>
-            <MenuIcon/>
-          </IconButton>
-        </Tooltip>
-      </Hidden>
+    const {renamePromptOpen} = this.state;
+    const onlySelectedId = fm.selected.length === 1 ? fm.selected[0] : '';
 
-      <Tooltip title={'Go to Parent Folder'}>
+    return (
+        <>
+          <GridToolbarContainer>
+            <Hidden smUp>
+              <Tooltip title={'Show Side Bar'}>
+                <IconButton
+                    aria-label={'sidebar'}
+                    onClick={this.handleShowSideBar}
+                    color={'primary'}>
+                  <MenuIcon/>
+                </IconButton>
+              </Tooltip>
+            </Hidden>
+
+            <Tooltip title={'Go to Parent Folder'}>
                 <span><IconButton
                     disabled={loading}
                     aria-label={'up'}
@@ -179,116 +225,160 @@ export default class CustomToolbar extends React.Component {
                     color={'primary'}>
                     <ArrowUpward/>
                 </IconButton></span>
-      </Tooltip>
+            </Tooltip>
 
-      <OutlinedInput
-          disabled={loading}
-          fullWidth
-          style={{height: 40}}
-          autoComplete={'new-password'}
-          onKeyPress={this.handleCwdInputKeyPress}
-          onBlur={this.handleCwdInputBlur}
-          onChange={this.handleCwdInputChange}
-          value={this.props.fm.state.cwdInput}
-          error={Boolean(this.props.fm.state.cwdInputErr)}
-          endAdornment={
-            <InputAdornment position="end">
-              <IconButton
-                  disabled={loading}
-                  color={'primary'} id={'enter_button'} edge={'end'}
-                  aria-label={'enter'}
-                  onClick={this.handleCwdSubmit}>
-                <KeyboardArrowRight/>
-              </IconButton>
-            </InputAdornment>
-          }
-          inputProps={{'aria-label': 'current-directory'}}/>
+            <OutlinedInput
+                disabled={loading}
+                fullWidth
+                style={{height: 40}}
+                autoComplete={'new-password'}
+                onKeyPress={this.handleCwdInputKeyPress}
+                onBlur={this.handleCwdInputBlur}
+                onChange={this.handleCwdInputChange}
+                value={this.props.fm.state.cwdInput}
+                error={Boolean(this.props.fm.state.cwdInputErr)}
+                endAdornment={
+                  <InputAdornment position="end">
+                    <IconButton
+                        disabled={loading}
+                        color={'primary'} id={'enter_button'} edge={'end'}
+                        aria-label={'enter'}
+                        onClick={this.handleCwdSubmit}>
+                      <KeyboardArrowRight/>
+                    </IconButton>
+                  </InputAdornment>
+                }
+                inputProps={{'aria-label': 'current-directory'}}/>
 
-      <Hidden smDown>
-      <Tooltip title={'Density'}>
+            <Hidden smDown>
+              <Tooltip title={'Density'}>
                 <span><IconButton
                     disabled={loading}
                     color={'primary'}
                     onClick={this.handleMenuOpen}>
                     <DensityIcon/>
                 </IconButton></span>
-      </Tooltip>
-      </Hidden>
+              </Tooltip>
+            </Hidden>
 
-      <Tooltip title={`${showHidden ? 'Hide' : 'Show'} Hidden Files`}>
+            <Tooltip title={`${showHidden ? 'Hide' : 'Show'} Hidden Files`}>
                 <span><IconButton
                     disabled={loading}
                     color={'primary'}
                     onClick={this.handleHiddenFiles}>
                     {showHidden ? <VisibilityOff/> : <Visibility/>}
                 </IconButton></span>
-      </Tooltip>
+            </Tooltip>
 
-      <Tooltip title={'Delete'}>
+            <Tooltip title={'Rename'}>
+                <span><IconButton
+                    disabled={loading}
+                    color={'primary'}
+                    onClick={this.handleRename}>
+                    <DriveFileRenameOutline/>
+                </IconButton></span>
+            </Tooltip>
+
+            <Tooltip title={'Change Permissions'}>
+                <span><IconButton
+                    disabled={loading}
+                    color={'primary'}
+                    onClick={this.handleChangePermissions}>
+                    <PermIdentity/>
+                </IconButton></span>
+            </Tooltip>
+
+            <Tooltip title={'Delete'}>
                 <span><IconButton
                     disabled={loading}
                     color={'primary'}
                     onClick={this.handleDelete}>
                     <Delete/>
                 </IconButton></span>
-      </Tooltip>
+            </Tooltip>
 
-      <Tooltip title={'Download'}>
+            <Tooltip title={'Download'}>
                 <span><IconButton
                     disabled={loading}
                     color={'primary'}
                     onClick={this.handleDownload}>
                     <GetApp/>
                 </IconButton></span>
-      </Tooltip>
-
-      <Menu
-          id="density"
-          anchorEl={this.state.densityMenuAnchorEl}
-          keepMounted
-          open={Boolean(this.state.densityMenuAnchorEl)}
-          onClose={this.handleClose}
-      >
-        <MenuItem aria-label="compact" onClick={this.handleDensityChange}>
-          <DensityCompactIcon/>
-          Compact
-        </MenuItem>
-        <MenuItem aria-label="standard" onClick={this.handleDensityChange}>
-          <DensityStandardIcon/>
-          Standard
-        </MenuItem>
-        <MenuItem aria-label="comfortable" onClick={this.handleDensityChange}>
-          <DensityComfortableIcon/>
-          Comfortable
-        </MenuItem>
-      </Menu>
-      <Dialog
-          open={this.state.deleteAllPromptOpen}
-          keepMounted
-          onClose={this.handleDeleteAllPrompt}
-          aria-describedby="delete all alert"
-          fullWidth={true}
-          maxWidth={'sm'}
-      >
-        <DialogTitle>{`Delete ${pluralSelection ?
-            'files' :
-            'file'} permanently?`}</DialogTitle>
-        <DialogContent>
-          <DialogContentText id="delete all description">
-            Your {pluralSelection ? 'files' : 'file'} will be deleted
-            permanently and cannot be
-            recovered.<br/>
-            Do you want to proceed?
-          </DialogContentText>
-        </DialogContent>
-        <DialogActions>
-          <Button variant={'contained'}
-                  onClick={this.handleDeleteAllPrompt}>Cancel</Button>
-          <Button id={'button_proceed_delete'}
-                  onClick={this.handleDeleteAllPrompt}>Delete</Button>
-        </DialogActions>
-      </Dialog>
-    </GridToolbarContainer>);
+            </Tooltip>
+          </GridToolbarContainer>
+          <Menu
+              id="density"
+              anchorEl={this.state.densityMenuAnchorEl}
+              keepMounted
+              open={Boolean(this.state.densityMenuAnchorEl)}
+              onClose={this.handleClose}
+          >
+            <MenuItem aria-label="compact" onClick={this.handleDensityChange}>
+              <DensityCompactIcon/>
+              Compact
+            </MenuItem>
+            <MenuItem aria-label="standard" onClick={this.handleDensityChange}>
+              <DensityStandardIcon/>
+              Standard
+            </MenuItem>
+            <MenuItem aria-label="comfortable"
+                      onClick={this.handleDensityChange}>
+              <DensityComfortableIcon/>
+              Comfortable
+            </MenuItem>
+          </Menu>
+          <Dialog
+              open={this.state.deleteAllPromptOpen}
+              keepMounted
+              onClose={this.handleDeleteAllPrompt}
+              aria-describedby="delete all prompt"
+              fullWidth={true}
+              maxWidth={'sm'}
+          >
+            <DialogTitle>{`Delete ${pluralSelection ?
+                'files' :
+                'file'} permanently?`}</DialogTitle>
+            <DialogContent>
+              <DialogContentText id="delete all description">
+                Your {pluralSelection ? 'files' : 'file'} will be deleted
+                permanently and cannot be
+                recovered.<br/>
+                Do you want to proceed?
+              </DialogContentText>
+            </DialogContent>
+            <DialogActions>
+              <Button variant={'contained'}
+                      onClick={this.handleDeleteAllPrompt}>Cancel</Button>
+              <Button id={'button_proceed_delete'}
+                      onClick={this.handleDeleteAllPrompt}>Delete</Button>
+            </DialogActions>
+          </Dialog>
+          <Dialog
+              open={renamePromptOpen}
+              keepMounted
+              onClose={this.handleRenamePrompt}
+              aria-describedby="rename prompt"
+              fullWidth={true}
+              maxWidth={'sm'}
+          >
+            <DialogTitle>{`Rename ${onlySelectedId}`}</DialogTitle>
+            <DialogContent>
+              <TextField
+                  autoFocus={true}
+                  margin={'dense'}
+                  id={'rename-newname'}
+                  label={'New file name'}
+                  fullWidth={true}
+                  variant={'standard'}
+              />
+            </DialogContent>
+            <DialogActions>
+              <Button onClick={this.handleRenamePrompt}>Cancel</Button>
+              <Button id={'button-rename-proceed'}
+                      onClick={this.handleRenamePrompt}>Rename</Button>
+            </DialogActions>
+          </Dialog>
+        </>);
   }
 }
 
