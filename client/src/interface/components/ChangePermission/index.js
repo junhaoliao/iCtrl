@@ -88,7 +88,7 @@ export default class ChangePermission extends React.Component {
             });
         }
     };
-    update_id_mode = (_cwd, _name, _mode) => {
+    updateRef = (_cwd, _name, _mode) => {
         this.cwd = _cwd;
         this.setState({
             name: _name,
