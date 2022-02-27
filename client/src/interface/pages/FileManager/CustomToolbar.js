@@ -205,7 +205,7 @@ export default class CustomToolbar extends React.Component {
 
     return (
         <>
-          <GridToolbarContainer>
+          <GridToolbarContainer style={{overflowX:'scroll', overflowY:'hidden'}}>
             <Hidden smUp>
               <Tooltip title={'Show Side Bar'}>
                 <IconButton
@@ -230,7 +230,7 @@ export default class CustomToolbar extends React.Component {
             <OutlinedInput
                 disabled={loading}
                 fullWidth
-                style={{height: 40}}
+                style={{height: 40, minWidth: 200}}
                 autoComplete={'new-password'}
                 onKeyPress={this.handleCwdInputKeyPress}
                 onBlur={this.handleCwdInputBlur}
