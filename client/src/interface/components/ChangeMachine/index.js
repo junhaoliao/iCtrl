@@ -87,6 +87,7 @@ export default class ChangeMachine extends React.Component {
                         onSelectionModelChange={this.handleSelectionModelChange}
                         onRowDoubleClick={this.handleRowDoubleClick}
                         onStateChange={this.handleStateChange}
+                        disableColumnMenu={true}
                     />
                 </DialogContent>
                 <DialogActions>
