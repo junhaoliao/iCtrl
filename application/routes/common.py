@@ -16,7 +16,7 @@ from ..utils import int_to_bytes
 def create_connection(session_id, conn_type):
     host, username, this_private_key_path, this_private_key_str = profiles.get_session_info(session_id)
     if host is None:
-        abort(403, f'failed: session {session_id} does not exist')
+        abort(403, f'Fail: session {session_id} does not exist')
 
     if conn_type == ConnectionType.GENERAL:
         conn = Connection()
