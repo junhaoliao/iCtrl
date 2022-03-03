@@ -145,7 +145,8 @@ class SFTP(Connection):
     def rm(self, cwd, file_list):
         cmd_list = [f"cd '{cwd}' && rm -rf"]
         for file in file_list:
-            cmd_list.append(f"'{file}'")
+            cmd_list.append(f'"{file}"')
+
         _, _, _, stderr = self.exec_command_blocking(" ".join(cmd_list))
         stderr_lines = stderr.readlines()
         if len(stderr_lines) != 0:
