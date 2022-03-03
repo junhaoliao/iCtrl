@@ -14,6 +14,7 @@ import {
   MenuItem,
   Paper,
   Snackbar,
+  Stack,
   SwipeableDrawer,
   Typography,
 } from '@material-ui/core';
@@ -35,6 +36,7 @@ import {
   CreateNewFolder,
   DesktopMac,
   DriveFolderUpload,
+  FileUpload,
   Home,
   MusicNote,
   PhotoLibrary,
@@ -77,6 +79,7 @@ export default class FileManager extends React.Component {
       uploadWindowCollapsed: false,
       uploadProgress: [],
       showHidden: false,
+      dragging: false,
       sortModel: [
         {
           field: 'id',
@@ -151,10 +154,10 @@ export default class FileManager extends React.Component {
   };
 
   handleChangePermission = (name, mode) => {
-    if (mode === undefined){
+    if (mode === undefined) {
       const {files} = this.state;
       for (const item of files) {
-        if (item.id === name){
+        if (item.id === name) {
           mode = item.mode;
           break;
         }
@@ -291,6 +294,37 @@ export default class FileManager extends React.Component {
     this.setState({sortModel: model});
   };
 
+  handleDragEnter = (ev) => {
+    ev.preventDefault();
+    this.setState({
+      dragging: true,
+    });
+  };
+
+  handleDragLeave = (ev) => {
+    ev.preventDefault();
+    this.setState({
+      dragging: false,
+    });
+  };
+
+  handleDragOver = (ev) => {
+    ev.preventDefault();
+  };
+
+  handleDragDrop = (ev) => {
+    ev.preventDefault();
+    this.setState({
+      dragging: false,
+    });
+    const file = ev.dataTransfer.files[0];
+    if (file !== undefined) {
+      const {cwd} = this.state;
+      const {isDirectory} = ev.dataTransfer.items[0].webkitGetAsEntry();
+      sftp_ul(this, this.session_id, cwd, file, isDirectory);
+    }
+  };
+
   componentDidMount() {
     updateTitle(this.session_id, 'File Manager');
 
@@ -300,7 +334,14 @@ export default class FileManager extends React.Component {
   }
 
   render() {
-    const {sortModel, files, showHidden, loading, sideBarOpen} = this.state;
+    const {
+      sortModel,
+      files,
+      showHidden,
+      loading,
+      sideBarOpen,
+      dragging,
+    } = this.state;
     const filesToShow = loading ?
         [] :
         (showHidden ? files : this.getNonHiddenFiles(files));
@@ -377,35 +418,55 @@ export default class FileManager extends React.Component {
               {drawerChildren}
             </Drawer>
           </Hidden>
-          <div style={{
-            marginLeft: sideBarOpen ? `${drawerWidth}px` : 0,
-            height: '100vh',
-          }}>
-            <DataGrid
-                rows={filesToShow}
-                density={this.state.density}
-                columns={columns}
-                checkboxSelection
-                disableSelectionOnClick
-                disableColumnMenu
-                rowsPerPageOptions={[100]}
-                loading={this.state.loading}
-                onCellClick={this.handleCellClick}
-                onCellDoubleClick={this.handleCellDoubleClick}
-                onCellEditCommit={this.handleCellEditCommit}
-                sortModel={sortModel}
-                onSortModelChange={this.handleSortModelChange}
-                components={{
-                  Toolbar: CustomToolbar,
-                  NoRowsOverlay: (_ => (
-                      <div style={{margin: 'auto'}}>Empty Directory</div>
-                  )),
-                }}
-                componentsProps={{
-                  toolbar: {fm: this},
-                }}
-                onSelectionModelChange={this.handleSelectionModelChange}
-            />
+          <div
+              onDragEnter={this.handleDragEnter}
+              onDragLeave={this.handleDragLeave}
+              onDragOver={this.handleDragOver}
+              onDrop={this.handleDragDrop}
+              style={{
+                marginLeft: `${drawerWidth}px`,
+                height: '100vh',
+              }}>
+            {dragging ?
+                <Stack style={{
+                  height: '100%',
+                  width: '100%',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  pointerEvents:'none'
+                }}>
+                  <FileUpload style={{color: 'grey', fontSize: 100}}/>
+                  <Typography variant={'h5'} style={{color: 'grey'}}>
+                    Drop to upload
+                  </Typography>
+                </Stack>
+                :
+                <DataGrid
+                    rows={filesToShow}
+                    density={this.state.density}
+                    columns={columns}
+                    checkboxSelection
+                    disableSelectionOnClick
+                    disableColumnMenu
+                    rowsPerPageOptions={[100]}
+                    loading={this.state.loading}
+                    onCellClick={this.handleCellClick}
+                    onCellDoubleClick={this.handleCellDoubleClick}
+                    onCellEditCommit={this.handleCellEditCommit}
+                    sortModel={sortModel}
+                    onSortModelChange={this.handleSortModelChange}
+                    components={{
+                      Toolbar: CustomToolbar,
+                      NoRowsOverlay: (_ => (
+                          <div style={{margin: 'auto'}}>Empty Directory</div>
+                      )),
+                    }}
+                    componentsProps={{
+                      toolbar: {fm: this},
+                    }}
+                    onSelectionModelChange={this.handleSelectionModelChange}
+                />
+            }
           </div>
           <Snackbar
               open={this.state.alertOpen}
@@ -428,12 +489,12 @@ export default class FileManager extends React.Component {
             <div style={{position: 'fixed', bottom: 55, right: 15}}>
               <UploadToolbar fm={this}/>
               {!this.state.uploadWindowCollapsed &&
-                  <Paper id="upload_paper"
-                         style={{maxHeight: 180, overflowY: 'auto'}}
-                         variant="outlined"
-                         square>
-                    <UploadList fm={this}/>
-                  </Paper>}
+              <Paper id="upload_paper"
+                     style={{maxHeight: 180, overflowY: 'auto'}}
+                     variant="outlined"
+                     square>
+                <UploadList fm={this}/>
+              </Paper>}
             </div>
           </Snackbar>
           <ChangePermission
