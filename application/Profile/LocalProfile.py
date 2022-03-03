@@ -93,7 +93,7 @@ class LocalProfile:
 
     def get_session_info(self, session_id):
         if session_id not in self._profile['sessions']:
-            return None, None, None
+            return None, None, None, None
 
         host = self._profile['sessions'][session_id]['host']
         username = self._profile['sessions'][session_id]['username']
