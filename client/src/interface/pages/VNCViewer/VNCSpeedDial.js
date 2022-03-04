@@ -16,17 +16,26 @@ import {
 import {
   Fullscreen,
   FullscreenExit,
+  Hd,
   Height,
   HighQuality,
   Keyboard,
   LensBlur,
   Refresh,
+  Sd,
   VisibilityOff,
 } from '@material-ui/icons';
 
 import './index.css';
 import {LoadingButton} from '@material-ui/lab';
 import {focusOnKeyboard, resetVNC} from '../../../actions/vnc';
+import axios from 'axios';
+
+let webFrame = null;
+if (window.require !== undefined) {
+  // if using electron
+  webFrame = window.require('electron').webFrame;
+}
 
 export default class VNCSpeedDial extends React.Component {
   constructor(props) {
@@ -42,6 +51,7 @@ export default class VNCSpeedDial extends React.Component {
       compressionLevel: 2,
       resetDialogOpen: false,
       resetting: false,
+      inHdMode: false,
     };
   }
 
@@ -184,6 +194,24 @@ export default class VNCSpeedDial extends React.Component {
     focusOnKeyboard();
   };
 
+  handleHDModeToggle = (_) => {
+    this.props.closeSpeedDial();
+
+    const {session_id} = this.props;
+    const {inHdMode} = this.state;
+    axios.post('/api/exec_blocking', {
+      session_id: session_id,
+      cmd: `gsettings set org.mate.interface window-scaling-factor ${inHdMode ?
+          0 :
+          2}`,
+    }).then((response) => {
+      webFrame.setZoomFactor(inHdMode ? 1 : 0.5);
+      this.setState({
+        inHdMode: !inHdMode,
+      });
+    });
+  };
+
   handleResetConnection = (_) => {
     this.props.closeSpeedDial();
     this.setState({
@@ -220,6 +248,7 @@ export default class VNCSpeedDial extends React.Component {
       isFullscreen,
       resetDialogOpen,
       resetting,
+      inHdMode,
     } = this.state;
 
     return (
@@ -292,6 +321,15 @@ export default class VNCSpeedDial extends React.Component {
               tooltipPlacement={tooltipPlacement}
               onClick={this.handleToggleResize}
           />
+          {webFrame && <SpeedDialAction
+              key={'hd-mode'}
+              icon={inHdMode ? <Sd/> : <Hd/>}
+              tooltipTitle={<div className={'speed-dial-action-title'}>
+                {inHdMode ? 'Exit' : 'Enter'} HD Mode</div>}
+              tooltipOpen
+              tooltipPlacement={tooltipPlacement}
+              onClick={this.handleHDModeToggle}
+          />}
           <br/>
           <SpeedDialAction
               key={'quality'}
