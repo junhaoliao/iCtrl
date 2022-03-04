@@ -424,7 +424,7 @@ export default class FileManager extends React.Component {
               onDragOver={this.handleDragOver}
               onDrop={this.handleDragDrop}
               style={{
-                marginLeft: `${drawerWidth}px`,
+                marginLeft: sideBarOpen ? `${drawerWidth}px` : null,
                 height: '100vh',
               }}>
             {dragging ?
@@ -433,7 +433,7 @@ export default class FileManager extends React.Component {
                   width: '100%',
                   justifyContent: 'center',
                   alignItems: 'center',
-                  pointerEvents:'none'
+                  pointerEvents: 'none',
                 }}>
                   <FileUpload style={{color: 'grey', fontSize: 100}}/>
                   <Typography variant={'h5'} style={{color: 'grey'}}>
@@ -489,12 +489,12 @@ export default class FileManager extends React.Component {
             <div style={{position: 'fixed', bottom: 55, right: 15}}>
               <UploadToolbar fm={this}/>
               {!this.state.uploadWindowCollapsed &&
-              <Paper id="upload_paper"
-                     style={{maxHeight: 180, overflowY: 'auto'}}
-                     variant="outlined"
-                     square>
-                <UploadList fm={this}/>
-              </Paper>}
+                  <Paper id="upload_paper"
+                         style={{maxHeight: 180, overflowY: 'auto'}}
+                         variant="outlined"
+                         square>
+                    <UploadList fm={this}/>
+                  </Paper>}
             </div>
           </Snackbar>
           <ChangePermission
