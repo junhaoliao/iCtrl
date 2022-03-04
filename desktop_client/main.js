@@ -91,6 +91,8 @@ const windowOptions = {
   show: false,
   webPreferences: {
     nativeWindowOpen: true,
+    nodeIntegration: true,
+    contextIsolation: false
   },
 };
 let mainWindow = null;
