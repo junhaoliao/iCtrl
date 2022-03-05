@@ -205,7 +205,7 @@ export default class CustomToolbar extends React.Component {
 
     return (
         <>
-          <GridToolbarContainer style={{overflowX:'scroll', overflowY:'hidden'}}>
+          <GridToolbarContainer style={{overflowX:'auto', overflowY:'hidden'}}>
             <Hidden smUp>
               <Tooltip title={'Show Side Bar'}>
                 <IconButton
