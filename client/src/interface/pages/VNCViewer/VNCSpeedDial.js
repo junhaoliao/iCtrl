@@ -232,6 +232,28 @@ export default class VNCSpeedDial extends React.Component {
     }
   };
 
+  componentDidMount() {
+    if (webFrame !== null) {
+      // only check zoom factor in electron
+      const {session_id} = this.props;
+
+      axios.post('/api/exec_blocking', {
+        session_id: session_id,
+        cmd: 'gsettings get org.mate.interface window-scaling-factor',
+      }).then((response) => {
+        const {data} = response;
+        if (data === 2) {
+          webFrame.setZoomFactor(0.5);
+          this.setState({
+            inHdMode: true,
+          });
+        }
+
+      });
+    }
+
+  }
+
   render() {
     const {
       speedDialOpen,
