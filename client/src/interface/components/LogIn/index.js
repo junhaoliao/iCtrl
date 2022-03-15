@@ -55,7 +55,7 @@ export default class LogIn extends React.Component {
       this.setState({
         resendRequesting: false,
         errorElem: <Alert severity="info">
-          Please check your email inbox or <a target="_blank" href={'https://outlook.office.com/mail/junkemail'}>Junk Email</a> to activate your account.
+          Please check your email inbox or <a target="_blank" rel="noreferrer" href={'https://outlook.office.com/mail/junkemail'}>Junk Email</a> to activate your account.
         </Alert>,
       });
     }).catch(error => {
@@ -121,7 +121,7 @@ export default class LogIn extends React.Component {
         this.setState({
           errorElem: <Alert severity="warning">
             Your account has not been activated yet.<br/>
-            Please check your email inbox or <a target="_blank" href={'https://outlook.office.com/mail/junkemail'}>Junk Email</a>,
+            Please check your email inbox or <a target="_blank" rel="noreferrer" href={'https://outlook.office.com/mail/junkemail'}>Junk Email</a>,
             or you may <button
               id={'resend-button'}
               onClick={this.handleResendActivation}
@@ -166,7 +166,7 @@ export default class LogIn extends React.Component {
         loading: false,
         errorElem: <Alert severity="info">
           If your email address is valid, an activation link has been sent.
-          Please check your email inbox or <a target="_blank" href={'https://outlook.office.com/mail/junkemail'}>Junk Email</a>.
+          Please check your email inbox or <a target="_blank" rel="noreferrer" href={'https://outlook.office.com/mail/junkemail'}>Junk Email</a>.
         </Alert>,
       });
     }).catch(error => {
