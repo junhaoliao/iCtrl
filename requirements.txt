@@ -7,7 +7,7 @@ Pillow
 psycopg2-binary
 pyDes
 pyinstaller
-git+git://github.com/junhaoliao/simple-websocket-server#egg=SimpleWebSocketServer
+git+https://github.com/junhaoliao/simple-websocket-server#egg=SimpleWebSocketServer
 websockify
 zipstream-new
 SQLAlchemy
