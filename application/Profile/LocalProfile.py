@@ -29,7 +29,6 @@ class LocalProfile:
 
                 # TODO: make sure the sessions file is not modified in an attempt to crash the script
                 self._profile["sessions"] = json_data["sessions"]
-                self._profile["last_session"] = json_data["last_session"]
 
         except Exception as e:
             self._profile = copy.deepcopy(_EMPTY_USER_PROFILE)
