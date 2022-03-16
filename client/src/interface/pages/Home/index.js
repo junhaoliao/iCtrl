@@ -56,13 +56,13 @@ export default class Home extends React.Component {
 
     let count = 0;
     if (platform === 'Windows') {
-        count = windowsCount;
+      count = windowsCount;
     } else if (platform === 'Intel Mac') {
-        count = macIntelCount;
+      count = macIntelCount;
     } else if (platform === 'ARM Mac') {
-        count = macARMCount;
+      count = macARMCount;
     } else {
-        // all platforms
+      // all platforms
       count = windowsCount + macIntelCount + macARMCount;
     }
 
@@ -100,17 +100,21 @@ export default class Home extends React.Component {
   updateTotalDownloadCount = () => {
     axios.get('https://api.github.com/repos/junhaoliao/iCtrl/releases').
         then((response) => {
-        const {data} = response;
+          const {data} = response;
           let totalDownloadCount = 0;
           for (const release of data) {
             for (const asset of release['assets']) {
-              totalDownloadCount += asset['download_count'];
+              // exclude those named "RELEASE" because the file
+              //  is used for Windows auto-update
+              if (asset['name'] !== 'RELEASES') {
+                totalDownloadCount += asset['download_count'];
+              }
             }
           }
           this.setState({
-            totalDownloadCount: totalDownloadCount
-          })
-        })
+            totalDownloadCount: totalDownloadCount,
+          });
+        });
   };
 
   componentDidMount() {
@@ -172,25 +176,29 @@ export default class Home extends React.Component {
 
                 <Stack direction={'row'} alignItems={'center'} spacing={3}
                        justifyContent={'center'}>
-                  <Tooltip title={showPublishCount && this.downloadCountString('all platforms')}>
+                  <Tooltip title={showPublishCount &&
+                      this.downloadCountString('all platforms')}>
                     <Typography>
                       Desktop Client
                     </Typography>
                   </Tooltip>
                   <ButtonGroup>
-                    <Tooltip title={showPublishCount && this.downloadCountString('Windows')}>
+                    <Tooltip title={showPublishCount &&
+                        this.downloadCountString('Windows')}>
                       <Button id={'download-windows'}
                               onClick={this.handleDesktopDownload}>
                         Windows
                       </Button>
                     </Tooltip>
-                    <Tooltip title={showPublishCount && this.downloadCountString('Intel Mac')}>
+                    <Tooltip title={showPublishCount &&
+                        this.downloadCountString('Intel Mac')}>
                       <Button id={'download-mac-intel'}
                               onClick={this.handleDesktopDownload}>
                         Intel Mac
                       </Button>
                     </Tooltip>
-                    <Tooltip title={showPublishCount && this.downloadCountString('ARM Mac')}>
+                    <Tooltip title={showPublishCount &&
+                        this.downloadCountString('ARM Mac')}>
                       <Button id={'download-mac-arm'}
                               onClick={this.handleDesktopDownload}>
                         M1 Mac
@@ -201,8 +209,8 @@ export default class Home extends React.Component {
                 <br/><br/>
 
                 {(totalDownloadCount !== 0) && <Typography align={'center'}>
-                      Total downloads: {totalDownloadCount}
-                    </Typography>}
+                  Total downloads: {totalDownloadCount}
+                </Typography>}
               </Box>
             </Hidden>
 
