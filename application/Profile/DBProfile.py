@@ -62,7 +62,7 @@ class DBProfile:
             def validate_username(self, key, username):
                 assert re.match("^[A-Za-z0-9_-]+$", username), \
                     'User name should contain only letters, numbers, underscores and dashes'
-                return username.lower()
+                return username
 
             # this field is for the hashed passwords
             # for the password requirements verifications, please see "self.add_user"
@@ -72,8 +72,6 @@ class DBProfile:
 
             @validates('email')
             def validate_email(self, key, email):
-                email = email.lower()
-
                 assert re.match(r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b', email), \
                     f'Invalid email address: "{email}"'
 
@@ -151,6 +149,10 @@ class DBProfile:
         return _profile
 
     def add_user(self, username, password, email):
+        # force lower case
+        username = username.lower()
+        email = email.lower()
+
         password_ok, password_reason = validate_password(password)
         if not password_ok:
             abort(422, password_reason)
