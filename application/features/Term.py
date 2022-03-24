@@ -32,7 +32,7 @@ class Term(Connection):
 
     def launch_shell(self):
         try:
-            self.channel = self.client.invoke_shell()
+            self.channel = self.client.invoke_shell('xterm-256color')
         except Exception as e:
             return False, str(e)
 
