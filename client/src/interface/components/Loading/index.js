@@ -111,7 +111,14 @@ export default class Loading extends React.Component {
                                             Continue
                                         </Button>
                                         <Button onClick={this.handleShowChangeMachine}
-                                            variant={'contained'} sx={{background: '#4caf50'}}>
+                                            variant={'contained'}
+                                                color={'success'}
+                                                sx={{background: '#4caf50',
+                                                    '&:hover':{
+                                                    background: 'rgb(60,140,60)',
+                                                    },
+                                                    color: 'white'
+                                                }}>
                                             Change Machine
                                         </Button>
                                     </StepContent>
