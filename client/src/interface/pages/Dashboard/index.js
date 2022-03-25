@@ -174,7 +174,7 @@ export default class Dashboard extends React.Component {
                         onClose={this.handleMenuClose}
                     >
                         <Hidden smUp>
-                            {showCM && <MenuItem>
+                            {showCM && <MenuItem onClick={() => this.handleMenuClick(key, 'CM')}>
                                 <ListItemIcon><StorageIcon style={{color: '#4caf50'}}/></ListItemIcon>
                                 Change Machine
                             </MenuItem>}
