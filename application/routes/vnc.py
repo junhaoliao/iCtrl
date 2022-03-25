@@ -34,8 +34,12 @@ def start_vnc():
             password = None
         else:
             status, password = vnc.get_vnc_password()
+
+            # in case we can read the password while the server is launched at port 5900
+            # check whether 5900 is opened anyway
+            use5900 = vnc.check_5900_open()
+
             if not status:
-                use5900 = vnc.check_5900_open()
                 if use5900:
                     password = None
                 else:
