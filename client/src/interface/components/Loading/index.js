@@ -17,7 +17,7 @@ import ChangeMachine from '../ChangeMachine';
 
 function LinearProgressWithLabel(props) {
     return (
-        <Box sx={{display: 'flex', alignItems: 'center'}}>
+        <Box sx={{display: 'flex', alignItems: 'center', marginLeft:'12px', marginRight:'12px'}}>
             <Box sx={{width: '100%', mr: 1}}>
                 <LinearProgress variant="determinate" {...props} />
             </Box>
