@@ -6,7 +6,7 @@ import {
   DialogActions,
   DialogContent,
   DialogContentText,
-  DialogTitle,
+  DialogTitle, Slide,
   Slider,
   SpeedDial,
   SpeedDialAction,
@@ -284,6 +284,8 @@ export default class VNCSpeedDial extends React.Component {
               onTouchStart: this.handleFabTouchStart,
             }}
             ariaLabel={'speed dial more'}
+            TransitionComponent={Slide}
+            TransitionProps={{direction: 'down'}}
             transitionDuration={1000}
         >
           <SpeedDialAction
