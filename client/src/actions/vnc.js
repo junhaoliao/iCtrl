@@ -230,6 +230,12 @@ export const vncConnect = async (vncViewer) => {
         });
       });
 
+      vncViewer.rfb.addEventListener('disconnect', () => {
+        vncViewer.setState({
+          disconnected: true,
+        });
+      });
+
       return;
     } // if (done)
 

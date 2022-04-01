@@ -1,5 +1,5 @@
 import React from 'react';
-import {Backdrop} from '@material-ui/core';
+import {Backdrop, Box, Button, Typography} from '@material-ui/core';
 
 import './index.css';
 import Loading from '../../components/Loading';
@@ -31,6 +31,7 @@ export default class VNCViewer extends React.Component {
     this.speedDialOpenTime = 0;
 
     this.state = {
+      disconnected: false,
       loading: true,
       currentStep: -1,
       authentication: null,
@@ -58,11 +59,11 @@ export default class VNCViewer extends React.Component {
     });
   };
 
-      closeSpeedDial = () => {
-        this.setState({
-            speedDialOpen: false,
-        });
-    };
+  closeSpeedDial = () => {
+    this.setState({
+      speedDialOpen: false,
+    });
+  };
   handleSpeedDialClose = (ev) => {
     if (ev.type === 'mouseleave' ||
         (new Date().getTime() - this.speedDialOpenTime) < 200) {
@@ -135,6 +136,10 @@ export default class VNCViewer extends React.Component {
     this.rfb.focus();
   };
 
+  reloadPage = () => {
+    window.location.reload();
+  }
+
   componentDidMount() {
     updateTitle(this.session_id, 'VNC');
 
@@ -146,6 +151,7 @@ export default class VNCViewer extends React.Component {
     const {
       authentication,
       currentStep,
+      disconnected,
       loading,
       speedDialOpen,
       showFab,
@@ -153,6 +159,26 @@ export default class VNCViewer extends React.Component {
       isOverloaded,
       fabMoving,
     } = this.state;
+
+    if (disconnected) {
+      return <Box height={'100vh'}
+                  display={'flex'}
+                  flexDirection={'column'}
+                  justifyContent={'center'}>
+        <Typography variant={'h6'} align={'center'}>
+          The VNC connection has been disconnected. Do you wish to reconnect?
+        </Typography>
+        <br/>
+        <Button
+            onClick={this.reloadPage}
+            style={{width: '8em', alignSelf: 'center'}}
+                size={'small'}
+                variant={'outlined'}>
+          Reconnect
+        </Button>
+      </Box>;
+    }
+
     return (<div>
           <Backdrop id={'speed-dial-backdrop'} open={speedDialOpen}/>
           {showFab && !loading &&
