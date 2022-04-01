@@ -6,12 +6,12 @@ import {
   DialogActions,
   DialogContent,
   DialogContentText,
-  DialogTitle, Slide,
+  DialogTitle, Grow, Slide,
   Slider,
   SpeedDial,
   SpeedDialAction,
   SpeedDialIcon,
-  Stack,
+  Stack, Zoom,
 } from '@material-ui/core';
 import {
   Fullscreen,
@@ -284,8 +284,6 @@ export default class VNCSpeedDial extends React.Component {
               onTouchStart: this.handleFabTouchStart,
             }}
             ariaLabel={'speed dial more'}
-            TransitionComponent={Slide}
-            TransitionProps={{direction: 'down'}}
             transitionDuration={1000}
         >
           <SpeedDialAction
