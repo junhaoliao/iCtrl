@@ -583,8 +583,12 @@ const setupWebSocket = (term, term_id, port) => {
         term.loadAddon(attachAddon);
     };
     socket.onclose = (ev) => {
-        term.write('\r\niCtrl: WebSocket closed');
-        console.log(ev);
+        term.write('\r\niCtrl: WebSocket closed. \r\nYou may press Ctrl + R to reload. ');
+        term.onData(chunk => {
+            if (chunk === ''){
+                window.location.reload();
+            }
+        })
     };
 
     return socket;
