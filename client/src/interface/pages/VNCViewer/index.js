@@ -32,6 +32,7 @@ export default class VNCViewer extends React.Component {
 
     this.state = {
       disconnected: false,
+      resetting: false,
       loading: true,
       currentStep: -1,
       authentication: null,
@@ -138,7 +139,13 @@ export default class VNCViewer extends React.Component {
 
   reloadPage = () => {
     window.location.reload();
-  }
+  };
+
+  handleVNCReset = () => {
+    this.setState({
+      resetting: true,
+    });
+  };
 
   componentDidMount() {
     updateTitle(this.session_id, 'VNC');
@@ -152,6 +159,7 @@ export default class VNCViewer extends React.Component {
       authentication,
       currentStep,
       disconnected,
+      resetting,
       loading,
       speedDialOpen,
       showFab,
@@ -160,7 +168,7 @@ export default class VNCViewer extends React.Component {
       fabMoving,
     } = this.state;
 
-    if (disconnected) {
+    if (!resetting && disconnected) {
       return <Box height={'100vh'}
                   display={'flex'}
                   flexDirection={'column'}
@@ -172,8 +180,8 @@ export default class VNCViewer extends React.Component {
         <Button
             onClick={this.reloadPage}
             style={{width: '8em', alignSelf: 'center'}}
-                size={'small'}
-                variant={'outlined'}>
+            size={'small'}
+            variant={'outlined'}>
           Reconnect
         </Button>
       </Box>;
@@ -186,6 +194,7 @@ export default class VNCViewer extends React.Component {
                   session_id={this.session_id}
                   rfb={this.rfb}
                   speedDialOpen={speedDialOpen && !fabMoving}
+                  onVNCReset={this.handleVNCReset}
                   onSpeedDialClose={this.handleSpeedDialClose}
                   onSpeedDialOpen={this.handleSpeedDialOpen}
                   closeSpeedDial={this.closeSpeedDial}
