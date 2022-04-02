@@ -143,13 +143,15 @@ class SFTP(Connection):
     #         self.sftp.rmdir(fullpath)
 
     def rm(self, cwd, file_list):
-        cmd_list = [f"cd '{cwd}' && rm -rf"]
+        cmd_list = [f'cd "{cwd}" && rm -rf']
         for file in file_list:
             cmd_list.append(f'"{file}"')
 
         _, _, _, stderr = self.exec_command_blocking(" ".join(cmd_list))
+        print(" ".join(cmd_list))
         stderr_lines = stderr.readlines()
         if len(stderr_lines) != 0:
+            print(stderr_lines)
             return False, 'Some files are not removed due to insufficient permissions'
         return True, ''
 

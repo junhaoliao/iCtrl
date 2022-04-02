@@ -191,3 +191,19 @@ export const sftp_quota = (fm, ms) => {
   });
 };
 
+export const file_cleaner_rm = (session_id, files, cancelToken) => {
+  axios.post(`/api/sftp_rm/${session_id}`,
+      {
+        cwd: '$HOME',
+        files: files,
+      }, {
+        cancelToken,
+      }).then(_ => {
+    alert('The files have been deleted successfully. Press OK to reload.');
+    window.location.reload();
+  }).catch(error => {
+    alert('Some files might NOT be deleted successfully. Press OK to reload.');
+    window.location.reload();
+    console.log(error);
+  });
+};
