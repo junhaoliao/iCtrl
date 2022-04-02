@@ -413,7 +413,7 @@ export default class FileManager extends React.Component {
               primary={'File Cleaner'}/>
         </ListItem>
         <ListItem>
-          <QuotaUsage fm={this}/>
+          <QuotaUsage sessionID={this.session_id}/>
         </ListItem>
       </List>
     </>;
