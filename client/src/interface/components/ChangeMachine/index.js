@@ -1,6 +1,14 @@
 /* eslint-disable react-hooks/rules-of-hooks */
 import React from 'react';
-import {Button, Dialog, DialogActions, DialogContent, DialogTitle} from '@material-ui/core';
+import {
+    Box,
+    Button,
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogTitle,
+    TextField, Typography,
+} from '@material-ui/core';
 import {DataGrid} from '@material-ui/data-grid';
 import columns from './column';
 import {session_change_host, session_ruptime} from '../../../actions/session';
@@ -73,8 +81,13 @@ export default class ChangeMachine extends React.Component {
                 aria-labelledby="change machine"
             >
                 <DialogTitle>Change Machine</DialogTitle>
-                <DialogContent style={{height: '380px'}}>
+                <DialogContent style={{height: '430px'}}>
+                    <Box marginBottom={'10px'} display={'flex'} alignItems={'center'}>
+                        <Typography variant={'body1'} marginRight={'8px'}>Command:</Typography>
+                        <TextField size={'small'} fullWidth={true} value={'ruptime -aur'}/>
+                    </Box>
                     <DataGrid
+                        style={{height:'380px'}}
                         rows={machineList}
                         columns={columns}
                         pageSize={100}
