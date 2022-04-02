@@ -41,6 +41,7 @@ export default class VNCViewer extends React.Component {
       speedDialOpen: false,
       showToolbar: false,
       isOverloaded: false,
+      quotaExceeded: false,
       fabMoving: false,
     };
   }
@@ -167,6 +168,7 @@ export default class VNCViewer extends React.Component {
       showFab,
       showToolbar,
       isOverloaded,
+      quotaExceeded,
       fabMoving,
     } = this.state;
 
@@ -220,7 +222,9 @@ export default class VNCViewer extends React.Component {
                   currentStep={currentStep}
                   steps={VNCSteps}
                   authentication={authentication}
-                  isOverloaded={isOverloaded}/>
+                  isOverloaded={isOverloaded}
+                  quotaExceeded={quotaExceeded}
+              />
           }
 
           <div style={{display: loading && 'none'}} id={'screen'}

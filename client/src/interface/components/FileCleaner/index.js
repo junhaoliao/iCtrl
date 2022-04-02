@@ -68,7 +68,7 @@ export default class FileCleaner extends React.Component {
   handleConfirmClose = (ev) => {
     if (ev.target && ev.target.id === 'button-confirm') {
       file_cleaner_rm(this.props.sessionID, this.state.selectedFiles,
-          this.cancelTokenSrc);
+          this.cancelTokenSrc.token);
       this.setState({
         deleting: true,
       });
@@ -113,7 +113,7 @@ export default class FileCleaner extends React.Component {
   }
 
   render() {
-    const {open: fileCleanerOpen, sessionID} = this.props;
+    const {sessionID} = this.props;
     const {
       confirmDialogOpen,
       deleting,
@@ -126,7 +126,7 @@ export default class FileCleaner extends React.Component {
     return (
         <>
           <Dialog
-              open={fileCleanerOpen}
+              open={true}
               fullWidth={true}
               maxWidth={'md'}
               aria-labelledby="file cleaner"

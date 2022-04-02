@@ -1,5 +1,4 @@
 import json
-import re
 
 from flask import request, abort, stream_with_context
 
@@ -52,8 +51,11 @@ def start_vnc():
         elif use5900:
             vnc_port = 5900
         else:
-            # FIXME: handle the case when the vnc server can't be launched
-            vnc_port = vnc.launch_vnc()
+            status, vnc_port = vnc.launch_vnc()
+            if not status:
+                # TODO: handle the other failures
+                yield int_to_bytes(ICtrlError.VNC.QUOTA_EXCEEDED)
+                return
 
         yield int_to_bytes(ICtrlStep.VNC.CREATE_TUNNEL)
         ws_port = vnc.create_tunnel(vnc_port)

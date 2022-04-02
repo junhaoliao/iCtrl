@@ -148,7 +148,6 @@ class SFTP(Connection):
             cmd_list.append(f'"{file}"')
 
         _, _, _, stderr = self.exec_command_blocking(" ".join(cmd_list))
-        print(" ".join(cmd_list))
         stderr_lines = stderr.readlines()
         if len(stderr_lines) != 0:
             print(stderr_lines)

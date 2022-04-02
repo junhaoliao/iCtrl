@@ -18,6 +18,7 @@ ERROR_GENERAL = 100
 class VNCError(IntEnum):
     GENERAL = ERROR_GENERAL + 20
     PASSWD_MISSING = auto()
+    QUOTA_EXCEEDED = auto()
 
 
 @unique

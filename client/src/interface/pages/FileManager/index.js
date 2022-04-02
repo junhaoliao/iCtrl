@@ -561,10 +561,9 @@ export default class FileManager extends React.Component {
               sessionId={this.session_id}
               cwd={this.state.cwd}
           />
-          <FileCleaner
+          {fileCleanerOpen && <FileCleaner
               sessionID={this.session_id}
-              open={fileCleanerOpen}
-              onClose={this.handleFileCleanerClose}/>
+              onClose={this.handleFileCleanerClose}/>}
         </div>
     );
   }

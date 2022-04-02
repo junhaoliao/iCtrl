@@ -106,14 +106,17 @@ class VNC(Connection):
             'killall -q -w xvfb-run Xtigervnc',
             'vncserver'
         ]
-        if len(ports_by_me) > 1:
+        if len(ports_by_me) > 1 or len(ports_by_me) == 0:
             # TODO: might recover the valid ones
             # more than one VNC servers are listening and therefore all killed above to prevent unexpected results
-            _, _, stdout, _ = self.exec_command_blocking(';'.join(relaunch_cmd_list))
-            relaunch = True
-        elif len(ports_by_me) == 0:
-            # no valid VNC server is listening
-            _, _, stdout, _ = self.exec_command_blocking(';'.join(relaunch_cmd_list))
+            _, _, stdout, stderr = self.exec_command_blocking(';'.join(relaunch_cmd_list))
+            stderr_lines = "".join(stderr.readlines())
+            if len(stderr_lines) != 0:
+                if 'quota' in stderr_lines:
+                    return False, 'QUOTA'
+                else:
+                    # TODO: can there be any other harmful errors?
+                    pass
             relaunch = True
 
         vnc_port = None
@@ -126,7 +129,7 @@ class VNC(Connection):
                     vnc_port = int(match.group(1))
                     break
 
-        return 5900 + vnc_port
+        return True, 5900 + vnc_port
 
     def create_tunnel(self, remote_port):
         local_vnc_port = find_free_port()
