@@ -27,8 +27,8 @@ const setupDOM = (port, passwd) => {
   // Reference: https://github.com/novnc/noVNC/blob/master/docs/API.md
 
   // resizeSession:
-  // Is a boolean indicating if a request to resize the remote session should be sent
-  //  whenever the container changes dimensions. Disabled by default.
+  // Is a boolean indicating if a request to resize the remote session should
+  // be sent whenever the container changes dimensions. Disabled by default.
   rfb.resizeSession = true;
 
   return rfb;
@@ -115,12 +115,15 @@ const setupOnScreenKeyboard = (vncViewer) => {
       vncViewer.rfb.sendKey(KeyTable.XK_BackSpace, 'Backspace');
     }
     for (let i = newLen - inputs; i < newLen; i++) {
-      const key = newValue.charCodeAt(i);
+      let key = newValue.charCodeAt(i);
       if (key === 10) {
-        vncViewer.rfb.sendKey(KeyTable.XK_Return);
+        key = KeyTable.XK_Return;
+      } else if (vncViewer.shiftKeyDown && (key >= 0x61) && (key <= 0x7a)) {
+        key = key - 0x20;
       } else {
-        vncViewer.rfb.sendKey(keysyms.lookup(key));
+        key = keysyms.lookup(key);
       }
+      vncViewer.rfb.sendKey(key);
     }
 
     // Control the text content length in the keyboardinput element
@@ -147,23 +150,24 @@ const setupOnScreenKeyboard = (vncViewer) => {
 
 const setupClipboard = (rfb) => {
   /* Setup bi-directional clipboard forwarding */
-  // TODO: keep an eye on the official support discussed on https://github.com/novnc/noVNC/pull/1562
-  // remote -> local
+  // TODO: keep an eye on the official support discussed on
+  // https://github.com/novnc/noVNC/pull/1562 remote -> local
   rfb.addEventListener('clipboard', (ev) => {
     try {
       navigator.clipboard.writeText(ev.detail.text).then();
     } catch (e) {
       // 3 cases of navigator.clipboard failure:
       // 1) not hosting over https on the server
-      // 2) TODO: show a tutorial to approve clipboard permission if this is the case
-      //    the user didn't approve clipboard permission
-      // 3) the browser is too old to support clipboard
+      // 2) TODO: show a tutorial to approve clipboard permission if this is
+      // the case the user didn't approve clipboard permission 3) the browser
+      // is too old to support clipboard
       console.log(e);
     }
   });
 
   // local -> remote
-  // whenever the window gets focus (the user just switched from another tab/window),
+  // whenever the window gets focus (the user just switched from another
+  // tab/window),
   let clipboardText = null;
   window.onfocus = _ => {
     try {
@@ -199,9 +203,10 @@ export const vncConnect = async (vncViewer) => {
     return;
   }
 
-  // the steps will be streamed as the server establishes the connection to the target
-  //  so we will need a ReadableStream Reader to get the current step, and the final response
-  //  which contains the port to be used and the VNC password
+  // the steps will be streamed as the server establishes the connection to the
+  // target so we will need a ReadableStream Reader to get the current step,
+  // and the final response which contains the port to be used and the VNC
+  // password
   const reader = response.body.getReader();
   // this will store all the data read from the stream
   const data = [];
@@ -244,11 +249,13 @@ export const vncConnect = async (vncViewer) => {
 
     // the stream is in this format:
     // STEP1 | STEP2 | ... | _DONE_ | FINAL_RESPONSE
-    // from above we can see step 'DONE' serve as a divider of the step codes and the final response
+    // from above we can see step 'DONE' serve as a divider of the step codes
+    // and the final response
 
     // if the step 'DONE' is present in 'data'
     if (data.includes(ICtrlStep.VNC.DONE)) {
-      // update the current step to 'DONE' and wait for the whole stream to be transferred
+      // update the current step to 'DONE' and wait for the whole stream to be
+      // transferred
       vncViewer.setState({
         currentStep: ICtrlStep.VNC.DONE,
       });
