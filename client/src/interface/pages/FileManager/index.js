@@ -34,6 +34,7 @@ import {
   CloudDownload,
   Computer,
   CreateNewFolder,
+  DeleteSweep,
   DesktopMac,
   DriveFolderUpload,
   FileUpload,
@@ -46,6 +47,7 @@ import Button from '@material-ui/core/Button';
 import NewFolderDialog from './NewFolderDialog';
 import {changeFavicon} from '../../utils';
 import {updateTitle} from '../../../actions/common';
+import FileCleaner from '../../components/FileCleaner';
 
 const drawerWidth = 200;
 
@@ -73,6 +75,7 @@ export default class FileManager extends React.Component {
       cwdInput: '',
       density: 'standard',
       files: [],
+      fileCleanerOpen: false,
       loading: true,
       newMenuAnchorEl: null,
       newFolderDialogOpen: false,
@@ -325,6 +328,17 @@ export default class FileManager extends React.Component {
     }
   };
 
+  handleFileCleanerOpen = () => {
+    this.setState({
+      fileCleanerOpen: true,
+    });
+  };
+  handleFileCleanerClose = () => {
+    this.setState({
+      fileCleanerOpen: false,
+    });
+  };
+
   componentDidMount() {
     updateTitle(this.session_id, 'File Manager');
 
@@ -341,6 +355,7 @@ export default class FileManager extends React.Component {
       loading,
       sideBarOpen,
       dragging,
+      fileCleanerOpen,
     } = this.state;
     const filesToShow = loading ?
         [] :
@@ -390,6 +405,13 @@ export default class FileManager extends React.Component {
             </ListItem>
         ))}
         <Divider/>
+        <ListItem button onClick={this.handleFileCleanerOpen}>
+          <ListItemIcon>
+            {<DeleteSweep/>}
+          </ListItemIcon>
+          <ListItemText
+              primary={'File Cleaner'}/>
+        </ListItem>
         <ListItem>
           <QuotaUsage fm={this}/>
         </ListItem>
@@ -539,6 +561,10 @@ export default class FileManager extends React.Component {
               sessionId={this.session_id}
               cwd={this.state.cwd}
           />
+          <FileCleaner
+              sessionID={this.session_id}
+              open={fileCleanerOpen}
+              onClose={this.handleFileCleanerClose}/>
         </div>
     );
   }

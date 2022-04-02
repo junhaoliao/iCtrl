@@ -184,6 +184,16 @@ class Connection:
 
         return exit_status, stdin, stdout, stderr
 
+    def exec_command_blocking_large(self, command):
+        """ Execute some command on the remote and return the received data of the execution.
+        NOTE: This function is blocking.
+        :param command: command to be executed
+        :return: the received data of the executed command
+        """
+        _, stdout, stderr = self.client.exec_command(command)
+
+        return '\n'.join(stdout) + '\n' + '\n'.join(stderr)
+
     def _port_forward_thread(self, local_port, remote_port):
         forward_server = ForwardServer(("", local_port), Handler)
 

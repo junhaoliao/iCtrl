@@ -125,16 +125,22 @@ def handle_session():
 def exec_blocking():
     session_id = request.json.get('session_id')
     cmd = request.json.get('cmd')
+    large = request.json.get('large', False)
 
     conn, reason = create_connection(session_id, ConnectionType.GENERAL)
     if reason != '':
         abort(403, reason)
 
-    status, _, stdout, stderr = conn.exec_command_blocking(cmd)
-    if status is False:
-        abort(500, 'exec failed')
+    result: str
+    if large:
+        result = conn.exec_command_blocking_large(cmd)
+    else:
+        status, _, stdout, stderr = conn.exec_command_blocking(cmd)
+        if status is False:
+            abort(500, 'exec failed')
+        result = '\n'.join(stdout) + '\n' + '\n'.join(stderr)
 
-    return '\n'.join(stdout) + '\n' + '\n'.join(stderr)
+    return result
 
 
 @api.route('/favicon/<feature>/<session_id>')
