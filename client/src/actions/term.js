@@ -470,7 +470,14 @@ const evaluateKeyboardEvent = (
 };
 
 export const sendKey = (TermViewer, ev) => {
-    console.log(ev);
+    const options = {
+        ctrlKey: ev.ctrlKey || TermViewer.ctrlKey,
+        shiftKey: ev.shiftKey || TermViewer.shiftKey,
+        metaKey: ev.metaKey || TermViewer.metaKey,
+        altKey: ev.altKey || TermViewer.altKey,
+        key: ev.key,
+        keyCode: ev.keyCode,
+    };
     if (ev.keyCode === 229) {
         const oldValue = TermViewer.term.textarea.value;
         TermViewer.term.textarea.setSelectionRange(oldValue.length, oldValue.length);
@@ -486,11 +493,15 @@ export const sendKey = (TermViewer, ev) => {
                     // try our best to match the char with the keycodes
                     //  so that the ctrl/alt/shift combinations will work
                     if (charCode >= 65 && charCode <= 90) {
-                        sendKey(TermViewer, {key: diff, keyCode: charCode});
+                        sendKey(TermViewer, {...options, key: diff, keyCode: charCode});
                     } else if (charCode >= 97 && charCode <= 122) {
-                        sendKey(TermViewer, {key: diff, keyCode: charCode - 97 + 65});
+                        sendKey(TermViewer, {
+                            ...options,
+                            key: options.shiftKey?diff.toUpperCase():diff,
+                            keyCode: charCode - 0x20
+                        });
                     } else if (diff in KEY_KEYCODE_MAPPINGS) {
-                        sendKey(TermViewer, {key: diff, keyCode: KEY_KEYCODE_MAPPINGS[diff]});
+                        sendKey(TermViewer, {...options, key: diff, keyCode: KEY_KEYCODE_MAPPINGS[diff]});
                     } else {
                         TermViewer.term._core.coreService.triggerDataEvent(diff, true);
                     }
@@ -508,14 +519,7 @@ export const sendKey = (TermViewer, ev) => {
     } else if (ev.key === 'ArrowRight') {
         TermViewer.term.textarea.setSelectionRange(0, 0);
     }
-    const options = {
-        ctrlKey: ev.ctrlKey || TermViewer.ctrlKey,
-        shiftKey: ev.shiftKey || TermViewer.shiftKey,
-        metaKey: ev.metaKey || TermViewer.metaKey,
-        altKey: ev.altKey || TermViewer.altKey,
-        key: ev.key,
-        keyCode: ev.keyCode,
-    };
+
     const result = evaluateKeyboardEvent(
         options,
         TermViewer.term._core.coreService.decPrivateModes.applicationCursorKeys,
