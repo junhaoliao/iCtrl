@@ -27,6 +27,7 @@ export default class VNCViewer extends React.Component {
 
     this.rfb = null;
     this.lastKeyboardinput = null;
+    this.shiftKeyDown = false;
 
     this.speedDialOpenTime = 0;
 
@@ -92,6 +93,7 @@ export default class VNCViewer extends React.Component {
         break;
       case 'Shift':
         this.rfb.sendKey(KeyTable.XK_Shift_L, 'ShiftLeft', down);
+        this.shiftKeyDown = down;
         break;
       case '⌘':
         this.rfb.sendKey(KeyTable.XK_Super_L, 'MetaLeft', down);
