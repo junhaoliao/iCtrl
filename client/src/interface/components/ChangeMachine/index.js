@@ -84,7 +84,7 @@ export default class ChangeMachine extends React.Component {
                 <DialogContent style={{height: '430px'}}>
                     <Box marginBottom={'10px'} display={'flex'} alignItems={'center'}>
                         <Typography variant={'body1'} marginRight={'8px'}>Command:</Typography>
-                        <TextField size={'small'} fullWidth={true} value={'ruptime -aur'}/>
+                        <TextField size={'small'} fullWidth={true} spellCheck={false} value={'ruptime -aur'}/>
                     </Box>
                     <DataGrid
                         style={{height:'380px'}}
