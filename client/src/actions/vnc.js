@@ -7,7 +7,7 @@ import {
   VNCAuthentication,
 } from '../interface/components/Loading/authentications';
 import axios from 'axios';
-import {isIOS} from './utils';
+import {htmlResponseToReason, isIOS} from './utils';
 
 const setupDOM = (port, passwd) => {
   /* Creating a new RFB object and start a new connection */
@@ -289,6 +289,14 @@ export const vncConnect = async (vncViewer) => {
               window.location.reload();
             }).catch(error => {
               console.log(error);
+              if (error.response) {
+                const reason = htmlResponseToReason(error.response.data, true);
+                if (reason.includes('quota')) {
+                  vncViewer.setState({
+                    quotaExceeded: true,
+                  });
+                }
+              }
             });
           };
           vncViewer.setState({
@@ -297,6 +305,10 @@ export const vncConnect = async (vncViewer) => {
         } else if (currentStep === ICtrlError.SSH.OVER_LOADED) {
           vncViewer.setState({
             isOverloaded: true,
+          });
+        } else if (currentStep === ICtrlError.VNC.QUOTA_EXCEEDED) {
+          vncViewer.setState({
+            quotaExceeded: true,
           });
         } else {
           console.log(`VNC error code: ${currentStep}`);

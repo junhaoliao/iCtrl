@@ -4,6 +4,7 @@ const ERROR_GENERAL = 100;
 class VNCError {
     static GENERAL = ERROR_GENERAL + 20;
     static PASSWD_MISSING = this.GENERAL + 1;
+    static QUOTA_EXCEEDED = this.GENERAL + 2;
 }
 
 class SSHError {
