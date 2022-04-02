@@ -33,8 +33,9 @@ export default class QuotaUsage extends React.Component {
     }
 
     componentDidMount() {
+        const {sessionID} = this.props;
         sftp_quota(
-            this.props.fm,
+            sessionID,
             this,
         );
     }

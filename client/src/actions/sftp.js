@@ -171,11 +171,11 @@ export const sftp_chmod = (fm, cwd, name, mode, recursive) => {
   });
 };
 
-export const sftp_quota = (fm, ms) => {
+export const sftp_quota = (sessionID, ms) => {
   // load silently as much as possible
   // because not all machines support quota checking
   axios.post('/api/exec_blocking', {
-    session_id: fm.session_id,
+    session_id: sessionID,
     cmd: 'quota -s | tail -n 1',
   }).then(res => {
     const mem = res.data.match(/[0-9]+[a-zA-Z]+/g);

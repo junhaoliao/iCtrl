@@ -15,6 +15,7 @@ import columns from './column';
 import axios from 'axios';
 import {file_cleaner_rm} from '../../../actions/sftp';
 import {LoadingButton} from '@material-ui/lab';
+import QuotaUsage from '../QuotaUsage';
 
 export default class FileCleaner extends React.Component {
   constructor(props) {
@@ -112,13 +113,13 @@ export default class FileCleaner extends React.Component {
   }
 
   render() {
-    const {open: fileCleanerOpen} = this.props;
+    const {open: fileCleanerOpen, sessionID} = this.props;
     const {
       confirmDialogOpen,
       deleting,
       fileList,
       selectedFiles,
-      selectedFilesTotalSize,
+      // selectedFilesTotalSize,
       sortModel,
     } = this.state;
 
@@ -130,7 +131,14 @@ export default class FileCleaner extends React.Component {
               maxWidth={'md'}
               aria-labelledby="file cleaner"
           >
-            <DialogTitle>File Cleaner</DialogTitle>
+            <DialogTitle>
+              <Box display={'flex'} alignItems={'center'}>
+                <div style={{flex: 1}}>File Cleaner</div>
+                <div style={{width: '200px'}}>
+                  <QuotaUsage sessionID={sessionID}/>
+                </div>
+              </Box>
+            </DialogTitle>
             <DialogContent style={{height: '430px'}}>
               <Box marginBottom={'10px'} display={'flex'} alignItems={'center'}>
                 <Typography variant={'body1'}
