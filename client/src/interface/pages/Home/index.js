@@ -7,6 +7,7 @@ import {
   ButtonGroup,
   Divider,
   Hidden,
+  IconButton,
   Stack,
   Toolbar,
   Tooltip,
@@ -18,6 +19,8 @@ import ictrlLogo from '../../../icons/logo.png';
 import LogIn from '../../components/LogIn';
 
 import './index.css';
+import About from '../../components/About';
+import InfoIcon from '@material-ui/icons/Info';
 
 export default class Home extends React.Component {
   constructor(props) {
@@ -29,6 +32,7 @@ export default class Home extends React.Component {
       macARMCount: 0,
       totalDownloadCount: 0,
       publishDate: null,
+      aboutOpened: false,
     };
   }
 
@@ -117,6 +121,18 @@ export default class Home extends React.Component {
         });
   };
 
+  handleAboutOpen = () => {
+    this.setState({
+      aboutOpened: true,
+    });
+  };
+
+  handleAboutClose = () => {
+    this.setState({
+      aboutOpened: false,
+    });
+  };
+
   componentDidMount() {
     axios.get('/api/userid').then(response => {
       window.location = '/dashboard';
@@ -127,7 +143,7 @@ export default class Home extends React.Component {
   }
 
   render() {
-    const {publishDate, totalDownloadCount} = this.state;
+    const {publishDate, totalDownloadCount, aboutOpened} = this.state;
     const showPublishCount = (publishDate !== null);
 
     return (
@@ -144,6 +160,11 @@ export default class Home extends React.Component {
               <Typography style={{flex: 1, fontWeight: 'bold'}} variant="h6">
                 iCtrl
               </Typography>
+              <Tooltip title="About iCtrl">
+                <IconButton onClick={this.handleAboutOpen} size={'large'}>
+                  <InfoIcon style={{color: 'white'}} fontSize="large"/>
+                </IconButton>
+              </Tooltip>
               <GitHubButton href="https://github.com/junhaoliao/iCtrl"
                             data-size="large" data-show-count="true"
                             aria-label="Star junhaoliao/iCtrl on GitHub">Star</GitHubButton>
@@ -224,6 +245,7 @@ export default class Home extends React.Component {
             </Box>
           </Box>
 
+          {aboutOpened && <About onClose={this.handleAboutClose}/>}
         </div>
     );
   }
