@@ -25,10 +25,10 @@ code {
 
 .selectable {
     /* see above in 'body' */
-    -webkit-touch-callout: unset;
-    -webkit-user-select: unset;
-    -khtml-user-select: unset;
-    -moz-user-select: unset;
-    -ms-user-select: unset;
-    user-select: unset;
+    -webkit-touch-callout: default !important;
+    -webkit-user-select: all !important;
+    -khtml-user-select: all !important;
+    -moz-user-select: all !important;
+    -ms-user-select: all !important;
+    user-select: all !important;
 }
