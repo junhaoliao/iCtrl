@@ -24,6 +24,9 @@ export const supervisors = [
     name: 'Timorabadi, Hamid',
     url: 'https://www.ece.utoronto.ca/people/timorabadi-h/',
   },
+];
+
+export const admins = [
   {
     name: 'Phang, Khoman',
     url: 'https://www.eecg.utoronto.ca/~kphang/',

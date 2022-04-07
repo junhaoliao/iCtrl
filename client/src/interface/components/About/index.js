@@ -14,7 +14,14 @@ import {
   Typography,
 } from '@material-ui/core';
 import Marquee from 'react-easy-marquee';
-import {authors, disclaimer, introduction, projects, supervisors} from './info';
+import {
+  admins,
+  authors,
+  disclaimer,
+  introduction,
+  projects,
+  supervisors,
+} from './info';
 import Avatar from '@material-ui/core/Avatar';
 
 const Link = (props) => (
@@ -31,12 +38,12 @@ export default class About extends React.Component {
   render() {
     return <Dialog open={true} fullWidth={true} maxWidth={'md'}>
       <DialogTitle>About iCtrl</DialogTitle>
-      <DialogContent style={{maxHeight: '580px'}}>
+      <DialogContent style={{maxHeight: '630px'}}>
         <p className={'selectable'}>
           {introduction}
         </p>
         <Divider>
-          <Chip label={<b>Supervisors</b>} variant={'outlined'} size={'small'}/>
+          <Chip label={<b>Supervisor</b>} variant={'outlined'} size={'small'}/>
         </Divider>
         <List>
           {supervisors.map((s) => (<ListItem>
@@ -47,7 +54,20 @@ export default class About extends React.Component {
         </List>
 
         <Divider>
-          <Chip label={<b>Authors</b>} variant={'outlined'} size={'small'}/>
+          <Chip label={<b>Administrator</b>} variant={'outlined'}
+                size={'small'}/>
+        </Divider>
+        <List>
+          {admins.map((s) => (<ListItem>
+            <ListItemText
+                primary={s.name}
+                secondary={<Link url={s.url}>{s.url}</Link>}/>
+          </ListItem>))}
+        </List>
+
+        <Divider>
+          <Chip label={<b>Authors - Team 2021320</b>} variant={'outlined'}
+                size={'small'}/>
         </Divider>
         <List>
           {authors.map((a) => (<ListItem key={a.name}>
