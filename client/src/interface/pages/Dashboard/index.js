@@ -247,7 +247,7 @@ export default class Dashboard extends React.Component {
                     <ConsoleIcon style={{color: 'black'}} fontSize={'large'}/>
                   </IconButton>
                 </Tooltip>
-                <Tooltip title="File Manger" aria-label="file manager">
+                <Tooltip title="File Manager" aria-label="file manager">
                   <IconButton
                       onClick={() => this.handleFeatureClick(key, 'file')}>
                     <FileManagerIcon style={{color: '#1976d2'}}
