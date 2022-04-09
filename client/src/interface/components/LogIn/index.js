@@ -18,8 +18,20 @@ import axios from 'axios';
 import {TransitionGroup} from 'react-transition-group';
 
 import './index.css';
-import {AccountBox, Check, Email, HighlightOff, Password} from '@material-ui/icons';
-import {hasLowerCase, hasNumeral, hasSpecialSymbols, hasUpperCase, special_symbols} from './utils';
+import {
+  AccountBox,
+  Check,
+  Email,
+  HighlightOff,
+  Password,
+} from '@material-ui/icons';
+import {
+  hasLowerCase,
+  hasNumeral,
+  hasSpecialSymbols,
+  hasUpperCase,
+  special_symbols,
+} from './utils';
 
 const status = ['login', 'signup'];
 
@@ -55,7 +67,9 @@ export default class LogIn extends React.Component {
       this.setState({
         resendRequesting: false,
         errorElem: <Alert severity="info">
-          Please check your email inbox or <a target="_blank" rel="noreferrer" href={'https://outlook.office.com/mail/junkemail'}>Junk Email</a> to activate your account.
+          Please check your email inbox or <a target="_blank" rel="noreferrer"
+                                              href={'https://outlook.office.com/mail/junkemail'}>Junk
+          Email</a> to activate your account.
         </Alert>,
       });
     }).catch(error => {
@@ -97,11 +111,12 @@ export default class LogIn extends React.Component {
         loading: false,
       });
       const resp = htmlResponseToReason(error.response.data, true);
-      if(resp === 'ACCOUNT_WRONG_PASSWORD'){
+      if (resp === 'ACCOUNT_WRONG_PASSWORD') {
         this.setState({
           errorElem: <Alert severity="error">
             Wrong password. <br/>
-            Please try again or click <button onClick={this.handleRecoverPassword}>
+            Please try again or click <button
+              onClick={this.handleRecoverPassword}>
             Forgot password
           </button> to reset it.
           </Alert>,
@@ -121,7 +136,9 @@ export default class LogIn extends React.Component {
         this.setState({
           errorElem: <Alert severity="warning">
             Your account has not been activated yet.<br/>
-            Please check your email inbox or <a target="_blank" rel="noreferrer" href={'https://outlook.office.com/mail/junkemail'}>Junk Email</a>,
+            Please check your email inbox or <a target="_blank" rel="noreferrer"
+                                                href={'https://outlook.office.com/mail/junkemail'}>Junk
+            Email</a>,
             or you may <button
               id={'resend-button'}
               onClick={this.handleResendActivation}
@@ -166,7 +183,9 @@ export default class LogIn extends React.Component {
         loading: false,
         errorElem: <Alert severity="info">
           If your email address is valid, an activation link has been sent.
-          Please check your email inbox or <a target="_blank" rel="noreferrer" href={'https://outlook.office.com/mail/junkemail'}>Junk Email</a>.
+          Please check your email inbox or <a target="_blank" rel="noreferrer"
+                                              href={'https://outlook.office.com/mail/junkemail'}>Junk
+          Email</a>.
         </Alert>,
       });
     }).catch(error => {
@@ -176,16 +195,18 @@ export default class LogIn extends React.Component {
       if (resp === 'ACCOUNT_DUPLICATE_USERNAME') {
         this.setState({
           errorElem: <Alert severity="warning">
-            The entered username already exists. Do you want to <button onClick={() => {
-            this.handleTabChange(null, 0);
-          }}>login</button> instead?
+            The entered username already exists. Do you want to <button
+              onClick={() => {
+                this.handleTabChange(null, 0);
+              }}>login</button> instead?
           </Alert>,
         });
       } else if (resp === 'ACCOUNT_DUPLICATE_EMAIL') {
         this.setState({
 
           errorElem: <Alert severity="warning">
-            The entered email already exists. Do you want to <button onClick={this.handleRecoverUsername}>
+            The entered email already exists. Do you want to <button
+              onClick={this.handleRecoverUsername}>
             recover
           </button> your username?
           </Alert>,
@@ -205,22 +226,42 @@ export default class LogIn extends React.Component {
     const passwordErrorList = [];
 
     const checks = [
-      {pass: password.length >= 6, prompt: 'Password length should be at least 6 characters'},
-      {pass: password.length <= 32, prompt: 'Password length should not exceed 32 characters'},
-      {pass: hasNumeral(password), prompt: 'Password should have at least one numeral'},
-      {pass: hasUpperCase(password), prompt: 'Password should have at least one uppercase letter'},
-      {pass: hasLowerCase(password), prompt: 'Password should have at least one lowercase letter'},
-      {pass: hasSpecialSymbols(password), prompt: `Password should have at least one of the symbols: ${special_symbols.join('')}`},
-    ]
+      {
+        pass: password.length >= 6,
+        prompt: 'Password length should be at least 6 characters',
+      },
+      {
+        pass: password.length <= 32,
+        prompt: 'Password length should not exceed 32 characters',
+      },
+      {
+        pass: hasNumeral(password),
+        prompt: 'Password should have at least one numeral',
+      },
+      {
+        pass: hasUpperCase(password),
+        prompt: 'Password should have at least one uppercase letter',
+      },
+      {
+        pass: hasLowerCase(password),
+        prompt: 'Password should have at least one lowercase letter',
+      },
+      {
+        pass: hasSpecialSymbols(password),
+        prompt: `Password should have at least one of the symbols: ${special_symbols.join(
+            '')}`,
+      },
+    ];
     checks.forEach(({pass, prompt}) => {
-      if (!pass){
-        passwordErrorList.push(prompt)
+      if (!pass) {
+        passwordErrorList.push(prompt);
       }
-    })
+    });
 
     this.setState({
       passwordErrorList: passwordErrorList,
-      passwordValid: ev.target.value.length > 0 && passwordErrorList.length === 0,
+      passwordValid: ev.target.value.length > 0 && passwordErrorList.length ===
+          0,
     });
   };
 
@@ -239,8 +280,35 @@ export default class LogIn extends React.Component {
     }
     this.setState({
       passwordErrorList: passwordErrorList,
-      confirmPasswordValid: ev.target.value.length > 0 && passwordErrorList.length === 0,
+      confirmPasswordValid: ev.target.value.length > 0 &&
+          passwordErrorList.length === 0,
     });
+  };
+
+  handleFieldKeyDown = (ev) => {
+    if (ev.key !== 'Enter') {
+      return false;
+    }
+
+    const currentStatus = status[this.state.currentTabIndex];
+    const isLogin = 'login' === currentStatus;
+
+    const currentField = ev.target.id;
+    if (currentField === 'username') {
+      document.getElementById(isLogin ? 'password' : 'email').focus();
+    } else if (currentField === 'email') {
+      document.getElementById('password').focus();
+    } else if (currentField === 'password') {
+      if (isLogin) {
+        document.getElementById('submit-button').click();
+      } else { // sign up
+        document.getElementById('confirm-password').focus();
+      }
+    } else if (currentField === 'confirm-password') {
+      document.getElementById('submit-button').click();
+    } else {
+      console.error(currentField, 'should not be attached this handler');
+    }
   };
 
   render() {
@@ -255,7 +323,8 @@ export default class LogIn extends React.Component {
       confirmPasswordValid,
     } = this.state;
     const currentStatus = status[currentTabIndex];
-    const canSignUp = usernameValid && emailValid && passwordValid && confirmPasswordValid;
+    const canSignUp = usernameValid && emailValid && passwordValid &&
+        confirmPasswordValid;
 
     return (
         <div>
@@ -283,6 +352,7 @@ export default class LogIn extends React.Component {
                 onChange={(ev) => {
                   this.setState({usernameValid: ev.target.value.length > 0});
                 }}
+                onKeyDown={this.handleFieldKeyDown}
                 InputProps={{
                   startAdornment: (
                       <InputAdornment position="start">
@@ -301,6 +371,7 @@ export default class LogIn extends React.Component {
                 onChange={(ev) => {
                   this.setState({emailValid: ev.target.value.length > 0});
                 }}
+                onKeyDown={this.handleFieldKeyDown}
                 InputProps={{
                   startAdornment: (
                       <InputAdornment position="start">
@@ -317,7 +388,10 @@ export default class LogIn extends React.Component {
                 label={'Password'}
                 type={'password'}
                 onChange={this.handlePasswordInputChange}
-                autoComplete={currentStatus === 'login' ? 'current-password' : 'new-password'}
+                onKeyDown={this.handleFieldKeyDown}
+                autoComplete={currentStatus === 'login' ?
+                    'current-password' :
+                    'new-password'}
                 InputProps={{
                   startAdornment: (
                       <InputAdornment position="start">
@@ -335,6 +409,7 @@ export default class LogIn extends React.Component {
                 type={'password'}
                 autoComplete={'new-password'}
                 onChange={this.handleConfirmPasswordInputChange}
+                onKeyDown={this.handleFieldKeyDown}
                 InputProps={{
                   startAdornment: (
                       <InputAdornment position="start">
@@ -353,10 +428,14 @@ export default class LogIn extends React.Component {
                             <Collapse key={item}>
                               <ListItem>
                                 <ListItemIcon>
-                                  <HighlightOff style={{color: 'rgb(102, 60, 0)'}}/>
+                                  <HighlightOff
+                                      style={{color: 'rgb(102, 60, 0)'}}/>
                                 </ListItemIcon>
                                 <ListItemText
-                                    primary={<div style={{fontWeight: 600, fontSize: 14}}>{item}</div>}/>
+                                    primary={<div style={{
+                                      fontWeight: 600,
+                                      fontSize: 14,
+                                    }}>{item}</div>}/>
                               </ListItem>
                             </Collapse>
                         ))}
@@ -369,30 +448,21 @@ export default class LogIn extends React.Component {
               {errorElem}
             </Collapse>
             }
-            {
-              currentStatus === 'login' ? <LoadingButton
-                  variant={'contained'}
-                  loading={loading}
-                  loadingIndicator={'Logging in...'}
-                  onClick={this.handleLogIn}
-                  fullWidth
-                  color={'info'}
-                  size={'large'}
-              >
-                Log In
-              </LoadingButton> : <LoadingButton
-                  variant={'contained'}
-                  loading={loading}
-                  loadingIndicator={'Signing up...'}
-                  onClick={this.handleSignUp}
-                  fullWidth
-                  color={'info'}
-                  size={'large'}
-                  disabled={!canSignUp}
-              >
-                Sign Up
-              </LoadingButton>
-            }
+            <LoadingButton
+                id={'submit-button'}
+                variant={'contained'}
+                loading={loading}
+                loadingIndicator={'Logging in...'}
+                onClick={currentStatus === 'login' ?
+                    this.handleLogIn :
+                    this.handleSignUp}
+                fullWidth
+                color={'info'}
+                size={'large'}
+                disabled={currentStatus === 'login' ? false : !canSignUp}
+            >
+              {currentStatus === 'login' ? 'Log In' : 'Sign up'}
+            </LoadingButton>
           </TransitionGroup>
         </div>
     );
