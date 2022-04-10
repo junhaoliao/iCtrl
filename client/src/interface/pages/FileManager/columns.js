@@ -37,7 +37,7 @@ import '../../../index.css';
 
 const columns = [
   {
-    field: 'id', headerName: 'Name', flex: 1, minWidth: 200,
+    field: 'id', headerName: 'Name', flex: 1, minWidth: 200, editable: true,
     renderCell: (params) => {
       const is_dir = isDir(params.getValue(params.value, 'mode'));
       const is_lnk = isLnk(params.getValue(params.value, 'mode'));
