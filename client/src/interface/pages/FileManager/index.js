@@ -17,8 +17,8 @@ import {
   Stack,
   SwipeableDrawer,
   Typography,
-} from '@material-ui/core';
-import {DataGrid} from '@material-ui/data-grid';
+} from '@mui/material';
+import {DataGrid} from '@mui/x-data-grid';
 
 import CustomToolbar from './CustomToolbar';
 import UploadToolbar from './UploadToolbar';
@@ -42,8 +42,8 @@ import {
   MusicNote,
   PhotoLibrary,
   UploadFile,
-} from '@material-ui/icons';
-import Button from '@material-ui/core/Button';
+} from '@mui/icons-material';
+import Button from '@mui/material/Button';
 import NewFolderDialog from './NewFolderDialog';
 import {changeFavicon} from '../../utils';
 import {updateTitle} from '../../../actions/common';
@@ -508,11 +508,16 @@ export default class FileManager extends React.Component {
               open={this.state.uploadProgress.length !== 0}
               anchorOrigin={{vertical: 'bottom', horizontal: 'right'}}
           >
-            <div style={{position: 'fixed', bottom: 55, right: 15}}>
+            <div style={{
+              position: 'fixed',
+              bottom: 55,
+              right: 15,
+              width: '300px',
+            }}>
               <UploadToolbar fm={this}/>
               {!this.state.uploadWindowCollapsed &&
                   <Paper id="upload_paper"
-                         style={{maxHeight: 180, overflowY: 'auto'}}
+                         style={{maxHeight: '180px', overflowY: 'auto'}}
                          variant="outlined"
                          square>
                     <UploadList fm={this}/>

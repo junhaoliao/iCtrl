@@ -14,8 +14,8 @@ import {
   Tabs,
   TextField,
   Typography,
-} from '@material-ui/core';
-import {LoadingButton} from '@material-ui/lab';
+} from '@mui/material';
+import {LoadingButton} from '@mui/lab';
 import {htmlResponseToReason} from '../../../actions/utils';
 import axios from 'axios';
 import {TransitionGroup} from 'react-transition-group';
@@ -26,8 +26,9 @@ import {
   Check,
   Email,
   HighlightOff,
-  Password,
-} from '@material-ui/icons';
+  Key,
+} from '@mui/icons-material';
+
 import {
   hasLowerCase,
   hasNumeral,
@@ -398,7 +399,7 @@ export default class LogIn extends React.Component {
                 InputProps={{
                   startAdornment: (
                       <InputAdornment position="start">
-                        <Password/>
+                        <Key/>
                       </InputAdornment>
                   ),
                 }}

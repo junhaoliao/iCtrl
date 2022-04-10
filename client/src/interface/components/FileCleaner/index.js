@@ -9,12 +9,12 @@ import {
   DialogTitle,
   TextField,
   Typography,
-} from '@material-ui/core';
-import {DataGrid} from '@material-ui/data-grid';
+} from '@mui/material';
+import {DataGrid} from '@mui/x-data-grid';
 import columns from './column';
 import axios from 'axios';
 import {file_cleaner_rm} from '../../../actions/sftp';
-import {LoadingButton} from '@material-ui/lab';
+import {LoadingButton} from '@mui/lab';
 import QuotaUsage from '../QuotaUsage';
 
 export default class FileCleaner extends React.Component {

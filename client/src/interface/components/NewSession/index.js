@@ -1,21 +1,21 @@
 import React from 'react';
-import Button from '@material-ui/core/Button';
-import TextField from '@material-ui/core/TextField';
+import Button from '@mui/material/Button';
+import TextField from '@mui/material/TextField';
 import {
-    Alert,
-    Autocomplete,
-    Box,
-    Dialog,
-    DialogActions,
-    DialogTitle,
-    Tooltip,
-    Typography,
-} from '@material-ui/core';
+  Alert,
+  Autocomplete,
+  Box,
+  Dialog,
+  DialogActions,
+  DialogTitle,
+  Tooltip,
+  Typography,
+} from '@mui/material';
 import axios from 'axios';
 
 import './index.css';
 import {hostAddressList} from '../../../actions/session';
-import {LoadingButton} from '@material-ui/lab';
+import {LoadingButton} from '@mui/lab';
 import {htmlResponseToReason} from '../../../actions/utils';
 
 export default class NewSession extends React.Component {
@@ -90,9 +90,9 @@ export default class NewSession extends React.Component {
           </a></p>
         </div>,
       });
-    } else if (hostValue.includes('ecf')){
+    } else if (hostValue.includes('ecf')) {
       window.open('https://ssl.ecf.utoronto.ca/ecf/services/forgotpass',
-          '_blank')
+          '_blank');
     }
   };
 
@@ -160,8 +160,10 @@ export default class NewSession extends React.Component {
                   openOnFocus={true}
                   value={hostValue}
                   onInputChange={(_, newValue) => {
-                    this.setState({hostValue: newValue,
-                    passwordPrompt: null});
+                    this.setState({
+                      hostValue: newValue,
+                      passwordPrompt: null,
+                    });
                   }}
                   renderInput={(params) => (
                       <TextField
@@ -215,9 +217,9 @@ export default class NewSession extends React.Component {
           </div>
           <DialogActions>
             {showForgotPassword &&
-              <Button onClick={this.handleForgotPassword}>
-                Forgot Password?
-              </Button>
+                <Button onClick={this.handleForgotPassword}>
+                  Forgot Password?
+                </Button>
             }
             <Button variant={'outlined'} disabled={loading}
                     onClick={this.handleClose}>Close</Button>

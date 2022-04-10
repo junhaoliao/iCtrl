@@ -9,98 +9,98 @@ import {isMobile} from '../../../actions/utils';
 import {updateTitle} from '../../../actions/common';
 
 export default class Term extends React.Component {
-    constructor(props) {
-        super(props);
+  constructor(props) {
+    super(props);
 
-        document.title = 'Terminal';
+    document.title = 'Terminal';
 
-        const {match: {params}} = this.props;
-        this.session_id = params.session_id;
-        this.noLoadCheck = window.location.toString().includes('no_load_check');
+    const {match: {params}} = this.props;
+    this.session_id = params.session_id;
+    this.noLoadCheck = window.location.toString().includes('no_load_check');
 
-        this.resize_timeout = null;
+    this.resize_timeout = null;
 
-        this.ctrlKey = false;
-        this.shiftKey = false;
-        this.metaKey = false;
-        this.altKey = false;
+    this.ctrlKey = false;
+    this.shiftKey = false;
+    this.metaKey = false;
+    this.altKey = false;
 
-        this.state = {
-            loading: true,
-            currentStep: -1,
-            authentication: null,
-            isOverloaded: false
-        };
-    }
-
-    handleToolbarSendKey = (key, down) => {
-        this.term.focus();
-
-        switch (key) {
-            case 'Ctrl':
-                this.ctrlKey = down;
-                break;
-            case 'Alt':
-                this.altKey = down;
-                break;
-            case 'Shift':
-                this.shiftKey = down;
-                break;
-            case '⌘':
-                this.metaKey = down;
-                break;
-
-            case 'Tab':
-                sendKey(this, {key: 'Tab', keyCode: 9});
-                break;
-            case 'Esc':
-                sendKey(this, {key: 'Escape', keyCode: 27});
-                break;
-            case 'Delete':
-                sendKey(this, {key: 'Delete', keyCode: 46});
-                break;
-            case 'Ctrl+Alt+Delete':
-                console.log('Unexpected Ctrl+Alt+Delete pressed.');
-                break;
-            default:
-                console.log('Unexpected key pressed.');
-        }
+    this.state = {
+      loading: true,
+      currentStep: -1,
+      authentication: null,
+      isOverloaded: false,
     };
+  }
 
-    componentDidMount() {
-        updateTitle(this.session_id, 'Terminal');
+  handleToolbarSendKey = (key, down) => {
+    this.term.focus();
 
-        changeFavicon(`/api/favicon/terminal/${this.session_id}`);
+    switch (key) {
+      case 'Ctrl':
+        this.ctrlKey = down;
+        break;
+      case 'Alt':
+        this.altKey = down;
+        break;
+      case 'Shift':
+        this.shiftKey = down;
+        break;
+      case '⌘':
+        this.metaKey = down;
+        break;
 
-        termConnect(this).then();
+      case 'Tab':
+        sendKey(this, {key: 'Tab', keyCode: 9});
+        break;
+      case 'Esc':
+        sendKey(this, {key: 'Escape', keyCode: 27});
+        break;
+      case 'Delete':
+        sendKey(this, {key: 'Delete', keyCode: 46});
+        break;
+      case 'Ctrl+Alt+Delete':
+        console.log('Unexpected Ctrl+Alt+Delete pressed.');
+        break;
+      default:
+        console.log('Unexpected key pressed.');
     }
+  };
 
-    render() {
-        const {authentication, currentStep, loading, isOverloaded} = this.state;
+  componentDidMount() {
+    updateTitle(this.session_id, 'Terminal');
 
-        return (
-            <div>
-                {loading &&
-                <Loading
-                    sessionId={this.session_id}
-                    currentStep={currentStep}
-                    steps={TermSteps}
-                    authentication={authentication}
-                    isOverloaded={isOverloaded}
-                />}
+    changeFavicon(`/api/favicon/terminal/${this.session_id}`);
 
-                <div id="terminal" style={{
-                    visibility: loading ? 'hidden' : 'visible',
-                    position: 'absolute',
-                    top: 0,
-                    bottom: isMobile() ? 45 : 0,
-                    left: 0,
-                    right: 0,
-                }}/>
-                {isMobile() &&
-                <Toolbar onToolbarSendKey={this.handleToolbarSendKey}/>
-                }
-            </div>
-        );
-    }
+    termConnect(this).then();
+  }
+
+  render() {
+    const {authentication, currentStep, loading, isOverloaded} = this.state;
+
+    return (
+        <div>
+          {loading &&
+              <Loading
+                  sessionId={this.session_id}
+                  currentStep={currentStep}
+                  steps={TermSteps}
+                  authentication={authentication}
+                  isOverloaded={isOverloaded}
+              />}
+
+          <div id="terminal" style={{
+            visibility: loading ? 'hidden' : 'visible',
+            position: 'absolute',
+            top: 0,
+            bottom: isMobile() ? 45 : 0,
+            left: 0,
+            right: 0,
+          }}/>
+          {isMobile() &&
+              <Toolbar onToolbarSendKey={this.handleToolbarSendKey}/>
+          }
+        </div>
+    );
+  }
 }

@@ -6,13 +6,13 @@ import {
   DialogActions,
   DialogContent,
   DialogContentText,
-  DialogTitle, Grow, Slide,
+  DialogTitle,
   Slider,
   SpeedDial,
   SpeedDialAction,
   SpeedDialIcon,
-  Stack, Zoom,
-} from '@material-ui/core';
+  Stack,
+} from '@mui/material';
 import {
   Fullscreen,
   FullscreenExit,
@@ -24,10 +24,10 @@ import {
   Refresh,
   Sd,
   VisibilityOff,
-} from '@material-ui/icons';
+} from '@mui/icons-material';
 
 import './index.css';
-import {LoadingButton} from '@material-ui/lab';
+import {LoadingButton} from '@mui/lab';
 import {focusOnKeyboard, resetVNC} from '../../../actions/vnc';
 import axios from 'axios';
 
