@@ -21,16 +21,17 @@
  */
 
 import axios from 'axios';
+import {sortListByKey} from './utils';
 
 export const session_ruptime = (cm, cancelToken) => {
   axios.post('/api/exec_blocking', {
     session_id: cm.props.session_id,
-    cmd: 'ruptime -aur | grep up',
+    cmd: 'ruptime -a | grep up', // TODO: review the need of '-a'
   }, {
     cancelToken: cancelToken,
   }).then(res => {
     // parse response data (str) into json format
-    const machineListJson = [];
+    const machineList = [];
     for (const machine of res.data.split('\n')) {
       const machineInfo = machine.split(',');
       if (machineInfo.length === 5) {
@@ -48,11 +49,18 @@ export const session_ruptime = (cm, cancelToken) => {
             'load5': machineInfo[3],
             'load15': machineInfo[4],
           };
-          machineListJson.push(machineJson);
+          machineList.push(machineJson);
         }
       }
     }
-    cm.setState({machineList: machineListJson});
+
+    // sort it before storing, now that x-data-grid doesn't support sorting with
+    //  more than one conditions in the free version
+    sortListByKey(machineList, 'load15');
+    sortListByKey(machineList, 'load5');
+    sortListByKey(machineList, 'load1');
+
+    cm.setState({machineList});
   }).catch(error => {
     console.log(error);
   });

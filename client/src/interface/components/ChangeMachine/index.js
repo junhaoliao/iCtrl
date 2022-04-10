@@ -47,9 +47,6 @@ export default class ChangeMachine extends React.Component {
       machineList: [],
       sortModel: [
         {field: 'userNum', sort: 'asc'},
-        {field: 'load15', sort: 'asc'},
-        {field: 'load5', sort: 'asc'},
-        {field: 'load1', sort: 'asc'},
       ],
     };
   }
