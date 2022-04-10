@@ -104,7 +104,7 @@ export default class CustomToolbar extends React.Component {
 
   handleRename = (_) => {
     const {fm} = this.props;
-    if (fm.selected.length !== 1) {
+    if (fm.state.selectionModel.length !== 1) {
       fm.showAlert('Please select only 1 file to rename. ');
       return;
     }
@@ -116,28 +116,28 @@ export default class CustomToolbar extends React.Component {
 
   handleChangePermissions = (_) => {
     const {fm} = this.props;
-    if (fm.selected.length !== 1) {
+    if (fm.state.selectionModel.length !== 1) {
       fm.showAlert('Please select only 1 file to change permissions. ');
       return;
     }
 
-    const name = fm.selected[0];
+    const name = fm.state.selectionModel[0];
     fm.handleChangePermission(name);
   };
 
   handleDownload = (_) => {
-    if (this.props.fm.selected.length === 0) {
+    if (this.props.fm.state.selectionModel.length === 0) {
       this.props.fm.showAlert('No files selected for download. ');
       return;
     }
     sftp_dl(this.props.fm.session_id, this.props.fm.state.cwd,
-        this.props.fm.selected);
+        this.props.fm.state.selectionModel);
   };
 
   handleRenamePrompt = (ev) => {
     if (ev.target.id === 'button-rename-proceed') {
       const {fm} = this.props;
-      const oldName = fm.selected[0];
+      const oldName = fm.state.selectionModel[0];
       const newName = document.getElementById('rename-newname').value;
       fm.handleChangeName(oldName, newName);
     }
@@ -158,14 +158,14 @@ export default class CustomToolbar extends React.Component {
       loading: true,
     });
     sftp_rm(this.props.fm, this.props.fm.session_id, this.props.fm.state.cwd,
-        this.props.fm.selected);
+        this.props.fm.state.selectionModel);
     this.setState({
       deleteAllPromptOpen: false,
     });
   };
 
   handleDelete = (_) => {
-    if (this.props.fm.selected.length === 0) {
+    if (this.props.fm.state.selectionModel.length === 0) {
       this.props.fm.showAlert('No files selected for removal.');
       return;
     }
@@ -219,11 +219,13 @@ export default class CustomToolbar extends React.Component {
 
   render() {
     const {fm} = this.props;
-    const pluralSelection = fm.selected.length > 1;
+    const pluralSelection = fm.state.selectionModel.length > 1;
     const {loading, showHidden} = fm.state;
 
     const {renamePromptOpen} = this.state;
-    const onlySelectedId = fm.selected.length === 1 ? fm.selected[0] : '';
+    const onlySelectedId = fm.state.selectionModel.length === 1 ?
+        fm.state.selectionModel[0] :
+        '';
 
     return (
         <>

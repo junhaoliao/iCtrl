@@ -86,7 +86,6 @@ export default class FileManager extends React.Component {
 
     this.session_id = params.session_id;
 
-    this.selected = [];
     this.clickTimeout = null;
     this.editEnter = null;
     this.state = {
@@ -105,11 +104,13 @@ export default class FileManager extends React.Component {
       uploadProgress: [],
       showHidden: false,
       dragging: false,
+      selectionModel: [],
       sortModel: [
         {
           field: 'id',
           sort: 'asc',
         }],
+      editRowsModel: {},
       sideBarOpen: true,
     };
   }
@@ -137,43 +138,53 @@ export default class FileManager extends React.Component {
   };
 
   handleSelectionModelChange = (selectionModel) => {
-    this.selected = selectionModel;
+    this.setState({
+      selectionModel,
+    });
   };
 
-  clearSelection = (api) => {
+  clearSelection = () => {
     clearTimeout(this.clickTimeout);
-    api.selectRows([], true, true);
+    this.setState({
+      selectionModel: [],
+    });
   };
 
-  handleCellClick = (ev) => {
+  handleCellClick = (params) => {
     const isMobile = document.body.clientWidth < 768;
-    const id = ev.row.id;
-    const mode = ev.row.mode;
+    const {id, field} = params;
+    const mode = params.row.mode;
+
+    if (field === '__check__') {
+      return;
+    }
 
     if (isMobile) {
-      this.enterSelection(ev.api, id, mode);
+      this.enterSelection(id, mode);
     } else {
-      const curr_selected = this.selected;
-
-      this.clearSelection(ev.api);
+      const {selectionModel} = this.state;
+      this.clearSelection();
       this.clickTimeout = setTimeout(() => {
         this.setState({id: id, mode: mode});
-        if (ev.field === 'id' && curr_selected.length === 1 &&
-            curr_selected.includes(id)) {
-          ev.api.setCellMode(id, 'id', 'edit');
+        if (field === 'id' && selectionModel.length === 1 &&
+            selectionModel.includes(id)) {
+          this.setState({
+            editRowsModel: {
+              [id]:
+                  {
+                    id: {
+                      value: params.value,
+                    },
+                  },
+            },
+          });
 
-          document.body.onkeydown = (kd_ev) => {
-            if (kd_ev.key === 'Enter') {
-              ev.api.commitCellChange({id: id, field: 'id'});
-              ev.api.setCellMode(id, 'id', 'view');
-            }
-          };
           return;
-        } else if (ev.field === 'mode' && curr_selected.length === 1 &&
-            curr_selected.includes(id)) {
-          this.handleChangePermission(ev.row.id, ev.row.mode);
+        } else if (field === 'mode' && selectionModel.length === 1 &&
+            selectionModel.includes(id)) {
+          this.handleChangePermission(id, mode);
         }
-        ev.api.selectRow(id);
+        this.handleSelectionModelChange([id]);
       }, 500);
     }
   };
@@ -198,10 +209,14 @@ export default class FileManager extends React.Component {
     this.setState({changePermissionOpen: true});
   };
 
-  enterSelection = (api, name, mode) => {
+  enterSelection = (name, mode) => {
     const {cwd} = this.state;
-    this.clearSelection(api);
-
+    this.clearSelection();
+    setTimeout(() => {
+      this.setState({
+        editRowsModel: {},
+      });
+    }, 0);
     if (isDir(mode) || isLnk(mode)) {
       // avoid two '/'s when loading at root
       this.loadDir(`${cwd === '/' ? '' : cwd}/${name}`);
@@ -210,19 +225,26 @@ export default class FileManager extends React.Component {
     }
   };
 
-  handleCellDoubleClick = (ev) => {
-    const name = ev.row.id;
-    const mode = ev.row.mode;
+  handleCellDoubleClick = (params) => {
+    const name = params.row.id;
+    const mode = params.row.mode;
+    const {editRowsModel} = this.state;
 
-    if (ev.field === '__check__' || ev.api.getCellMode(name, 'id') === 'edit') {
+    if (params.field === '__check__' || name in editRowsModel) {
       return;
     }
 
-    this.enterSelection(ev.api, name, mode);
+    this.enterSelection(name, mode);
   };
 
   handleCellEditCommit = (ev) => {
     this.handleChangeName(ev.id, ev.value);
+  };
+
+  handleEditRowsModelChange = (editRowsModel) => {
+    this.setState({
+      editRowsModel,
+    });
   };
 
   handleChangeName = (oldName, newName) => {
@@ -372,6 +394,8 @@ export default class FileManager extends React.Component {
   render() {
     const {
       sortModel,
+      selectionModel,
+      editRowsModel,
       files,
       showHidden,
       loading,
@@ -497,6 +521,9 @@ export default class FileManager extends React.Component {
                     onCellClick={this.handleCellClick}
                     onCellDoubleClick={this.handleCellDoubleClick}
                     onCellEditCommit={this.handleCellEditCommit}
+                    editRowsModel={editRowsModel}
+                    onEditRowsModelChange={this.handleEditRowsModelChange}
+                    selectionModel={selectionModel}
                     sortModel={sortModel}
                     onSortModelChange={this.handleSortModelChange}
                     components={{
