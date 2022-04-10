@@ -26,20 +26,28 @@ Secure Shell (SSH) connections with a terminal interface, user profile
 management, change machines with workload detection, file transfer, and mobile 
 compatibility.`;
 
-export const disclaimer = `If you are using the desktop client, your SSH hosts 
-and credentials will be stored locally on the computer you run the program with. 
-In the web service, we store the hosts and credentials in a database on our 
-server. Although we have been trying to protect your information with honest 
-efforts, we are not cyber security experts and cannot guarantee the program is 
-100% bug-free.
-
-Please do not use the program on a public computer. 
-We are not responsible for any unintended use of our program, including but not 
-limited to Academic Misconduct, loss of data when the APIs are called with 
-unofficial web clients, and any hacking behaviour that utilises our tool. 
-However, if you suspect there is any security vulnerability, you are more than 
-welcome to email support@ictrl.ca , and we will try our best to address such 
-issues.`;
+export const disclaimer = <>
+  <p>If you are using the desktop client, your SSH hosts and credentials will be
+    stored locally on the computer you run the program with.
+    In the web service, we store the hosts and credentials in a database on our
+    server. Although we have been trying to protect your information with honest
+    efforts, we are not cyber security experts and cannot guarantee the program
+    is 100% bug-free.
+  </p>
+  <p>
+    Please do not use the desktop version on a public computer.
+  </p>
+  <p>
+    We are not responsible for any unintended use of our program, including but
+    not limited to Academic Misconduct, loss of data when the APIs are called
+    with unofficial web clients, and any hacking behaviour that utilises our
+    tool.
+    However, if you suspect there is any security vulnerability, you are more
+    than welcome to email <a
+      href={'mailto:support@ictrl.ca?cc=junhao@junhao.ca&subject=Bug%20Report&body=Hi%20there%2C%0D%0A%0D%0AI%20am%20writing%20this%20to%20report%20a%20bug%20in%20iCtrl.%0D%0A%0D%0ABug%20Title%3A%0D%0A%0D%0ADetails%3A%0D%0A%0D%0APlatform%20%5Bweb%2FWindows%2FMac%5D%3A%0D%0A%0D%0AFrequency%20%5Bonce%2Foccasionally%2Falways%5D%3A%0D%0A%0D%0AHow%20to%20reproduce%3A%0D%0A%0D%0A'}>
+    support@ictrl.ca</a> , and we will try our best to address such issues.
+  </p>
+</>;
 
 export const supervisors = [
   {
@@ -68,7 +76,7 @@ export const authors = [
   },
   {
     name: 'Yizhong Xu',
-    url: 'https://kruzer.ca',
+    url: 'https://www.linkedin.com/in/yizhong-xu-076bb9157/',
     pic: 'https://media-exp1.licdn.com/dms/image/C5603AQFiSB5nUzPRxw/profile-displayphoto-shrink_800_800/0/1589163392583?e=1654732800&v=beta&t=1lWstEQpelK0yGC09L5iUEFK4sWjbho-hSb-ugXbqO8',
   },
   {

@@ -177,11 +177,11 @@ export default class Home extends React.Component {
                 width: 30,
                 marginRight: 10,
               }}
-                   alt=""/>
+                   alt="ictrl-logo"/>
               <Typography style={{flex: 1, fontWeight: 'bold'}} variant="h6">
                 iCtrl
               </Typography>
-              <Tooltip title="About iCtrl">
+              <Tooltip title="About iCtrl" style={{marginRight: '8px'}}>
                 <IconButton onClick={this.handleAboutOpen} size={'large'}>
                   <InfoIcon style={{color: 'white'}} fontSize="large"/>
                 </IconButton>

@@ -60,8 +60,8 @@ export default class About extends React.Component {
   render() {
     return <Dialog open={true} fullWidth={true} maxWidth={'md'}>
       <DialogTitle>About iCtrl</DialogTitle>
-      <DialogContent style={{maxHeight: '630px'}}>
-        <p className={'selectable'}>
+      <DialogContent style={{maxHeight: '630px'}} className={'selectable'}>
+        <p>
           {introduction}
         </p>
         <Divider>
@@ -129,7 +129,7 @@ export default class About extends React.Component {
         <Divider>
           <Chip label={<b>Disclaimer</b>} variant={'outlined'} size={'small'}/>
         </Divider>
-        <p className={'selectable'}>
+        <p>
           {disclaimer}
         </p>
       </DialogContent>
