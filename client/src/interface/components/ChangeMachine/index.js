@@ -43,7 +43,7 @@ export default class ChangeMachine extends React.Component {
     this.cancelTokenSrc = axios.CancelToken.source();
 
     this.state = {
-      selectedHost: null,
+      selectionModel: [],
       machineList: [],
       sortModel: [
         {field: 'userNum', sort: 'asc'},
@@ -56,7 +56,7 @@ export default class ChangeMachine extends React.Component {
 
   handleClose = (ev) => {
     if (ev.target && ev.target.id === 'button_apply') {
-      session_change_host(this.props.session_id, this.state.selectedHost,
+      session_change_host(this.props.session_id, this.state.selectionModel[0],
           this.props.domain);
     }
 
@@ -66,15 +66,15 @@ export default class ChangeMachine extends React.Component {
 
   handleSelectionModelChange = (selectionModel) => {
     this.setState({
-      selectedHost: selectionModel[0],
+      selectionModel,
     });
   };
 
-  handleStateChange = ({api, state}) => {
+  handleStateChange = (state) => {
     // select the first row once loaded
-    if (state.rows.allRows.length !== 0 && state.selection.length === 0) {
+    if (state.rows.totalRowCount !== 0 && state.selection.length === 0) {
       const firstHost = state.sorting.sortedRows[0];
-      api.selectRow(firstHost);
+      this.setState({selectionModel: [firstHost]});
     }
   };
 
@@ -94,7 +94,7 @@ export default class ChangeMachine extends React.Component {
   }
 
   render() {
-    const {machineList, sortModel} = this.state;
+    const {machineList, sortModel, selectionModel} = this.state;
 
     return (
         <Dialog
@@ -119,6 +119,7 @@ export default class ChangeMachine extends React.Component {
                 rowsPerPageOptions={[]}
                 loading={!machineList.length}
                 sortModel={sortModel}
+                selectionModel={selectionModel}
                 hideFooter={machineList.length <= 100}
                 hideFooterSelectedRowCount={true}
                 onSortModelChange={this.handleSortModelChange}
@@ -132,7 +133,7 @@ export default class ChangeMachine extends React.Component {
             <Button onClick={this.handleClose}>Close</Button>
             <Button id={'button_apply'}
                     variant={'contained'}
-                    disabled={!Boolean(this.state.selectedHost)}
+                    disabled={selectionModel.length === 0}
                     onClick={this.handleClose}>
               Apply
             </Button>
