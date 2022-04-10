@@ -46,7 +46,7 @@ export default class About extends React.Component {
           <Chip label={<b>Supervisor</b>} variant={'outlined'} size={'small'}/>
         </Divider>
         <List>
-          {supervisors.map((s) => (<ListItem>
+          {supervisors.map((s) => (<ListItem key={s.name}>
             <ListItemText
                 primary={s.name}
                 secondary={<Link url={s.url}>{s.url}</Link>}/>
@@ -58,10 +58,10 @@ export default class About extends React.Component {
                 size={'small'}/>
         </Divider>
         <List>
-          {admins.map((s) => (<ListItem>
+          {admins.map((a) => (<ListItem key={a.name}>
             <ListItemText
-                primary={s.name}
-                secondary={<Link url={s.url}>{s.url}</Link>}/>
+                primary={a.name}
+                secondary={<Link url={a.url}>{a.url}</Link>}/>
           </ListItem>))}
         </List>
 

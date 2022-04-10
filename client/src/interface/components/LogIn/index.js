@@ -2,7 +2,9 @@ import React from 'react';
 import {
   Alert,
   AppBar,
+  Checkbox,
   Collapse,
+  FormControlLabel,
   InputAdornment,
   List,
   ListItem,
@@ -11,6 +13,7 @@ import {
   Tab,
   Tabs,
   TextField,
+  Typography,
 } from '@material-ui/core';
 import {LoadingButton} from '@material-ui/lab';
 import {htmlResponseToReason} from '../../../actions/utils';
@@ -417,8 +420,20 @@ export default class LogIn extends React.Component {
                       </InputAdornment>
                   ),
                 }}
-            /></Collapse>
-            }
+            />
+            </Collapse>}
+            {currentStatus === 'signup' && <Collapse>
+              <FormControlLabel
+                  control={<Checkbox checked={true}/>}
+                  label={<Typography variant={'body2'}>
+                    By creating an account, you agree to iCtrl's&nbsp;
+                    <a href={'https://github.com/junhaoliao/iCtrl/blob/main/LICENSE.md'}
+                       rel={'noreferrer'} target={'_blank'}>
+                      Terms and Conditions
+                    </a>
+                  </Typography>}
+              />
+            </Collapse>}
             {currentStatus === 'signup' && passwordErrorList.length > 0 &&
                 <Collapse>
                   <Alert icon={false} severity="warning">
