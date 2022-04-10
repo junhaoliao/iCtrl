@@ -12,7 +12,7 @@ import {
   Toolbar,
   Tooltip,
   Typography,
-} from '@material-ui/core';
+} from '@mui/material';
 import GitHubButton from 'react-github-btn';
 import axios from 'axios';
 import ictrlLogo from '../../../icons/logo.png';
@@ -20,7 +20,7 @@ import LogIn from '../../components/LogIn';
 
 import './index.css';
 import About from '../../components/About';
-import InfoIcon from '@material-ui/icons/Info';
+import InfoIcon from '@mui/icons-material/Info';
 
 export default class Home extends React.Component {
   constructor(props) {

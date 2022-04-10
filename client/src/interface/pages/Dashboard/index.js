@@ -17,18 +17,18 @@ import {
   Toolbar,
   Tooltip,
   Typography,
-} from '@material-ui/core';
-import AddBoxIcon from '@material-ui/icons/AddBox';
-import InfoIcon from '@material-ui/icons/Info';
+} from '@mui/material';
+import AddBoxIcon from '@mui/icons-material/AddBox';
+import InfoIcon from '@mui/icons-material/Info';
 import BackgroundLetterAvatar from '../../components/BackgroundLetterAvatar';
-import StorageIcon from '@material-ui/icons/Storage';
+import StorageIcon from '@mui/icons-material/Storage';
 import {ConsoleIcon, FileManagerIcon, RemoteDesktopIcon} from '../../../icons';
-import MoreVertIcon from '@material-ui/icons/MoreVert';
-import DeleteIcon from '@material-ui/icons/Delete';
+import MoreVertIcon from '@mui/icons-material/MoreVert';
+import DeleteIcon from '@mui/icons-material/Delete';
 import ChangeMachine from '../../components/ChangeMachine';
-import LogoutIcon from '@material-ui/icons/Logout';
+import LogoutIcon from '@mui/icons-material/Logout';
 
-import MenuItem from '@material-ui/core/MenuItem';
+import MenuItem from '@mui/material/MenuItem';
 import NewSession from '../../components/NewSession';
 import axios from 'axios';
 

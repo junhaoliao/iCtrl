@@ -8,22 +8,21 @@ import Term from './interface/pages/Term';
 import Dashboard from './interface/pages/Dashboard';
 import Home from './interface/pages/Home';
 
-
 export default class App extends React.Component {
-    render() {
-        return (
-            <Router>
-                <Switch>
-                    <Route path="/fm/:session_id" component={FileManager}/>
-                    <Route path="/vnc/:session_id" component={VNCViewer}/>
-                    <Route path="/terminal/:session_id" component={Term}/>
-                    <Route exact path="/dashboard" component={Dashboard}/>
-                    <Route exact path={'/'} component={Home}/>
-                    <Route path={'/*'}>
-                        <div>404</div>
-                    </Route>
-                </Switch>
-            </Router>
-        );
-    }
+  render() {
+    return (
+        <Router>
+          <Switch>
+            <Route path="/fm/:session_id" component={FileManager}/>
+            <Route path="/vnc/:session_id" component={VNCViewer}/>
+            <Route path="/terminal/:session_id" component={Term}/>
+            <Route exact path="/dashboard" component={Dashboard}/>
+            <Route exact path={'/'} component={Home}/>
+            <Route path={'/*'}>
+              <div>404</div>
+            </Route>
+          </Switch>
+        </Router>
+    );
+  }
 }

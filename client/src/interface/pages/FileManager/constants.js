@@ -18,13 +18,13 @@ export const S_IWOTH = 0o002;
 export const S_IXOTH = 0o001;
 
 export const PERMISSION_BITS = [
-    S_IRUSR,
-    S_IWUSR,
-    S_IXUSR,
-    S_IRGRP,
-    S_IWGRP,
-    S_IXGRP,
-    S_IROTH,
-    S_IWOTH,
-    S_IXOTH,
+  S_IRUSR,
+  S_IWUSR,
+  S_IXUSR,
+  S_IRGRP,
+  S_IWGRP,
+  S_IXGRP,
+  S_IROTH,
+  S_IWOTH,
+  S_IXOTH,
 ];

@@ -1,118 +1,121 @@
 /* eslint-disable react-hooks/rules-of-hooks */
 import React from 'react';
 import {
-    Box,
-    Button,
-    Dialog,
-    DialogActions,
-    DialogContent,
-    DialogTitle,
-    TextField, Typography,
-} from '@material-ui/core';
-import {DataGrid} from '@material-ui/data-grid';
+  Box,
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  TextField,
+  Typography,
+} from '@mui/material';
+import {DataGrid} from '@mui/x-data-grid';
 import columns from './column';
 import {session_change_host, session_ruptime} from '../../../actions/session';
 import axios from 'axios';
 
 export default class ChangeMachine extends React.Component {
-    constructor(props) {
-        super(props);
-        this.cancelTokenSrc = axios.CancelToken.source();
+  constructor(props) {
+    super(props);
+    this.cancelTokenSrc = axios.CancelToken.source();
 
-        this.state = {
-            selectedHost: null,
-            machineList: [],
-            sortModel:[
-                            {field: 'userNum', sort: 'asc'},
-                            {field: 'load15', sort: 'asc'},
-                            {field: 'load5', sort: 'asc'},
-                            {field: 'load1', sort: 'asc'},
-                        ]
-        };
+    this.state = {
+      selectedHost: null,
+      machineList: [],
+      sortModel: [
+        {field: 'userNum', sort: 'asc'},
+        {field: 'load15', sort: 'asc'},
+        {field: 'load5', sort: 'asc'},
+        {field: 'load1', sort: 'asc'},
+      ],
+    };
+  }
+
+  handleClose = (ev) => {
+    if (ev.target && ev.target.id === 'button_apply') {
+      session_change_host(this.props.session_id, this.state.selectedHost,
+          this.props.domain);
     }
 
+    this.cancelTokenSrc.cancel();
+    this.props.onChangeMenuClose();
+  };
 
-    handleClose = (ev) => {
-        if (ev.target && ev.target.id === 'button_apply') {
-            session_change_host(this.props.session_id, this.state.selectedHost, this.props.domain);
-        }
+  handleSelectionModelChange = (selectionModel) => {
+    this.setState({
+      selectedHost: selectionModel[0],
+    });
+  };
 
-        this.cancelTokenSrc.cancel();
-        this.props.onChangeMenuClose();
-    };
-
-    handleSelectionModelChange = (selectionModel) => {
-        this.setState({
-            selectedHost: selectionModel[0],
-        });
-    };
-
-    handleStateChange = ({api, state}) => {
-        // select the first row once loaded
-        if (state.rows.allRows.length !== 0 && state.selection.length === 0) {
-            const firstHost = state.sorting.sortedRows[0];
-            api.selectRow(firstHost);
-        }
-    };
-
-    handleRowDoubleClick = (row) => {
-        session_change_host(this.props.session_id, row.id, this.props.domain);
-        this.props.onChangeMenuClose();
-    };
-
-    handleSortModelChange = (newModel, _) => {
-        this.setState({
-            sortModel: newModel
-        })
+  handleStateChange = ({api, state}) => {
+    // select the first row once loaded
+    if (state.rows.allRows.length !== 0 && state.selection.length === 0) {
+      const firstHost = state.sorting.sortedRows[0];
+      api.selectRow(firstHost);
     }
+  };
 
-    componentDidMount() {
-        session_ruptime(this, this.cancelTokenSrc.token);
-    }
+  handleRowDoubleClick = (row) => {
+    session_change_host(this.props.session_id, row.id, this.props.domain);
+    this.props.onChangeMenuClose();
+  };
 
-    render() {
-        const {machineList, sortModel} = this.state;
+  handleSortModelChange = (newModel, _) => {
+    this.setState({
+      sortModel: newModel,
+    });
+  };
 
-        return (
-            <Dialog
-                open={true}
-                fullWidth={true}
-                maxWidth={'md'}
-                aria-labelledby="change machine"
-            >
-                <DialogTitle>Change Machine</DialogTitle>
-                <DialogContent style={{height: '430px'}}>
-                    <Box marginBottom={'10px'} display={'flex'} alignItems={'center'}>
-                        <Typography variant={'body1'} marginRight={'8px'}>Command:</Typography>
-                        <TextField size={'small'} fullWidth={true} spellCheck={false} value={'ruptime -aur'}/>
-                    </Box>
-                    <DataGrid
-                        style={{height:'380px'}}
-                        rows={machineList}
-                        columns={columns}
-                        pageSize={100}
-                        rowsPerPageOptions={[]}
-                        loading={!machineList.length}
-                        sortModel={sortModel}
-                        hideFooter={machineList.length <= 100}
-                        hideFooterSelectedRowCount={true}
-                        onSortModelChange={this.handleSortModelChange}
-                        onSelectionModelChange={this.handleSelectionModelChange}
-                        onRowDoubleClick={this.handleRowDoubleClick}
-                        onStateChange={this.handleStateChange}
-                        disableColumnMenu={true}
-                    />
-                </DialogContent>
-                <DialogActions>
-                    <Button onClick={this.handleClose}>Close</Button>
-                    <Button id={'button_apply'}
-                            variant={'contained'}
-                            disabled={!Boolean(this.state.selectedHost)}
-                            onClick={this.handleClose}>
-                        Apply
-                    </Button>
-                </DialogActions>
-            </Dialog>
-        );
-    }
+  componentDidMount() {
+    session_ruptime(this, this.cancelTokenSrc.token);
+  }
+
+  render() {
+    const {machineList, sortModel} = this.state;
+
+    return (
+        <Dialog
+            open={true}
+            fullWidth={true}
+            maxWidth={'md'}
+            aria-labelledby="change machine"
+        >
+          <DialogTitle>Change Machine</DialogTitle>
+          <DialogContent style={{height: '430px'}}>
+            <Box marginBottom={'10px'} display={'flex'} alignItems={'center'}>
+              <Typography variant={'body1'}
+                          marginRight={'8px'}>Command:</Typography>
+              <TextField size={'small'} fullWidth={true} spellCheck={false}
+                         value={'ruptime -aur'}/>
+            </Box>
+            <DataGrid
+                style={{height: '380px'}}
+                rows={machineList}
+                columns={columns}
+                pageSize={100}
+                rowsPerPageOptions={[]}
+                loading={!machineList.length}
+                sortModel={sortModel}
+                hideFooter={machineList.length <= 100}
+                hideFooterSelectedRowCount={true}
+                onSortModelChange={this.handleSortModelChange}
+                onSelectionModelChange={this.handleSelectionModelChange}
+                onRowDoubleClick={this.handleRowDoubleClick}
+                onStateChange={this.handleStateChange}
+                disableColumnMenu={true}
+            />
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={this.handleClose}>Close</Button>
+            <Button id={'button_apply'}
+                    variant={'contained'}
+                    disabled={!Boolean(this.state.selectedHost)}
+                    onClick={this.handleClose}>
+              Apply
+            </Button>
+          </DialogActions>
+        </Dialog>
+    );
+  }
 }

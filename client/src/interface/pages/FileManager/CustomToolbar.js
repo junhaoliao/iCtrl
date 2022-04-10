@@ -1,6 +1,6 @@
 import React from 'react';
 
-import {GridToolbarContainer} from '@material-ui/data-grid';
+import {GridToolbarContainer} from '@mui/x-data-grid';
 import {
   Button,
   Dialog,
@@ -16,7 +16,7 @@ import {
   OutlinedInput,
   TextField,
   Tooltip,
-} from '@material-ui/core';
+} from '@mui/material';
 import {
   ArrowUpward,
   Delete,
@@ -26,8 +26,8 @@ import {
   PermIdentity,
   Visibility,
   VisibilityOff,
-} from '@material-ui/icons';
-import MenuIcon from '@material-ui/icons/Menu';
+} from '@mui/icons-material';
+import MenuIcon from '@mui/icons-material/Menu';
 
 import {
   DensityComfortableIcon,
@@ -205,7 +205,8 @@ export default class CustomToolbar extends React.Component {
 
     return (
         <>
-          <GridToolbarContainer style={{overflowX:'auto', overflowY:'hidden'}}>
+          <GridToolbarContainer
+              style={{overflowX: 'auto', overflowY: 'hidden'}}>
             <Hidden smUp>
               <Tooltip title={'Show Side Bar'}>
                 <IconButton

@@ -1,5 +1,5 @@
 import React from 'react';
-import {Backdrop, Box, Button, Typography} from '@material-ui/core';
+import {Backdrop, Box, Button, Typography} from '@mui/material';
 
 import './index.css';
 import Loading from '../../components/Loading';

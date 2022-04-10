@@ -12,7 +12,7 @@ import {
   ListItemAvatar,
   ListItemText,
   Typography,
-} from '@material-ui/core';
+} from '@mui/material';
 import Marquee from 'react-easy-marquee';
 import {
   admins,
@@ -22,7 +22,7 @@ import {
   projects,
   supervisors,
 } from './info';
-import Avatar from '@material-ui/core/Avatar';
+import Avatar from '@mui/material/Avatar';
 
 const Link = (props) => (
     <a href={props.url} rel={'noreferrer'} target={'_blank'}
