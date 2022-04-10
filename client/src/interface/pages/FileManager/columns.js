@@ -43,7 +43,7 @@ const columns = [
       const is_lnk = isLnk(params.getValue(params.value, 'mode'));
       return (
           <Stack direction={'row'} spacing={1}>
-            <div style={{position: 'relative', top: 5}}>
+            <div>
               {is_lnk ?
                   <ShortcutIcon/> :
                   (is_dir ? <FolderIcon fontSize={'small'}/> :
