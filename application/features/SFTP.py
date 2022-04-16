@@ -18,7 +18,7 @@
 #   FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 #   IN THE SOFTWARE.
 
-import os.path
+import posixpath
 import stat
 from typing import Optional
 
@@ -103,7 +103,7 @@ class SFTP(Connection):
                     yield c
 
     def _zip_dir_recurse(self, z, parent, file):
-        fullpath = os.path.join(parent, file)
+        fullpath = posixpath.join(parent, file)
         mode = self.sftp.stat(fullpath).st_mode
         if stat.S_ISREG(mode):
             # print(fullpath, 'is file')
@@ -150,7 +150,7 @@ class SFTP(Connection):
         return f
 
     # def _rm_recurse(self, parent, file):
-    #     fullpath = os.path.join(parent, file)
+    #     fullpath = posixpath.join(parent, file)
     #     try:
     #         self.sftp.remove(fullpath)
     #     except IOError:
@@ -176,8 +176,8 @@ class SFTP(Connection):
 
     # TODO: might use this if the server is running locally
     # def dl_direct(self, path):
-    #     home = os.path.expanduser("~")
-    #     local_path = os.path.join(home, "Downloads", os.path.basename(path))
+    #     home = posixpath.expanduser("~")
+    #     local_path = posixpath.join(home, "Downloads", posixpath.basename(path))
     #     start_time = time.time()
     #
     #     def byte_count(transferred, total):
