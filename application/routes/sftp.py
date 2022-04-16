@@ -19,7 +19,7 @@
 #   IN THE SOFTWARE.
 
 import json
-import os
+import posixpath
 from datetime import datetime
 from pathlib import Path
 
@@ -73,7 +73,7 @@ def sftp_dl(session_id):
     if zip_mode:
         r = app.response_class(stream_with_context(sftp.zip_generator(cwd, files)), mimetype='application/zip')
         dt_str = datetime.now().strftime('_%Y%m%d_%H%M%S')
-        zip_name = os.path.basename(cwd) + dt_str + '.zip'
+        zip_name = posixpath.basename(cwd) + dt_str + '.zip'
         r.headers.set('Content-Disposition', 'attachment', filename=zip_name)
     else:
         r = app.response_class(stream_with_context(sftp.dl_generator(files[0])), mimetype='application/octet-stream')
@@ -149,7 +149,7 @@ def sftp_ul(session_id):
 
     relative_dir_path = p.parent
     if str(relative_dir_path) != '.':
-        cwd = os.path.join(cwd, relative_dir_path)
+        cwd = posixpath.join(cwd, relative_dir_path)
         # TODO: check: will this ever fail?
         sftp.exec_command_blocking(f'mkdir -p "{cwd}"')
 
