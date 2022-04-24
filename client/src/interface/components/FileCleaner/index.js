@@ -38,21 +38,21 @@ import axios from 'axios';
 import {file_cleaner_rm} from '../../../actions/sftp';
 import {LoadingButton} from '@mui/lab';
 import QuotaUsage from '../QuotaUsage';
+import {humanFileSize} from '../../pages/FileManager/utils';
+import {FileTrie} from './FileTrie';
 
 export default class FileCleaner extends React.Component {
   constructor(props) {
     super(props);
     this.cancelTokenSrc = axios.CancelToken.source();
 
-    // quickly calculate the file sizes
-    // this.fileListDict = {};
-
+    this.fileListDict = {};
     this.state = {
       confirmDialogOpen: false,
       deleting: false,
       fileList: [],
       selectedFiles: [],
-      // selectedFilesTotalSize: 0,
+      selectedFilesTotalSize: 0,
       sortModel: [
         {field: 'size', sort: 'desc'},
       ],
@@ -70,15 +70,22 @@ export default class FileCleaner extends React.Component {
   };
 
   handleSelectionModelChange = (selectionModel) => {
-    // let selectedFilesTotalSize = 0;
-    // for (const f of selectionModel){
-    //   selectedFilesTotalSize += this.fileListDict[f];
-    // }
+    const ft = new FileTrie(0);
+    for (const s of selectionModel) {
+      ft.insert(s, this.fileListDict[s]);
+    }
 
     this.setState({
-      // selectedFilesTotalSize,
-      selectedFiles: selectionModel,
+      selectedFilesTotalSize: ft.count(),
     });
+
+    // set selectedFiles after the ft count is calculated
+    //  so that the correct selectedFilesTotalSize can be rendered
+    setTimeout(() => {
+      this.setState({
+        selectedFiles: selectionModel,
+      });
+    }, 0);
   };
 
   handleSortModelChange = (newModel, _) => {
@@ -111,18 +118,19 @@ export default class FileCleaner extends React.Component {
     }, {
       cancelToken: this.cancelToken,
     }).then(res => {
-      // this.fileListDict = {};
       const fileList = [];
+      this.fileListDict = {};
       // parse response data (str) into json format
       const lines = res.data.split('\n\n');
       for (const l of lines) {
         const [size, fileName] = l.split('\t');
         if (fileName && fileName !== '.') {
+          const parsedSize = parseInt(size);
           fileList.push({
-            size: parseInt(size),
+            size: parsedSize,
             id: fileName,
           });
-          // this.fileListDict[fileName] = sizeInBytes;
+          this.fileListDict[fileName] = parsedSize;
         }
       }
       this.setState({
@@ -140,7 +148,7 @@ export default class FileCleaner extends React.Component {
       deleting,
       fileList,
       selectedFiles,
-      // selectedFilesTotalSize,
+      selectedFilesTotalSize,
       sortModel,
     } = this.state;
 
@@ -177,9 +185,13 @@ export default class FileCleaner extends React.Component {
                   onSortModelChange={this.handleSortModelChange}
                   onSelectionModelChange={this.handleSelectionModelChange}
                   disableColumnMenu={true}
-                  // localeText={{
-                  //   footerRowSelected: count => `${count} row${(count>1)?'s':''} selected: ${humanFileSize(selectedFilesTotalSize)}`
-                  // }}
+                  localeText={{
+                    footerRowSelected: count =>
+                        `${count} row${(count > 1) ?
+                            's' :
+                            ''} selected: ${humanFileSize(
+                            selectedFilesTotalSize)}`,
+                  }}
               />
             </DialogContent>
             <DialogActions>
@@ -203,9 +215,9 @@ export default class FileCleaner extends React.Component {
             <DialogContent style={{height: '200px'}}>
               <Typography variant={'body1'}><b>Do you wish to delete the
                 following {selectedFiles.length} file{selectedFiles.length >
-                    1 && 's'}?</b></Typography>
+                    1 && 's'}?</b> ({humanFileSize(selectedFilesTotalSize)})</Typography>
               {selectedFiles.map((f) => (<p>
-                {f}
+                {f} ({humanFileSize(this.fileListDict[f])})
               </p>))}
             </DialogContent>
             <DialogActions>
