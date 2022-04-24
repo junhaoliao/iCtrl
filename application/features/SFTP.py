@@ -17,18 +17,15 @@
 #   LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 #   FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 #   IN THE SOFTWARE.
-
 import posixpath
 import stat
 from typing import Optional
 
+import paramiko.sftp_client
 import zipstream
 from paramiko.sftp_client import SFTPClient
 
 from .Connection import Connection
-
-DL_CHUNK_SIZE = 1024 * 1024 * 4  # unit: bytes
-DL_CACHE_SIZE = int(128 / 4)  # unit: count
 
 
 class SFTP(Connection):
@@ -85,22 +82,14 @@ class SFTP(Connection):
 
     def dl_generator(self, path):
         with self.sftp.file(path) as f:
-            # do NOT use f.prefetch(), which can cause a serious memory leak
+            # TODO: this seems already fixed
+            #  do NOT use f.prefetch(), which can cause a serious memory leak
             #  when the user stop the download and the file is very large
-            # Instead, we cache the file with a sliding window of size (4 * DL_CHUNK_SIZE)
-            file_size = f.stat().st_size
-            offset = 0
-            while file_size > 0:
-                read_chunks = []
-                for _ in range(DL_CACHE_SIZE):
-                    if file_size <= 0:
-                        break
-                    chunk_size = min(file_size, DL_CHUNK_SIZE)
-                    read_chunks.append((offset, chunk_size))
-                    offset += chunk_size
-                    file_size -= chunk_size
-                for c in f.readv(read_chunks):
-                    yield c
+            f.prefetch()
+            chunk = f.read(paramiko.sftp_file.SFTPFile.MAX_REQUEST_SIZE)
+            while len(chunk) != 0:
+                yield chunk
+                chunk = f.read(paramiko.sftp_file.SFTPFile.MAX_REQUEST_SIZE)
 
     def _zip_dir_recurse(self, z, parent, file):
         fullpath = posixpath.join(parent, file)
