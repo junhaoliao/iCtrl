@@ -106,7 +106,7 @@ export default class FileCleaner extends React.Component {
     const {sessionID} = this.props;
     axios.post('/api/exec_blocking', {
       session_id: sessionID,
-      cmd: 'du -a',
+      cmd: 'du -a --block-size=1',
       large: true,
     }, {
       cancelToken: this.cancelToken,
@@ -118,9 +118,8 @@ export default class FileCleaner extends React.Component {
       for (const l of lines) {
         const [size, fileName] = l.split('\t');
         if (fileName && fileName !== '.') {
-          const sizeInBytes = parseInt(size) * 1024;
           fileList.push({
-            size: sizeInBytes,
+            size: parseInt(size),
             id: fileName,
           });
           // this.fileListDict[fileName] = sizeInBytes;
@@ -221,7 +220,6 @@ export default class FileCleaner extends React.Component {
             </DialogActions>
           </Dialog>
         </>
-
     );
   }
 }
