@@ -36,6 +36,7 @@ from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import validates
 
+from . import Profile
 from ..utils import send_email, validate_password
 
 ACTIVATION_TTL_SECOND = 60 * 30
@@ -53,7 +54,7 @@ class ActivationType(IntEnum):
     NORMAL_USER = 1
 
 
-class DBProfile:
+class DBProfile(Profile):
     def __init__(self, app):
         db_passwd = os.environ['DBPASSWD']
         db_address = os.environ['DBADDR']
@@ -256,7 +257,7 @@ class DBProfile:
 
         return True, ''
 
-    def get_session(self, session_id):
+    def _get_session(self, session_id):
         if 'userid' not in flask_session:
             abort(403, 'You are not logged in')
         userid = flask_session['userid']
@@ -264,7 +265,7 @@ class DBProfile:
         return self.Session.query.filter_by(id=session_id, user_id=userid).first()
 
     def delete_session(self, session_id):
-        session = self.get_session(session_id)
+        session = self._get_session(session_id)
         if session is None:
             return False, f'failed: session {session_id} does not exist'
 
@@ -274,7 +275,7 @@ class DBProfile:
         return True, ''
 
     def change_host(self, session_id, new_host):
-        session = self.get_session(session_id)
+        session = self._get_session(session_id)
         if session is None:
             return False, f'failed: session {session_id} does not exist'
 
@@ -287,7 +288,7 @@ class DBProfile:
         self.db.session.commit()
 
     def get_session_info(self, session_id):
-        session = self.get_session(session_id)
+        session = self._get_session(session_id)
         if session is None:
             return None, None, None
 

@@ -1,15 +1,15 @@
-#  Copyright (c) 2021-2022 iCtrl Developers
-# 
+#  Copyright (c) 2022 iCtrl Developers
+#
 #  Permission is hereby granted, free of charge, to any person obtaining a copy
 #   of this software and associated documentation files (the "Software"), to
 #   deal in the Software without restriction, including without limitation the
 #   rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
 #   sell copies of the Software, and to permit persons to whom the Software is
 #   furnished to do so, subject to the following conditions:
-# 
+#
 #  The above copyright notice and this permission notice shall be included in
 #   all copies or substantial portions of the Software.
-# 
+#
 #  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 #   IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 #   FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -18,38 +18,55 @@
 #   FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 #   IN THE SOFTWARE.
 
-import os
-import sys
+from abc import ABCMeta, abstractmethod
 
-from flask import Flask, Blueprint
-from werkzeug.serving import WSGIRequestHandler
 
-from .Profile import *
+class Profile(metaclass=ABCMeta):
+    @abstractmethod
+    def login(self, username, password):
+        pass
 
-# enable persistent HTTP connections (keep-alive)
-WSGIRequestHandler.protocol_version = "HTTP/1.1"
+    @staticmethod
+    @abstractmethod
+    def logout():
+        pass
 
-# launch the client from different path depending on whether the Python script has been packed into an executable
-if getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS'):
-    app = Flask(__name__, static_folder=os.path.join(os.getcwd(), 'client'))
-else:
-    app = Flask(__name__, static_folder="../client/build")
+    @abstractmethod
+    def query(self):
+        pass
 
-app.secret_key = os.getenv('SECRET_KEY', os.urandom(16))
+    @abstractmethod
+    def add_user(self, username, password, email):
+        pass
 
-try:
-    APP_PORT = sys.argv[1]
-    APP_HOST = '127.0.0.1'
-except IndexError:
-    APP_PORT = 5000
-    APP_HOST = '127.0.0.1'
+    @abstractmethod
+    def activate_user(self, userid, code):
+        pass
 
-profiles: Profile
-if os.getenv('DBADDR') is not None:
-    profiles = DBProfile(app)
-else:
-    profiles = LocalProfile()
+    @abstractmethod
+    def get_user(self):
+        pass
 
-api = Blueprint('api', __name__)
+    @abstractmethod
+    def add_session(self, host, username, conn):
+        pass
 
-from .routes import *
+    @abstractmethod
+    def save_profile(self):
+        pass
+
+    @abstractmethod
+    def delete_session(self, session_id):
+        pass
+
+    @abstractmethod
+    def change_host(self, session_id, new_host):
+        pass
+
+    @abstractmethod
+    def get_session_info(self, session_id):
+        pass
+
+    @abstractmethod
+    def send_activation_email(self, username):
+        pass
