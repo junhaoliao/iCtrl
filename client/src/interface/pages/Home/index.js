@@ -37,7 +37,7 @@ import {
 } from '@mui/material';
 import GitHubButton from 'react-github-btn';
 import axios from 'axios';
-import ictrlLogo from '../../../icons/logo.png';
+import ictrlLogo from '../../../icons/logo.webp';
 import LogIn from '../../components/LogIn';
 
 import About from '../../components/About';

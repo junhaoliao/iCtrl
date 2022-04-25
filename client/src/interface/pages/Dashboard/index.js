@@ -54,7 +54,7 @@ import MenuItem from '@mui/material/MenuItem';
 import NewSession from '../../components/NewSession';
 import axios from 'axios';
 
-import logo from '../../../icons/logo.png';
+import logo from '../../../icons/logo.webp';
 import {canChangeMachine} from '../../../actions/utils';
 import About from '../../components/About';
 
