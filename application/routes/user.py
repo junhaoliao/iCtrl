@@ -78,8 +78,8 @@ def logout():
 @api.route('/resend_activation', methods=['POST'])
 def resend():
     try:
-        email = request.json['username']
-        profiles.send_activation_email(email)
+        username = request.json['username']
+        profiles.send_activation_email(username)
     except KeyError as e:
         abort(403, f'{e} is missing')
     return 'sent'

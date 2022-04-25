@@ -23,7 +23,7 @@ import json
 import uuid
 
 from application.paths import *
-from . import Profile
+from .Profile import Profile
 
 _PROFILE_VERSION = 1  # in case the schema changes in the future
 

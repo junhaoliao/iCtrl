@@ -36,7 +36,7 @@ from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import validates
 
-from . import Profile
+from .Profile import Profile
 from ..utils import send_email, validate_password
 
 ACTIVATION_TTL_SECOND = 60 * 30
