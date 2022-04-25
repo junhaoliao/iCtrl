@@ -138,19 +138,6 @@ class SFTP(Connection):
         f.set_pipelined(True)
         return f
 
-    # def _rm_recurse(self, parent, file):
-    #     fullpath = posixpath.join(parent, file)
-    #     try:
-    #         self.sftp.remove(fullpath)
-    #     except IOError:
-    #         # it is a directory: remove any files or sub-directories under it
-    #         dir_ls = self.sftp.listdir(fullpath)
-    #         for dir_file in dir_ls:
-    #             self._rm_recurse(fullpath, dir_file)
-    #
-    #         # now we can remove the emptied directory
-    #         self.sftp.rmdir(fullpath)
-
     def rm(self, cwd, file_list):
         cmd_list = [f'cd "{cwd}" && rm -rf']
         for file in file_list:
@@ -162,18 +149,6 @@ class SFTP(Connection):
             print(stderr_lines)
             return False, 'Some files are not removed due to insufficient permissions'
         return True, ''
-
-    # TODO: might use this if the server is running locally
-    # def dl_direct(self, path):
-    #     home = posixpath.expanduser("~")
-    #     local_path = posixpath.join(home, "Downloads", posixpath.basename(path))
-    #     start_time = time.time()
-    #
-    #     def byte_count(transferred, total):
-    #         time_elapsed = time.time() - start_time
-    #         print(transferred/1024/1024/time_elapsed, "MB/s")
-    #
-    #     self.sftp.get(path, local_path, byte_count)
 
     def mkdir(self, cwd, name):
         _, _, _, stderr = self.exec_command_blocking(f'cd "{cwd}"&& mkdir "{name}"')
