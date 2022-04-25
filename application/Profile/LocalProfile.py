@@ -23,6 +23,7 @@ import json
 import uuid
 
 from application.paths import *
+from . import Profile
 
 _PROFILE_VERSION = 1  # in case the schema changes in the future
 
@@ -37,7 +38,23 @@ _EMPTY_USER_PROFILE = {
 }
 
 
-class LocalProfile:
+class LocalProfile(Profile):
+    def login(self, username, password):
+        raise NotImplementedError(f'Method {__name__} should not be invoke from {__class__}')
+
+    @staticmethod
+    def logout():
+        raise NotImplementedError(f'Method {__name__} should not be invoke from {__class__}')
+
+    def add_user(self, username, password, email):
+        raise NotImplementedError(f'Method {__name__} should not be invoke from {__class__}')
+
+    def activate_user(self, userid, code):
+        raise NotImplementedError(f'Method {__name__} should not be invoke from {__class__}')
+
+    def send_activation_email(self, username):
+        raise NotImplementedError(f'Method {__name__} should not be invoke from {__class__}')
+
     def __init__(self):
         self._profile = copy.deepcopy(_EMPTY_USER_PROFILE)
         try:
@@ -47,7 +64,6 @@ class LocalProfile:
                 if "version" not in json_data or json_data["version"] != _PROFILE_VERSION:
                     raise ValueError("LocalProfile: Version info not found or mismatch in the profile.")
 
-                # TODO: make sure the sessions file is not modified in an attempt to crash the script
                 self._profile["sessions"] = json_data["sessions"]
 
         except Exception as e:
@@ -120,8 +136,7 @@ class LocalProfile:
 
         return host, username, this_private_key_path, None
 
-    @staticmethod
-    def get_user():
+    def get_user(self):
         class DummyUser:
             id = 0
 
