@@ -30,6 +30,7 @@ import {
   Dialog,
   DialogActions,
   DialogTitle,
+  Popper,
   Tooltip,
   Typography,
 } from '@mui/material';
@@ -166,7 +167,7 @@ export default class NewSession extends React.Component {
 
           <div className={'new-session-content-wrapper'}>
             <Box display={'flex'}>
-              <Tooltip flexGrow={1}
+              <Tooltip style={{width: '150px'}}
                        title={'[Required] host name of the target SSH server'}>
                 <Typography variant={'subtitle1'}>
                   Host<span style={{color: 'red'}}>*</span>
@@ -181,6 +182,7 @@ export default class NewSession extends React.Component {
                   autoComplete={true}
                   openOnFocus={true}
                   value={hostValue}
+                  fullWidth={true}
                   onInputChange={(_, newValue) => {
                     this.setState({
                       hostValue: newValue,
@@ -194,22 +196,30 @@ export default class NewSession extends React.Component {
                           size={'small'}
                           placeholder={'example.com'}
                           variant={'standard'}
-                          style={{width: 250}}
                       />
-                  )
-                  }
+                  )}
+                  PopperComponent={(props) => <Popper {...props}
+                                                      placement={'top-end'}
+                                                      style={{width: '200px'}}/>}
+                  ListboxProps={{
+                    style: {
+                      maxHeight: '200px',
+                      marginLeft: '-8px',
+                    },
+                  }}
                   onKeyDown={this.shiftFocus}
               />
             </Box>
             <Box display={'flex'}>
-              <Tooltip flexGrow={1} title={'[Required] username for login'}>
+              <Tooltip style={{width: '150px'}}
+                       title={'[Required] username for login'}>
                 <Typography variant={'subtitle1'}>
                   Username<span style={{color: 'red'}}>*</span>
                 </Typography>
               </Tooltip>
               <TextField id={'username'}
                          autoComplete={'new-password'}
-                         style={{width: 250}}
+                         fullWidth={true}
                          size={'small'}
                          placeholder={'username'}
                          variant={'standard'}
@@ -217,8 +227,9 @@ export default class NewSession extends React.Component {
               />
             </Box>
             <Box display={'flex'}>
-              <Tooltip flexGrow={1} title={'[Optional] password for login. ' +
-                  'If left empty, you will need to enter the password at the next login. '}>
+              <Tooltip style={{width: '150px'}}
+                       title={'[Optional] password for login. ' +
+                           'If left empty, you will need to enter the password at the next login. '}>
                 <Typography variant={'subtitle1'}>
                   Password
                 </Typography>
@@ -226,7 +237,7 @@ export default class NewSession extends React.Component {
               <TextField id={'password'}
                          type={'password'}
                          autoComplete={'new-password'}
-                         style={{width: 250}}
+                         fullWidth={true}
                          size={'small'}
                          placeholder={'****'}
                          variant={'standard'}
