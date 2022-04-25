@@ -37,12 +37,13 @@ else:
 
 app.secret_key = os.getenv('SECRET_KEY', os.urandom(16))
 
+APP_PORT: int
 try:
-    APP_PORT = sys.argv[1]
-    APP_HOST = '127.0.0.1'
+    APP_PORT = int(sys.argv[1])
 except IndexError:
     APP_PORT = 5000
-    APP_HOST = '127.0.0.1'
+
+APP_HOST = '127.0.0.1'
 
 profiles: Profile
 if os.getenv('DBADDR') is not None:
