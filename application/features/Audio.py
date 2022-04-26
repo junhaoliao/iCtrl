@@ -84,8 +84,12 @@ class AudioWebSocket(WebSocket):
 
         sink_name = 'remote_' + audio_id
 
-        load_module_command = f'pactl load-module module-null-sink sink_name={sink_name}'
-        exit_status, _, stdout, _ = self.audio.exec_command_blocking(load_module_command)
+        # unload 5 times to clean up any previously loaded instances
+        # let's hope 5 is enough
+        # TODO: verify whether this would unload others' sessions
+        load_module_command_list = [f'pactl unload-module module-null-sink'] * 5 \
+                                   + [f'pactl load-module module-null-sink sink_name={sink_name}']
+        exit_status, _, stdout, _ = self.audio.exec_command_blocking(';'.join(load_module_command_list))
         if exit_status != 0:
             print(f'AudioWebSocket: audio_id={audio_id}: unable to load pactl module-null-sink')
             return
