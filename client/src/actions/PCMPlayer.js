@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2022 iCtrl Developers
+ * ​Copyright (c) 2018 Samir Das <cse.samir@gmail.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  *  of this software and associated documentation files (the "Software"), to
@@ -19,6 +20,11 @@
  *  FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
  *  IN THE SOFTWARE.
  */
+
+// original project: https://github.com/samirkumardas/pcm-player
+// modification:
+// 1. Performance improvement
+// 2. Fix a bug where audio is out of sync occasionally
 
 export default class PCMPlayer {
   static maxValue = {
