@@ -45,7 +45,6 @@ export const launch_audio = (vncsd, sessionID) => {
       });
     };
     socket.onmessage = (ev) => {
-      console.log(ev.data);
       player.feed(ev.data);
     };
     socket.onclose = (_) => {

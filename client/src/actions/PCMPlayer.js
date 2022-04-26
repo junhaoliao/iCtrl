@@ -119,7 +119,13 @@ export default class PCMPlayer {
     }
 
     // sync playback time with the context
-    this.startTime = Math.max(this.startTime, this.audioCtx.currentTime);
+    // TODO: test on FireFox due to reduced precision for timing attack prevention
+    //  https://developer.mozilla.org/en-US/docs/Web/API/BaseAudioContext/currentTime
+    if (this.startTime < this.audioCtx.currentTime) {
+      console.log('hardware time sync', this.startTime,
+          this.audioCtx.currentTime);
+      this.startTime = this.audioCtx.currentTime;
+    }
 
     // set up the buffer in the buffer source
     bufferSource.buffer = audioBuffer;
@@ -135,7 +141,9 @@ export default class PCMPlayer {
 
     // sync playback time with the actual clock
     const dateTotalDuration = (Date.now() - this.dateStart) / 1000;
-    if (this.startTime - dateTotalDuration > 0.5) {
+    if (this.startTime - dateTotalDuration > this.options.flushInterval * 3 /
+        1000) {
+      console.log('real time sync', this.startTime, dateTotalDuration);
       this.startTime = dateTotalDuration;
     }
     this.samples = [];
