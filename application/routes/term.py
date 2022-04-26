@@ -25,7 +25,7 @@ from flask import request, abort, stream_with_context
 from .common import create_connection
 from .. import api, app
 from ..codes import ICtrlStep, ConnectionType, ICtrlError
-from ..features.Term import terminal_connections, TERMINAL_PORT
+from ..features.Term import TERM_CONNECTIONS, TERMINAL_PORT
 from ..utils import int_to_bytes
 
 
@@ -67,13 +67,13 @@ def start_terminal():
 @api.route('/terminal_resize', methods=['PATCH'])
 def resize_terminal():
     term_id = request.json.get('term_id')
-    if term_id not in terminal_connections:
+    if term_id not in TERM_CONNECTIONS:
         abort(403, description='invalid term_id')
 
     width = request.json.get('w')
     height = request.json.get('h')
 
-    term = terminal_connections[term_id]
+    term = TERM_CONNECTIONS[term_id]
     status, reason = term.resize(width, height)
     if status is False:
         abort(403, description=reason)

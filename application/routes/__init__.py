@@ -18,6 +18,7 @@
 #   FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 #   IN THE SOFTWARE.
 
+from .audio import *
 from .common import *
 from .sftp import *
 from .term import *
