@@ -30,7 +30,7 @@ from .Connection import Connection
 from .. import app
 from ..utils import find_free_port
 
-terminal_connections = {}
+TERM_CONNECTIONS = {}
 
 
 class Term(Connection):
@@ -57,7 +57,7 @@ class Term(Connection):
             return False, str(e)
 
         self.id = uuid.uuid4().hex
-        terminal_connections[self.id] = self
+        TERM_CONNECTIONS[self.id] = self
 
         return True, self.id
 
@@ -70,7 +70,7 @@ class Term(Connection):
         return True, ''
 
 
-class TerminalSocket(WebSocket):
+class TermWebSocket(WebSocket):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.term = None
@@ -81,12 +81,12 @@ class TerminalSocket(WebSocket):
     def handleConnected(self):
         print(self.address, 'connected')
         terminal_id = self.request.path[1:]
-        if terminal_id not in terminal_connections:
-            print(f'TerminalSocket: Requested terminal_id={terminal_id} does not exist.')
+        if terminal_id not in TERM_CONNECTIONS:
+            print(f'TermWebSocket: Requested terminal_id={terminal_id} does not exist.')
             self.close()
             return
 
-        self.term = terminal_connections[terminal_id]
+        self.term = TERM_CONNECTIONS[terminal_id]
 
         def writeall():
             while True:
@@ -101,8 +101,7 @@ class TerminalSocket(WebSocket):
         writer.start()
 
     def handleClose(self):
-        print(self.address, 'closed')
-        del terminal_connections[self.term.id]
+        del TERM_CONNECTIONS[self.term.id]
         del self.term
 
 
@@ -114,11 +113,11 @@ if not app.debug or os.environ.get("WERKZEUG_RUN_MAIN") == "true":
     if os.environ.get('SSL_CERT_PATH') is None:
         # no certificate provided, run in non-encrypted mode
         # FIXME: consider using a self-signing certificate for local connections
-        terminal_server = SimpleWebSocketServer('', TERMINAL_PORT, TerminalSocket)
+        terminal_server = SimpleWebSocketServer('', TERMINAL_PORT, TermWebSocket)
     else:
         import ssl
 
-        terminal_server = SimpleSSLWebSocketServer('', TERMINAL_PORT, TerminalSocket,
+        terminal_server = SimpleSSLWebSocketServer('', TERMINAL_PORT, TermWebSocket,
                                                    certfile=os.environ.get('SSL_CERT_PATH'),
                                                    keyfile=os.environ.get('SSL_KEY_PATH'),
                                                    version=ssl.PROTOCOL_TLS)

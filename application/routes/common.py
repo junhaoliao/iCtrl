@@ -25,6 +25,7 @@ from flask import request, abort, send_file
 
 from .. import api, profiles
 from ..codes import ICtrlError, ConnectionType
+from ..features.Audio import Audio
 from ..features.Connection import Connection
 from ..features.Favicon import Favicon
 from ..features.SFTP import SFTP
@@ -46,6 +47,8 @@ def create_connection(session_id, conn_type):
         conn = Term()
     elif conn_type == ConnectionType.SFTP:
         conn = SFTP()
+    elif conn_type == ConnectionType.AUDIO:
+        conn = Audio()
     else:
         raise TypeError(f'Invalid type: {conn_type}')
 

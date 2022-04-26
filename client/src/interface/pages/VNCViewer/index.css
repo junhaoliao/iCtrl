@@ -85,10 +85,10 @@
     width: max-content;
 }
 
-#auto-resize-enabled-text {
+.enabled-text {
     color: green;
 }
 
-#auto-resize-disabled-text {
+.disabled-text {
     color: red;
 }

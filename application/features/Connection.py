@@ -19,16 +19,16 @@
 #   IN THE SOFTWARE.
 
 import re
-import select
 import socketserver
 import threading
 import typing
 from io import StringIO
 
 import paramiko
+import select
 
 
-class Handler(socketserver.BaseRequestHandler):
+class ForwardServerHandler(socketserver.BaseRequestHandler):
     def handle(self):
         self.server: ForwardServer
         try:
@@ -82,7 +82,7 @@ class ForwardServer(socketserver.ThreadingTCPServer):
 
 class Connection:
     def __init__(self):
-        self.client = paramiko.SSHClient()
+        self.client: paramiko.SSHClient = paramiko.SSHClient()
         self.client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
         self.host = ""
 
@@ -215,7 +215,7 @@ class Connection:
         return '\n'.join(stdout) + '\n' + '\n'.join(stderr)
 
     def _port_forward_thread(self, local_port, remote_port):
-        forward_server = ForwardServer(("", local_port), Handler)
+        forward_server = ForwardServer(("", local_port), ForwardServerHandler)
 
         forward_server.ssh_transport = self.client.get_transport()
         forward_server.chain_port = remote_port
@@ -239,8 +239,8 @@ class Connection:
     def is_load_high(self):
         # FIXME: might replace `uptime` with some command that find the users of all running processes on the same
         #  computer
-        status, _, stdout, _ = self.exec_command_blocking('uptime && who | grep $USER')
-        if status is False:
+        exit_status, _, stdout, _ = self.exec_command_blocking('uptime && who | grep $USER')
+        if exit_status is False:
             return True
 
         output = stdout.readlines()

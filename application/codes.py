@@ -27,6 +27,7 @@ class ConnectionType(IntEnum):
     VNC = auto()
     TERM = auto()
     SFTP = auto()
+    AUDIO = auto()
 
 
 # 31: 32(space) starts to be the first commonly used code in ASCII

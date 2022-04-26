@@ -43,6 +43,8 @@ import {
   HighQuality,
   Keyboard,
   LensBlur,
+  MusicNote,
+  MusicOff,
   Refresh,
   Sd,
   VisibilityOff,
@@ -52,6 +54,7 @@ import './index.css';
 import {LoadingButton} from '@mui/lab';
 import {focusOnKeyboard, resetVNC} from '../../../actions/vnc';
 import axios from 'axios';
+import {launch_audio} from '../../../actions/audio';
 
 let webFrame = null;
 if (window.require !== undefined) {
@@ -63,10 +66,13 @@ export default class VNCSpeedDial extends React.Component {
   constructor(props) {
     super(props);
 
+    this.audioSocket = null;
+
     // TODO: support saving those per session
     this.state = {
       isFullscreen: Boolean(document.fullscreenElement),
       resizeSession: true,
+      enableAudio: false,
       speedDialDirection: 'up',
       tooltipPlacement: 'left',
       qualityLevel: 6,
@@ -185,6 +191,27 @@ export default class VNCSpeedDial extends React.Component {
     this.props.rfb.compressionLevel = newValue;
   };
 
+  handleToggleAudio = (_) => {
+    if (this.state.enableAudio === null) {
+      return;
+    }
+
+    const enableAudio = !this.state.enableAudio;
+
+    if (enableAudio) {
+      this.setState({
+        enableAudio: null,
+      });
+      const {session_id} = this.props;
+      launch_audio(this, session_id);
+    } else if (this.audioSocket !== null) {
+      this.audioSocket.close();
+      this.setState({
+        enableAudio: false,
+      });
+    }
+  };
+
   handleToggleResize = (_) => {
     const newResizeSession = !this.state.resizeSession;
     this.setState({
@@ -291,7 +318,10 @@ export default class VNCSpeedDial extends React.Component {
       resetDialogOpen,
       resetting,
       inHdMode,
+      enableAudio,
     } = this.state;
+
+    const audioConnecting = (enableAudio === null);
 
     return (
         <><SpeedDial
@@ -349,14 +379,31 @@ export default class VNCSpeedDial extends React.Component {
               />
           }
           <SpeedDialAction
+              key={'toggle-audio'}
+              icon={enableAudio ? <MusicNote/> : <MusicOff/>}
+              tooltipTitle={<Box display={'flex'} width={200}>
+                <Box flexGrow={1} className={'speed-dial-action-title'}>Audio
+                  (Beta)</Box>
+                <Box>{enableAudio ?
+                    <span className={'enabled-text'}> Enabled</span> :
+                    (audioConnecting) ?
+                        <span className={'enabled-text'}> Connecting</span> :
+                        <span className={'disabled-text'}> Disabled</span>
+                }</Box>
+              </Box>}
+              tooltipOpen
+              tooltipPlacement={tooltipPlacement}
+              onClick={this.handleToggleAudio}
+          />
+          <SpeedDialAction
               key={'toggle-resize'}
               icon={<Height/>}
               tooltipTitle={<Box display={'flex'} width={200}>
                 <Box flexGrow={1} className={'speed-dial-action-title'}>Auto
                   Resize</Box>
                 <Box>{resizeSession ?
-                    <span id={'auto-resize-enabled-text'}> Enabled</span> :
-                    <span id={'auto-resize-disabled-text'}> Disabled</span>
+                    <span className={'enabled-text'}> Enabled</span> :
+                    <span className={'disabled-text'}> Disabled</span>
                 }</Box>
               </Box>}
               tooltipOpen
