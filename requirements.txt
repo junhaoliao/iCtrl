@@ -1,15 +1,14 @@
-wheel
-bcrypt
-flask
-Flask-SQLAlchemy
-paramiko
-Pillow
-psycopg2-binary
-pyDes
-pyinstaller
+wheel == 0.37.1
+websockify == 0.10.0
+Pillow == 9.1.0
+psycopg2-binary == 2.9.3
+pyDes == 2.0.1
+bcrypt == 3.2.0
+cryptography == 37.0.0
+cachetools == 5.0.0
+SQLAlchemy == 1.4.36
+pyinstaller == 4.10
+Flask-SQLAlchemy == 2.5.1
+zipstream-new == 1.1.8
+paramiko == 2.10.4
 git+https://github.com/junhaoliao/simple-websocket-server#egg=SimpleWebSocketServer
-websockify
-zipstream-new
-SQLAlchemy
-cachetools
-cryptography
