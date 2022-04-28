@@ -38,3 +38,8 @@
     top: -10px;
     z-index: 1;
 }
+
+.file-icon {
+    color: rgb(118,118,118);
+    height: 24px;
+}

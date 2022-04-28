@@ -34,6 +34,7 @@ import {
 import React from 'react';
 
 import '../../../index.css';
+import {getIconForFile} from 'vscode-icons-js';
 
 const columns = [
   {
@@ -42,15 +43,18 @@ const columns = [
       const is_dir = isDir(params.getValue(params.value, 'mode'));
       const is_lnk = isLnk(params.getValue(params.value, 'mode'));
       return (
-          <Stack direction={'row'} spacing={1}>
-            <div>
-              {is_lnk ?
+          <div style={{display:'flex', alignItems:'center', gap: '5px'}}>
+            <span className={'file-icon'}>{is_lnk ?
                   <ShortcutIcon/> :
-                  (is_dir ? <FolderIcon fontSize={'small'}/> :
-                      <InsertDriveFileIcon fontSize={'small'}/>)}
-            </div>
-            <div>{params.value}</div>
-          </Stack>
+                  (is_dir ? <FolderIcon/> :
+                      <img src={`/vscode-icons-11.6.0/icons/${getIconForFile(params.value)}`}
+                           alt={'file-icon'}
+                           style={{filter: 'brightness(60%)'}}
+                           height={24}
+                      />)}
+            </span>
+            <span style={{fontWeight: 'bolder', color:'rgba(0,0,0,0.8)'}}>{params.value}</span>
+          </div>
 
       );
     },
