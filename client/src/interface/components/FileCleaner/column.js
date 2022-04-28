@@ -33,6 +33,7 @@ const columns = [
     field: 'id',
     headerName: 'File / Directory Name',
     flex: 1,
+    minWidth: 500
   },
 ];
 
