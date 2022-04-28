@@ -237,27 +237,28 @@ class Connection:
         return self.is_eecg() or self.is_ecf()
 
     def is_load_high(self):
-        # FIXME: might replace `uptime` with some command that find the users of all running processes on the same
-        #  computer
-        exit_status, _, stdout, _ = self.exec_command_blocking('uptime && who | grep $USER')
-        if exit_status is False:
-            return True
+        _, _, stdout, _ = self.exec_command_blocking('uptime && who | grep $USER')
 
         output = stdout.readlines()
 
         uptime_output = output[0].strip().split(',')
-        user_count, = re.findall(r'\d+', uptime_output[-4])
+
+        pts_count, = re.findall(r'\d+', uptime_output[-4])
+        pts_count = int(pts_count)
+
         load1, = re.findall(r"\d+\.\d+", uptime_output[-3])
+        load5, = re.findall(r"\d+\.\d+", uptime_output[-2])
+        load15, = re.findall(r"\d+\.\d+", uptime_output[-1])
+        load1, load5, load15 = float(load1), float(load5), float(load15)
+        load_sum = load1 + load5 + load15
 
-        # cast string to int
-        user_count = int(user_count)
-        load1 = float(load1)
+        my_pts_count = len(output) - 1  # -1: excluding the `uptime` output
 
-        # skip check if I'm the only user (the `who|grep` command doesn't produce any output)
-        # FIXME: need to recognize my terminal sessions as well
-        if user_count == 1 and len(output) == 2:
-            return False
-        elif user_count > 0 or load1 > 0.2:
+        if pts_count > my_pts_count:  # there are more terminals than mine
+            return True
+        elif load_sum > 0.3:  # suspect a high load if the 1-min load average is greater than the threshold
+            # even if I'm the only user (others might not use a terminal to do port-forwarding),
+            #  it is considered a high load
             return True
 
         return False
