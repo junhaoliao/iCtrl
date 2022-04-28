@@ -195,7 +195,16 @@ export default class Dashboard extends React.Component {
     for (const [key, value] of Object.entries(sessions)) {
       const showCM = canChangeMachine(value.host);
       sessionList.push(
-          <ListItem style={{cursor: 'default'}} button key={key}>
+          <ListItem style={{cursor: 'default'}} button key={key}
+                    onDoubleClick={(ev) => {
+                      // open VNC when double-clicked
+
+                      if (ev.target.className.includes('MuiBackdrop-root')) {
+                        // don't open VNC when the menu button is double-clicked
+                        return;
+                      }
+                      this.handleMenuClick(key, 'vnc');
+                    }}>
             <ListItemAvatar>
               <BackgroundLetterAvatar name={value.host}/>
             </ListItemAvatar>
@@ -210,7 +219,6 @@ export default class Dashboard extends React.Component {
                 }}
                 secondary={value.username}/>
             <Menu
-                id="simple-menu"
                 anchorEl={anchorEl}
                 open={anchorSessionId === key}
                 onClose={this.handleMenuClose}
