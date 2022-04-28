@@ -121,7 +121,7 @@ export default class PCMPlayer {
     // sync playback time with the context
     // TODO: test on FireFox due to reduced precision for timing attack prevention
     //  https://developer.mozilla.org/en-US/docs/Web/API/BaseAudioContext/currentTime
-    if (this.startTime < this.audioCtx.currentTime) {
+    if (this.startTime < this.audioCtx.currentTime - 0.05) {
       console.log('hardware time sync', this.startTime,
           this.audioCtx.currentTime);
       this.startTime = this.audioCtx.currentTime;
