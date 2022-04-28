@@ -175,4 +175,4 @@ class VNC(Connection):
         """
         return "#\\!/bin/sh\\n" \
                "gnome-session &\\n" \
-               "xvfb-run -a xterm &\\n"
+               "timeout 2d xvfb-run -a xterm &\\n"
