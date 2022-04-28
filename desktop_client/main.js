@@ -34,7 +34,10 @@ const isWindows = process.platform === 'win32';
 let ictrl_be = null;
 if (isMac) {
   ictrl_be = spawn('./ictrl_be', [mainPort],
-      {cwd: resolve(__dirname, 'ictrl_be')});
+      {
+        cwd: resolve(__dirname, 'ictrl_be'),
+        shell:true // FIXME: needs to be specified since Electron 15. reasons unknown
+      });
 
   // need to have a 'window' role in the menu on mac
   //  to show all windows when right-clicking on the dock icon

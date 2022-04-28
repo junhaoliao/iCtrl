@@ -4,7 +4,7 @@ Pillow == 9.1.0
 psycopg2-binary == 2.9.3
 pyDes == 2.0.1
 bcrypt == 3.2.0
-cryptography == 37.0.0
+cryptography == 37.0.1
 cachetools == 5.0.0
 SQLAlchemy == 1.4.36
 pyinstaller == 4.10
