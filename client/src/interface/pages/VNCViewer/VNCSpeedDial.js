@@ -36,10 +36,11 @@ import {
   Stack,
 } from '@mui/material';
 import {
+  AspectRatio,
+  FitScreen,
   Fullscreen,
   FullscreenExit,
   Hd,
-  Height,
   HighQuality,
   Keyboard,
   LensBlur,
@@ -241,8 +242,6 @@ export default class VNCSpeedDial extends React.Component {
   };
 
   handleHDModeToggle = (_) => {
-    this.props.closeSpeedDial();
-
     const {session_id} = this.props;
     const {inHdMode} = this.state;
     axios.post('/api/exec_blocking', {
@@ -349,15 +348,6 @@ export default class VNCSpeedDial extends React.Component {
               onClick={handleFabHide}
           />
           <SpeedDialAction
-              key={'reset'}
-              icon={<Refresh/>}
-              tooltipTitle={<div className={'speed-dial-action-title'}>Reset
-                VNC</div>}
-              tooltipOpen
-              tooltipPlacement={tooltipPlacement}
-              onClick={this.handleResetConnection}
-          />
-          <SpeedDialAction
               key={'open-keyboard'}
               icon={<Keyboard/>}
               tooltipTitle={<div
@@ -366,18 +356,45 @@ export default class VNCSpeedDial extends React.Component {
               tooltipPlacement={tooltipPlacement}
               onClick={this.handleKeyboardOpen}
           />
-          {document.fullscreenEnabled &&
-              <SpeedDialAction
-                  key={'toggle-fullscreen'}
-                  icon={isFullscreen ? <FullscreenExit/> : <Fullscreen/>}
-                  tooltipTitle={<div className={'speed-dial-action-title'}>
-                    {isFullscreen ? 'Exit' : 'Enter'} Full Screen
-                  </div>}
-                  tooltipOpen
-                  tooltipPlacement={tooltipPlacement}
-                  onClick={this.handleToggleFullscreen}
-              />
-          }
+          <SpeedDialAction
+              key={'reset'}
+              icon={<Refresh/>}
+              tooltipTitle={<div className={'speed-dial-action-title'}>Reset
+                VNC</div>}
+              tooltipOpen
+              tooltipPlacement={tooltipPlacement}
+              onClick={this.handleResetConnection}
+          />
+          {webFrame && <SpeedDialAction
+              key={'hd-mode'}
+              icon={inHdMode ? <Hd/> : <Sd/>}
+              tooltipTitle={<Box display={'flex'} width={200}>
+                <Box flexGrow={1} className={'speed-dial-action-title'}>HD
+                  Mode</Box>
+                <Box>{inHdMode ?
+                    <span className={'enabled-text'}> Enabled</span> :
+                    <span className={'disabled-text'}> Disabled</span>
+                }</Box>
+              </Box>}
+              tooltipOpen
+              tooltipPlacement={tooltipPlacement}
+              onClick={this.handleHDModeToggle}
+          />}
+          {document.fullscreenEnabled && <SpeedDialAction
+              key={'toggle-fullscreen'}
+              icon={isFullscreen ? <Fullscreen/> : <FullscreenExit/>}
+              tooltipTitle={<Box display={'flex'} width={200}>
+                <Box flexGrow={1} className={'speed-dial-action-title'}>Full
+                  Screen</Box>
+                <Box>{isFullscreen ?
+                    <span className={'enabled-text'}> Enabled</span> :
+                    <span className={'disabled-text'}> Disabled</span>
+                }</Box>
+              </Box>}
+              tooltipOpen
+              tooltipPlacement={tooltipPlacement}
+              onClick={this.handleToggleFullscreen}
+          />}
           <SpeedDialAction
               key={'toggle-audio'}
               icon={enableAudio ? <MusicNote/> : <MusicOff/>}
@@ -397,7 +414,7 @@ export default class VNCSpeedDial extends React.Component {
           />
           <SpeedDialAction
               key={'toggle-resize'}
-              icon={<Height/>}
+              icon={resizeSession ? <FitScreen/> : <AspectRatio/>}
               tooltipTitle={<Box display={'flex'} width={200}>
                 <Box flexGrow={1} className={'speed-dial-action-title'}>Auto
                   Resize</Box>
@@ -410,15 +427,6 @@ export default class VNCSpeedDial extends React.Component {
               tooltipPlacement={tooltipPlacement}
               onClick={this.handleToggleResize}
           />
-          {webFrame && <SpeedDialAction
-              key={'hd-mode'}
-              icon={inHdMode ? <Sd/> : <Hd/>}
-              tooltipTitle={<div className={'speed-dial-action-title'}>
-                {inHdMode ? 'Exit' : 'Enter'} HD Mode</div>}
-              tooltipOpen
-              tooltipPlacement={tooltipPlacement}
-              onClick={this.handleHDModeToggle}
-          />}
           <br/>
           <SpeedDialAction
               key={'quality'}
