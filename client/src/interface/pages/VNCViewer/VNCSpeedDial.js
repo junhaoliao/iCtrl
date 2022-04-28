@@ -265,7 +265,7 @@ export default class VNCSpeedDial extends React.Component {
   };
 
   handleResetDialogClose = (ev) => {
-    if (ev.target.id !== 'reset-button') {
+    if (ev.target.id === 'reset-cancel-button') {
       this.setState({
         resetDialogOpen: false,
       });
@@ -489,9 +489,9 @@ export default class VNCSpeedDial extends React.Component {
               </DialogContentText>
             </DialogContent>
             <DialogActions>
-              <Button onClick={this.handleResetDialogClose}>Cancel</Button>
+              <Button id={'reset-cancel-button'}
+                      onClick={this.handleResetDialogClose}>Cancel</Button>
               <LoadingButton
-                  id={'reset-button'}
                   variant={'contained'}
                   loading={resetting}
                   loadingPosition="start"
