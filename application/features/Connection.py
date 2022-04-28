@@ -85,6 +85,7 @@ class Connection:
         self.client: paramiko.SSHClient = paramiko.SSHClient()
         self.client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
         self.host = ""
+        self.username = ""
 
         self._jump_client: typing.Optional[paramiko.SSHClient] = None
         self._jump_channel: typing.Optional[paramiko.Channel] = None
@@ -142,6 +143,7 @@ class Connection:
             return False, str(e)
 
         self.host = host
+        self.username = username
 
         return True, ''
 

@@ -33,6 +33,8 @@ from ..utils import find_free_port
 
 AUDIO_CONNECTIONS = {}
 
+FFMPEG_LOAD_TIME = 4  # unit: seconds
+TRY_FFMPEG_MAX_COUNT = 3
 
 class Audio(Connection):
     def __init__(self):
@@ -82,25 +84,45 @@ class AudioWebSocket(WebSocket):
 
         self.audio = AUDIO_CONNECTIONS[audio_id]
 
-        sink_name = 'remote_' + audio_id
+        sink_name = 'remote_' + self.audio.username
 
-        # unload 5 times to clean up any previously loaded instances
-        # let's hope 5 is enough
-        # TODO: verify whether this would unload others' sessions
-        load_module_command_list = [f'pactl unload-module module-null-sink'] * 5 \
-                                   + [f'pactl load-module module-null-sink sink_name={sink_name}']
-        exit_status, _, stdout, _ = self.audio.exec_command_blocking(';'.join(load_module_command_list))
+        # only load module if the module is not loaded for the current user
+        load_module_command = f'sh -c \'pactl list modules | while IFS=" " read -r name module_number; do if test ' \
+                              f'"$name" == "Module"; then while IFS=" " read -r sub_name value; do if test $sub_name ' \
+                              f'== "Argument:"; then if test "$value" == "sink_name={sink_name}"; then echo "${{' \
+                              f'module_number#*#}}"; fi; break; fi; done; fi; done;\'| grep . || pactl load-module ' \
+                              f'module-null-sink sink_name={sink_name} '
+        exit_status, _, stdout, _ = self.audio.exec_command_blocking(load_module_command)
         if exit_status != 0:
-            print(f'AudioWebSocket: audio_id={audio_id}: unable to load pactl module-null-sink')
+            print(f'AudioWebSocket: audio_id={audio_id}: unable to load pactl module-null-sink sink_name={sink_name}')
             return
         load_module_stdout_lines = stdout.readlines()
         self.module_id = int(load_module_stdout_lines[0])
 
-        def writeall():
-            channel = self.audio.transport.accept(10)  # FIXME: should we try again?
+        keep_launching_ffmpeg = True
+
+        def ffmpeg_launcher():
+            # TODO: support requesting audio format from the client
+            launch_ffmpeg_command = f'killall ffmpeg; ffmpeg -f pulse -i "{sink_name}.monitor" ' \
+                                    f'-ac 2 -acodec pcm_s16le -ar 44100 -f s16le "tcp://127.0.0.1:{self.audio.remote_port}"'
+            # keep launching if the connection is not accepted in the writer() below
+            while keep_launching_ffmpeg:
+                _, ffmpeg_stdout, _ = self.audio.client.exec_command(launch_ffmpeg_command)
+                ffmpeg_stdout.channel.recv_exit_status()
+                # if `ffmpeg` launches successfully, `ffmpeg_stdout.channel.recv_exit_status` should not return
+
+        ffmpeg_launcher_thread = threading.Thread(target=ffmpeg_launcher)
+
+        def writer():
+            channel = self.audio.transport.accept(FFMPEG_LOAD_TIME * TRY_FFMPEG_MAX_COUNT)
+
+            nonlocal keep_launching_ffmpeg
+            keep_launching_ffmpeg = False
+
             if channel is None:
-                raise ConnectionError(
-                    f'AudioWebSocket: audio_id={audio_id}: unable to create socket on the remote target')
+                ffmpeg_launcher_thread.join()
+                raise ConnectionError("AudioWebSocket:handleConnected: Unable to launch audio socket on the remote "
+                                      "target. ")
 
             while True:
                 data = channel.recv(10240)
@@ -109,14 +131,10 @@ class AudioWebSocket(WebSocket):
                     break
                 self.sendMessage(data)
 
-        writer = threading.Thread(target=writeall)
-        writer.start()
+        writer_thread = threading.Thread(target=writer)
 
-        time.sleep(1)  # accept() has to run before the following, let's just hope 1s is enough
-        # TODO: support requesting audio format from the client
-        launch_ffmpeg_command = f'killall ffmpeg; ffmpeg -f pulse -i "{sink_name}.monitor" ' \
-                                f'-ac 2 -acodec pcm_s16le -ar 44100 -f s16le "tcp://127.0.0.1:{self.audio.remote_port}"'
-        self.audio.client.exec_command(launch_ffmpeg_command)
+        writer_thread.start()
+        ffmpeg_launcher_thread.start()
 
     def handleClose(self):
         if self.module_id is not None:
