@@ -124,12 +124,17 @@ class AudioWebSocket(WebSocket):
                 raise ConnectionError("AudioWebSocket:handleConnected: Unable to launch audio socket on the remote "
                                       "target. ")
 
+            # use a buffer to reduce transfer frequency
+            buffer = b''
             while True:
-                data = channel.recv(10240)
+                data = channel.recv(15360)
                 if not data:
                     self.close()
                     break
-                self.sendMessage(data)
+                buffer += data
+                if len(buffer) >= 15360:
+                    self.sendMessage(buffer)
+                    buffer = b''
 
         writer_thread = threading.Thread(target=writer)
 
