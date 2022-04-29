@@ -124,9 +124,9 @@ export default class About extends React.Component {
         <Divider>
           <Chip label={<b>Disclaimer</b>} variant={'outlined'} size={'small'}/>
         </Divider>
-        <p>
+        <div>
           {disclaimer}
-        </p>
+        </div>
       </DialogContent>
 
       <DialogActions>
