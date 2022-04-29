@@ -131,6 +131,18 @@ export default class VNCViewer extends React.Component {
       case 'Delete':
         this.rfb.sendKey(KeyTable.XK_Delete, 'Delete');
         break;
+      case '▲':
+        this.rfb.sendKey(KeyTable.XK_Up, 'ArrowUp');
+        break;
+      case '▼':
+        this.rfb.sendKey(KeyTable.XK_Down, 'ArrowDown');
+        break;
+      case '◀':
+        this.rfb.sendKey(KeyTable.XK_Left, 'ArrowLeft');
+        break;
+      case '▶':
+        this.rfb.sendKey(KeyTable.XK_Right, 'ArrowRight');
+        break;
       default:
         console.log('Unexpected key pressed.');
     }

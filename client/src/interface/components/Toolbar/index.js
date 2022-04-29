@@ -21,10 +21,11 @@
  */
 
 import React from 'react';
-import {Chip, IconButton} from '@mui/material';
+import {IconButton} from '@mui/material';
 import {KeyboardArrowDown} from '@mui/icons-material';
 
 import './index.css';
+import Button from '@mui/material/Button';
 
 export default class Toolbar extends React.Component {
   constructor(props) {
@@ -34,7 +35,7 @@ export default class Toolbar extends React.Component {
     };
   }
 
-  handleChipClick = (key) => {
+  handleButtonClick = (key) => {
     const {onToolbarSendKey: sendKey} = this.props;
     const {pressed} = this.state;
     switch (key) {
@@ -68,6 +69,10 @@ export default class Toolbar extends React.Component {
       case 'Tab':
       case 'Esc':
       case 'Delete':
+      case '▲':
+      case '▼':
+      case '◀':
+      case '▶':
         sendKey(key);
         break;
       case 'Ctrl+Alt+Delete':
@@ -86,9 +91,13 @@ export default class Toolbar extends React.Component {
       {label: 'Ctrl'},
       {label: 'Alt'},
       {label: 'Shift'},
-      {label: '⌘'},
       {label: 'Tab'},
       {label: 'Esc'},
+      {label: '⌘'},
+      {label: '▲'},
+      {label: '▼'},
+      {label: '◀'},
+      {label: '▶'},
       {label: 'Delete'},
     ];
     if (this.props.onCtrlAltDelete) {
@@ -97,25 +106,29 @@ export default class Toolbar extends React.Component {
     return (
         <div id={'toolbar'}>
           {handleToolbarHide && <IconButton
-              style={{marginLeft: 6}}
               color={'info'}
+              style={{height: '32px'}}
               onClick={handleToolbarHide}
           >
             <KeyboardArrowDown/>
           </IconButton>}
           {
             keyList.map((item) => (
-                <Chip key={item.label}
-                      label={item.label}
-                      color="primary"
-                      style={{
-                        marginLeft: 12,
-                      }}
-                      variant={pressed.has(item.label) ? 'filled' : 'outlined'}
-                      onClick={() => {
-                        this.handleChipClick(item.label);
-                      }}
-                />))}
+                <Button key={item.label}
+                        style={{minWidth: '50px', fontWeight: 'bold'}}
+                        color="info"
+                        variant={pressed.has(item.label) ?
+                            'contained' :
+                            'outlined'}
+                        disableElevation={true}
+                        size={'small'}
+                        onClick={() => {
+                          this.handleButtonClick(item.label);
+                        }}>
+                  {item.label}
+                </Button>
+            ))
+          }
         </div>
     );
   }
