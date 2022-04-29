@@ -306,7 +306,7 @@ export default class Dashboard extends React.Component {
               <div style={{
                 marginTop: '5px',
                 marginRight: '16px',
-                overflowX: 'scroll',
+                overflowX: 'auto',
                 overflowY: 'hidden',
               }}>
                 <GitHubButton href="https://github.com/junhaoliao/iCtrl"

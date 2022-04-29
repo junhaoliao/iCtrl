@@ -53,8 +53,11 @@ export default class About extends React.Component {
   };
 
   render() {
+    const version = window.require &&
+        window.require('electron').ipcRenderer.sendSync('version');
+
     return <Dialog open={true} fullWidth={true} maxWidth={'md'}>
-      <DialogTitle>About iCtrl</DialogTitle>
+      <DialogTitle>About iCtrl {version && `(v${version})`}</DialogTitle>
       <DialogContent style={{maxHeight: '630px'}} className={'selectable'}>
         <p>
           {introduction}
