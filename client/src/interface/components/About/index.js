@@ -45,12 +45,7 @@ import {
   supervisors,
 } from './info';
 import Avatar from '@mui/material/Avatar';
-
-const Link = (props) => (
-    <a href={props.url} rel={'noreferrer'} target={'_blank'}
-       style={{wordWrap: 'break-word'}}>
-      {props.children}
-    </a>);
+import LinkForNewWindow from '../LinkToNewWindow';
 
 export default class About extends React.Component {
   handleClose = (_) => {
@@ -71,7 +66,7 @@ export default class About extends React.Component {
           {supervisors.map((s) => (<ListItem key={s.name}>
             <ListItemText
                 primary={s.name}
-                secondary={<Link url={s.url}>{s.url}</Link>}/>
+                secondary={<LinkForNewWindow url={s.url}>{s.url}</LinkForNewWindow>}/>
           </ListItem>))}
         </List>
 
@@ -83,7 +78,7 @@ export default class About extends React.Component {
           {admins.map((a) => (<ListItem key={a.name}>
             <ListItemText
                 primary={a.name}
-                secondary={<Link url={a.url}>{a.url}</Link>}/>
+                secondary={<LinkForNewWindow url={a.url}>{a.url}</LinkForNewWindow>}/>
           </ListItem>))}
         </List>
 
@@ -101,7 +96,7 @@ export default class About extends React.Component {
             </ListItemAvatar>
             <ListItemText
                 primary={a.name}
-                secondary={<Link url={a.url}>{a.url}</Link>}/>
+                secondary={<LinkForNewWindow url={a.url}>{a.url}</LinkForNewWindow>}/>
           </ListItem>))}
         </List>
 
@@ -119,9 +114,9 @@ export default class About extends React.Component {
             {projects.map((p) => (<p key={p.name}>
               <b>{p.name}</b>
               <br/>
-              <Link url={p.url}>{p.url}</Link>
+              <LinkForNewWindow url={p.url}>{p.url}</LinkForNewWindow>
               {p.url2 && <br/>}
-              {p.url2 && <Link url={p.url2}>{p.url2}</Link>}
+              {p.url2 && <LinkForNewWindow url={p.url2}>{p.url2}</LinkForNewWindow>}
             </p>))}
           </List>
         </Marquee>

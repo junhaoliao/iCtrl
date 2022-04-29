@@ -39,7 +39,7 @@ import axios from 'axios';
 import './index.css';
 import {hostAddressList} from '../../../actions/session';
 import {LoadingButton} from '@mui/lab';
-import {htmlResponseToReason} from '../../../actions/utils';
+import {htmlResponseToReason, openInNewWindow} from '../../../actions/utils';
 
 export default class NewSession extends React.Component {
   constructor(props) {
@@ -114,8 +114,7 @@ export default class NewSession extends React.Component {
         </div>,
       });
     } else if (hostValue.includes('ecf')) {
-      window.open('https://ssl.ecf.utoronto.ca/ecf/services/forgotpass',
-          '_blank');
+      openInNewWindow('https://ssl.ecf.utoronto.ca/ecf/services/forgotpass');
     }
   };
 
