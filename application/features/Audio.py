@@ -20,7 +20,6 @@
 
 import os
 import threading
-import time
 import uuid
 from typing import Optional
 
@@ -35,6 +34,7 @@ AUDIO_CONNECTIONS = {}
 
 FFMPEG_LOAD_TIME = 4  # unit: seconds
 TRY_FFMPEG_MAX_COUNT = 3
+AUDIO_BUFFER_SIZE = 20480
 
 class Audio(Connection):
     def __init__(self):
@@ -127,12 +127,12 @@ class AudioWebSocket(WebSocket):
             # use a buffer to reduce transfer frequency
             buffer = b''
             while True:
-                data = channel.recv(15360)
+                data = channel.recv(AUDIO_BUFFER_SIZE)
                 if not data:
                     self.close()
                     break
                 buffer += data
-                if len(buffer) >= 15360:
+                if len(buffer) >= AUDIO_BUFFER_SIZE:
                     self.sendMessage(buffer)
                     buffer = b''
 
