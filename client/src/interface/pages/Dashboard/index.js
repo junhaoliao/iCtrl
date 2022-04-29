@@ -57,6 +57,7 @@ import axios from 'axios';
 import logo from '../../../icons/logo.webp';
 import {canChangeMachine} from '../../../actions/utils';
 import About from '../../components/About';
+import GitHubButton from 'react-github-btn';
 
 export default class Dashboard extends React.Component {
   constructor(props) {
@@ -302,6 +303,17 @@ export default class Dashboard extends React.Component {
               <Typography variant="h5" component="div" sx={{flexGrow: 1}}>
                 Dashboard
               </Typography>
+              <div style={{
+                marginTop: '5px',
+                marginRight: '16px',
+                overflowX: 'scroll',
+                overflowY: 'hidden',
+              }}>
+                <GitHubButton href="https://github.com/junhaoliao/iCtrl"
+                              data-color-scheme="no-preference: light_high_contrast; light: light_high_contrast; dark: light_high_contrast;"
+                              data-show-count="true"
+                              aria-label="Star junhaoliao/iCtrl on GitHub">Star</GitHubButton>
+              </div>
               <Tooltip title="About iCtrl">
                 <IconButton onClick={this.handleAboutOpen} size={'large'}>
                   <InfoIcon style={{color: 'white'}} fontSize="large"/>
@@ -320,6 +332,7 @@ export default class Dashboard extends React.Component {
                     </IconButton>
                   </Tooltip>
               }
+
             </Toolbar>
           </AppBar>
 
