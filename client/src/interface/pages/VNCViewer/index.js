@@ -89,6 +89,7 @@ export default class VNCViewer extends React.Component {
       speedDialOpen: false,
     });
   };
+
   handleSpeedDialClose = (ev) => {
     if (ev.type === 'mouseleave' ||
         (new Date().getTime() - this.speedDialOpenTime) < 200) {

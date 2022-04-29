@@ -22,6 +22,7 @@
 
 import React from 'react';
 import {
+  Autocomplete,
   Box,
   Button,
   Dialog,
@@ -34,6 +35,7 @@ import {
   SpeedDialAction,
   SpeedDialIcon,
   Stack,
+  TextField,
 } from '@mui/material';
 import {
   AspectRatio,
@@ -56,6 +58,7 @@ import {LoadingButton} from '@mui/lab';
 import {focusOnKeyboard, resetVNC} from '../../../actions/vnc';
 import axios from 'axios';
 import {launch_audio} from '../../../actions/audio';
+import RFB from '@novnc/novnc/core/rfb';
 
 let webFrame = null;
 if (window.require !== undefined) {
@@ -81,6 +84,7 @@ export default class VNCSpeedDial extends React.Component {
       resetDialogOpen: false,
       resetting: false,
       inHdMode: false,
+      scaleDialogOpen: false,
     };
   }
 
@@ -214,11 +218,38 @@ export default class VNCSpeedDial extends React.Component {
   };
 
   handleToggleResize = (_) => {
+    const {rfb} = this.props;
+
     const newResizeSession = !this.state.resizeSession;
     this.setState({
       resizeSession: newResizeSession,
     });
-    this.props.rfb.resizeSession = newResizeSession;
+
+    if (newResizeSession) {
+      rfb.resizeSession = true;
+    } else {
+      rfb.resizeSession = false;
+      this.setState({
+        scaleDialogOpen: true,
+      });
+    }
+
+  };
+
+  handleSetScale = () => {
+    this.setState({
+      scaleDialogOpen: false,
+    });
+    const {rfb} = this.props;
+    const scale = 1 / parseFloat(document.getElementById('scale-factor').value);
+    const size = rfb._screenSize();
+    RFB.messages.setDesktopSize(rfb._sock,
+        Math.floor(size.w * scale), Math.floor(size.h * scale), rfb._screenID,
+        rfb._screenFlags);
+
+    setTimeout(() => {
+      this.props.closeSpeedDial();
+    }, 50);
   };
 
   handleToggleFullscreen = (_) => {
@@ -318,6 +349,7 @@ export default class VNCSpeedDial extends React.Component {
       resetting,
       inHdMode,
       enableAudio,
+      scaleDialogOpen,
     } = this.state;
 
     const audioConnecting = (enableAudio === null);
@@ -500,6 +532,25 @@ export default class VNCSpeedDial extends React.Component {
               >
                 Reset
               </LoadingButton>
+            </DialogActions>
+          </Dialog>
+          <Dialog open={scaleDialogOpen}>
+            <DialogTitle>Scale Factor</DialogTitle>
+            <DialogContent>
+              <DialogContentText>
+                Please enter a scale factor from 0.5 to 2, and we will try out
+                best to apply that. You may enter 1 if you don't want to sacle.
+              </DialogContentText>
+              <br/>
+              <Autocomplete id={'scale-factor'} options={['0.5', '1', '2']}
+                            defaultValue={'1'}
+                            renderInput={(params) =>
+                                <TextField variant={'standard'} {...params}
+                                           label="Scale Factor"/>}/>
+            </DialogContent>
+            <DialogActions>
+              <Button variant={'contained'} autoFocus={true}
+                      onClick={this.handleSetScale}>Confirm</Button>
             </DialogActions>
           </Dialog>
         </>

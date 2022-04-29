@@ -53,6 +53,9 @@ const setupDOM = (port, passwd) => {
   // be sent whenever the container changes dimensions. Disabled by default.
   rfb.resizeSession = true;
 
+  // in case the session doesn't support auto resize
+  rfb.scaleViewport = true;
+
   return rfb;
 };
 
