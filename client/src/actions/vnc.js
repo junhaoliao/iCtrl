@@ -257,6 +257,7 @@ export const vncConnect = async (vncViewer) => {
         // hide the Loading element
         vncViewer.setState({
           loading: false,
+          disconnected: false, // sometimes 'disconnect' (below) is fired before 'connect' for unknown reasons
         });
       });
 
