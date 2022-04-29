@@ -81,6 +81,20 @@ export default class Term extends React.Component {
       case 'Delete':
         sendKey(this, {key: 'Delete', keyCode: 46});
         break;
+
+      case '▲':
+        sendKey(this, {key: 'ArrowUp', keyCode: 38});
+        break;
+      case '▼':
+        sendKey(this, {key: 'ArrowDown', keyCode: 40});
+        break;
+      case '◀':
+        sendKey(this, {key: 'ArrowLeft', keyCode: 37});
+        break;
+      case '▶':
+        sendKey(this, {key: 'ArrowRight', keyCode: 39});
+        break;
+
       case 'Ctrl+Alt+Delete':
         console.log('Unexpected Ctrl+Alt+Delete pressed.');
         break;
@@ -110,14 +124,14 @@ export default class Term extends React.Component {
                   authentication={authentication}
                   isOverloaded={isOverloaded}
               />}
-
           <div id="terminal" style={{
             visibility: loading ? 'hidden' : 'visible',
             position: 'absolute',
             top: 0,
-            bottom: isMobile() ? 45 : 0,
+            bottom: isMobile() ? 32 : 0,
             left: 0,
             right: 0,
+            background: 'black',
           }}/>
           {isMobile() &&
               <Toolbar onToolbarSendKey={this.handleToolbarSendKey}/>
