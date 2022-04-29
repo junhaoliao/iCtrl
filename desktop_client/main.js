@@ -9,7 +9,7 @@ if (handleSquirrelEvent()) {
 }
 
 // Modules to control application life and create native browser window
-const {app, BrowserWindow, Menu, MenuItem} = require('electron');
+const {app, BrowserWindow, Menu, MenuItem, ipcMain} = require('electron');
 const {spawn} = require('child_process');
 const {resolve} = require('path');
 
@@ -205,6 +205,10 @@ app.whenReady().then(() => {
   createDashboardWindow();
   // Open the DevTools.
   // mainWindow.webContents.openDevTools()
+});
+
+ipcMain.on('version', (event, args) => {
+  event.returnValue = app.getVersion();
 });
 
 // Show dashboard in this instance if the user tries to launch another instance
