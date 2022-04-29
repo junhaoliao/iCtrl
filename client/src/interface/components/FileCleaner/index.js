@@ -29,6 +29,8 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
+  LinearProgress,
+  Stack,
   TextField,
   Typography,
 } from '@mui/material';
@@ -40,6 +42,15 @@ import {LoadingButton} from '@mui/lab';
 import QuotaUsage from '../QuotaUsage';
 import {humanFileSize} from '../../pages/FileManager/utils';
 import {FileTrie} from './FileTrie';
+
+const FileCleanerLoadingOverlay = (props) => (
+    <Stack spacing={2} alignItems={'center'}>
+      <LinearProgress {...props} sx={{width: '100%'}}/>
+      <Typography>
+        Loading... It usually takes less than a minute.
+      </Typography>
+    </Stack>
+);
 
 export default class FileCleaner extends React.Component {
   constructor(props) {
@@ -56,7 +67,14 @@ export default class FileCleaner extends React.Component {
       sortModel: [
         {field: 'size', sort: 'desc'},
       ],
+      pseudoLoadingTimer: 0,
     };
+
+    this.loadingInterval = setInterval(() => {
+      this.setState({
+        pseudoLoadingTimer: this.state.pseudoLoadingTimer + 0.3,
+      });
+    }, 300);
   }
 
   handleClose = (ev) => {
@@ -136,6 +154,7 @@ export default class FileCleaner extends React.Component {
       this.setState({
         fileList,
       });
+      clearInterval(this.loadingInterval);
     }).catch(error => {
       console.log(error);
     });
@@ -150,6 +169,7 @@ export default class FileCleaner extends React.Component {
       selectedFiles,
       selectedFilesTotalSize,
       sortModel,
+      pseudoLoadingTimer,
     } = this.state;
 
     return (
@@ -185,6 +205,13 @@ export default class FileCleaner extends React.Component {
                   onSortModelChange={this.handleSortModelChange}
                   onSelectionModelChange={this.handleSelectionModelChange}
                   disableColumnMenu={true}
+                  components={{LoadingOverlay: FileCleanerLoadingOverlay}}
+                  componentsProps={{
+                    loadingOverlay: {
+                      variant: 'determinate',
+                      value: pseudoLoadingTimer / 30 * 100,
+                    },
+                  }}
                   localeText={{
                     footerRowSelected: count =>
                         `${count} row${(count > 1) ?
@@ -215,7 +242,8 @@ export default class FileCleaner extends React.Component {
             <DialogContent style={{height: '200px'}}>
               <Typography variant={'body1'}><b>Do you wish to delete the
                 following {selectedFiles.length} file{selectedFiles.length >
-                    1 && 's'}?</b> ({humanFileSize(selectedFilesTotalSize)})</Typography>
+                    1 && 's'}?</b> ({humanFileSize(
+                  selectedFilesTotalSize)})</Typography>
               {selectedFiles.map((f) => (<p>
                 {f} ({humanFileSize(this.fileListDict[f])})
               </p>))}
