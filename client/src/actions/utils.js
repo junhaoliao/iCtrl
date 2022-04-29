@@ -71,3 +71,19 @@ export const isMobile = () => {
 export const sortListByKey = (list, key) => {
   list.sort((a, b) => (a[key] - b[key]));
 };
+
+export const openInNewWindow = (url, ev) => {
+  if (ev !== undefined){
+      ev.preventDefault();
+  }
+
+  if (window.require !== undefined){
+    window.require("electron").shell.openExternal(url);
+  } else {
+    const a = document.createElement('a');
+    a.href = url;
+    a.rel = 'noreferrer'
+    a.target = '_blank'
+    a.click();
+  }
+}
