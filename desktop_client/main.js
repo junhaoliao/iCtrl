@@ -9,7 +9,7 @@ if (handleSquirrelEvent()) {
 }
 
 // Modules to control application life and create native browser window
-const {app, BrowserWindow, Menu} = require('electron');
+const {app, BrowserWindow, Menu, MenuItem} = require('electron');
 const {spawn} = require('child_process');
 const {resolve} = require('path');
 
@@ -36,7 +36,7 @@ if (isMac) {
   ictrl_be = spawn('./ictrl_be', [mainPort],
       {
         cwd: resolve(__dirname, 'ictrl_be'),
-        shell:true // FIXME: needs to be specified since Electron 15. reasons unknown
+        shell: true, // FIXME: needs to be specified since Electron 15. reasons unknown
       });
 
   // need to have a 'window' role in the menu on mac
@@ -85,6 +85,19 @@ const setupNewWindowIcon = (url, newWindow) => {
   });
 };
 
+const setupContextMenu = (newWindow) => {
+    newWindow.webContents.on('context-menu', (_, params) => {
+    if (params.isEditable) {
+      const menu = new Menu();
+      menu.append(new MenuItem({label: 'Cut', role: 'cut'}));
+      menu.append(new MenuItem({label: 'Copy', role: 'copy'}));
+      menu.append(new MenuItem({label: 'Paste', role: 'paste'}));
+
+      menu.popup();
+    }
+  });
+}
+
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
@@ -95,7 +108,7 @@ const windowOptions = {
   webPreferences: {
     nativeWindowOpen: true,
     nodeIntegration: true,
-    contextIsolation: false
+    contextIsolation: false,
   },
 };
 let mainWindow = null;
@@ -103,6 +116,7 @@ let mainWindow = null;
 const createDashboardWindow = () => {
   // Create the dashboard window.
   mainWindow = new BrowserWindow(windowOptions);
+  setupContextMenu(mainWindow);
 
   // load dashboard
   mainWindow.setTitle('Loading... ');
@@ -126,11 +140,13 @@ const createDashboardWindow = () => {
     event.preventDefault();
 
     const newWindow = new BrowserWindow(windowOptions);
+    setupContextMenu(newWindow);
+
     newWindow.loadURL(url);
 
     if (isWindows) {
       newWindow.setAppDetails({
-          appId: url
+        appId: url,
       });
       setupNewWindowIcon(url, newWindow);
     }
@@ -147,14 +163,12 @@ const createDashboardWindow = () => {
                 text: `Downloading ${fileName}`,
               },
               `Downloading ${fileName}`,
-
           ) : new ProgressBar({
                 indeterminate: false,
                 text: `Downloading ${fileName}`,
                 maximum: totalBytes,
               },
               `Downloading ${fileName}`,
-
           );
 
           let poppedAtLeastOnce = false;
