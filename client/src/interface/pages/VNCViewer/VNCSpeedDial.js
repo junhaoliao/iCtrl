@@ -71,7 +71,7 @@ export default class VNCSpeedDial extends React.Component {
     super(props);
 
     this.audioSocket = null;
-
+    this.sizeBeforeScale = null;
     // TODO: support saving those per session
     this.state = {
       isFullscreen: Boolean(document.fullscreenElement),
@@ -229,11 +229,15 @@ export default class VNCSpeedDial extends React.Component {
       rfb.resizeSession = true;
     } else {
       rfb.resizeSession = false;
+
+      // on Android, virtual keyboard popups change the size of the client
+      //  store the size before the virtual keyboard pops up for scale prompt
+      this.sizeBeforeScale = rfb._screenSize();
+
       this.setState({
         scaleDialogOpen: true,
       });
     }
-
   };
 
   handleSetScale = () => {
@@ -241,10 +245,12 @@ export default class VNCSpeedDial extends React.Component {
       scaleDialogOpen: false,
     });
     const {rfb} = this.props;
-    const scale = 1 / parseFloat(document.getElementById('scale-factor').value);
-    const size = rfb._screenSize();
+
+    const scaleFactorValue = document.getElementById('scale-factor').value;
+    const scale = 1 / parseFloat(scaleFactorValue);
     RFB.messages.setDesktopSize(rfb._sock,
-        Math.floor(size.w * scale), Math.floor(size.h * scale), rfb._screenID,
+        Math.floor(this.sizeBeforeScale.w * scale),
+        Math.floor(this.sizeBeforeScale.h * scale), rfb._screenID,
         rfb._screenFlags);
 
     setTimeout(() => {
