@@ -550,6 +550,7 @@ export default class VNCSpeedDial extends React.Component {
               <br/>
               <Autocomplete id={'scale-factor'} options={['0.5', '1', '2']}
                             defaultValue={'1'}
+                            freeSolo={true}
                             renderInput={(params) =>
                                 <TextField variant={'standard'} {...params}
                                            label="Scale Factor"/>}/>
