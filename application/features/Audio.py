@@ -21,6 +21,7 @@
 import os
 import threading
 import uuid
+import zlib
 from typing import Optional
 
 import paramiko
@@ -133,7 +134,9 @@ class AudioWebSocket(WebSocket):
                     break
                 buffer += data
                 if len(buffer) >= AUDIO_BUFFER_SIZE:
-                    self.sendMessage(buffer)
+                    compressed = zlib.compress(buffer, level=zlib.Z_BEST_COMPRESSION)
+                    self.sendMessage(compressed)
+                    print(len(compressed) / len(buffer) * 100)
                     buffer = b''
 
         writer_thread = threading.Thread(target=writer)

@@ -21,6 +21,7 @@
  */
 
 import axios from 'axios';
+import pako from 'pako';
 import PCMPlayer from './PCMPlayer';
 
 export const launch_audio = (vncsd, sessionID) => {
@@ -45,7 +46,8 @@ export const launch_audio = (vncsd, sessionID) => {
       });
     };
     socket.onmessage = (ev) => {
-      player.feed(ev.data);
+      const inflated = pako.inflate(ev.data);
+      player.feed(inflated.buffer);
     };
     socket.onclose = (_) => {
       player.destroy();
