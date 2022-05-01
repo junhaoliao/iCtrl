@@ -24,7 +24,8 @@
     "react-transition-group": "^4.4.2",
     "react-github-btn": "^1.2.2",
     "react-easy-marquee": "^1.2.3",
-    "vscode-icons-js": "^11.6.1"
+    "vscode-icons-js": "^11.6.1",
+    "pako": "^2.0.4"
   },
   "scripts": {
     "start": "react-scripts start",
