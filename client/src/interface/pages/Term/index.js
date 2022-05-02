@@ -47,7 +47,10 @@ export default class Term extends React.Component {
     this.metaKey = false;
     this.altKey = false;
 
+    this.touchStartDelta = 0;
+
     this.state = {
+      scaleLevel: 1,
       loading: true,
       currentStep: -1,
       authentication: null,
@@ -104,6 +107,40 @@ export default class Term extends React.Component {
   };
 
   componentDidMount() {
+    if (document.body.style.zoom !== undefined) {
+      // the "zoom" attribute is only supported on Chromium
+      document.body.ontouchend = (ev) => {
+        this.touchStartDelta = 0;
+      };
+      document.addEventListener('touchmove', (ev) => {
+        ev.preventDefault();
+        const touchEndDelta = Math.hypot(
+            ev.targetTouches[0].clientX - ev.targetTouches[1].clientX,
+            ev.targetTouches[0].clientY - ev.targetTouches[1].clientY);
+
+        let newScaleLevel = this.state.scaleLevel;
+        if (this.touchStartDelta !== 0) {
+          if (touchEndDelta > this.touchStartDelta) {
+            newScaleLevel += 0.05;
+          } else {
+            newScaleLevel -= 0.05;
+          }
+          newScaleLevel = Math.max(0.5, newScaleLevel);
+          newScaleLevel = Math.min(2, newScaleLevel);
+          if (this.state.scaleLevel !== newScaleLevel) {
+            this.setState({
+              scaleLevel: newScaleLevel,
+            });
+            this.term.blur();
+            setTimeout(() => {
+              this.term.focus();
+            }, 0);
+          }
+        }
+        this.touchStartDelta = touchEndDelta;
+      }, {passive: false});
+    }
+
     updateTitle(this.session_id, 'Terminal');
 
     changeFavicon(`/api/favicon/terminal/${this.session_id}`);
@@ -112,7 +149,13 @@ export default class Term extends React.Component {
   }
 
   render() {
-    const {authentication, currentStep, loading, isOverloaded} = this.state;
+    const {
+      authentication,
+      currentStep,
+      loading,
+      isOverloaded,
+      scaleLevel,
+    } = this.state;
 
     return (
         <div>
@@ -125,13 +168,16 @@ export default class Term extends React.Component {
                   isOverloaded={isOverloaded}
               />}
           <div id="terminal" style={{
+            // transform: `scale(${scaleLevel})`,
+            zoom: `${scaleLevel}`,
             visibility: loading ? 'hidden' : 'visible',
             position: 'absolute',
             top: 0,
-            bottom: isMobile() ? 32 : 0,
+            bottom: isMobile() ? 32 * (1 / scaleLevel) : 0,
             left: 0,
             right: 0,
             background: 'black',
+            zIndex: 10,
           }}/>
           {isMobile() &&
               <Toolbar onToolbarSendKey={this.handleToolbarSendKey}/>
