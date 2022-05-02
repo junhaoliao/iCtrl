@@ -41,7 +41,6 @@ import {LoadingButton} from '@mui/lab';
 import {htmlResponseToReason} from '../../../actions/utils';
 import axios from 'axios';
 import {TransitionGroup} from 'react-transition-group';
-
 import './index.css';
 import {
   AccountBox,
@@ -58,6 +57,7 @@ import {
   hasUpperCase,
   special_symbols,
 } from './utils';
+import AdComponent from '../AdComponent';
 
 const status = ['login', 'signup'];
 
@@ -353,7 +353,7 @@ export default class LogIn extends React.Component {
         confirmPasswordValid;
 
     return (
-        <div>
+        <div style={{height: '100vh'}}>
           <AppBar position="static" color="">
             <Tabs
                 value={currentTabIndex}
@@ -502,6 +502,11 @@ export default class LogIn extends React.Component {
               {currentStatus === 'login' ? 'Log In' : 'Sign up'}
             </LoadingButton>
           </TransitionGroup>
+          <AdComponent
+              data-ad-client={'ca-pub-9503782531617816'}
+              data-ad-slot={'6122871243'}
+          />
+
         </div>
     );
   }
