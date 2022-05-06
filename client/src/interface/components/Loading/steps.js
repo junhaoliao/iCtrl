@@ -40,7 +40,7 @@ export const VNCSteps = [
     label: 'Launching VNC Session',
     description:
         `Trying to launch a VNC session on the remote machine. 
-        We will try out best to reuse any pre-existing connections.`,
+        We will try our best to reuse any pre-existing connections.`,
   },
   {
     label: 'Establishing VNC Tunnel',
