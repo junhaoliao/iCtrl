@@ -694,8 +694,8 @@ export const termConnect = async (TermViewer) => {
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      session_id: TermViewer.session_id,
-      no_load_check: TermViewer.noLoadCheck,
+      sessionID: TermViewer.session_id,
+      loadCheck: TermViewer.loadCheck,
     }),
   };
 

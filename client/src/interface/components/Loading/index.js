@@ -89,7 +89,9 @@ export default class Loading extends React.Component {
   };
 
   handleNoLoadCheck = (_) => {
-    window.location = window.location.toString() + '?no_load_check';
+    const newURL = new URL(window.location);
+    newURL.searchParams.set('load-check', 'false');
+    window.location = newURL.toString();
   };
 
   handleShowChangeMachine = (_) => {

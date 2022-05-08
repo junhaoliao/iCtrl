@@ -30,8 +30,8 @@ from ..utils import int_to_bytes
 
 @api.route('/vnc', methods=['POST'])
 def start_vnc():
-    session_id = request.json.get('session_id')
-    no_load_check = request.json.get('no_load_check')
+    session_id = request.json.get('sessionID')
+    load_check = request.json.get('loadCheck', True)
 
     def generate():
         yield int_to_bytes(ICtrlStep.VNC.SSH_AUTH)
@@ -41,7 +41,7 @@ def start_vnc():
             return
 
         yield int_to_bytes(ICtrlStep.VNC.CHECK_LOAD)
-        if vnc.is_uoft() and no_load_check is False and vnc.is_load_high():
+        if vnc.is_uoft() and load_check and vnc.is_load_high():
             yield int_to_bytes(ICtrlError.SSH.OVER_LOADED)
             return
 
