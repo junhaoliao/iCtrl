@@ -218,8 +218,8 @@ export const vncConnect = async (vncViewer) => {
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      session_id: vncViewer.session_id,
-      no_load_check: vncViewer.noLoadCheck,
+      sessionID: vncViewer.session_id,
+      loadCheck: vncViewer.loadCheck,
     }),
   };
   const response = await fetch(`/api/vnc`, options);

@@ -33,8 +33,8 @@ from ..utils import int_to_bytes
 
 @api.route('/terminal', methods=['POST'])
 def start_terminal():
-    session_id = request.json.get('session_id')
-    no_load_check = request.json.get('no_load_check')
+    session_id = request.json.get('sessionID')
+    load_check = request.json.get('loadCheck', True)
 
     def generate():
         yield int_to_bytes(ICtrlStep.Term.SSH_AUTH)
@@ -45,7 +45,7 @@ def start_terminal():
             return
 
         yield int_to_bytes(ICtrlStep.Term.CHECK_LOAD)
-        if term.is_uoft() and no_load_check is False and term.is_load_high():
+        if term.is_uoft() and load_check and term.is_load_high():
             yield int_to_bytes(ICtrlError.SSH.OVER_LOADED)
             return
 

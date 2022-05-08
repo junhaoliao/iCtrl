@@ -38,7 +38,8 @@ export default class Term extends React.Component {
 
     const {match: {params}} = this.props;
     this.session_id = params.session_id;
-    this.noLoadCheck = window.location.toString().includes('no_load_check');
+    this.loadCheck = new URLSearchParams(window.location.search).get(
+        'load-check') !== 'false';
 
     this.resize_timeout = null;
 
