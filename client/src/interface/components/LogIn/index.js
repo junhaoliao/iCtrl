@@ -57,7 +57,6 @@ import {
   hasUpperCase,
   special_symbols,
 } from './utils';
-import AdComponent from '../AdComponent';
 
 const status = ['login', 'signup'];
 
@@ -502,10 +501,10 @@ export default class LogIn extends React.Component {
               {currentStatus === 'login' ? 'Log In' : 'Sign up'}
             </LoadingButton>
           </TransitionGroup>
-          <AdComponent
-              data-ad-client={'ca-pub-9503782531617816'}
-              data-ad-slot={'6122871243'}
-          />
+          {/*<AdComponent*/}
+          {/*    data-ad-client={'ca-pub-9503782531617816'}*/}
+          {/*    data-ad-slot={'6122871243'}*/}
+          {/*/>*/}
 
         </div>
     );
