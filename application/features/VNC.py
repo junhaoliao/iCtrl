@@ -71,6 +71,12 @@ class VNC(Connection):
     def check_5900_open(self):
         _, _, stdout, _ = self.exec_command_blocking('ss -tulpn | grep LISTEN | grep :5900')
         result = stdout.readline()
+
+        if result == '':
+            # possibly using mac
+            _, _, stdout, _ = self.exec_command_blocking('netstat -an | grep LISTEN | grep .5900')
+            result = stdout.readline()
+
         return result != ''
 
     def remove_vnc_settings(self):
