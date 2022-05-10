@@ -24,7 +24,7 @@ export const introduction = `iCtrl is a web-based remote control software, which
 supports Virtual Network Console (VNC) connections with a graphical interface, 
 Secure Shell (SSH) connections with a terminal interface, user profile 
 management, change machines with workload detection, file transfer, and mobile 
-compatibility.`;
+compatibility. Audio support is experimental at this moment. `;
 
 export const disclaimer = <>
   <p>If you are using the desktop client, your SSH hosts and credentials will be
@@ -56,10 +56,21 @@ export const supervisors = [
   },
 ];
 
-export const admins = [
+export const specialThanks = [
+  {
+    name: 'Betz, Vaughn',
+    url: 'https://www.eecg.utoronto.ca/~vaughn/',
+    reason: `Extensive support for the application's integration into ECE297. `,
+  },
   {
     name: 'Phang, Khoman',
     url: 'https://www.eecg.utoronto.ca/~kphang/',
+    reason: `Capstone project administrator. `,
+  },
+  {
+    name: 'Richard Junjie Shen',
+    url: 'https://www.linkedin.com/in/junjie-shen-38a450210/',
+    reason: `Icon designer. `,
   },
 ];
 

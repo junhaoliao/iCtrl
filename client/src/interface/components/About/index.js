@@ -37,15 +37,47 @@ import {
 } from '@mui/material';
 import Marquee from 'react-easy-marquee';
 import {
-  admins,
   authors,
   disclaimer,
   introduction,
   projects,
+  specialThanks,
   supervisors,
 } from './info';
 import Avatar from '@mui/material/Avatar';
 import LinkForNewWindow from '../LinkToNewWindow';
+
+import iCtrlQRCode from './iCtrlQRCode.svg';
+import './index.css';
+
+const AboutSection = (props) => (
+    <>
+      <Divider>
+        <Chip label={<b>{props.title}</b>} variant={'outlined'}
+              size={'small'}/>
+      </Divider>
+      <List className={'selectable'}>
+        {props.list.map((i) => (<ListItem key={i.name}>
+          {i.pic && <ListItemAvatar>
+            <Avatar>
+              <img width={'100%'} src={i.pic}
+                   alt={`${i.name} Profile`}/>
+            </Avatar>
+          </ListItemAvatar>}
+          <ListItemText
+              primary={i.name}
+              secondary={<div>
+                {i.reason && <Typography variant={'body2'}>
+                  {i.reason}
+                </Typography>}
+                <LinkForNewWindow
+                    url={i.url}>{i.url}</LinkForNewWindow>
+              </div>
+              }/>
+        </ListItem>))}
+      </List>
+    </>
+);
 
 export default class About extends React.Component {
   handleClose = (_) => {
@@ -58,76 +90,51 @@ export default class About extends React.Component {
 
     return <Dialog open={true} fullWidth={true} maxWidth={'md'}>
       <DialogTitle>About iCtrl {version && `(v${version})`}</DialogTitle>
-      <DialogContent style={{maxHeight: '630px'}} className={'selectable'}>
-        <p>
-          {introduction}
-        </p>
-        <Divider>
-          <Chip label={<b>Supervisor</b>} variant={'outlined'} size={'small'}/>
-        </Divider>
-        <List>
-          {supervisors.map((s) => (<ListItem key={s.name}>
-            <ListItemText
-                primary={s.name}
-                secondary={<LinkForNewWindow url={s.url}>{s.url}</LinkForNewWindow>}/>
-          </ListItem>))}
-        </List>
+      <DialogContent style={{maxHeight: '630px'}}>
+        <div>
+          <img width={85} src={iCtrlQRCode} alt={'ictrl-qr-code'}
+               style={{
+                 float: 'right',
+                 marginLeft: '10px',
+                 marginBottom: '10px',
+               }}/>
+          <p className={'about-section-container selectable'}>
+            {introduction}
+          </p>
+        </div>
 
-        <Divider>
-          <Chip label={<b>Administrator</b>} variant={'outlined'}
-                size={'small'}/>
-        </Divider>
-        <List>
-          {admins.map((a) => (<ListItem key={a.name}>
-            <ListItemText
-                primary={a.name}
-                secondary={<LinkForNewWindow url={a.url}>{a.url}</LinkForNewWindow>}/>
-          </ListItem>))}
-        </List>
-
-        <Divider>
-          <Chip label={<b>Authors - Team 2021320</b>} variant={'outlined'}
-                size={'small'}/>
-        </Divider>
-        <List>
-          {authors.map((a) => (<ListItem key={a.name}>
-            <ListItemAvatar>
-              <Avatar>
-                <img width={'100%'} src={a.pic}
-                     alt={`${a.name} Profile`}/>
-              </Avatar>
-            </ListItemAvatar>
-            <ListItemText
-                primary={a.name}
-                secondary={<LinkForNewWindow url={a.url}>{a.url}</LinkForNewWindow>}/>
-          </ListItem>))}
-        </List>
+        <AboutSection title={'Authors'} list={authors}/>
+        <AboutSection title={'Supervisor'} list={supervisors}/>
+        <AboutSection title={'Special Thanks'} list={specialThanks}/>
 
         <Divider>
           <Chip label={<b>Open Source Projects</b>} variant={'outlined'}
                 size={'small'}/>
         </Divider>
-        <Typography variant={'body2'}>
-          Thanks to the following open source projects:
-        </Typography>
-        <Marquee axis={'Y'} height={'200px'} duration={projects.length * 1000}
-                 reverse={true}
-                 pauseOnHover={true}>
-          <List>
-            {projects.map((p) => (<p key={p.name}>
-              <b>{p.name}</b>
-              <br/>
-              <LinkForNewWindow url={p.url}>{p.url}</LinkForNewWindow>
-              {p.url2 && <br/>}
-              {p.url2 && <LinkForNewWindow url={p.url2}>{p.url2}</LinkForNewWindow>}
-            </p>))}
-          </List>
-        </Marquee>
+        <div className={'about-section-container'}>
+          <Typography variant={'body2'}>
+            Thanks to the following open source projects:
+          </Typography>
+          <Marquee axis={'Y'} height={'200px'} duration={projects.length * 1000}
+                   reverse={true}
+                   pauseOnHover={true}>
+            <List>
+              {projects.map((p) => (<p key={p.name}>
+                <b>{p.name}</b>
+                <br/>
+                <LinkForNewWindow url={p.url}>{p.url}</LinkForNewWindow>
+                {p.url2 && <br/>}
+                {p.url2 &&
+                    <LinkForNewWindow url={p.url2}>{p.url2}</LinkForNewWindow>}
+              </p>))}
+            </List>
+          </Marquee>
+        </div>
 
         <Divider>
           <Chip label={<b>Disclaimer</b>} variant={'outlined'} size={'small'}/>
         </Divider>
-        <div>
+        <div className={'about-section-container'}>
           {disclaimer}
         </div>
       </DialogContent>
