@@ -352,7 +352,7 @@ export default class LogIn extends React.Component {
         confirmPasswordValid;
 
     return (
-        <div style={{height: '100vh'}}>
+        <>
           <AppBar position="static" color="">
             <Tabs
                 value={currentTabIndex}
@@ -506,7 +506,7 @@ export default class LogIn extends React.Component {
           {/*    data-ad-slot={'6122871243'}*/}
           {/*/>*/}
 
-        </div>
+        </>
     );
   }
 }
