@@ -21,7 +21,7 @@ The tool is provided in two variants: a web service and a desktop client. You ca
 
 
 ### Option II. Desktop Client
-1. Go to https://desktop.ictrl.ca
+1. Go to https://ictrl.ca
 2. Download the desktop client for your platform (Mac or Windows)
 3. i. On a Mac computer, you can open the DMG file and drag the app into the "Application" folder. Then you can find the installed app in LaunchPad or "Applications" in Finder. \
    ii. On a Windows computer, the installer download might be blocked. Check your browser settings and click on "Keep Anyways" to download the installer. Once the download is finished, double click on the installer, and the app will be installed in your user directory. You can find the installed app in the Start Menu. 
