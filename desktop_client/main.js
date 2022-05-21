@@ -9,7 +9,9 @@ if (handleSquirrelEvent()) {
 }
 
 // Modules to control application life and create native browser window
-const {app, BrowserWindow, Menu, MenuItem, ipcMain} = require('electron');
+const {app, BrowserWindow, Menu, MenuItem, ipcMain, session} = require(
+    'electron');
+const {randomUUID} = require('crypto');
 const {spawn} = require('child_process');
 const {resolve} = require('path');
 
@@ -24,6 +26,7 @@ if (!gotTheLock) {
 const {getFreePort, humanFileSize} = require('./utils');
 const ProgressBar = require('./ProgressBar');
 const mainPort = getFreePort();
+const localAuthKey = randomUUID();
 
 const isMac = process.platform === 'darwin';
 const isLinux = process.platform === 'linux';
@@ -33,7 +36,7 @@ const isWindows = process.platform === 'win32';
 // the backend process handle
 let ictrl_be = null;
 if (isMac) {
-  ictrl_be = spawn('./ictrl_be', [mainPort],
+  ictrl_be = spawn('./ictrl_be', [mainPort, localAuthKey],
       {
         cwd: resolve(__dirname, 'ictrl_be'),
         shell: true, // FIXME: needs to be specified since Electron 15. reasons unknown
@@ -48,11 +51,11 @@ if (isMac) {
     }];
   Menu.setApplicationMenu(Menu.buildFromTemplate(menuTemplate));
 } else if (isWindows) {
-  ictrl_be = spawn('ictrl_be.exe', [mainPort],
+  ictrl_be = spawn('ictrl_be.exe', [mainPort, localAuthKey],
       {cwd: resolve(__dirname, 'ictrl_be')});
   Menu.setApplicationMenu(null);
 } else if (isLinux) {
-  ictrl_be = spawn('./ictrl_be', [mainPort],
+  ictrl_be = spawn('./ictrl_be', [mainPort, localAuthKey],
       {cwd: resolve(__dirname, 'ictrl_be')});
   Menu.setApplicationMenu(null);
 } else {
@@ -112,6 +115,19 @@ const windowOptions = {
   },
 };
 let mainWindow = null;
+
+const setupLocalAuth = () => {
+  // Modify the user agent for all requests to the following urls.
+  const filter = {
+    urls: ['http://127.0.0.1/*'],
+  };
+
+  session.defaultSession.webRequest.onBeforeSendHeaders(filter,
+      (details, callback) => {
+        details.requestHeaders['Authorization'] = `Bearer ${localAuthKey}`;
+        callback({requestHeaders: details.requestHeaders});
+      });
+};
 
 const createDashboardWindow = () => {
   // Create the dashboard window.
@@ -202,6 +218,7 @@ const createDashboardWindow = () => {
 };
 
 app.whenReady().then(() => {
+  setupLocalAuth();
   createDashboardWindow();
   // Open the DevTools.
   // mainWindow.webContents.openDevTools()

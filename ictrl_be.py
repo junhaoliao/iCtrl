@@ -19,12 +19,26 @@
 #   IN THE SOFTWARE.
 
 if __name__ == '__main__':
-    from application import api, app, APP_HOST, APP_PORT
+    from application import api, app, APP_HOST, APP_PORT, LOCAL_AUTH_KEY
 
     if not app.debug:
         import os
 
-        from flask import send_from_directory
+        from flask import abort, request, send_from_directory
+
+
+        @app.before_request
+        def before_request():
+            if LOCAL_AUTH_KEY != '':
+                try:
+                    auth_type, auth_key = request.headers.get('Authorization').split()
+                    if auth_type != 'Bearer' or auth_key != LOCAL_AUTH_KEY:
+                        abort(403, "You are not authorized to access this API.")
+                except Exception as e:
+                    abort(403, "You are not authorized to access this API.")
+
+                    print("Auth failure: is anyone hacking?")
+                    raise e
 
 
         # Reference: https://stackoverflow.com/questions/44209978/serving-a-front-end-created-with-create-react-app-with
