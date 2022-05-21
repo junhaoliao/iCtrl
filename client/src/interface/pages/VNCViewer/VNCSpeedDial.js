@@ -54,12 +54,12 @@ import {
 } from '@mui/icons-material';
 
 import './index.css';
-import {LoadingButton} from '@mui/lab';
-import {focusOnKeyboard, resetVNC} from '../../../actions/vnc';
+import {focusOnKeyboard} from '../../../actions/vnc';
 import axios from 'axios';
 import {launch_audio} from '../../../actions/audio';
 import RFB from '@novnc/novnc/core/rfb';
 import {IOSSwitch} from '../../components/IOSSwitch';
+import ResetVNCDialog from '../../components/ResetVNCDialog';
 
 const speedDialTooltipWidth = 180;
 
@@ -85,7 +85,6 @@ export default class VNCSpeedDial extends React.Component {
       qualityLevel: 6,
       compressionLevel: 2,
       resetDialogOpen: false,
-      resetting: false,
       inHdMode: false,
       scaleDialogOpen: false,
     };
@@ -305,17 +304,9 @@ export default class VNCSpeedDial extends React.Component {
   };
 
   handleResetDialogClose = (ev) => {
-    if (ev.target.id === 'reset-cancel-button') {
-      this.setState({
-        resetDialogOpen: false,
-      });
-    } else {
-      this.setState({
-        resetting: true,
-      });
-      this.props.onVNCReset();
-      resetVNC(this.props.session_id);
-    }
+    this.setState({
+      resetDialogOpen: false,
+    });
   };
 
   componentDidMount() {
@@ -328,13 +319,12 @@ export default class VNCSpeedDial extends React.Component {
         cmd: 'gsettings get org.mate.interface window-scaling-factor',
       }).then((response) => {
         const {data} = response;
-        if (data === 2) {
-          webFrame.setZoomFactor(0.5);
+        if (data >= 2) {
+          webFrame.setZoomFactor(1 / data);
           this.setState({
             inHdMode: true,
           });
         }
-
       });
     }
 
@@ -346,6 +336,7 @@ export default class VNCSpeedDial extends React.Component {
       onSpeedDialClose: handleSpeedDialClose,
       onSpeedDialOpen: handleSpeedDialOpen,
       onFabHide: handleFabHide,
+      session_id,
     } = this.props;
     const {
       speedDialDirection,
@@ -355,7 +346,6 @@ export default class VNCSpeedDial extends React.Component {
       resizeSession,
       isFullscreen,
       resetDialogOpen,
-      resetting,
       inHdMode,
       enableAudio,
       scaleDialogOpen,
@@ -508,34 +498,12 @@ export default class VNCSpeedDial extends React.Component {
               tooltipPlacement={tooltipPlacement}
           />
         </SpeedDial>
-          <Dialog
-              open={resetDialogOpen}
-              keepMounted
-              onClose={this.handleResetDialogClose}
-          >
-            <DialogTitle>{'Do you wish to reset the VNC session? '}</DialogTitle>
-            <DialogContent>
-              <DialogContentText>
-                If you broke the VNC session by mistakenly logging out in the
-                VNC screen,
-                or you wish to change your VNC password, you may proceed to
-                reset your VNC settings.
-              </DialogContentText>
-            </DialogContent>
-            <DialogActions>
-              <Button id={'reset-cancel-button'}
-                      onClick={this.handleResetDialogClose}>Cancel</Button>
-              <LoadingButton
-                  variant={'contained'}
-                  loading={resetting}
-                  loadingPosition="start"
-                  startIcon={<Refresh/>}
-                  onClick={this.handleResetDialogClose}
-              >
-                Reset
-              </LoadingButton>
-            </DialogActions>
-          </Dialog>
+
+          <ResetVNCDialog open={resetDialogOpen}
+                          sessionID={session_id}
+                          onClose={this.handleResetDialogClose}
+                          onReset={this.props.onVNCReset}/>
+
           <Dialog open={scaleDialogOpen}>
             <DialogTitle>Scale Factor</DialogTitle>
             <DialogContent>
