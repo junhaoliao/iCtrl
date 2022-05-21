@@ -48,13 +48,13 @@ const setupDOM = (port, passwd) => {
   /* Setup the VNC default options */
   // Reference: https://github.com/novnc/noVNC/blob/master/docs/API.md
 
+  // in case the session doesn't support auto resize
+  rfb.scaleViewport = true;
+
   // resizeSession:
   // Is a boolean indicating if a request to resize the remote session should
   // be sent whenever the container changes dimensions. Disabled by default.
   rfb.resizeSession = true;
-
-  // in case the session doesn't support auto resize
-  rfb.scaleViewport = true;
 
   return rfb;
 };
