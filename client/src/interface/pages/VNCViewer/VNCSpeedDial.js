@@ -59,6 +59,9 @@ import {focusOnKeyboard, resetVNC} from '../../../actions/vnc';
 import axios from 'axios';
 import {launch_audio} from '../../../actions/audio';
 import RFB from '@novnc/novnc/core/rfb';
+import {IOSSwitch} from '../../components/IOSSwitch';
+
+const speedDialTooltipWidth = 180;
 
 let webFrame = null;
 if (window.require !== undefined) {
@@ -406,7 +409,7 @@ export default class VNCSpeedDial extends React.Component {
           {webFrame && <SpeedDialAction
               key={'hd-mode'}
               icon={inHdMode ? <Hd/> : <Sd/>}
-              tooltipTitle={<Box display={'flex'} width={200}>
+              tooltipTitle={<Box display={'flex'} width={speedDialTooltipWidth}>
                 <Box flexGrow={1} className={'speed-dial-action-title'}>HD
                   Mode</Box>
                 <Box>{inHdMode ?
@@ -421,13 +424,11 @@ export default class VNCSpeedDial extends React.Component {
           {document.fullscreenEnabled && <SpeedDialAction
               key={'toggle-fullscreen'}
               icon={isFullscreen ? <Fullscreen/> : <FullscreenExit/>}
-              tooltipTitle={<Box display={'flex'} width={200}>
+              tooltipTitle={<Box display={'flex'} width={speedDialTooltipWidth}>
                 <Box flexGrow={1} className={'speed-dial-action-title'}>Full
                   Screen</Box>
-                <Box>{isFullscreen ?
-                    <span className={'enabled-text'}> Enabled</span> :
-                    <span className={'disabled-text'}> Disabled</span>
-                }</Box>
+                <IOSSwitch checked={isFullscreen}
+                           onChange={this.handleToggleFullscreen}/>
               </Box>}
               tooltipOpen
               tooltipPlacement={tooltipPlacement}
@@ -436,15 +437,12 @@ export default class VNCSpeedDial extends React.Component {
           <SpeedDialAction
               key={'toggle-audio'}
               icon={enableAudio ? <MusicNote/> : <MusicOff/>}
-              tooltipTitle={<Box display={'flex'} width={200}>
-                <Box flexGrow={1} className={'speed-dial-action-title'}>Audio
-                  (Beta)</Box>
-                <Box>{enableAudio ?
-                    <span className={'enabled-text'}> Enabled</span> :
-                    (audioConnecting) ?
-                        <span className={'enabled-text'}> Connecting</span> :
-                        <span className={'disabled-text'}> Disabled</span>
-                }</Box>
+              tooltipTitle={<Box display={'flex'} width={speedDialTooltipWidth}>
+                <Box flexGrow={1}
+                     className={'speed-dial-action-title'}>Audio</Box>
+                <IOSSwitch checked={enableAudio}
+                           disabled={audioConnecting}
+                           onChange={this.handleToggleAudio}/>
               </Box>}
               tooltipOpen
               tooltipPlacement={tooltipPlacement}
@@ -453,13 +451,11 @@ export default class VNCSpeedDial extends React.Component {
           <SpeedDialAction
               key={'toggle-resize'}
               icon={resizeSession ? <FitScreen/> : <AspectRatio/>}
-              tooltipTitle={<Box display={'flex'} width={200}>
+              tooltipTitle={<Box display={'flex'} width={speedDialTooltipWidth}>
                 <Box flexGrow={1} className={'speed-dial-action-title'}>Auto
                   Resize</Box>
-                <Box>{resizeSession ?
-                    <span className={'enabled-text'}> Enabled</span> :
-                    <span className={'disabled-text'}> Disabled</span>
-                }</Box>
+                <IOSSwitch checked={resizeSession}
+                           onChange={this.handleToggleResize}/>
               </Box>}
               tooltipOpen
               tooltipPlacement={tooltipPlacement}
@@ -470,7 +466,7 @@ export default class VNCSpeedDial extends React.Component {
               key={'quality'}
               icon={<HighQuality/>}
               tooltipTitle={<Stack>
-                <Box display={'flex'} width={200}>
+                <Box display={'flex'} width={speedDialTooltipWidth}>
                   <Box flexGrow={1}
                        className={'speed-dial-action-title'}>Quality</Box>
                   <Box>{qualityLevel}</Box>
@@ -493,7 +489,7 @@ export default class VNCSpeedDial extends React.Component {
               key={'compression'}
               icon={<LensBlur/>}
               tooltipTitle={<Stack>
-                <Box display={'flex'} width={200}>
+                <Box display={'flex'} width={speedDialTooltipWidth}>
                   <Box flexGrow={1}
                        className={'speed-dial-action-title'}>Compression</Box>
                   <Box>{compressionLevel}</Box>
