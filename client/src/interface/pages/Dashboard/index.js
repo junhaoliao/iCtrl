@@ -47,6 +47,7 @@ import StorageIcon from '@mui/icons-material/Storage';
 import {ConsoleIcon, FileManagerIcon, RemoteDesktopIcon} from '../../../icons';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import DeleteIcon from '@mui/icons-material/Delete';
+import RefreshIcon from '@mui/icons-material/Refresh';
 import ChangeMachine from '../../components/ChangeMachine';
 import LogoutIcon from '@mui/icons-material/Logout';
 
@@ -58,6 +59,7 @@ import logo from '../../../icons/logo.webp';
 import {canChangeMachine, openInNewWindow} from '../../../actions/utils';
 import About from '../../components/About';
 import GitHubButton from 'react-github-btn';
+import ResetVNCDialog from '../../components/ResetVNCDialog';
 
 export default class Dashboard extends React.Component {
   constructor(props) {
@@ -73,6 +75,7 @@ export default class Dashboard extends React.Component {
       sessions: {},
       isLocal: true,
       aboutOpened: false,
+      resettingSessionID: null,
     };
   }
 
@@ -88,23 +91,23 @@ export default class Dashboard extends React.Component {
     this.setState({changeMachineSessionId: null});
   };
 
-  handleFeatureClick(sessionId, type) {
+  handleFeatureClick(sessionID, type) {
     switch (type) {
       case 'CM':
-        this.handleChangeMachineOpen(sessionId);
+        this.handleChangeMachineOpen(sessionID);
         break;
       case 'vnc':
-        window.open(`/vnc/${sessionId}`, '_blank');
+        window.open(`/vnc/${sessionID}`, '_blank');
         break;
       case 'term':
-        window.open(`/terminal/${sessionId}`, '_blank');
+        window.open(`/terminal/${sessionID}`, '_blank');
         break;
       case 'file':
-        window.open(`/fm/${sessionId}`, '_blank');
+        window.open(`/fm/${sessionID}`, '_blank');
         break;
       case 'delete':
         axios.delete(`/api/session`, {
-          params: {session_id: sessionId},
+          params: {session_id: sessionID},
         }).then(response => {
           console.log(response.data);
           window.location.reload();
@@ -112,7 +115,13 @@ export default class Dashboard extends React.Component {
           console.log(error);
         });
         break;
+      case 'resetVNC':
+        this.setState({
+          resettingSessionID: sessionID,
+        });
+        break;
       default:
+        alert(`Feature ${type} on session ${sessionID} not implemented. `);
         return;
     }
   }
@@ -162,6 +171,12 @@ export default class Dashboard extends React.Component {
     });
   };
 
+  handleResetDialogClose = () => {
+    this.setState({
+      resettingSessionID: null,
+    });
+  };
+
   componentDidMount() {
     axios.get('/api/profiles').then(response => {
       const {sessions, version} = response.data;
@@ -186,6 +201,7 @@ export default class Dashboard extends React.Component {
       sessions,
       isLocal,
       aboutOpened,
+      resettingSessionID,
     } = this.state;
 
     const sessionList = [];
@@ -193,10 +209,10 @@ export default class Dashboard extends React.Component {
         sessions[changeMachineSessionId].host :
         null;
 
-    for (const [key, value] of Object.entries(sessions)) {
-      const showCM = canChangeMachine(value.host);
+    for (const [sessionID, sessionProps] of Object.entries(sessions)) {
+      const showCM = canChangeMachine(sessionProps.host);
       sessionList.push(
-          <ListItem style={{cursor: 'default'}} button key={key}
+          <ListItem style={{cursor: 'default'}} button key={sessionID}
                     onDoubleClick={(ev) => {
                       // open VNC when double-clicked
 
@@ -204,13 +220,13 @@ export default class Dashboard extends React.Component {
                         // don't open VNC when the menu button is double-clicked
                         return;
                       }
-                      this.handleMenuClick(key, 'vnc');
+                      this.handleMenuClick(sessionID, 'vnc');
                     }}>
             <ListItemAvatar>
-              <BackgroundLetterAvatar name={value.host}/>
+              <BackgroundLetterAvatar name={sessionProps.host}/>
             </ListItemAvatar>
             <ListItemText
-                primary={value.host}
+                primary={sessionProps.host}
                 primaryTypographyProps={{
                   style: {
                     fontSize: 18,
@@ -218,37 +234,49 @@ export default class Dashboard extends React.Component {
                     wordWrap: 'break-word',
                   },
                 }}
-                secondary={value.username}/>
+                secondary={sessionProps.username}/>
             <Menu
                 anchorEl={anchorEl}
-                open={anchorSessionId === key}
+                open={anchorSessionId === sessionID}
                 onClose={this.handleMenuClose}
             >
               <Hidden smUp>
                 {showCM &&
-                    <MenuItem onClick={() => this.handleMenuClick(key, 'CM')}>
+                    <MenuItem
+                        onClick={() => this.handleMenuClick(sessionID, 'CM')}>
                       <ListItemIcon><StorageIcon
                           style={{color: '#4caf50'}}/></ListItemIcon>
                       Change Machine
                     </MenuItem>}
-                <MenuItem onClick={() => this.handleMenuClick(key, 'vnc')}>
+                <MenuItem
+                    onClick={() => this.handleMenuClick(sessionID, 'vnc')}>
                   <ListItemIcon><RemoteDesktopIcon
                       style={{color: 'lightcoral'}}/>
                   </ListItemIcon>
                   VNC
                 </MenuItem>
-                <MenuItem onClick={() => this.handleMenuClick(key, 'term')}>
+                <MenuItem
+                    onClick={() => this.handleMenuClick(sessionID, 'term')}>
                   <ListItemIcon><ConsoleIcon
                       style={{color: 'black'}}/></ListItemIcon>
                   Terminal
                 </MenuItem>
-                <MenuItem onClick={() => this.handleMenuClick(key, 'file')}>
+                <MenuItem
+                    onClick={() => this.handleMenuClick(sessionID, 'file')}>
                   <ListItemIcon><FileManagerIcon
                       style={{color: '#1976d2'}}/></ListItemIcon>
                   File Manager
                 </MenuItem>
               </Hidden>
-              <MenuItem onClick={() => this.handleMenuClick(key, 'delete')}>
+              <MenuItem
+                  onClick={() => this.handleMenuClick(sessionID, 'resetVNC')}>
+                <ListItemIcon><RefreshIcon
+                    style={{color: 'orange'}}/>
+                </ListItemIcon>
+                Reset VNC
+              </MenuItem>
+              <MenuItem
+                  onClick={() => this.handleMenuClick(sessionID, 'delete')}>
                 <ListItemIcon><DeleteIcon
                     style={{color: 'grey'}}/></ListItemIcon>
                 Delete
@@ -259,7 +287,8 @@ export default class Dashboard extends React.Component {
                 {showCM &&
                     <Tooltip title="Change Machine" aria-label="change machine">
                       <IconButton
-                          onClick={() => this.handleFeatureClick(key, 'CM')}>
+                          onClick={() => this.handleFeatureClick(sessionID,
+                              'CM')}>
                         <StorageIcon style={{color: '#4caf50'}}
                                      fontSize={'large'}/>
                       </IconButton>
@@ -267,27 +296,30 @@ export default class Dashboard extends React.Component {
                 }
                 <Tooltip title="VNC" aria-label="VNC">
                   <IconButton
-                      onClick={() => this.handleFeatureClick(key, 'vnc')}>
+                      onClick={() => this.handleFeatureClick(sessionID, 'vnc')}>
                     <RemoteDesktopIcon style={{color: 'lightcoral'}}
                                        fontSize={'large'}/>
                   </IconButton>
                 </Tooltip>
                 <Tooltip title="Terminal" aria-label="terminal">
                   <IconButton
-                      onClick={() => this.handleFeatureClick(key, 'term')}>
+                      onClick={() => this.handleFeatureClick(sessionID,
+                          'term')}>
                     <ConsoleIcon style={{color: 'black'}} fontSize={'large'}/>
                   </IconButton>
                 </Tooltip>
                 <Tooltip title="File Manager" aria-label="file manager">
                   <IconButton
-                      onClick={() => this.handleFeatureClick(key, 'file')}>
+                      onClick={() => this.handleFeatureClick(sessionID,
+                          'file')}>
                     <FileManagerIcon style={{color: '#1976d2'}}
                                      fontSize={'large'}/>
                   </IconButton>
                 </Tooltip>
               </Hidden>
               <Tooltip title="More Options" aria-label="more options">
-                <IconButton onClick={(ev) => this.handleMenuOpen(ev, key)}>
+                <IconButton
+                    onClick={(ev) => this.handleMenuOpen(ev, sessionID)}>
                   <MoreVertIcon fontSize={'large'}/>
                 </IconButton>
               </Tooltip>
@@ -390,6 +422,10 @@ export default class Dashboard extends React.Component {
                       changeMachineHost.indexOf('.'))}
                   onChangeMenuClose={this.handleChangeMachineClose}/>}
           {aboutOpened && <About onClose={this.handleAboutClose}/>}
+
+          <ResetVNCDialog open={Boolean(resettingSessionID)}
+                          sessionID={resettingSessionID}
+                          onClose={this.handleResetDialogClose}/>
         </>
     );
   }

@@ -31,7 +31,11 @@ export default class ResetVNCDialog extends React.Component {
       this.setState({
         resetting: true,
       });
-      handleVNCReset();
+
+      if (handleVNCReset !== undefined) {
+        handleVNCReset();
+      }
+
       resetVNC(sessionID);
     }
   };
