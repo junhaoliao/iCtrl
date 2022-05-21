@@ -38,10 +38,13 @@ else:
 app.secret_key = os.getenv('SECRET_KEY', os.urandom(16))
 
 APP_PORT: int
+LOCAL_AUTH_KEY: str
 try:
     APP_PORT = int(sys.argv[1])
+    LOCAL_AUTH_KEY = sys.argv[2]
 except IndexError:
     APP_PORT = 5000
+    LOCAL_AUTH_KEY = ''
 
 APP_HOST = '127.0.0.1'
 

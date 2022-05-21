@@ -8,6 +8,7 @@ cryptography == 37.0.1
 cachetools == 5.0.0
 SQLAlchemy == 1.4.36
 pyinstaller == 4.10
+Flask==2.1.2
 Flask-SQLAlchemy == 2.5.1
 zipstream-new == 1.1.8
 paramiko == 2.10.4
