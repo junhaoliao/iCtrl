@@ -118,6 +118,15 @@ export default class PCMPlayer {
       }
     }
 
+    // sync playback time with the actual clock
+    const dateTotalDuration = (Date.now() - this.dateStart) / 1000;
+    if (this.startTime - dateTotalDuration > this.options.flushInterval * 3 /
+        1000) {
+      // console.log('realtime', dateTotalDuration, ', startTime', this.startTime);
+      console.log('real time sync', this.startTime, dateTotalDuration);
+      this.startTime = dateTotalDuration - this.options.flushInterval / 1000;
+    }
+
     // sync playback time with the context
     // TODO: test on FireFox due to reduced precision for timing attack prevention
     //  https://developer.mozilla.org/en-US/docs/Web/API/BaseAudioContext/currentTime
@@ -139,13 +148,6 @@ export default class PCMPlayer {
     // when the next chunk of samples should be play
     this.startTime += audioBuffer.duration;
 
-    // sync playback time with the actual clock
-    const dateTotalDuration = (Date.now() - this.dateStart) / 1000;
-    if (this.startTime - dateTotalDuration > this.options.flushInterval * 3 /
-        1000) {
-      console.log('real time sync', this.startTime, dateTotalDuration);
-      this.startTime = dateTotalDuration;
-    }
     this.samples = [];
   };
 

@@ -136,7 +136,7 @@ class AudioWebSocket(WebSocket):
                 if len(buffer) >= AUDIO_BUFFER_SIZE:
                     compressed = zlib.compress(buffer, level=zlib.Z_BEST_COMPRESSION)
                     self.sendMessage(compressed)
-                    print(len(compressed) / len(buffer) * 100)
+                    # print(len(compressed) / len(buffer) * 100)
                     buffer = b''
 
         writer_thread = threading.Thread(target=writer)
