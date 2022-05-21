@@ -100,14 +100,17 @@ class VNC(Connection):
             # cp /etc/vnc/xstartup ~/.vnc
             #  : provide a xstartup file to prevent the VNC settings dialog from popping up
             "killall -q -w xvfb-run Xtigervnc",
+
             "rm -rf ~/.vnc",
             "mkdir ~/.vnc",
+
             f"printf '{VNC.read_xstartup()}' > ~/.vnc/xstartup",
             "cp /etc/vnc/xstartup ~/.vnc  >& /dev/null",
+            "chmod 700 ~/.vnc/xstartup",
+
             "echo '%s'| xxd -r -p > ~/.vnc/passwd" % hexed_passwd,
             "chmod 600 ~/.vnc/passwd",
         ]
-        print(f"printf '{VNC.read_xstartup()}' > ~/.vnc/xstartup")
         _, _, _, stderr = self.exec_command_blocking(';'.join(reset_cmd_lst))
         for line in stderr:
             if "Disk quota exceeded" in line:
@@ -150,7 +153,7 @@ class VNC(Connection):
             vnc_port = int(ports_by_me[0])
         else:
             for vnc_prompt in stdout:
-                match = re.search("at :(\d+)", vnc_prompt)
+                match = re.search(":(\d+)", vnc_prompt)
                 if match:
                     vnc_port = int(match.group(1))
                     break
