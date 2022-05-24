@@ -74,6 +74,7 @@ const setupNewWindowIcon = (url, newWindow) => {
     hostname: '127.0.0.1',
     port: mainPort,
     path: `/api/favicon/${feature}/${sessionId}`,
+    headers: {'Authorization': `Bearer ${localAuthKey}`},
   }, (msg) => {
     const result = [];
 
@@ -89,7 +90,7 @@ const setupNewWindowIcon = (url, newWindow) => {
 };
 
 const setupContextMenu = (newWindow) => {
-    newWindow.webContents.on('context-menu', (_, params) => {
+  newWindow.webContents.on('context-menu', (_, params) => {
     if (params.isEditable) {
       const menu = new Menu();
       menu.append(new MenuItem({label: 'Cut', role: 'cut'}));
@@ -99,7 +100,7 @@ const setupContextMenu = (newWindow) => {
       menu.popup();
     }
   });
-}
+};
 
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
