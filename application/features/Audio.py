@@ -29,7 +29,7 @@ from SimpleWebSocketServer import SimpleSSLWebSocketServer, WebSocket, SimpleWeb
 
 from .Connection import Connection
 from .. import app
-from ..utils import find_free_port
+from ..utils import find_free_port, get_headers_dict_from_str, local_auth
 
 AUDIO_CONNECTIONS = {}
 
@@ -77,6 +77,12 @@ class AudioWebSocket(WebSocket):
         self.module_id = None
 
     def handleConnected(self):
+        headers = self.headerbuffer.decode('utf-8')
+        headers = get_headers_dict_from_str(headers)
+        if not local_auth(headers=headers, abort_func=self.close):
+            # local auth failure
+            return
+
         audio_id = self.request.path[1:]
         if audio_id not in AUDIO_CONNECTIONS:
             print(f'AudioWebSocket: Requested audio_id={audio_id} does not exist.')
@@ -158,6 +164,8 @@ class AudioWebSocket(WebSocket):
 # if we are in debug mode, run the server in the second round
 if not app.debug or os.environ.get("WERKZEUG_RUN_MAIN") == "true":
     AUDIO_PORT = find_free_port()
+    print("AUDIO_PORT =", AUDIO_PORT)
+
     if os.environ.get('SSL_CERT_PATH') is None:
         # no certificate provided, run in non-encrypted mode
         # FIXME: consider using a self-signing certificate for local connections

@@ -120,7 +120,7 @@ let mainWindow = null;
 const setupLocalAuth = () => {
   // Modify the user agent for all requests to the following urls.
   const filter = {
-    urls: ['http://127.0.0.1/*'],
+    urls: ['http://127.0.0.1/*', 'ws://127.0.0.1/*'],
   };
 
   session.defaultSession.webRequest.onBeforeSendHeaders(filter,

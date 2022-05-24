@@ -80,3 +80,32 @@ def validate_password(password):
         return False, reason
     else:
         return True, None
+
+
+def get_headers_dict_from_str(headers_str):
+    headers = {}
+
+    for line in headers_str.split("\r\n"):
+        if line.startswith("GET") or ':' not in line:
+            continue
+        header_name, header_value = line.split(': ', 1)
+        headers[header_name] = header_value
+
+    return headers
+
+
+def local_auth(headers, abort_func):
+    auth_passed = True
+    local_auth_key = os.getenv('LOCAL_AUTH_KEY')
+    if local_auth_key != '':
+        try:
+            auth_type, auth_key = headers.get('Authorization').split()
+            if auth_type != 'Bearer' or auth_key != local_auth_key:
+                auth_passed = False
+        except Exception as e:
+            auth_passed = False
+
+        if not auth_passed:
+            abort_func(403, "You are not authorized to access this API.")
+
+    return auth_passed

@@ -46,6 +46,8 @@ except IndexError:
     APP_PORT = 5000
     LOCAL_AUTH_KEY = ''
 
+os.environ['LOCAL_AUTH_KEY'] = LOCAL_AUTH_KEY
+
 APP_HOST = '127.0.0.1'
 
 profiles: Profile

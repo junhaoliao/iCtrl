@@ -28,7 +28,7 @@ from paramiko import Channel
 
 from .Connection import Connection
 from .. import app
-from ..utils import find_free_port
+from ..utils import find_free_port, local_auth, get_headers_dict_from_str
 
 TERM_CONNECTIONS = {}
 
@@ -79,6 +79,12 @@ class TermWebSocket(WebSocket):
         self.term.channel.send(self.data)
 
     def handleConnected(self):
+        headers = self.headerbuffer.decode('utf-8')
+        headers = get_headers_dict_from_str(headers)
+        if not local_auth(headers=headers, abort_func=self.close):
+            # local auth failure
+            return
+
         print(self.address, 'connected')
         terminal_id = self.request.path[1:]
         if terminal_id not in TERM_CONNECTIONS:
@@ -110,6 +116,8 @@ class TermWebSocket(WebSocket):
 # if we are in debug mode, run the server in the second round
 if not app.debug or os.environ.get("WERKZEUG_RUN_MAIN") == "true":
     TERMINAL_PORT = find_free_port()
+    print("TERMINAL_PORT =", TERMINAL_PORT)
+
     if os.environ.get('SSL_CERT_PATH') is None:
         # no certificate provided, run in non-encrypted mode
         # FIXME: consider using a self-signing certificate for local connections
