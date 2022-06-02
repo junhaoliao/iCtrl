@@ -1,6 +1,6 @@
 wheel == 0.37.1
 websockify == 0.10.0
-Pillow == 9.1.0
+Pillow == 9.1.1
 psycopg2-binary == 2.9.3
 pyDes == 2.0.1
 bcrypt == 3.2.0
