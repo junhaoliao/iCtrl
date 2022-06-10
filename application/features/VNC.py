@@ -22,21 +22,23 @@ import os
 import re
 import threading
 
-import websockify
-
 from .Connection import Connection
+from .mywebsockify import MyProxyRequestHandler, MySSLProxyServer
 from .vncpasswd import decrypt_passwd, obfuscate_password
 from ..utils import find_free_port
 
 
 def websocket_proxy_thread(local_websocket_port, local_vnc_port):
     if os.environ.get('SSL_CERT_PATH') is None:
-        # no certificate provided, run in non-encrypted mode
-        # FIXME: consider using a self-signing certificate for local connections
-        proxy_server = websockify.LibProxyServer(listen_port=local_websocket_port, target_host='',
-                                                 target_port=local_vnc_port,
-                                                 run_once=True)
-        proxy_server.serve_forever()
+        proxy_server = MySSLProxyServer(RequestHandlerClass=MyProxyRequestHandler,
+                                        listen_port=local_websocket_port, target_host='',
+                                        target_port=local_vnc_port)
+
+        # only serve two request:
+        #  1st: first handshake: upgrade the HTTP request
+        #  2nd: actually serve the ws connection
+        for _ in range(2):
+            proxy_server.handle_request()
         proxy_server.server_close()
     else:
         import subprocess

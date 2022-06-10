@@ -33,8 +33,8 @@ import {htmlResponseToReason, isIOS} from './utils';
 
 const setupDOM = (port, passwd) => {
   /* Creating a new RFB object and start a new connection */
-  const url = `${process.env.REACT_APP_DOMAIN_NAME ? 'wss' : 'ws'}
-://${process.env.REACT_APP_DOMAIN_NAME || '127.0.0.1'}:${port}`;
+  const url = `wss://${process.env.REACT_APP_DOMAIN_NAME ||
+  '127.0.0.1'}:${port}`;
   const rfb = passwd ?
       new RFB(
           document.getElementById('screen'),
@@ -257,7 +257,6 @@ export const vncConnect = async (vncViewer) => {
         // hide the Loading element
         vncViewer.setState({
           loading: false,
-          disconnected: false, // sometimes 'disconnect' (below) is fired before 'connect' for unknown reasons
         });
       });
 

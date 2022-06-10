@@ -23,8 +23,9 @@ import threading
 import uuid
 from typing import Optional
 
-from SimpleWebSocketServer import SimpleSSLWebSocketServer, WebSocket, SimpleWebSocketServer
+from SimpleWebSocketServer import SimpleSSLWebSocketServer, WebSocket
 from paramiko import Channel
+from werkzeug.serving import generate_adhoc_ssl_context
 
 from .Connection import Connection
 from .. import app
@@ -119,9 +120,9 @@ if not app.debug or os.environ.get("WERKZEUG_RUN_MAIN") == "true":
     print("TERMINAL_PORT =", TERMINAL_PORT)
 
     if os.environ.get('SSL_CERT_PATH') is None:
-        # no certificate provided, run in non-encrypted mode
-        # FIXME: consider using a self-signing certificate for local connections
-        terminal_server = SimpleWebSocketServer('', TERMINAL_PORT, TermWebSocket)
+        # no certificate provided, generate self-signing certificate
+        terminal_server = SimpleSSLWebSocketServer('', TERMINAL_PORT, TermWebSocket,
+                                                   ssl_context=generate_adhoc_ssl_context())
     else:
         import ssl
 

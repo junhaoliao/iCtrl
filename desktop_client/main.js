@@ -9,11 +9,7 @@ if (handleSquirrelEvent()) {
 }
 
 // Modules to control application life and create native browser window
-const {app, BrowserWindow, Menu, MenuItem, ipcMain, session} = require(
-    'electron');
-const {randomUUID} = require('crypto');
-const {spawn} = require('child_process');
-const {resolve} = require('path');
+const {app} = require('electron');
 
 const gotTheLock = app.requestSingleInstanceLock();
 if (!gotTheLock) {
@@ -23,8 +19,13 @@ if (!gotTheLock) {
   process.exit();
 }
 
+const {BrowserWindow, Menu, MenuItem, ipcMain, session} = require('electron');
+const {randomUUID} = require('crypto');
+const {spawn} = require('child_process');
+const {resolve} = require('path');
 const {getFreePort, humanFileSize} = require('./utils');
 const ProgressBar = require('./ProgressBar');
+
 const mainPort = getFreePort();
 const localAuthKey = randomUUID();
 
@@ -65,7 +66,7 @@ if (isMac) {
 
 const setupNewWindowIcon = (url, newWindow) => {
   const {nativeImage} = require('electron');
-  const {get} = require('http');
+  const {get} = require('https');
 
   const url_split = url.split('/');
   const sessionId = url_split[url_split.length - 1];
@@ -75,6 +76,7 @@ const setupNewWindowIcon = (url, newWindow) => {
     port: mainPort,
     path: `/api/favicon/${feature}/${sessionId}`,
     headers: {'Authorization': `Bearer ${localAuthKey}`},
+    rejectUnauthorized: false,
   }, (msg) => {
     const result = [];
 
@@ -86,6 +88,8 @@ const setupNewWindowIcon = (url, newWindow) => {
       const icon = nativeImage.createFromBuffer(Buffer.concat(result));
       newWindow.setIcon(icon);
     });
+  }).on('error', (e) => {
+    console.error(e);
   });
 };
 
@@ -120,13 +124,25 @@ let mainWindow = null;
 const setupLocalAuth = () => {
   // Modify the user agent for all requests to the following urls.
   const filter = {
-    urls: ['http://127.0.0.1/*', 'ws://127.0.0.1/*'],
+    urls: ['https://127.0.0.1/*', 'wss://127.0.0.1/*'],
   };
 
   session.defaultSession.webRequest.onBeforeSendHeaders(filter,
       (details, callback) => {
         details.requestHeaders['Authorization'] = `Bearer ${localAuthKey}`;
         callback({requestHeaders: details.requestHeaders});
+      });
+
+  app.on('certificate-error',
+      (event, webContents, url, error, certificate, callback) => {
+        if (url.startsWith('https://127.0.0.1') ||
+            url.startsWith('wss://127.0.0.1')) {
+          event.preventDefault();
+          callback(true);
+        } else {
+          console.error('Certificate Error at', url);
+          app.quit();
+        }
       });
 };
 
@@ -137,7 +153,7 @@ const createDashboardWindow = () => {
 
   // load dashboard
   mainWindow.setTitle('Loading... ');
-  mainWindow.loadURL(`http://127.0.0.1:${mainPort}/dashboard`);
+  mainWindow.loadURL(`https://127.0.0.1:${mainPort}/dashboard`);
   // need to reload on Mac because the first load times out very quickly
   mainWindow.webContents.on('did-fail-load', () => {
     mainWindow.reload();

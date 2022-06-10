@@ -43,4 +43,4 @@ if __name__ == '__main__':
                 return send_from_directory(app.static_folder, 'index.html')
 
     app.register_blueprint(api, url_prefix='/api')
-    app.run(host=APP_HOST, port=APP_PORT)
+    app.run(host=APP_HOST, port=APP_PORT, ssl_context="adhoc")

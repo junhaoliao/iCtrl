@@ -25,7 +25,8 @@ import zlib
 from typing import Optional
 
 import paramiko
-from SimpleWebSocketServer import SimpleSSLWebSocketServer, WebSocket, SimpleWebSocketServer
+from SimpleWebSocketServer import SimpleSSLWebSocketServer, WebSocket
+from werkzeug.serving import generate_adhoc_ssl_context
 
 from .Connection import Connection
 from .. import app
@@ -36,6 +37,7 @@ AUDIO_CONNECTIONS = {}
 FFMPEG_LOAD_TIME = 4  # unit: seconds
 TRY_FFMPEG_MAX_COUNT = 3
 AUDIO_BUFFER_SIZE = 20480
+
 
 class Audio(Connection):
     def __init__(self):
@@ -167,9 +169,9 @@ if not app.debug or os.environ.get("WERKZEUG_RUN_MAIN") == "true":
     print("AUDIO_PORT =", AUDIO_PORT)
 
     if os.environ.get('SSL_CERT_PATH') is None:
-        # no certificate provided, run in non-encrypted mode
-        # FIXME: consider using a self-signing certificate for local connections
-        audio_server = SimpleWebSocketServer('', AUDIO_PORT, AudioWebSocket)
+        # no certificate provided, generate self-signing certificate
+        audio_server = SimpleSSLWebSocketServer('', AUDIO_PORT, AudioWebSocket,
+                                                ssl_context=generate_adhoc_ssl_context())
     else:
         import ssl
 

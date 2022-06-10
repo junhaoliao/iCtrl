@@ -36,8 +36,8 @@ export const launch_audio = (vncsd, sessionID) => {
   }).then((response) => {
     const {port, audio_id} = response.data;
     const socket = new WebSocket(
-        `${process.env.REACT_APP_DOMAIN_NAME ? 'wss' : 'ws'}
-://${process.env.REACT_APP_DOMAIN_NAME || '127.0.0.1'}:${port}/${audio_id}`);
+        `wss://${process.env.REACT_APP_DOMAIN_NAME ||
+        '127.0.0.1'}:${port}/${audio_id}`);
     socket.binaryType = 'arraybuffer';
 
     socket.onopen = (_) => {
