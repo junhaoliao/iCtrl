@@ -24,7 +24,7 @@ import sys
 from flask import Flask, Blueprint
 from werkzeug.serving import WSGIRequestHandler
 
-from .Profile import *
+from .Profile.Profile import Profile
 
 # enable persistent HTTP connections (keep-alive)
 WSGIRequestHandler.protocol_version = "HTTP/1.1"
@@ -52,8 +52,10 @@ APP_HOST = '127.0.0.1'
 
 profiles: Profile
 if os.getenv('DBADDR') is not None:
+    from .Profile.DBProfile import DBProfile
     profiles = DBProfile(app)
 else:
+    from .Profile.LocalProfile import LocalProfile
     profiles = LocalProfile()
 
 api = Blueprint('api', __name__)
