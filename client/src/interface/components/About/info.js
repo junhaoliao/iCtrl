@@ -83,17 +83,17 @@ export const authors = [
   {
     name: 'Jiaxing Li',
     url: 'https://www.linkedin.com/in/jiaxing-leo-li/',
-    pic: 'https://media-exp1.licdn.com/dms/image/C5603AQHpYQzbo47eKw/profile-displayphoto-shrink_800_800/0/1632491896220?e=1654732800&v=beta&t=3nvEUuzOpBkRCr1OV83a2nk0hBIlZyD9eTajU0NPrgA',
+    pic: '/profile-pics/jiaxing-pic.jpg',
   },
   {
     name: 'Yizhong Xu',
     url: 'https://www.linkedin.com/in/yizhong-xu-076bb9157/',
-    pic: 'https://media-exp1.licdn.com/dms/image/C5603AQFiSB5nUzPRxw/profile-displayphoto-shrink_800_800/0/1589163392583?e=1654732800&v=beta&t=1lWstEQpelK0yGC09L5iUEFK4sWjbho-hSb-ugXbqO8',
+    pic: '/profile-pics/yizhong-pic.jpg',
   },
   {
     name: 'Haoran Zhang',
     url: 'https://www.linkedin.com/in/haoran-zhang-424b33196/',
-    pic: 'https://media-exp1.licdn.com/dms/image/C4D03AQFoaq3XUbDryw/profile-displayphoto-shrink_800_800/0/1573966281887?e=1654732800&v=beta&t=_5m0gliEtnOC00wKGjefaXJvctHp2WJkYESfpvQJAgU',
+    pic: '/profile-pics/haoran-pic.jpg',
   },
 ];
 
