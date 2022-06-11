@@ -254,8 +254,7 @@ export default class CustomToolbar extends React.Component {
 
             <OutlinedInput
                 disabled={loading}
-                fullWidth
-                style={{height: 40, minWidth: 200}}
+                style={{height: '40px', minWidth: '200px', flexGrow: 1}}
                 autoComplete={'new-password'}
                 onKeyPress={this.handleCwdInputKeyPress}
                 onBlur={this.handleCwdInputBlur}
