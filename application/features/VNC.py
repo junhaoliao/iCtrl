@@ -183,7 +183,10 @@ class VNC(Connection):
            xterm: write to /var/run/utmp
             so that uptime & ruptime can get the correct login count
            xvfb-run: run in the background / don't show GUI
+
+        NOTE: it seems the latest version of TigerVNC expects the xstartup script to run in the foreground
+              and therefore an '&' should not be added towards the end of the script
         """
         return "#\\!/bin/sh\\n" \
                "gnome-session &\\n" \
-               "timeout 2d xvfb-run -a xterm &\\n"
+               "timeout 2d xvfb-run -a xterm\\n"
