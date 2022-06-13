@@ -136,10 +136,12 @@ sudo chown www-data:www-data fullchain.pem privkey.pem
 Edit `/var/www/ictrl/ictrl.conf`. An example configuration is shown below
 ```
 # setup DB password and url
-DBPASSWD=THE_PASSWORD_YOU_SET_IN_"Initialization of the Database"
+DBPASSWD=<THE_PASSWORD_YOU_SET_IN_"Initialization of the Database">
 DBADDR=localhost:5432
 
 # setup email credentials for verifications
+SENDER_SERVER=<SENDER_SERVER>
+SENDER_PORT=<SENDER_PORT>
 SENDER_EMAIL=<EMAIL_ADDRESS>
 SENDER_PASSWD=<EMAIL_PASSWORD>
 
