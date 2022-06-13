@@ -57,6 +57,7 @@ class VNC(Connection):
         super().__init__()
 
     def __del__(self):
+        print('VNC::__del__')
         super().__del__()
 
     def connect(self, *args, **kwargs):
@@ -160,6 +161,15 @@ class VNC(Connection):
                     vnc_port = int(match.group(1))
                     break
 
+        # FIXME: use a better condition than is_eecg
+        """
+        To address a bug described at https://bugzilla.redhat.com/show_bug.cgi?id=1710949
+           xterm: write to /var/run/utmp so that uptime & ruptime can get the correct login count
+           xvfb-run: run in the background / don't show GUI
+        """
+        if self.is_eecg():
+            self.exec_command_blocking("pgrep -cxu $USER Xvfb || ( timeout 12h xvfb-run -a xterm & )")
+
         return True, 5900 + vnc_port
 
     def create_tunnel(self, remote_port):
@@ -179,14 +189,9 @@ class VNC(Connection):
         """
         TODO: read from an actual file instead
         1. Launch a gnome-session so that the VNC config window doesn't show up
-        2. To address the bug described at https://bugzilla.redhat.com/show_bug.cgi?id=1710949
-           xterm: write to /var/run/utmp
-            so that uptime & ruptime can get the correct login count
-           xvfb-run: run in the background / don't show GUI
 
         NOTE: it seems the latest version of TigerVNC expects the xstartup script to run in the foreground
               and therefore an '&' should not be added towards the end of the script
         """
         return "#\\!/bin/sh\\n" \
-               "gnome-session &\\n" \
-               "timeout 2d xvfb-run -a xterm\\n"
+               "gnome-session &\\n"
