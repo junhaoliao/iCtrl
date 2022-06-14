@@ -42,23 +42,12 @@ import LogIn from '../../components/LogIn';
 
 import About from '../../components/About';
 import InfoIcon from '@mui/icons-material/Info';
-import {VolumeUp} from '@mui/icons-material';
+import ICtrlVoiceButton
+  from '../../components/iCtrlVoiceButton/iCtrlVoiceButton';
 
 export default class Home extends React.Component {
   constructor(props) {
     super(props);
-
-    this.iCtrlVoiceSource = [
-      '/ictrl-voice/ictrl-slow.mp3',
-      '/ictrl-voice/ictrl-robot.mp3',
-      '/ictrl-voice/ictrl-teleport.mp3',
-    ];
-    this.iCtrlVoiceButtonColors = [
-      'grey',
-      'black',
-      'black',
-    ];
-    this.iCtrlVoiceIndex = 0;
 
     this.state = {
       windowsCount: 0,
@@ -67,9 +56,6 @@ export default class Home extends React.Component {
       totalDownloadCount: 0,
       publishDate: null,
       aboutOpened: false,
-      iCtrlVoiceButtonDisabled: false,
-      iCtrlVoiceButtonColor: this.iCtrlVoiceButtonColors[0],
-      iCtrlVoiceButtonBackground: null,
     };
   }
 
@@ -170,33 +156,6 @@ export default class Home extends React.Component {
     });
   };
 
-  handlePlayICtrlVoice = () => {
-    const audio = new Audio(this.iCtrlVoiceSource[this.iCtrlVoiceIndex]);
-
-    audio.play();
-    this.iCtrlVoiceIndex = (this.iCtrlVoiceIndex + 1) %
-        this.iCtrlVoiceSource.length;
-    this.setState({
-      iCtrlVoiceButtonDisabled: true,
-    });
-
-    const showNextButton = () => {
-      this.setState({
-        iCtrlVoiceButtonDisabled: false,
-        iCtrlVoiceButtonColor: this.iCtrlVoiceButtonColors[this.iCtrlVoiceIndex],
-        iCtrlVoiceButtonBackground: (this.iCtrlVoiceIndex + 1 ===
-                this.iCtrlVoiceSource.length) &&
-            'conic-gradient(red, yellow, lime, aqua, blue, magenta, red)',
-      });
-    };
-
-    if (this.iCtrlVoiceIndex !== 0) {
-      setTimeout(showNextButton, 300);
-    } else {
-      audio.onended = showNextButton;
-    }
-  };
-
   componentDidMount() {
     axios.get('/api/userid').then(response => {
       window.location = '/dashboard';
@@ -211,9 +170,6 @@ export default class Home extends React.Component {
       publishDate,
       totalDownloadCount,
       aboutOpened,
-      iCtrlVoiceButtonDisabled,
-      iCtrlVoiceButtonColor,
-      iCtrlVoiceButtonBackground,
     } = this.state;
     const showPublishCount = (publishDate !== null);
 
@@ -268,16 +224,7 @@ export default class Home extends React.Component {
                       variant={'h2'}>
                     iCtrl
                   </Typography>
-                  <IconButton
-                      disabled={iCtrlVoiceButtonDisabled}
-                      style={{
-                        alignSelf: 'center',
-                        color: iCtrlVoiceButtonColor,
-                        background: iCtrlVoiceButtonBackground,
-                      }}
-                      onClick={this.handlePlayICtrlVoice}>
-                    <VolumeUp/>
-                  </IconButton>
+                  <ICtrlVoiceButton/>
                 </div>
 
                 <br/>
