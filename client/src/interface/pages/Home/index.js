@@ -42,10 +42,23 @@ import LogIn from '../../components/LogIn';
 
 import About from '../../components/About';
 import InfoIcon from '@mui/icons-material/Info';
+import {VolumeUp} from '@mui/icons-material';
 
 export default class Home extends React.Component {
   constructor(props) {
     super(props);
+
+    this.iCtrlVoiceSource = [
+      '/ictrl-voice/ictrl-slow.mp3',
+      '/ictrl-voice/ictrl-robot.mp3',
+      '/ictrl-voice/ictrl-teleport.mp3',
+    ];
+    this.iCtrlVoiceButtonColors = [
+      'grey',
+      'black',
+      'black',
+    ];
+    this.iCtrlVoiceIndex = 0;
 
     this.state = {
       windowsCount: 0,
@@ -54,6 +67,9 @@ export default class Home extends React.Component {
       totalDownloadCount: 0,
       publishDate: null,
       aboutOpened: false,
+      iCtrlVoiceButtonDisabled: false,
+      iCtrlVoiceButtonColor: this.iCtrlVoiceButtonColors[0],
+      iCtrlVoiceButtonBackground: null,
     };
   }
 
@@ -154,6 +170,33 @@ export default class Home extends React.Component {
     });
   };
 
+  handlePlayICtrlVoice = () => {
+    const audio = new Audio(this.iCtrlVoiceSource[this.iCtrlVoiceIndex]);
+
+    audio.play();
+    this.iCtrlVoiceIndex = (this.iCtrlVoiceIndex + 1) %
+        this.iCtrlVoiceSource.length;
+    this.setState({
+      iCtrlVoiceButtonDisabled: true,
+    });
+
+    const showNextButton = () => {
+      this.setState({
+        iCtrlVoiceButtonDisabled: false,
+        iCtrlVoiceButtonColor: this.iCtrlVoiceButtonColors[this.iCtrlVoiceIndex],
+        iCtrlVoiceButtonBackground: (this.iCtrlVoiceIndex + 1 ===
+                this.iCtrlVoiceSource.length) &&
+            'conic-gradient(red, yellow, lime, aqua, blue, magenta, red)',
+      });
+    };
+
+    if (this.iCtrlVoiceIndex !== 0) {
+      setTimeout(showNextButton, 300);
+    } else {
+      audio.onended = showNextButton;
+    }
+  };
+
   componentDidMount() {
     axios.get('/api/userid').then(response => {
       window.location = '/dashboard';
@@ -164,7 +207,14 @@ export default class Home extends React.Component {
   }
 
   render() {
-    const {publishDate, totalDownloadCount, aboutOpened} = this.state;
+    const {
+      publishDate,
+      totalDownloadCount,
+      aboutOpened,
+      iCtrlVoiceButtonDisabled,
+      iCtrlVoiceButtonColor,
+      iCtrlVoiceButtonBackground,
+    } = this.state;
     const showPublishCount = (publishDate !== null);
 
     return (
@@ -207,7 +257,30 @@ export default class Home extends React.Component {
                   marginRight: 'auto',
                 }}
                      src={ictrlLogo} alt=""/>
-                <br/><br/>
+                <br/>
+
+                <div style={{
+                  display: 'flex',
+                  justifyContent: 'center',
+                  gap: '4px',
+                }}>
+                  <Typography
+                      variant={'h2'}>
+                    iCtrl
+                  </Typography>
+                  <IconButton
+                      disabled={iCtrlVoiceButtonDisabled}
+                      style={{
+                        alignSelf: 'center',
+                        color: iCtrlVoiceButtonColor,
+                        background: iCtrlVoiceButtonBackground,
+                      }}
+                      onClick={this.handlePlayICtrlVoice}>
+                    <VolumeUp/>
+                  </IconButton>
+                </div>
+
+                <br/>
 
                 <Typography
                     align={'center'}
