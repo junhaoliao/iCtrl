@@ -49,6 +49,7 @@ import LinkForNewWindow from '../LinkToNewWindow';
 
 import iCtrlQRCode from './iCtrlQRCode.svg';
 import './index.css';
+import ICtrlVoiceButton from '../iCtrlVoiceButton/iCtrlVoiceButton';
 
 const AboutSection = (props) => (
     <>
@@ -89,7 +90,9 @@ export default class About extends React.Component {
         window.require('electron').ipcRenderer.sendSync('version');
 
     return <Dialog open={true} fullWidth={true} maxWidth={'md'}>
-      <DialogTitle>About iCtrl {version && `(v${version})`}</DialogTitle>
+      <DialogTitle>
+          About iCtrl {version && `(v${version})`} <ICtrlVoiceButton/>
+      </DialogTitle>
       <DialogContent style={{maxHeight: '630px'}}>
         <div>
           <img width={85} src={iCtrlQRCode} alt={'ictrl-qr-code'}
