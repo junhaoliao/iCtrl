@@ -126,9 +126,9 @@ export default class Dashboard extends React.Component {
     }
   }
 
-  handleMenuOpen = (ev, session_id) => {
+  handleMenuOpen = (target, session_id) => {
     this.setState({
-      anchorEl: ev.target,
+      anchorEl: target,
       anchorSessionId: session_id,
     });
   };
@@ -221,7 +221,20 @@ export default class Dashboard extends React.Component {
                         return;
                       }
                       this.handleMenuClick(sessionID, 'vnc');
-                    }}>
+                    }}
+                    onContextMenu={(ev) => {
+                      ev.preventDefault();
+
+                      this.handleMenuClose();
+
+                      if (this.state.anchorEl === null) {
+                        // using this as anchor seems not to cover any valid info
+                        const anchorElem = document.getElementById(
+                            `${sessionID}-username`);
+                        this.handleMenuOpen(anchorElem, sessionID);
+                      }
+                    }}
+          >
             <ListItemAvatar>
               <BackgroundLetterAvatar name={sessionProps.host}/>
             </ListItemAvatar>
@@ -234,7 +247,9 @@ export default class Dashboard extends React.Component {
                     wordWrap: 'break-word',
                   },
                 }}
-                secondary={sessionProps.username}/>
+                secondary={<div id={`${sessionID}-username`}>
+                  {sessionProps.username}
+                </div>}/>
             <Menu
                 anchorEl={anchorEl}
                 open={anchorSessionId === sessionID}
@@ -319,7 +334,7 @@ export default class Dashboard extends React.Component {
               </Hidden>
               <Tooltip title="More Options" aria-label="more options">
                 <IconButton
-                    onClick={(ev) => this.handleMenuOpen(ev, sessionID)}>
+                    onClick={(ev) => this.handleMenuOpen(ev.target, sessionID)}>
                   <MoreVertIcon fontSize={'large'}/>
                 </IconButton>
               </Tooltip>
