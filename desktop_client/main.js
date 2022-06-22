@@ -158,7 +158,8 @@ const createDashboardWindow = () => {
   // Create the dashboard window.
   mainWindow = new BrowserWindow({
     ...windowOptions,
-    frame: false,
+    titleBarStyle: 'hidden',
+    trafficLightPosition:{x:16, y:25}
   });
   setupContextMenu(mainWindow);
 

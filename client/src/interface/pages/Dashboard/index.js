@@ -352,11 +352,12 @@ export default class Dashboard extends React.Component {
         <>
           <AppBar position="static" color={'primary'} id={'titlebar'}>
             <Toolbar>
+              {platform === 'darwin' && <div style={{width: '64px'}}/>}
               <img src={ictrlLogo} style={{
                 // background: 'white',
-                height: 30,
-                width: 30,
-                marginRight: 24,
+                height: '30px',
+                width: '30px',
+                marginRight: '16px',
               }} alt="ictrl-logo"/>
               <Typography variant="h5" component="div" sx={{flexGrow: 1}}>
                 iCtrl Dashboard
