@@ -294,15 +294,15 @@ app.on('window-all-closed', () => {
 
 // kill the backend when the app exits
 app.on('before-quit', () => {
-    if (ictrl_be) {
-      ictrl_be.kill('SIGTERM');
-    }
+  if (ictrl_be) {
+    ictrl_be.kill('SIGTERM');
+  }
 });
 
 // in case the above is not successful,
 //  force kill the backend when the process exits
 process.on('exit', () => {
-  if (ictrl_be){
-      ictrl_be.kill('SIGKILL');
+  if (ictrl_be) {
+    ictrl_be.kill('SIGKILL');
   }
 });
