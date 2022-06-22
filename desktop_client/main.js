@@ -26,7 +26,8 @@ const {resolve} = require('path');
 const {getFreePort, humanFileSize} = require('./utils');
 const ProgressBar = require('./ProgressBar');
 
-const mainPort = getFreePort();
+const debugPort = null;
+const mainPort = debugPort || getFreePort();
 const localAuthKey = randomUUID();
 
 const isMac = process.platform === 'darwin';
@@ -37,11 +38,13 @@ const isWindows = process.platform === 'win32';
 // the backend process handle
 let ictrl_be = null;
 if (isMac) {
-  ictrl_be = spawn('./ictrl_be', [mainPort, localAuthKey],
-      {
-        cwd: resolve(__dirname, 'ictrl_be'),
-        shell: true, // FIXME: needs to be specified since Electron 15. reasons unknown
-      });
+  if (!debugPort) {
+    ictrl_be = spawn('./ictrl_be', [mainPort, localAuthKey],
+        {
+          cwd: resolve(__dirname, 'ictrl_be'),
+          shell: true, // FIXME: needs to be specified since Electron 15. reasons unknown
+        });
+  }
 
   // need to have a 'window' role in the menu on mac
   //  to show all windows when right-clicking on the dock icon
@@ -52,12 +55,17 @@ if (isMac) {
     }];
   Menu.setApplicationMenu(Menu.buildFromTemplate(menuTemplate));
 } else if (isWindows) {
-  ictrl_be = spawn('ictrl_be.exe', [mainPort, localAuthKey],
-      {cwd: resolve(__dirname, 'ictrl_be')});
+  if (!debugPort) {
+    ictrl_be = spawn('ictrl_be.exe', [mainPort, localAuthKey],
+        {cwd: resolve(__dirname, 'ictrl_be')});
+  }
+
   Menu.setApplicationMenu(null);
 } else if (isLinux) {
-  ictrl_be = spawn('./ictrl_be', [mainPort, localAuthKey],
-      {cwd: resolve(__dirname, 'ictrl_be')});
+  if (!debugPort) {
+    ictrl_be = spawn('./ictrl_be', [mainPort, localAuthKey],
+        {cwd: resolve(__dirname, 'ictrl_be')});
+  }
   Menu.setApplicationMenu(null);
 } else {
   console.log(`OS: ${process.platform} not supported.`);
@@ -153,7 +161,7 @@ const createDashboardWindow = () => {
 
   // load dashboard
   mainWindow.setTitle('Loading... ');
-  mainWindow.loadURL(`https://127.0.0.1:${mainPort}/dashboard`);
+  mainWindow.loadURL(`http${debugPort ? '':'s'}://127.0.0.1:${mainPort}/dashboard`);
   // need to reload on Mac because the first load times out very quickly
   mainWindow.webContents.on('did-fail-load', () => {
     mainWindow.reload();
