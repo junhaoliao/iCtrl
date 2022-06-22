@@ -156,12 +156,16 @@ const setupLocalAuth = () => {
 
 const createDashboardWindow = () => {
   // Create the dashboard window.
-  mainWindow = new BrowserWindow(windowOptions);
+  mainWindow = new BrowserWindow({
+    ...windowOptions,
+    frame: false,
+  });
   setupContextMenu(mainWindow);
 
   // load dashboard
   mainWindow.setTitle('Loading... ');
-  mainWindow.loadURL(`http${debugPort ? '':'s'}://127.0.0.1:${mainPort}/dashboard`);
+  mainWindow.loadURL(
+      `http${debugPort ? '' : 's'}://127.0.0.1:${mainPort}/dashboard`);
   // need to reload on Mac because the first load times out very quickly
   mainWindow.webContents.on('did-fail-load', () => {
     mainWindow.reload();
@@ -253,6 +257,24 @@ ipcMain.on('version', (event, args) => {
   event.returnValue = app.getVersion();
 });
 
+ipcMain.on('platform', (event, args) => {
+  event.returnValue = process.platform;
+});
+
+ipcMain.on('win-min', (_) => {
+  mainWindow.minimize();
+});
+ipcMain.on('win-max', (_) => {
+  if (mainWindow.isMaximized()) {
+    mainWindow.restore();
+  } else {
+    mainWindow.maximize();
+  }
+});
+ipcMain.on('win-close', (_) => {
+  mainWindow.close();
+});
+
 // Show dashboard in this instance if the user tries to launch another instance
 // The other instance will exit if it finds an already running instance: see
 //  app.requestSingleInstanceLock() above
@@ -271,12 +293,15 @@ app.on('window-all-closed', () => {
 
 // kill the backend when the app exits
 app.on('before-quit', () => {
-  ictrl_be.kill('SIGTERM');
-
+    if (ictrl_be) {
+      ictrl_be.kill('SIGTERM');
+    }
 });
 
 // in case the above is not successful,
 //  force kill the backend when the process exits
 process.on('exit', () => {
-  ictrl_be.kill('SIGKILL');
+  if (ictrl_be){
+      ictrl_be.kill('SIGKILL');
+  }
 });

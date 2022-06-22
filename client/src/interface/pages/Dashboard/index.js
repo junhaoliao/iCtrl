@@ -56,10 +56,12 @@ import NewSession from '../../components/NewSession';
 import axios from 'axios';
 
 import logo from '../../../icons/logo.webp';
+import ictrlLogo from '../../../icons/logo.webp';
 import {canChangeMachine, openInNewWindow} from '../../../actions/utils';
 import About from '../../components/About';
 import GitHubButton from 'react-github-btn';
 import ResetVNCDialog from '../../components/ResetVNCDialog';
+import TrafficLights from '../../components/TrafficLights/TrafficLights';
 
 export default class Dashboard extends React.Component {
   constructor(props) {
@@ -204,6 +206,9 @@ export default class Dashboard extends React.Component {
       resettingSessionID,
     } = this.state;
 
+    const platform = window.require &&
+        window.require('electron').ipcRenderer.sendSync('platform');
+
     const sessionList = [];
     const changeMachineHost = Boolean(changeMachineSessionId) ?
         sessions[changeMachineSessionId].host :
@@ -345,12 +350,19 @@ export default class Dashboard extends React.Component {
 
     return (
         <>
-          <AppBar position="static" color={'info'}>
+          <AppBar position="static" color={'primary'} id={'titlebar'}>
             <Toolbar>
+              <img src={ictrlLogo} style={{
+                // background: 'white',
+                height: 30,
+                width: 30,
+                marginRight: 24,
+              }} alt="ictrl-logo"/>
               <Typography variant="h5" component="div" sx={{flexGrow: 1}}>
-                Dashboard
+                iCtrl Dashboard
               </Typography>
               <div
+                  className={'titlebar-buttons'}
                   onClick={(ev) => {
                     openInNewWindow('https://github.com/junhaoliao/iCtrl', ev);
                   }}
@@ -366,17 +378,17 @@ export default class Dashboard extends React.Component {
                               aria-label="Star junhaoliao/iCtrl on GitHub">Star</GitHubButton>
 
               </div>
-              <Tooltip title="About iCtrl">
+              <Tooltip title="About iCtrl" className={'titlebar-buttons'}>
                 <IconButton onClick={this.handleAboutOpen} size={'large'}>
                   <InfoIcon style={{color: 'white'}} fontSize="large"/>
                 </IconButton>
               </Tooltip>
-              <Tooltip title="Add new session">
+              <Tooltip title="Add new session" className={'titlebar-buttons'}>
                 <IconButton onClick={this.handleAddNewSession} size={'large'}>
                   <AddBoxIcon style={{color: 'white'}} fontSize="large"/>
                 </IconButton>
               </Tooltip>
-              {!isLocal &&
+              {isLocal? (platform === 'win32' && <TrafficLights/>) :
                   <Tooltip title="Log out">
                     <IconButton edge={'end'} onClick={this.handleLogout}
                                 size={'large'}>
@@ -384,7 +396,6 @@ export default class Dashboard extends React.Component {
                     </IconButton>
                   </Tooltip>
               }
-
             </Toolbar>
           </AppBar>
 

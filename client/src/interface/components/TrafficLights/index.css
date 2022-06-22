@@ -1,0 +1,53 @@
+.win-button {
+    border-radius: 20px;
+    width: 20px;
+    height: 20px;
+}
+
+.win-text {
+    font-family: 'Arial', sans-serif;
+    font-size: 20px;
+    font-weight: 600;
+    line-height: 20px;
+    display: none;
+}
+
+#traffic-lights-container {
+    display: flex;
+    flex-direction: row;
+    gap: 12px;
+    padding-left: 12px;
+    text-align: center;
+
+    -webkit-app-region: no-drag;
+}
+
+#traffic-lights-container:hover .win-text {
+    display: block;
+}
+
+#win-close-button {
+    background-color: #ff5f57;
+}
+
+#win-close-text {
+    color: #7c0605;
+}
+
+#win-min-button {
+    background-color: #febc2e;
+}
+
+#win-min-text {
+    color: #cb8917;
+}
+
+#win-max-button {
+    background-color: #28c63f;
+}
+
+#win-max-text {
+    color: #006000;
+}
+
+
