@@ -19,7 +19,8 @@ if (!gotTheLock) {
   process.exit();
 }
 
-const {BrowserWindow, Menu, MenuItem, ipcMain, session} = require('electron');
+const {BrowserWindow, Menu, MenuItem, ipcMain, session, protocol} = require(
+    'electron');
 const {randomUUID} = require('crypto');
 const {spawn} = require('child_process');
 const {resolve} = require('path');
@@ -34,6 +35,9 @@ const isMac = process.platform === 'darwin';
 const isLinux = process.platform === 'linux';
 const isWindows = process.platform === 'win32';
 
+const backendPath = resolve(__dirname, 'ictrl_be');
+const staticFilesPath = resolve(__dirname, 'ictrl_be/client');
+
 /* launch the backend and disable the menu bar*/
 // the backend process handle
 let ictrl_be = null;
@@ -41,7 +45,7 @@ if (isMac) {
   if (!debugPort) {
     ictrl_be = spawn('./ictrl_be', [mainPort, localAuthKey],
         {
-          cwd: resolve(__dirname, 'ictrl_be'),
+          cwd: backendPath,
           shell: true, // FIXME: needs to be specified since Electron 15.
                        // reasons unknown
         });
@@ -53,19 +57,34 @@ if (isMac) {
     {
       role: 'window',
       submenu: [{role: 'minimize'}, {role: 'close'}],
+    }, {
+      label: 'Edit',
+      submenu: [
+        {label: 'Undo', accelerator: 'Command+Z', selector: 'undo:'},
+        {label: 'Redo', accelerator: 'Shift+Command+Z', selector: 'redo:'},
+        {type: 'separator'},
+        {label: 'Cut', accelerator: 'Command+X', selector: 'cut:'},
+        {label: 'Copy', accelerator: 'Command+C', selector: 'copy:'},
+        {label: 'Paste', accelerator: 'Command+V', selector: 'paste:'},
+        {
+          label: 'Select All',
+          accelerator: 'Command+A',
+          selector: 'selectAll:',
+        },
+      ],
     }];
   Menu.setApplicationMenu(Menu.buildFromTemplate(menuTemplate));
 } else if (isWindows) {
   if (!debugPort) {
     ictrl_be = spawn('ictrl_be.exe', [mainPort, localAuthKey],
-        {cwd: resolve(__dirname, 'ictrl_be')});
+        {cwd: backendPath});
   }
 
   Menu.setApplicationMenu(null);
 } else if (isLinux) {
   if (!debugPort) {
     ictrl_be = spawn('./ictrl_be', [mainPort, localAuthKey],
-        {cwd: resolve(__dirname, 'ictrl_be')});
+        {cwd: backendPath});
   }
   Menu.setApplicationMenu(null);
 } else {
@@ -165,10 +184,21 @@ const createDashboardWindow = () => {
   setupContextMenu(mainWindow);
 
   // load dashboard
+
+  // Fix relative paths
+  protocol.interceptFileProtocol('file', (request, callback) => {
+    if (request.url.includes('ictrl_be')) {
+      callback(request);
+    } else {
+      const fileName = request.url.substring(8);
+      callback(resolve(staticFilesPath, fileName));
+    }
+  });
+
   const appURL =
       `http${debugPort ? '' : 's'}://127.0.0.1:${mainPort}/dashboard`;
   const tempURL =
-      `file://${resolve(__dirname, 'ictrl_be/client/index.html')}`;
+      `file://${resolve(staticFilesPath, 'index.html')}`;
 
   mainWindow.loadURL(tempURL);
   setTimeout(() => {

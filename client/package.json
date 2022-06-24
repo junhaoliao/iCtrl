@@ -51,7 +51,6 @@
       "last 1 safari version"
     ]
   },
-  "homepage": ".",
   "proxy": "https://localhost:5000",
   "//": "https://ictrl.ca"
 }

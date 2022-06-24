@@ -29,8 +29,19 @@ import VNCViewer from './interface/pages/VNCViewer';
 import Term from './interface/pages/Term';
 import Dashboard from './interface/pages/Dashboard';
 import Home from './interface/pages/Home';
+import ReactDOM from 'react-dom';
 
 export default class App extends React.Component {
+  componentDidMount() {
+    if (window.location.protocol === 'file:'){
+    ReactDOM.render(
+        <React.StrictMode>
+          <Dashboard/>
+        </React.StrictMode>,
+        document.getElementById('root'));
+    }
+  }
+
   render() {
     return (
         <Router>
@@ -40,7 +51,9 @@ export default class App extends React.Component {
             <Route path="/terminal/:session_id" component={Term}/>
             <Route exact path="/dashboard" component={Dashboard}/>
             <Route exact path={'/'} component={Home}/>
-            <Route path={'/*'} component={Dashboard}/>
+            <Route path={'/*'}>
+              <div>404</div>
+            </Route>
           </Switch>
         </Router>
     );
