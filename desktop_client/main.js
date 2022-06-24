@@ -42,7 +42,8 @@ if (isMac) {
     ictrl_be = spawn('./ictrl_be', [mainPort, localAuthKey],
         {
           cwd: resolve(__dirname, 'ictrl_be'),
-          shell: true, // FIXME: needs to be specified since Electron 15. reasons unknown
+          shell: true, // FIXME: needs to be specified since Electron 15.
+                       // reasons unknown
         });
   }
 
@@ -159,18 +160,33 @@ const createDashboardWindow = () => {
   mainWindow = new BrowserWindow({
     ...windowOptions,
     titleBarStyle: 'hidden',
-    trafficLightPosition:{x:16, y:25}
+    trafficLightPosition: {x: 16, y: 25},
   });
   setupContextMenu(mainWindow);
 
   // load dashboard
-  mainWindow.setTitle('Loading... ');
-  mainWindow.loadURL(
-      `http${debugPort ? '' : 's'}://127.0.0.1:${mainPort}/dashboard`);
+  const appURL =
+      `http${debugPort ? '' : 's'}://127.0.0.1:${mainPort}/dashboard`;
+  const tempURL =
+      `file://${resolve(__dirname, 'ictrl_be/client/index.html')}`;
+
+  mainWindow.loadURL(tempURL);
+  setTimeout(() => {
+    mainWindow.loadURL(appURL);
+  }, 2000);
+
+  let loadAppURLTimeout = null;
   // need to reload on Mac because the first load times out very quickly
   mainWindow.webContents.on('did-fail-load', () => {
-    mainWindow.reload();
+    mainWindow.loadURL(tempURL);
+    if (loadAppURLTimeout === null) {
+      loadAppURLTimeout = setTimeout(() => {
+        mainWindow.loadURL(appURL);
+        loadAppURLTimeout = null;
+      }, 1000);
+    }
   });
+
   mainWindow.webContents.on('did-finish-load', () => {
     mainWindow.show();
     mainWindow.maximize();

@@ -40,9 +40,7 @@ export default class App extends React.Component {
             <Route path="/terminal/:session_id" component={Term}/>
             <Route exact path="/dashboard" component={Dashboard}/>
             <Route exact path={'/'} component={Home}/>
-            <Route path={'/*'}>
-              <div>404</div>
-            </Route>
+            <Route path={'/*'} component={Dashboard}/>
           </Switch>
         </Router>
     );

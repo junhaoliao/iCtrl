@@ -188,8 +188,11 @@ export default class Dashboard extends React.Component {
         isLocal: Boolean(version),
       });
     }).catch(error => {
-      // possibly not logged in
-      window.location = '/';
+      // if not accessing directly from Electron
+      if (window.location.protocol !== 'file:'){
+        // possibly not logged in
+        window.location = '/';
+      }
     });
   }
 
