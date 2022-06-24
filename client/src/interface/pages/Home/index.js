@@ -232,7 +232,7 @@ export default class Home extends React.Component {
                 <Typography
                     align={'center'}
                     variant={'h5'}>
-                  Connect to uoft engineering labs in 5 seconds.
+                  A Simple VNC + SSH Shell + SFTP Client
                 </Typography>
                 <br/><br/>
 
