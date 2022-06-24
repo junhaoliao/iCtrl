@@ -20,10 +20,8 @@
  *  IN THE SOFTWARE.
  */
 
-import {Stack} from '@mui/material';
 import {ShortcutIcon} from '../../../icons';
 import FolderIcon from '@mui/icons-material/Folder';
-import InsertDriveFileIcon from '@mui/icons-material/InsertDriveFile';
 import {
   dateFormatter,
   humanFileSize,
