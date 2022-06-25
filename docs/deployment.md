@@ -121,7 +121,7 @@ sudo chown www-data:www-data fullchain.pem privkey.pem
     ```Shell
     # take a note of the password because we need to put it in a configuration 
     # (see Configure the iCtrl Backend Server)
-    sudo passwd postgresql
+    sudo passwd postgres
     ```
 
 3. Edit `/etc/postgresql/14/main/pg_hba.conf` to allow local connections
