@@ -178,7 +178,6 @@ export default class Home extends React.Component {
           <AppBar position="absolute" color={'info'}>
             <Toolbar>
               <img src={ictrlLogo} style={{
-                background: 'white',
                 height: 30,
                 width: 30,
                 marginRight: 10,
