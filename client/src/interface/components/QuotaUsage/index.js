@@ -23,6 +23,7 @@
 import React from 'react';
 import {sftp_quota} from '../../../actions/sftp';
 import {Box, LinearProgress, Skeleton, Typography} from '@mui/material';
+import {humanFileSize} from '../../pages/FileManager/utils';
 
 function LinearProgressWithLabel(props) {
   return (
@@ -66,9 +67,7 @@ export default class QuotaUsage extends React.Component {
   render() {
     const {
       used,
-      usedUnit,
       quota,
-      quotaUnit,
     } = this.state;
     const loading = (quota === 0);
     const loadFailed = (quota === null);
@@ -79,9 +78,9 @@ export default class QuotaUsage extends React.Component {
           <LinearProgressWithLabel loading={loading}
                                    value={used / quota * 100}/>
           <Typography variant="caption" display={'flex'}>
-            {loading ? <Skeleton width={44}/> : `${used}${usedUnit}`}
+            {loading ? <Skeleton width={44}/> : `${humanFileSize(used)}`}
             {' / '}
-            {loading ? <Skeleton width={44}/> : `${quota}${quotaUnit}`}
+            {loading ? <Skeleton width={44}/> : `${humanFileSize(quota)}`}
             {' Used'}
           </Typography>
         </div>

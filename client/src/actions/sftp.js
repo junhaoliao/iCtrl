@@ -195,14 +195,12 @@ export const sftp_quota = (sessionID, ms) => {
   // because not all machines support quota checking
   axios.post('/api/exec_blocking', {
     session_id: sessionID,
-    cmd: 'quota -s | tail -n 1',
+    cmd: 'quota | tail -n 1',
   }).then(res => {
-    const mem = res.data.match(/[0-9]+[a-zA-Z]+/g);
+    const mem = res.data.match(/[0-9]+/g);
     ms.setState({
-      used: parseInt(mem[0]),
-      usedUnit: mem[0].replace(/[0-9]+/, ''),
-      quota: parseInt(mem[1]),
-      quotaUnit: mem[1].replace(/[0-9]+/, ''),
+      used: parseInt(mem[0]) * 1024,
+      quota: parseInt(mem[1]) * 1024,
     });
   }).catch(error => {
     // handle this silently because not all machines support quota checking
