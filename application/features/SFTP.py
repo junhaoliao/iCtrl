@@ -144,15 +144,34 @@ class SFTP(Connection):
         return f
 
     def rm(self, cwd, file_list):
+        # FIXME: clean this up
+        result = ''
+
         cmd_list = [f'cd "{cwd}" && rm -rf']
+        counter = 0
         for file in file_list:
             cmd_list.append(f'"{file}"')
 
-        _, _, _, stderr = self.exec_command_blocking(" ".join(cmd_list))
+            counter += 1
+            if counter == 50:
+                _, _, stderr = self.client.exec_command(" ".join(cmd_list))
+                stderr_lines = stderr.readlines()
+                if len(stderr_lines) != 0:
+                    print(stderr_lines)
+                    result = 'Some files are not removed due to insufficient permissions'
+
+                # reset counter
+                counter = 0
+                cmd_list = [f'cd "{cwd}" && rm -rf']
+
+        _, _, stderr = self.client.exec_command(" ".join(cmd_list))
         stderr_lines = stderr.readlines()
         if len(stderr_lines) != 0:
             print(stderr_lines)
-            return False, 'Some files are not removed due to insufficient permissions'
+            result = 'Some files are not removed due to insufficient permissions'
+
+        if result != '':
+            return False, result
         return True, ''
 
     def mkdir(self, cwd, name):
