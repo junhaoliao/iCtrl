@@ -76,12 +76,9 @@ export const sftp_ls = (fm, path) => {
 };
 
 export const sftp_dl = (session_id, cwd, files) => {
-  const a = document.createElement('a');
-  a.download = '';
-  a.href = `/api/sftp_dl/${session_id}?` +
+  window.location = `/api/sftp_dl/${session_id}?` +
       `cwd=${cwd}&` +
       `files=${JSON.stringify(files)}`;
-  a.click();
 };
 
 export const sftp_ul = (fm, session_id, cwd, file, isDirectory) => {
