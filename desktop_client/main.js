@@ -187,7 +187,7 @@ const createDashboardWindow = () => {
 
   // Fix relative paths
   protocol.interceptFileProtocol('file', (request, callback) => {
-    if (request.url.includes('ictrl_be')) {
+    if (request.url.includes('ictrl_be') || request.url.includes('progress_page')) {
       callback(request);
     } else {
       const fileName = request.url.substring(8);
