@@ -93,17 +93,22 @@ class SFTP(Connection):
 
     def _zip_dir_recurse(self, z, parent, file):
         fullpath = posixpath.join(parent, file)
-        mode = self.sftp.stat(fullpath).st_mode
-        if stat.S_ISREG(mode):
-            # print(fullpath, 'is file')
-            z.write_iter(fullpath, self.dl_generator(fullpath))
-        elif stat.S_ISDIR(mode):
-            # print(fullpath, 'is dir')
-            # TODO: support writing an empty directory if len(dir_ls)==0
-            #  That will involve modifying the zipstream library
-            dir_ls = self.sftp.listdir(fullpath)
-            for dir_file in dir_ls:
-                self._zip_dir_recurse(z, fullpath, dir_file)
+        try:
+            mode = self.sftp.stat(fullpath).st_mode
+            if stat.S_ISREG(mode):
+                # print(fullpath, 'is file')
+                z.write_iter(fullpath, self.dl_generator(fullpath))
+            elif stat.S_ISDIR(mode):
+                # print(fullpath, 'is dir')
+                # TODO: support writing an empty directory if len(dir_ls)==0
+                #  That will involve modifying the zipstream library
+                dir_ls = self.sftp.listdir(fullpath)
+                for dir_file in dir_ls:
+                    self._zip_dir_recurse(z, fullpath, dir_file)
+        except FileNotFoundError:
+            # likely due to a symlink that cannot be resolved
+            # do nothing for now
+            return
 
     def zip_generator(self, cwd, file_list):
         self.sftp.chdir(cwd)
