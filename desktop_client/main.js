@@ -134,12 +134,11 @@ const setupContextMenu = (newWindow) => {
   });
 };
 
-// This method will be called when Electron has finished
-// initialization and is ready to create browser windows.
-// Some APIs can only be used after this event occurs.
 const windowOptions = {
   width: 800,
   height: 600,
+  minWidth: 800,
+  minHeight: 600,
   show: false,
   webPreferences: {
     nativeWindowOpen: true,
