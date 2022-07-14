@@ -42,6 +42,7 @@ import GitHubButton from 'react-github-btn';
 import axios from 'axios';
 import ictrlLogo from '../../../icons/logo.webp';
 import LogIn from '../../components/LogIn';
+import UAParser from 'ua-parser-js';
 
 import About from '../../components/About';
 import InfoIcon from '@mui/icons-material/Info';
@@ -60,6 +61,7 @@ export default class Home extends React.Component {
       totalDownloadCount: 0,
       publishDate: null,
       aboutOpened: false,
+      detectedPlatform: null,
     };
   }
 
@@ -167,6 +169,24 @@ export default class Home extends React.Component {
       this.updatePlatformDownloadCount();
       this.updateTotalDownloadCount();
     });
+
+    const parser = new UAParser();
+    if (parser.getOS().name === 'Windows') {
+      this.setState({detectedPlatform: 'windows'});
+    } else {
+      console.log(parser.getOS());
+      // is mac, check whether is ARM by checking whether GPU vendor is Apple
+      const canvas = document.createElement('canvas');
+      const gl = canvas && canvas.getContext('webgl');
+      const debuggerInfo = gl && gl.getExtension('WEBGL_debug_renderer_info');
+      const renderer = debuggerInfo &&
+          gl.getParameter(debuggerInfo.UNMASKED_RENDERER_WEBGL);
+      if (renderer && renderer.match(/Apple/)) {
+        this.setState({detectedPlatform: 'mac-arm'});
+      } else {
+        this.setState({detectedPlatform: 'mac-intel'});
+      }
+    }
   }
 
   render() {
@@ -174,6 +194,7 @@ export default class Home extends React.Component {
       publishDate,
       totalDownloadCount,
       aboutOpened,
+      detectedPlatform,
     } = this.state;
     const showPublishCount = (publishDate !== null);
 
@@ -242,14 +263,15 @@ export default class Home extends React.Component {
                 <Typography
                     align={'center'}
                     variant={'h6'}>
-                  Use the online version 👉
+                  1. Use the online version 👉
                 </Typography>
                 <Typography align={'center'}
-                    variant={'h6'} sx={{color: 'text.secondary', marginBottom:'5px'}}>
+                            variant={'h6'}
+                            sx={{color: 'text.secondary', marginBottom: '5px'}}>
                   or
                 </Typography>
                 <div style={{display: 'flex', justifyContent: 'center'}}>
-                  <Accordion style={{width: '28em'}}>
+                  <Accordion style={{width: '30em'}}>
                     <AccordionSummary
                         expandIcon={<ExpandMore/>}
                     >
@@ -258,7 +280,7 @@ export default class Home extends React.Component {
                           title={showPublishCount &&
                               this.downloadCountString('all platforms')}>
                         <Typography>
-                          Download Desktop Client
+                          2. Download Desktop Client
                         </Typography>
                       </Tooltip>
                       {(totalDownloadCount !== 0) && <Typography
@@ -268,28 +290,28 @@ export default class Home extends React.Component {
                     </AccordionSummary>
                     <AccordionDetails>
                       <Stack alignItems={'center'}>
-                        <ButtonGroup>
-                          <Tooltip title={showPublishCount &&
-                              this.downloadCountString('Windows')}>
-                            <Button id={'download-windows'}
-                                    onClick={this.handleDesktopDownload}>
-                              Windows
-                            </Button>
-                          </Tooltip>
-                          <Tooltip title={showPublishCount &&
-                              this.downloadCountString('Intel Mac')}>
-                            <Button id={'download-mac-intel'}
-                                    onClick={this.handleDesktopDownload}>
-                              Intel Mac
-                            </Button>
-                          </Tooltip>
-                          <Tooltip title={showPublishCount &&
-                              this.downloadCountString('ARM Mac')}>
-                            <Button id={'download-mac-arm'}
-                                    onClick={this.handleDesktopDownload}>
-                              M1 Mac
-                            </Button>
-                          </Tooltip>
+                        <ButtonGroup color={'info'}>
+                          {[
+                            {
+                              name: 'windows',
+                              fullName: 'Windows',
+                            }, {
+                              name: 'mac-intel',
+                              fullName: 'Intel Mac',
+                            }, {
+                              name: 'mac-arm',
+                              fullName: 'ARM Mac',
+                            }].map((p) => (
+                              <Tooltip title={showPublishCount && this.downloadCountString(p.fullName)}>
+                                <Button id={`download-${p.name}`}
+                                        variant={detectedPlatform === p.name ?
+                                            'contained' :
+                                            'outlined'}
+                                        onClick={this.handleDesktopDownload}>
+                                  {p.fullName}
+                                </Button>
+                              </Tooltip>
+                          ))}
                         </ButtonGroup>
                       </Stack>
                     </AccordionDetails>
