@@ -23,6 +23,9 @@
 import React from 'react';
 
 import {
+  Accordion,
+  AccordionDetails,
+  AccordionSummary,
   AppBar,
   Box,
   Button,
@@ -44,6 +47,7 @@ import About from '../../components/About';
 import InfoIcon from '@mui/icons-material/Info';
 import ICtrlVoiceButton
   from '../../components/iCtrlVoiceButton/iCtrlVoiceButton';
+import {ExpandMore} from '@mui/icons-material';
 
 export default class Home extends React.Component {
   constructor(props) {
@@ -200,7 +204,7 @@ export default class Home extends React.Component {
           <Box sx={{display: 'flex', height: '100%'}}>
             <Hidden mdDown>
               <Box sx={{
-                flex: 5,
+                flex: 6,
                 marginTop: '30px',
                 alignSelf: 'center',
                 alignItems: 'center',
@@ -235,43 +239,64 @@ export default class Home extends React.Component {
                 </Typography>
                 <br/><br/>
 
-                <Stack direction={'row'} alignItems={'center'} spacing={3}
-                       justifyContent={'center'}>
-                  <Tooltip title={showPublishCount &&
-                      this.downloadCountString('all platforms')}>
-                    <Typography>
-                      Desktop Client
-                    </Typography>
-                  </Tooltip>
-                  <ButtonGroup>
-                    <Tooltip title={showPublishCount &&
-                        this.downloadCountString('Windows')}>
-                      <Button id={'download-windows'}
-                              onClick={this.handleDesktopDownload}>
-                        Windows
-                      </Button>
-                    </Tooltip>
-                    <Tooltip title={showPublishCount &&
-                        this.downloadCountString('Intel Mac')}>
-                      <Button id={'download-mac-intel'}
-                              onClick={this.handleDesktopDownload}>
-                        Intel Mac
-                      </Button>
-                    </Tooltip>
-                    <Tooltip title={showPublishCount &&
-                        this.downloadCountString('ARM Mac')}>
-                      <Button id={'download-mac-arm'}
-                              onClick={this.handleDesktopDownload}>
-                        M1 Mac
-                      </Button>
-                    </Tooltip>
-                  </ButtonGroup>
-                </Stack>
-                <br/><br/>
+                <Typography
+                    align={'center'}
+                    variant={'h6'}>
+                  Use the online version 👉
+                </Typography>
+                <Typography align={'center'}
+                    variant={'h6'} sx={{color: 'text.secondary', marginBottom:'5px'}}>
+                  or
+                </Typography>
+                <div style={{display: 'flex', justifyContent: 'center'}}>
+                  <Accordion style={{width: '28em'}}>
+                    <AccordionSummary
+                        expandIcon={<ExpandMore/>}
+                    >
+                      <Tooltip
+                          sx={{flexGrow: 1}}
+                          title={showPublishCount &&
+                              this.downloadCountString('all platforms')}>
+                        <Typography>
+                          Download Desktop Client
+                        </Typography>
+                      </Tooltip>
+                      {(totalDownloadCount !== 0) && <Typography
+                          sx={{marginRight: '8px', color: 'text.secondary'}}>
+                        Total downloads: {totalDownloadCount}
+                      </Typography>}
+                    </AccordionSummary>
+                    <AccordionDetails>
+                      <Stack alignItems={'center'}>
+                        <ButtonGroup>
+                          <Tooltip title={showPublishCount &&
+                              this.downloadCountString('Windows')}>
+                            <Button id={'download-windows'}
+                                    onClick={this.handleDesktopDownload}>
+                              Windows
+                            </Button>
+                          </Tooltip>
+                          <Tooltip title={showPublishCount &&
+                              this.downloadCountString('Intel Mac')}>
+                            <Button id={'download-mac-intel'}
+                                    onClick={this.handleDesktopDownload}>
+                              Intel Mac
+                            </Button>
+                          </Tooltip>
+                          <Tooltip title={showPublishCount &&
+                              this.downloadCountString('ARM Mac')}>
+                            <Button id={'download-mac-arm'}
+                                    onClick={this.handleDesktopDownload}>
+                              M1 Mac
+                            </Button>
+                          </Tooltip>
+                        </ButtonGroup>
+                      </Stack>
+                    </AccordionDetails>
+                  </Accordion>
+                </div>
 
-                {(totalDownloadCount !== 0) && <Typography align={'center'}>
-                  Total downloads: {totalDownloadCount}
-                </Typography>}
+
               </Box>
             </Hidden>
 
