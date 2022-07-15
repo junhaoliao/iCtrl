@@ -170,11 +170,10 @@ export default class Home extends React.Component {
       this.updateTotalDownloadCount();
     });
 
-    const parser = new UAParser();
-    if (parser.getOS().name === 'Windows') {
+    const osName = (new UAParser()).getOS().name;
+    if (osName === 'Windows') {
       this.setState({detectedPlatform: 'windows'});
-    } else {
-      console.log(parser.getOS());
+    } else if (osName === 'Mac OS') {
       // is mac, check whether is ARM by checking whether GPU vendor is Apple
       const canvas = document.createElement('canvas');
       const gl = canvas && canvas.getContext('webgl');
