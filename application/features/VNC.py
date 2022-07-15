@@ -194,4 +194,4 @@ class VNC(Connection):
               and therefore an '&' should not be added towards the end of the script
         """
         return "#\\!/bin/sh\\n" \
-               "gnome-session &\\n"
+               "gnome-session\\n"
