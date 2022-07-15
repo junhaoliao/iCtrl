@@ -328,6 +328,11 @@ export default class VNCSpeedDial extends React.Component {
       });
     }
 
+    document.onfullscreenchange = (ev) => {
+      this.setState({
+        isFullscreen: Boolean(document.fullscreenElement)
+      })
+    }
   }
 
   render() {
