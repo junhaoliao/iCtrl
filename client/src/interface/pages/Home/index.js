@@ -238,16 +238,19 @@ export default class Home extends React.Component {
                      src={ictrlLogo} alt=""/>
                 <br/>
 
-                <div style={{
-                  display: 'flex',
-                  justifyContent: 'center',
-                  gap: '4px',
-                }}>
-                  <Typography
-                      variant={'h2'}>
-                    iCtrl
-                  </Typography>
-                  <ICtrlVoiceButton/>
+                <div style={{marginLeft:'40px'}}>
+                  <div style={{
+                    display: 'flex',
+                    justifyContent: 'center',
+                    gap: '4px',
+                  }}>
+                    <Typography
+                        sx={{fontWeight: '600'}}
+                        variant={'h2'}>
+                      iCtrl
+                    </Typography>
+                    <ICtrlVoiceButton/>
+                  </div>
                 </div>
 
                 <br/>
@@ -301,7 +304,8 @@ export default class Home extends React.Component {
                               name: 'mac-arm',
                               fullName: 'ARM Mac',
                             }].map((p) => (
-                              <Tooltip title={showPublishCount && this.downloadCountString(p.fullName)}>
+                              <Tooltip title={showPublishCount &&
+                                  this.downloadCountString(p.fullName)}>
                                 <Button id={`download-${p.name}`}
                                         variant={detectedPlatform === p.name ?
                                             'contained' :
