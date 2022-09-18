@@ -194,13 +194,16 @@ const setupLocalAuth = () => {
 
 function interceptFilePaths() {
   // Fix relative paths
-  protocol.interceptFileProtocol('file', (request, callback) => {
+  protocol.interceptFileProtocol('file',
+      (request, callback) => {
+    const {pathname} = new URL(request.url);
+    const fileName = pathname.substring(pathname.indexOf('/')+1);
+
     if (request.method !== 'GET' ||
-        request.url.includes('ictrl_be') ||
-        request.url.includes('progress_page')) {
+        fileName.includes('ictrl_be') ||
+        fileName.includes('progress_page')) {
       callback(request);
     } else {
-      const fileName = request.url.substring(8);
       callback(resolve(staticFilesPath, fileName));
     }
   });
