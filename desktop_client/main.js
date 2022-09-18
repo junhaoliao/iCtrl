@@ -192,12 +192,16 @@ const setupLocalAuth = () => {
       });
 };
 
-function interceptFilePaths() {
+const interceptFilePaths = () => {
   // Fix relative paths
   protocol.interceptFileProtocol('file',
       (request, callback) => {
     const {pathname} = new URL(request.url);
-    const fileName = pathname.substring(pathname.indexOf('/')+1);
+
+    let fileName = pathname.substring(pathname.indexOf('/')+1);
+    if (isWindows) {
+      fileName = pathname.substring(fileName.indexOf('/')+2);
+    }
 
     if (request.method !== 'GET' ||
         fileName.includes('ictrl_be') ||
