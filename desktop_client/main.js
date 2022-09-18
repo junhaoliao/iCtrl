@@ -30,6 +30,7 @@ const ProgressBar = require('./ProgressBar');
 const debugPort = null;
 const mainPort = debugPort || getFreePort();
 const localAuthKey = randomUUID();
+const appURL = `http${debugPort ? '' : 's'}://127.0.0.1:${mainPort}/dashboard`;
 
 const isMac = process.platform === 'darwin';
 const isLinux = process.platform === 'linux';
@@ -37,6 +38,20 @@ const isWindows = process.platform === 'win32';
 
 const backendPath = resolve(__dirname, 'ictrl_be');
 const staticFilesPath = resolve(__dirname, 'ictrl_be/client');
+
+let mainWindow = null;
+const windowOptions = {
+  width: 800,
+  height: 600,
+  minWidth: 800,
+  minHeight: 600,
+  show: false,
+  webPreferences: {
+    nativeWindowOpen: true,
+    nodeIntegration: true,
+    contextIsolation: false,
+  },
+};
 
 /* launch the backend and disable the menu bar*/
 // the backend process handle
@@ -92,6 +107,24 @@ if (isMac) {
   app.exit();
 }
 
+if (ictrl_be !== null) {
+  const stdoutDataHandler = (data) => {
+    // load the Dashboard in the main window once output is generated
+    //  from the local backend server
+    const dataString = data.toString();
+    if (dataString.includes('Serving')) {
+      mainWindow.loadURL(appURL);
+    }
+    console.error(dataString);
+
+    // remove the listener once the Dashboard is loaded the first time
+    ictrl_be.stdout.removeListener('data', stdoutDataHandler);
+  };
+
+  // register the handler
+  ictrl_be.stdout.on('data', stdoutDataHandler);
+}
+
 const setupNewWindowIcon = (url, newWindow) => {
   const {nativeImage} = require('electron');
   const {get} = require('https');
@@ -134,20 +167,6 @@ const setupContextMenu = (newWindow) => {
   });
 };
 
-const windowOptions = {
-  width: 800,
-  height: 600,
-  minWidth: 800,
-  minHeight: 600,
-  show: false,
-  webPreferences: {
-    nativeWindowOpen: true,
-    nodeIntegration: true,
-    contextIsolation: false,
-  },
-};
-let mainWindow = null;
-
 const setupLocalAuth = () => {
   // Modify the user agent for all requests to the following urls.
   const filter = {
@@ -173,7 +192,21 @@ const setupLocalAuth = () => {
       });
 };
 
-const createDashboardWindow = () => {
+function interceptFilePaths() {
+  // Fix relative paths
+  protocol.interceptFileProtocol('file', (request, callback) => {
+    if (request.method !== 'GET' ||
+        request.url.includes('ictrl_be') ||
+        request.url.includes('progress_page')) {
+      callback(request);
+    } else {
+      const fileName = request.url.substring(8);
+      callback(resolve(staticFilesPath, fileName));
+    }
+  });
+}
+
+const createDashboardWindow = (isServerUp) => {
   // Create the dashboard window.
   mainWindow = new BrowserWindow({
     ...windowOptions,
@@ -182,30 +215,20 @@ const createDashboardWindow = () => {
   });
   setupContextMenu(mainWindow);
 
-  // load dashboard
-
-  // Fix relative paths
-  protocol.interceptFileProtocol('file', (request, callback) => {
-    if (request.url.includes('ictrl_be') || request.url.includes('progress_page')) {
-      callback(request);
-    } else {
-      const fileName = request.url.substring(8);
-      callback(resolve(staticFilesPath, fileName));
-    }
-  });
-
-  const appURL =
-      `http${debugPort ? '' : 's'}://127.0.0.1:${mainPort}/dashboard`;
+  // if the server is up, load from the server
+  // otherwise, load a static loading page first,
+  //  and the subprocess stdout handler will load the appURL once there are
+  //  output from the backend
   const tempURL =
       `file://${resolve(staticFilesPath, 'index.html')}`;
-
-  mainWindow.loadURL(tempURL);
-  setTimeout(() => {
+  if (isServerUp) {
     mainWindow.loadURL(appURL);
-  }, 2000);
+  } else {
+    mainWindow.loadURL(tempURL);
+  }
 
+  // TODO: revisit the need to reload now that we only load when the server is up
   let loadAppURLTimeout = null;
-  // need to reload on Mac because the first load times out very quickly
   mainWindow.webContents.on('did-fail-load', () => {
     mainWindow.loadURL(tempURL);
     if (loadAppURLTimeout === null) {
@@ -294,7 +317,8 @@ const createDashboardWindow = () => {
 
 app.whenReady().then(() => {
   setupLocalAuth();
-  createDashboardWindow();
+  interceptFilePaths();
+  createDashboardWindow(false);
   // Open the DevTools.
   // mainWindow.webContents.openDevTools()
 });
@@ -327,7 +351,7 @@ ipcMain.on('win-close', (_) => {
 app.on('second-instance',
     (event, commandLine, workingDirectory, additionalData) => {
       if (mainWindow === null) {
-        createDashboardWindow();
+        createDashboardWindow(true);
       }
       mainWindow.show();
     });
