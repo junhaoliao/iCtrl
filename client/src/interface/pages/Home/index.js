@@ -260,15 +260,14 @@ export default class Home extends React.Component {
                     variant={'h5'}>
                   A Simple VNC + SSH Shell + SFTP Client
                 </Typography>
-                <br/><br/>
+                <br/>
 
                 <div style={{display: 'flex', justifyContent: 'center'}}>
                   <Accordion style={{width: '30em'}}>
-                    <AccordionSummary
-                        expandIcon={<ExpandMore/>}
-                    >
+                    <AccordionSummary expandIcon={<ExpandMore/>}>
                       <Tooltip
                           sx={{flexGrow: 1}}
+                          placement={'top'}
                           title={showPublishCount &&
                               this.downloadCountString('all platforms')}>
                         <Typography>
@@ -295,7 +294,8 @@ export default class Home extends React.Component {
                               fullName: 'ARM Mac',
                             }].map((p) => (
                               <Tooltip title={showPublishCount &&
-                                  this.downloadCountString(p.fullName)}>
+                                  this.downloadCountString(p.fullName)}
+                              placement={'top'}>
                                 <Button id={`download-${p.name}`}
                                         variant={detectedPlatform === p.name ?
                                             'contained' :
@@ -313,7 +313,7 @@ export default class Home extends React.Component {
 
                 <Typography align={'center'}
                             variant={'h6'}
-                            sx={{color: 'text.secondary', marginBottom: '5px'}}>
+                            sx={{color: 'text.secondary', marginTop: '5px'}}>
                   or
                 </Typography>
 
