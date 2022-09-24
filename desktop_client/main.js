@@ -228,7 +228,6 @@ const createDashboardWindow = () => {
   // otherwise, load a static loading page first,
   //  and the subprocess stdout handler will load the appURL once there are
   //  output from the backend
-  console.log(backendReady);
   if (backendReady) {
     mainWindow.loadURL(appURL);
   } else {
