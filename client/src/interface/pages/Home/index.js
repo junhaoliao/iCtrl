@@ -238,7 +238,7 @@ export default class Home extends React.Component {
                      src={ictrlLogo} alt=""/>
                 <br/>
 
-                <div style={{marginLeft:'40px'}}>
+                <div style={{marginLeft: '40px'}}>
                   <div style={{
                     display: 'flex',
                     justifyContent: 'center',
@@ -262,16 +262,6 @@ export default class Home extends React.Component {
                 </Typography>
                 <br/><br/>
 
-                <Typography
-                    align={'center'}
-                    variant={'h6'}>
-                  1. Use the online version 👉
-                </Typography>
-                <Typography align={'center'}
-                            variant={'h6'}
-                            sx={{color: 'text.secondary', marginBottom: '5px'}}>
-                  or
-                </Typography>
                 <div style={{display: 'flex', justifyContent: 'center'}}>
                   <Accordion style={{width: '30em'}}>
                     <AccordionSummary
@@ -282,7 +272,7 @@ export default class Home extends React.Component {
                           title={showPublishCount &&
                               this.downloadCountString('all platforms')}>
                         <Typography>
-                          2. Download Desktop Client
+                          1. Download Desktop Client
                         </Typography>
                       </Tooltip>
                       {(totalDownloadCount !== 0) && <Typography
@@ -321,7 +311,17 @@ export default class Home extends React.Component {
                   </Accordion>
                 </div>
 
+                <Typography align={'center'}
+                            variant={'h6'}
+                            sx={{color: 'text.secondary', marginBottom: '5px'}}>
+                  or
+                </Typography>
 
+                <Typography
+                    align={'center'}
+                    variant={'h6'}>
+                  2. Use iCtrl online 👉
+                </Typography>
               </Box>
             </Hidden>
 
