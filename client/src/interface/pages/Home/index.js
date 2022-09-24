@@ -181,7 +181,14 @@ export default class Home extends React.Component {
       const renderer = debuggerInfo &&
           gl.getParameter(debuggerInfo.UNMASKED_RENDERER_WEBGL);
       if (renderer && renderer.match(/Apple/)) {
-        this.setState({detectedPlatform: 'mac-arm'});
+        if (!renderer.match(/Apple GPU/)) {
+          // must be ARM
+          this.setState({detectedPlatform: 'mac-arm'});
+        } else {
+          // cannot really tell whether it is ARM-based
+          // because Safari tries to hide any platform-related info as of today
+          console.log('Safari');
+        }
       } else {
         this.setState({detectedPlatform: 'mac-intel'});
       }
