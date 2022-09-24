@@ -36,6 +36,7 @@ const isMac = process.platform === 'darwin';
 const isLinux = process.platform === 'linux';
 const isWindows = process.platform === 'win32';
 
+let backendReady = false;
 const backendPath = resolve(__dirname, 'ictrl_be');
 const staticFilesPath = resolve(__dirname, 'ictrl_be/client');
 
@@ -112,13 +113,14 @@ if (ictrl_be !== null) {
     // load the Dashboard in the main window once output is generated
     //  from the local backend server
     const dataString = data.toString();
-    if (dataString.includes('Serving')) {
-      mainWindow.loadURL(appURL);
-    }
     console.error(dataString);
+    if (dataString.includes('Serving')) {
+      backendReady = true;
+      mainWindow.loadURL(appURL);
 
-    // remove the listener once the Dashboard is loaded the first time
-    ictrl_be.stdout.removeListener('data', stdoutDataHandler);
+      // remove the listener once the Dashboard is loaded the first time
+      ictrl_be.stdout.removeListener('data', stdoutDataHandler);
+    }
   };
 
   // register the handler
@@ -196,24 +198,24 @@ const interceptFilePaths = () => {
   // Fix relative paths
   protocol.interceptFileProtocol('file',
       (request, callback) => {
-    const {pathname} = new URL(request.url);
+        const {pathname} = new URL(request.url);
 
-    let fileName = pathname.substring(pathname.indexOf('/')+1);
-    if (isWindows) {
-      fileName = pathname.substring(fileName.indexOf('/')+2);
-    }
+        let fileName = pathname.substring(pathname.indexOf('/') + 1);
+        if (isWindows) {
+          fileName = pathname.substring(fileName.indexOf('/') + 2);
+        }
 
-    if (request.method !== 'GET' ||
-        fileName.includes('ictrl_be') ||
-        fileName.includes('progress_page')) {
-      callback(request);
-    } else {
-      callback(resolve(staticFilesPath, fileName));
-    }
-  });
-}
+        if (request.method !== 'GET' ||
+            fileName.includes('ictrl_be') ||
+            fileName.includes('progress_page')) {
+          callback(request);
+        } else {
+          callback(resolve(staticFilesPath, fileName));
+        }
+      });
+};
 
-const createDashboardWindow = (isServerUp) => {
+const createDashboardWindow = () => {
   // Create the dashboard window.
   mainWindow = new BrowserWindow({
     ...windowOptions,
@@ -226,25 +228,26 @@ const createDashboardWindow = (isServerUp) => {
   // otherwise, load a static loading page first,
   //  and the subprocess stdout handler will load the appURL once there are
   //  output from the backend
-  const tempURL =
-      `file://${resolve(staticFilesPath, 'index.html')}`;
-  if (isServerUp) {
+  console.log(backendReady);
+  if (backendReady) {
     mainWindow.loadURL(appURL);
   } else {
+    const tempURL =
+        `file://${resolve(staticFilesPath, 'index.html')}`;
     mainWindow.loadURL(tempURL);
-  }
 
-  // TODO: revisit the need to reload now that we only load when the server is up
-  let loadAppURLTimeout = null;
-  mainWindow.webContents.on('did-fail-load', () => {
-    mainWindow.loadURL(tempURL);
-    if (loadAppURLTimeout === null) {
-      loadAppURLTimeout = setTimeout(() => {
-        mainWindow.loadURL(appURL);
-        loadAppURLTimeout = null;
-      }, 1000);
-    }
-  });
+    // TODO: revisit the need to reload now that we only load when the server is up
+    let loadAppURLTimeout = null;
+    mainWindow.webContents.on('did-fail-load', () => {
+      mainWindow.loadURL(tempURL);
+      if (loadAppURLTimeout === null) {
+        loadAppURLTimeout = setTimeout(() => {
+          mainWindow.loadURL(appURL);
+          loadAppURLTimeout = null;
+        }, 1000);
+      }
+    });
+  }
 
   mainWindow.webContents.on('did-finish-load', () => {
     mainWindow.show();
@@ -358,7 +361,7 @@ ipcMain.on('win-close', (_) => {
 app.on('second-instance',
     (event, commandLine, workingDirectory, additionalData) => {
       if (mainWindow === null) {
-        createDashboardWindow(true);
+        createDashboardWindow();
       }
       mainWindow.show();
     });
