@@ -1,5 +1,14 @@
 #!/bin/zsh
 
+echo -------------------------   Check Build Environment    -------------------------
+if [[ $(pwd) != *ictrl ]] | [[ $(pwd) != *iCtrl ]]; then
+    echo This script should be run from the project root directory
+    echo e.g. ./publish/macOS_build.sh
+else
+    echo pwd satisfies requirement
+fi
+exit
+
 if [ "$(arch)" = "arm64" ]
 then
   cpu_arch="arm64"
@@ -29,7 +38,7 @@ cd ..
 
 echo ------------------------   Compile the Python Backend   ------------------------
 source venv/bin/activate
-pyinstaller --noconfirm --clean macOS_ictrl_be.spec
+pyinstaller --noconfirm --clean ./publish/macOS_ictrl_be.spec
 
 echo ----------------- Compile the Electron Frontend --------------------
 cd desktop_client || exit
@@ -41,7 +50,7 @@ echo ----------------- Publish the Application --------------------
 cd  "./desktop_client/out/iCtrl Desktop-darwin-$cpu_arch" || exit
 ditto -c -k --sequesterRsrc --keepParent --zlibCompressionLevel 9 "./iCtrl Desktop.app" "ictrl-desktop-darwin-$cpu_arch.zip"
 cd ../../..
-node publish/mac_publish.js junhaoliao iCtrl \
+node ./publish/mac_publish.js junhaoliao iCtrl \
  "./desktop_client/out/iCtrl Desktop-darwin-$cpu_arch/ictrl-desktop-darwin-$cpu_arch.zip" "ictrl-desktop-darwin-$cpu_arch.zip"
-node publish/mac_publish.js junhaoliao iCtrl \
+node ./publish/mac_publish.js junhaoliao iCtrl \
  "./desktop_client/out/make/ictrl-desktop-setup.dmg" "ictrl-desktop-darwin-$cpu_arch.dmg"

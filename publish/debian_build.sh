@@ -1,3 +1,5 @@
+echo THIS SCRIPT IS CURRENTLY NOT MAINTAINED
+
 echo ------------------------   Check Uncommitted Changes    ------------------------
 echo If you see any lines below, there are uncommitted changes:
 git status -s

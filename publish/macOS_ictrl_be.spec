@@ -6,10 +6,10 @@ PyInstaller.config.CONF['distpath'] = './desktop_client'
 block_cipher = None
 
 
-a = Analysis(['ictrl_be.py'],
-             pathex=['/Users/junhao/PycharmProjects/iCtrl'],
+a = Analysis(['../ictrl_be.py'],
+             pathex=['.'],
              binaries=[],
-             datas=[('./client/build','./client')],
+             datas=[('../client/build', './client')],
              hiddenimports=[],
              hookspath=[],
              hooksconfig={},
@@ -23,7 +23,7 @@ pyz = PYZ(a.pure, a.zipped_data,
              cipher=block_cipher)
 
 exe = EXE(pyz,
-          a.scripts, 
+          a.scripts,
           [],
           exclude_binaries=True,
           name='ictrl_be',
@@ -33,13 +33,14 @@ exe = EXE(pyz,
           upx=True,
           console=True,
           disable_windowed_traceback=False,
+          argv_emulation=False,
           target_arch=None,
           codesign_identity=None,
-          entitlements_file=None )
+          entitlements_file=None)
 coll = COLLECT(exe,
                a.binaries,
                a.zipfiles,
-               a.datas, 
+               a.datas,
                strip=False,
                upx=True,
                upx_exclude=[],

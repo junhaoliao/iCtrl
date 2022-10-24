@@ -21,10 +21,10 @@
 import os
 import threading
 import uuid
-import zlib
 from typing import Optional
 
 import paramiko
+import zlib
 from SimpleWebSocketServer import SimpleSSLWebSocketServer, WebSocket
 from werkzeug.serving import generate_adhoc_ssl_context
 
@@ -180,4 +180,4 @@ if not app.debug or os.environ.get("WERKZEUG_RUN_MAIN") == "true":
                                                 keyfile=os.environ.get('SSL_KEY_PATH'),
                                                 version=ssl.PROTOCOL_TLS)
 
-    threading.Thread(target=audio_server.serveforever).start()
+    threading.Thread(target=audio_server.serveforever, daemon=True).start()

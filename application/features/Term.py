@@ -131,4 +131,4 @@ if not app.debug or os.environ.get("WERKZEUG_RUN_MAIN") == "true":
                                                    keyfile=os.environ.get('SSL_KEY_PATH'),
                                                    version=ssl.PROTOCOL_TLS)
 
-    threading.Thread(target=terminal_server.serveforever).start()
+    threading.Thread(target=terminal_server.serveforever, daemon=True).start()
