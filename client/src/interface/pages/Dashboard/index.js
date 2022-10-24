@@ -224,18 +224,30 @@ export default class Dashboard extends React.Component {
         sessions[changeMachineSessionId].host :
         null;
 
+    let doubleClickToOpenVNCTimeout = null;
+
     for (const [sessionID, sessionProps] of Object.entries(sessions)) {
       const showCM = canChangeMachine(sessionProps.host);
       sessionList.push(
           <ListItem style={{cursor: 'default'}} button key={sessionID}
-                    onDoubleClick={(ev) => {
-                      // open VNC when double-clicked
-
-                      if (ev.target.className.includes('MuiBackdrop-root')) {
+                    onClick={(ev) => {
+                      if (ev.target.className.includes(
+                          'MuiBackdrop-root')) {
                         // don't open VNC when the menu button is double-clicked
                         return;
                       }
-                      this.handleMenuClick(sessionID, 'vnc');
+                      if (ev.detail === 2) {
+                        // open VNC when double-clicked
+                        doubleClickToOpenVNCTimeout = setTimeout(() => {
+                          this.handleMenuClick(sessionID, 'vnc');
+                        }, 300);
+                      } else if (ev.detail === 3) {
+                        if (doubleClickToOpenVNCTimeout) {
+                          clearTimeout(doubleClickToOpenVNCTimeout);
+                          doubleClickToOpenVNCTimeout = null;
+                        }
+                        this.handleMenuClick(sessionID, 'term');
+                      }
                     }}
                     onContextMenu={(ev) => {
                       ev.preventDefault();
