@@ -25,6 +25,7 @@ import RFB from '@novnc/novnc/core/rfb';
 import KeyTable from '@novnc/novnc/core/input/keysym';
 import keysyms from '@novnc/novnc/core/input/keysymdef';
 import {
+  SSHAuthenticationWrong,
   SSHHostUnreachableRefresh,
   VNCAuthentication,
 } from '../interface/components/Loading/authentications';
@@ -302,6 +303,10 @@ export const vncConnect = async (vncViewer) => {
         if (currentStep === ICtrlError.SSH.HOST_UNREACHABLE) {
           vncViewer.setState({
             authentication: SSHHostUnreachableRefresh,
+          });
+        } else if (currentStep === ICtrlError.SSH.AUTH_WRONG) {
+          vncViewer.setState({
+            authentication: SSHAuthenticationWrong,
           });
         } else if (currentStep === ICtrlError.VNC.PASSWD_MISSING) {
           // make a copy of the VNCAuthentication model

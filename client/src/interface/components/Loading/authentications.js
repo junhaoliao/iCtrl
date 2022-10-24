@@ -31,7 +31,8 @@ export const SSHHostUnreachableRefresh = {
   },
 };
 
-export const SSHNoKeyAuthentication = {
+// TODO: implement this in the future
+export const SSHAuthenticationMissing = {
   label: 'Please enter your SSH password',
   description: `We can't find any SSH keys for the connection. 
     Please enter your password for the SSH connection:`,
@@ -41,6 +42,22 @@ export const SSHNoKeyAuthentication = {
   submitterName: 'Confirm',
   submitter: (authInput) => {
     console.log('Virtual submitter not overridden: ', authInput);
+  },
+};
+
+// FIXME: this is a temporary solution to mismatching keys
+//  Eventually, SSHNoKeyAuthentication can be used instead if it is implemented
+export const SSHAuthenticationWrong = {
+  label: 'Unable to match key pairs',
+  description: `iCtrl is unable to match any keys on the remote host. 
+  This may mean the remote host was re-imaged or the hostname is now being 
+  resolved to a different machine.   If you are certain those keys are no 
+  longer recoverable, please close this window and go to the iCtrl Dashboard to 
+  remove this session. Then you may recreate one with the same host name. `,
+  validator: null,
+  submitterName: 'Close',
+  submitter: () => {
+    window.close()
   },
 };
 

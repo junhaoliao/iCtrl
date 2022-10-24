@@ -23,7 +23,7 @@
 export const VNCSteps = [
   {
     label: 'SSH Authentication',
-    description: 'Connecting to the remote SSH machine with stored credentials (if any)...',
+    description: 'Connecting to the remote SSH machine...',
   },
   {
     label: 'Load Check',
@@ -58,7 +58,7 @@ export const VNCSteps = [
 export const TermSteps = [
   {
     label: 'SSH Authentication',
-    description: 'Connecting to the remote SSH machine with stored credentials (if any)...',
+    description: 'Connecting to the remote SSH machine...',
   },
   {
     label: 'Load Check',

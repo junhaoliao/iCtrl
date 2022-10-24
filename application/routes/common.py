@@ -60,6 +60,8 @@ def create_connection(session_id, conn_type):
                 or reason.startswith('[Errno 51]') \
                 or reason == 'timed out':
             reason = int_to_bytes(ICtrlError.SSH.HOST_UNREACHABLE)
+        elif "encountered RSA key, expected OPENSSH key" in reason:
+            reason = int_to_bytes(ICtrlError.SSH.AUTH_WRONG)
         else:
             print(reason)
             # TODO: return the other specific codes
