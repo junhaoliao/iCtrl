@@ -48,9 +48,7 @@ const windowOptions = {
   minHeight: 600,
   show: false,
   webPreferences: {
-    nativeWindowOpen: true,
-    nodeIntegration: true,
-    contextIsolation: false,
+    nativeWindowOpen: true, nodeIntegration: true, contextIsolation: false,
   },
 };
 
@@ -59,23 +57,19 @@ const windowOptions = {
 let ictrl_be = null;
 if (isMac) {
   if (!debugPort) {
-    ictrl_be = spawn('./ictrl_be', [mainPort, localAuthKey],
-        {
-          cwd: backendPath,
-          shell: true, // FIXME: needs to be specified since Electron 15.
-                       // reasons unknown
-        });
+    ictrl_be = spawn('./ictrl_be', [mainPort, localAuthKey], {
+      cwd: backendPath, shell: true, // FIXME: needs to be specified since Electron 15.
+                                     // reasons unknown
+    });
   }
 
   // need to have a 'window' role in the menu on mac
   //  to show all windows when right-clicking on the dock icon
   const menuTemplate = [
     {
-      role: 'window',
-      submenu: [{role: 'minimize'}, {role: 'close'}],
+      role: 'window', submenu: [{role: 'minimize'}, {role: 'close'}],
     }, {
-      label: 'Edit',
-      submenu: [
+      label: 'Edit', submenu: [
         {label: 'Undo', accelerator: 'Command+Z', selector: 'undo:'},
         {label: 'Redo', accelerator: 'Shift+Command+Z', selector: 'redo:'},
         {type: 'separator'},
@@ -83,11 +77,8 @@ if (isMac) {
         {label: 'Copy', accelerator: 'Command+C', selector: 'copy:'},
         {label: 'Paste', accelerator: 'Command+V', selector: 'paste:'},
         {
-          label: 'Select All',
-          accelerator: 'Command+A',
-          selector: 'selectAll:',
-        },
-      ],
+          label: 'Select All', accelerator: 'Command+A', selector: 'selectAll:',
+        }],
     }];
   Menu.setApplicationMenu(Menu.buildFromTemplate(menuTemplate));
 } else if (isWindows) {
@@ -109,22 +100,24 @@ if (isMac) {
 }
 
 if (ictrl_be !== null) {
+  let dataString = '';
+
   const stdoutDataHandler = (data) => {
     // load the Dashboard in the main window once output is generated
     //  from the local backend server
-    const dataString = data.toString();
+    dataString += data.toString();
     console.error(dataString);
-    if (dataString.includes('Serving')) {
+    if (dataString.includes('Running on')) {
       backendReady = true;
       mainWindow.loadURL(appURL);
 
       // remove the listener once the Dashboard is loaded the first time
-      ictrl_be.stdout.removeListener('data', stdoutDataHandler);
+      ictrl_be.stderr.removeListener('data', stdoutDataHandler);
     }
   };
 
   // register the handler
-  ictrl_be.stdout.on('data', stdoutDataHandler);
+  ictrl_be.stderr.on('data', stdoutDataHandler);
 }
 
 const setupNewWindowIcon = (url, newWindow) => {
@@ -196,23 +189,21 @@ const setupLocalAuth = () => {
 
 const interceptFilePaths = () => {
   // Fix relative paths
-  protocol.interceptFileProtocol('file',
-      (request, callback) => {
-        const {pathname} = new URL(request.url);
+  protocol.interceptFileProtocol('file', (request, callback) => {
+    const {pathname} = new URL(request.url);
 
-        let fileName = pathname.substring(pathname.indexOf('/') + 1);
-        if (isWindows) {
-          fileName = pathname.substring(fileName.indexOf('/') + 2);
-        }
+    let fileName = pathname.substring(pathname.indexOf('/') + 1);
+    if (isWindows) {
+      fileName = pathname.substring(fileName.indexOf('/') + 2);
+    }
 
-        if (request.method !== 'GET' ||
-            fileName.includes('ictrl_be') ||
-            fileName.includes('progress_page')) {
-          callback(request);
-        } else {
-          callback(resolve(staticFilesPath, fileName));
-        }
-      });
+    if (request.method !== 'GET' || fileName.includes('ictrl_be') ||
+        fileName.includes('progress_page')) {
+      callback(request);
+    } else {
+      callback(resolve(staticFilesPath, fileName));
+    }
+  });
 };
 
 const createDashboardWindow = () => {
@@ -231,21 +222,20 @@ const createDashboardWindow = () => {
   if (backendReady) {
     mainWindow.loadURL(appURL);
   } else {
-    const tempURL =
-        `file://${resolve(staticFilesPath, 'index.html')}`;
+    const tempURL = `file://${resolve(staticFilesPath, 'index.html')}`;
     mainWindow.loadURL(tempURL);
 
-    // TODO: revisit the need to reload now that we only load when the server is up
-    let loadAppURLTimeout = null;
-    mainWindow.webContents.on('did-fail-load', () => {
-      mainWindow.loadURL(tempURL);
-      if (loadAppURLTimeout === null) {
-        loadAppURLTimeout = setTimeout(() => {
-          mainWindow.loadURL(appURL);
-          loadAppURLTimeout = null;
-        }, 1000);
-      }
-    });
+    // TODO: DO we really need to handle failed loads?
+    // let loadAppURLTimeout = null;
+    // mainWindow.webContents.on('did-fail-load', () => {
+    //   mainWindow.loadURL(tempURL);
+    //   if (loadAppURLTimeout === null) {
+    //     loadAppURLTimeout = setTimeout(() => {
+    //       mainWindow.loadURL(appURL);
+    //       loadAppURLTimeout = null;
+    //     }, 1000);
+    //   }
+    // });
   }
 
   mainWindow.webContents.on('did-finish-load', () => {
@@ -282,17 +272,12 @@ const createDashboardWindow = () => {
           const fileName = item.getFilename();
           const indeterminate = totalBytes === 0;
           const progressBar = indeterminate ? new ProgressBar({
-                indeterminate: true,
-                text: `Downloading ${fileName}`,
-              },
-              `Downloading ${fileName}`,
-          ) : new ProgressBar({
-                indeterminate: false,
-                text: `Downloading ${fileName}`,
-                maximum: totalBytes,
-              },
-              `Downloading ${fileName}`,
-          );
+            indeterminate: true, text: `Downloading ${fileName}`,
+          }, `Downloading ${fileName}`) : new ProgressBar({
+            indeterminate: false,
+            text: `Downloading ${fileName}`,
+            maximum: totalBytes,
+          }, `Downloading ${fileName}`);
 
           let poppedAtLeastOnce = false;
           item.on('updated', (event, state) => {
