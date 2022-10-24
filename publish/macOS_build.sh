@@ -4,10 +4,10 @@ echo -------------------------   Check Build Environment    --------------------
 if [[ $(pwd) != *ictrl ]] | [[ $(pwd) != *iCtrl ]]; then
     echo This script should be run from the project root directory
     echo e.g. ./publish/macOS_build.sh
-else
-    echo pwd satisfies requirement
+    exit
 fi
-exit
+
+echo pwd satisfies requirement
 
 if [ "$(arch)" = "arm64" ]
 then

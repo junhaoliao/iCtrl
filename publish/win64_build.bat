@@ -1,5 +1,15 @@
 @echo off
 
+echo -------------------------   Check Build Environment    -------------------------
+if "%cd:~-7%"=="publish"  (
+    echo This script should be run from the project root directory
+    echo e.g. .\publish\win64_build.bat
+    exit
+)
+
+echo pwd satisfies requirement
+
+
 echo ------------------------   Check Uncommitted Changes    ------------------------
 echo If you see any lines below, there are uncommitted changes:
 git status -s
@@ -25,7 +35,7 @@ cd ..
 call venv\Scripts\activate.bat
 
 :: compile the Python backend
-pyinstaller --noconfirm --clean win64_ictrl_be.spec
+pyinstaller --noconfirm --clean .\publish\win64_ictrl_be.spec
 
 :: make the desktop client
 cd desktop_client
