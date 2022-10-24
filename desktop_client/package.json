@@ -36,12 +36,12 @@
     "update-electron-app": "^2.0.1"
   },
   "devDependencies": {
-    "@electron-forge/cli": "^6.0.0-beta.63",
-    "@electron-forge/maker-deb": "^6.0.0-beta.63",
-    "@electron-forge/maker-squirrel": "^6.0.0-beta.63",
-    "@electron-forge/maker-dmg": "^6.0.0-beta.63",
-    "@electron-forge/publisher-github": "^6.0.0-beta.63",
-    "electron": "^18.1.0"
+    "@electron-forge/cli": "^6.0.0-beta.67",
+    "@electron-forge/maker-deb": "^6.0.0-beta.67",
+    "@electron-forge/maker-dmg": "^6.0.0-beta.67",
+    "@electron-forge/maker-squirrel": "^6.0.0-beta.67",
+    "@electron-forge/publisher-github": "^6.0.0-beta.67",
+    "electron": "^21.2.0"
   },
   "scripts": {
     "electron": "electron .",
@@ -94,7 +94,9 @@
           "name": "@electron-forge/maker-deb",
           "config": {
             "options": {
-              "categories": ["Utility"],
+              "categories": [
+                "Utility"
+              ],
               "description": "Desktop Client for iCtrl",
               "genericName": "iCtrl Desktop",
               "homepage": "https://ictrl.ca",
