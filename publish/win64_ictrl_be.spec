@@ -5,10 +5,10 @@ PyInstaller.config.CONF['distpath'] = './desktop_client'
 block_cipher = None
 
 
-a = Analysis(['ictrl_be.py'],
-             pathex=['C:\\Users\\junha\\PycharmProjects\\ictrl'],
+a = Analysis(['../ictrl_be.py'],
+             pathex=['.'],
              binaries=[],
-             datas=[('./client/build','./client')],
+             datas=[('../client/build','./client')],
              hiddenimports=[],
              hookspath=[],
              hooksconfig={},
@@ -29,7 +29,7 @@ exe = EXE(pyz,
           debug=False,
           bootloader_ignore_signals=False,
           strip=False,
-          upx=False,
+          upx=True,
           console=True,
           disable_windowed_traceback=False,
           target_arch=None,
