@@ -179,6 +179,13 @@ export default class Dashboard extends React.Component {
     });
   };
 
+  handleDoubleClickAppBar = () => {
+    const {ipcRenderer} = window.require('electron');
+    if (ipcRenderer) {
+      ipcRenderer.send('win-max');
+    }
+  };
+
   componentDidMount() {
     axios.get('/api/profiles').then(response => {
       const {sessions, version} = response.data;
@@ -189,7 +196,7 @@ export default class Dashboard extends React.Component {
       });
     }).catch(error => {
       // if not accessing directly from Electron
-      if (window.location.protocol !== 'file:'){
+      if (window.location.protocol !== 'file:') {
         // possibly not logged in
         window.location = '/';
       }
@@ -353,7 +360,8 @@ export default class Dashboard extends React.Component {
 
     return (
         <>
-          <AppBar position="static" color={'primary'} id={'titlebar'}>
+          <AppBar position="static" color={'primary'} id={'titlebar'}
+                  onDoubleClick={this.handleDoubleClickAppBar}>
             <Toolbar>
               {platform === 'darwin' && <div style={{width: '64px'}}/>}
               <img src={ictrlLogo} style={{
@@ -392,7 +400,7 @@ export default class Dashboard extends React.Component {
                   <AddBoxIcon style={{color: 'white'}} fontSize="large"/>
                 </IconButton>
               </Tooltip>
-              {isLocal? (platform === 'win32' && <TrafficLights/>) :
+              {isLocal ? (platform === 'win32' && <TrafficLights/>) :
                   <Tooltip title="Log out">
                     <IconButton edge={'end'} onClick={this.handleLogout}
                                 size={'large'}>

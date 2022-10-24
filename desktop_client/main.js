@@ -197,6 +197,7 @@ const interceptFilePaths = () => {
       fileName = pathname.substring(fileName.indexOf('/') + 2);
     }
 
+    // FIXME: should find better filters
     if (request.method !== 'GET' || fileName.includes('ictrl_be') ||
         fileName.includes('progress_page')) {
       callback(request);
