@@ -60,10 +60,7 @@ const AboutSection = (props) => (
       <List className={'selectable'}>
         {props.list.map((i) => (<ListItem key={i.name}>
           {i.pic && <ListItemAvatar>
-            <Avatar>
-              <img width={'100%'} src={i.pic}
-                   alt={`${i.name} Profile`}/>
-            </Avatar>
+            <Avatar src={i.pic}/>
           </ListItemAvatar>}
           <ListItemText
               primary={i.name}
