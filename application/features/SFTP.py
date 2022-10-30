@@ -81,15 +81,18 @@ class SFTP(Connection):
         return stat.S_ISREG(file_stat.st_mode), file_stat.st_size
 
     def dl_generator(self, path):
-        with self.sftp.file(path) as f:
-            # TODO: this seems already fixed
-            #  do NOT use f.prefetch(), which can cause a serious memory leak
-            #  when the user stop the download and the file is very large
-            f.prefetch()
-            chunk = f.read(paramiko.sftp_file.SFTPFile.MAX_REQUEST_SIZE)
-            while len(chunk) != 0:
-                yield chunk
+        try:
+            with self.sftp.file(path) as f:
+                # TODO: this seems already fixed
+                #  do NOT use f.prefetch(), which can cause a serious memory leak
+                #  when the user stop the download and the file is very large
+                f.prefetch()
                 chunk = f.read(paramiko.sftp_file.SFTPFile.MAX_REQUEST_SIZE)
+                while len(chunk) != 0:
+                    yield chunk
+                    chunk = f.read(paramiko.sftp_file.SFTPFile.MAX_REQUEST_SIZE)
+        except PermissionError:
+            yield bytes()
 
     def _zip_dir_recurse(self, z, parent, file):
         fullpath = posixpath.join(parent, file)
@@ -108,6 +111,8 @@ class SFTP(Connection):
         except FileNotFoundError:
             # likely due to a symlink that cannot be resolved
             # do nothing for now
+            return
+        except PermissionError:
             return
 
     def zip_generator(self, cwd, file_list):
