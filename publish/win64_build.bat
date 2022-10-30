@@ -35,7 +35,7 @@ cd ..
 call venv\Scripts\activate.bat
 
 :: compile the Python backend
-pyinstaller --noconfirm --clean .\publish\win64_ictrl_be.spec
+pyinstaller --noconfirm --clean .\publish\ictrl_be.spec
 
 :: make the desktop client
 cd desktop_client

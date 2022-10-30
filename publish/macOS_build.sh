@@ -38,7 +38,7 @@ cd ..
 
 echo ------------------------   Compile the Python Backend   ------------------------
 source venv/bin/activate
-pyinstaller --noconfirm --clean ./publish/macOS_ictrl_be.spec
+pyinstaller --noconfirm --clean ./publish/ictrl_be.spec
 
 echo ----------------- Compile the Electron Frontend --------------------
 cd desktop_client || exit

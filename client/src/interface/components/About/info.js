@@ -83,17 +83,17 @@ export const authors = [
   {
     name: 'Jiaxing Li',
     url: 'https://www.linkedin.com/in/jiaxing-leo-li/',
-    pic: '/profile-pics/jiaxing-pic.jpg',
+    pic: '/profile-pics/jiaxing-pic.webp',
   },
   {
     name: 'Yizhong Xu',
     url: 'https://www.linkedin.com/in/yizhong-xu-076bb9157/',
-    pic: '/profile-pics/yizhong-pic.jpg',
+    pic: '/profile-pics/yizhong-pic.webp',
   },
   {
     name: 'Haoran Zhang',
     url: 'https://www.linkedin.com/in/haoran-zhang-424b33196/',
-    pic: '/profile-pics/haoran-pic.jpg',
+    pic: '/profile-pics/haoran-pic.webp',
   },
 ];
 

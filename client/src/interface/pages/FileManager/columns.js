@@ -45,9 +45,9 @@ const columns = [
             <span className={'file-icon'}>{is_lnk ?
                   <ShortcutIcon/> :
                   (is_dir ? <FolderIcon/> :
-                      <img src={`/vscode-icons-11.6.0/icons/${getIconForFile(params.value)}`}
+                      <img src={`/vscode-icons-12.0.1/icons/${getIconForFile(params.value)}`}
                            alt={'file-icon'}
-                           style={{filter: 'brightness(60%)'}}
+                           style={{filter: 'brightness(80%)'}}
                            height={24}
                       />)}
             </span>
