@@ -27,6 +27,8 @@ from .mywebsockify import MyProxyRequestHandler, MySSLProxyServer
 from .vncpasswd import decrypt_passwd, obfuscate_password
 from ..utils import find_free_port
 
+with open('./application/resources/xstartup') as xstartup_file:
+    xstartup_str = "".join(xstartup_file.readlines())
 
 def websocket_proxy_thread(local_websocket_port, local_vnc_port):
     if os.environ.get('SSL_CERT_PATH') is None:
@@ -107,7 +109,7 @@ class VNC(Connection):
             "rm -rf ~/.vnc",
             "mkdir ~/.vnc",
 
-            f"printf '{VNC.read_xstartup()}' > ~/.vnc/xstartup",
+            f"printf '{xstartup_str}' > ~/.vnc/xstartup",
             "cp /etc/vnc/xstartup ~/.vnc  >& /dev/null",
             "chmod 700 ~/.vnc/xstartup",
 
@@ -183,15 +185,3 @@ class VNC(Connection):
         proxy_thread.start()
 
         return local_websocket_port
-
-    @staticmethod
-    def read_xstartup():
-        """
-        TODO: read from an actual file instead
-        1. Launch a gnome-session so that the VNC config window doesn't show up
-
-        NOTE: it seems the latest version of TigerVNC expects the xstartup script to run in the foreground
-              and therefore an '&' should not be added towards the end of the script
-        """
-        return "#\\!/bin/sh\\n" \
-               "gnome-session\\n"
