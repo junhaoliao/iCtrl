@@ -10,6 +10,23 @@ Although we have been trying to protect your information with honest efforts, we
 Please do not use the program on a public computer. 
 We are not responsible for any unintended use of our program, including but not limited to Academic Misconduct, loss of data when the APIs are called with unofficial web clients, and any hacking behaviour that utilises our tool. However, if you suspect there is any security vulnerability, you are more than welcome to email support@ictrl.ca , and we will try our best to address such issues. 
 
+## Demo Screenshot
+<table>
+  <tr>
+    <th colspan="2">Features</th>
+  </tr>
+  <tr>
+    <td>Dashboard</td>
+    <td>File Manager via SFTP</td>
+  </tr>
+  <tr>
+    <td>Graphical Remote via VNC</td>
+    <td>Terminal Console via SSH</td>
+  </tr>
+</table>
+
+![image](https://user-images.githubusercontent.com/43196707/201545822-0782c64d-fbac-4286-9af8-1cd5af3c30a5.png)
+
 ## Instructions
 The tool is provided in two variants: a web service and a desktop client. You can pick from one of the below options to best suit your need.
 
