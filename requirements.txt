@@ -1,5 +1,5 @@
 websockify==0.10.0
-Pillow==9.2.0
+Pillow==9.3.0
 psycopg2-binary==2.9.3; sys_platform == 'linux'
 pyDes==2.0.1
 bcrypt==3.2.0; sys_platform == 'linux'
