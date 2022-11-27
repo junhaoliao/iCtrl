@@ -26,7 +26,6 @@ import './index.css';
 
 import {
   AppBar,
-  Fade,
   Hidden,
   IconButton,
   List,
@@ -79,7 +78,6 @@ export default class Dashboard extends React.Component {
       isLocal: true,
       aboutOpened: false,
       resettingSessionID: null,
-      hoveredSession: null,
     };
   }
 
@@ -216,7 +214,6 @@ export default class Dashboard extends React.Component {
       isLocal,
       aboutOpened,
       resettingSessionID,
-      hoveredSession,
     } = this.state;
 
     const platform = window.require &&
@@ -263,12 +260,6 @@ export default class Dashboard extends React.Component {
                             `${sessionID}-username`);
                         this.handleMenuOpen(anchorElem, sessionID);
                       }
-                    }}
-                    onMouseEnter={() => {
-                      this.setState({hoveredSession: sessionID});
-                    }}
-                    onMouseLeave={() => {
-                      this.setState({hoveredSession: null});
                     }}
           >
             <ListItemAvatar>
@@ -333,54 +324,48 @@ export default class Dashboard extends React.Component {
                 Delete
               </MenuItem>
             </Menu>
-            <Fade in={hoveredSession === sessionID}
-                  timeout={{enter: 500, exit: 2000}}>
-              <ListItemSecondaryAction>
-                <Hidden smDown>
-                  {showCM &&
-                      <Tooltip title="Change Machine"
-                               aria-label="change machine">
-                        <IconButton
-                            onClick={() => this.handleFeatureClick(sessionID,
-                                'CM')}>
-                          <StorageIcon style={{color: '#4caf50'}}
-                                       fontSize={'large'}/>
-                        </IconButton>
-                      </Tooltip>
-                  }
-                  <Tooltip title="VNC" aria-label="VNC">
-                    <IconButton
-                        onClick={() => this.handleFeatureClick(sessionID,
-                            'vnc')}>
-                      <RemoteDesktopIcon style={{color: 'lightcoral'}}
-                                         fontSize={'large'}/>
-                    </IconButton>
-                  </Tooltip>
-                  <Tooltip title="Terminal" aria-label="terminal">
-                    <IconButton
-                        onClick={() => this.handleFeatureClick(sessionID,
-                            'term')}>
-                      <ConsoleIcon style={{color: 'black'}} fontSize={'large'}/>
-                    </IconButton>
-                  </Tooltip>
-                  <Tooltip title="File Manager" aria-label="file manager">
-                    <IconButton
-                        onClick={() => this.handleFeatureClick(sessionID,
-                            'file')}>
-                      <FileManagerIcon style={{color: '#1976d2'}}
-                                       fontSize={'large'}/>
-                    </IconButton>
-                  </Tooltip>
-                </Hidden>
-                <Tooltip title="More Options" aria-label="more options">
+            <ListItemSecondaryAction>
+              <Hidden smDown>
+                {showCM &&
+                    <Tooltip title="Change Machine" aria-label="change machine">
+                      <IconButton
+                          onClick={() => this.handleFeatureClick(sessionID,
+                              'CM')}>
+                        <StorageIcon style={{color: '#4caf50'}}
+                                     fontSize={'large'}/>
+                      </IconButton>
+                    </Tooltip>
+                }
+                <Tooltip title="VNC" aria-label="VNC">
                   <IconButton
-                      onClick={(ev) => this.handleMenuOpen(ev.target,
-                          sessionID)}>
-                    <MoreVertIcon fontSize={'large'}/>
+                      onClick={() => this.handleFeatureClick(sessionID, 'vnc')}>
+                    <RemoteDesktopIcon style={{color: 'lightcoral'}}
+                                       fontSize={'large'}/>
                   </IconButton>
                 </Tooltip>
-              </ListItemSecondaryAction>
-            </Fade>
+                <Tooltip title="Terminal" aria-label="terminal">
+                  <IconButton
+                      onClick={() => this.handleFeatureClick(sessionID,
+                          'term')}>
+                    <ConsoleIcon style={{color: 'black'}} fontSize={'large'}/>
+                  </IconButton>
+                </Tooltip>
+                <Tooltip title="File Manager" aria-label="file manager">
+                  <IconButton
+                      onClick={() => this.handleFeatureClick(sessionID,
+                          'file')}>
+                    <FileManagerIcon style={{color: '#1976d2'}}
+                                     fontSize={'large'}/>
+                  </IconButton>
+                </Tooltip>
+              </Hidden>
+              <Tooltip title="More Options" aria-label="more options">
+                <IconButton
+                    onClick={(ev) => this.handleMenuOpen(ev.target, sessionID)}>
+                  <MoreVertIcon fontSize={'large'}/>
+                </IconButton>
+              </Tooltip>
+            </ListItemSecondaryAction>
           </ListItem>,
       );
     }
