@@ -167,7 +167,7 @@ export default class NewSession extends React.Component {
           <div className={'new-session-content-wrapper'}>
             <Box display={'flex'}>
               <Tooltip style={{width: '150px'}}
-                       title={'[Required] host name of the target SSH server'}>
+                       title={'[Required] Host name of the remote SSH server. '}>
                 <Typography variant={'subtitle1'}>
                   Host<span style={{color: 'red'}}>*</span>
                 </Typography>
@@ -211,7 +211,7 @@ export default class NewSession extends React.Component {
             </Box>
             <Box display={'flex'}>
               <Tooltip style={{width: '150px'}}
-                       title={'[Required] username for login'}>
+                       title={'[Required] Username for login. '}>
                 <Typography variant={'subtitle1'}>
                   Username<span style={{color: 'red'}}>*</span>
                 </Typography>
@@ -227,10 +227,10 @@ export default class NewSession extends React.Component {
             </Box>
             <Box display={'flex'}>
               <Tooltip style={{width: '150px'}}
-                       title={'[Optional] password for login. ' +
-                           'If left empty, you will need to enter the password at the next login. '}>
+                       title={'[Required] Password for login. ' +
+                           'A secure token will be created and stored to be used for logins in the future. '}>
                 <Typography variant={'subtitle1'}>
-                  Password
+                  Password<span style={{color: 'red'}}>*</span>
                 </Typography>
               </Tooltip>
               <TextField id={'password'}
