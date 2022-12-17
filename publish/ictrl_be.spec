@@ -29,8 +29,8 @@ a = Analysis(['../ictrl_be.py'],
                  'win32ctypes',
                  'setuptools',
                  # numpy unused
-                 "numpy.array_api", "numpy._typing", "numpy.distutils", "numpy.doc", "numpy.f2py", "numpy.testing",
-                 "numpy.tests", "numpy.typing",
+                 # "numpy.array_api", "numpy._typing", "numpy.distutils", "numpy.doc", "numpy.f2py", "numpy.testing",
+                 # "numpy.tests", "numpy.typing",
                  # PIL unused
                  "PIL.__main__", "PIL.BdfFontFile", "PIL.BlpImagePlugin", "PIL.BufrStubImagePlugin", "PIL.ContainerIO",
                  "PIL.CurImagePlugin", "PIL.DcxImagePlugin", "PIL.DdsImagePlugin", "PIL.EpsImagePlugin", "PIL.ExifTags",
