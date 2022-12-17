@@ -1,4 +1,5 @@
-#!/bin/sh
+XSTARTUP_STR = \
+    """#!/bin/sh
 
 xrdb $HOME/.Xresources || true
 
@@ -9,3 +10,4 @@ unset SESSION_MANAGER
 unset DBUS_SESSION_BUS_ADDRESS
 
 /etc/X11/Xsession
+"""

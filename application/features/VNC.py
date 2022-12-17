@@ -25,10 +25,9 @@ import threading
 from .Connection import Connection
 from .mywebsockify import MyProxyRequestHandler, MySSLProxyServer
 from .vncpasswd import decrypt_passwd, obfuscate_password
+from ..resources.xstartup import XSTARTUP_STR
 from ..utils import find_free_port
 
-with open('./application/resources/xstartup') as xstartup_file:
-    xstartup_str = "".join(xstartup_file.readlines())
 
 def websocket_proxy_thread(local_websocket_port, local_vnc_port):
     if os.environ.get('SSL_CERT_PATH') is None:
@@ -109,7 +108,7 @@ class VNC(Connection):
             "rm -rf ~/.vnc",
             "mkdir ~/.vnc",
 
-            f"printf '{xstartup_str}' > ~/.vnc/xstartup",
+            f"printf '{XSTARTUP_STR}' > ~/.vnc/xstartup",
             "cp /etc/vnc/xstartup ~/.vnc  >& /dev/null",
             "chmod 700 ~/.vnc/xstartup",
 
