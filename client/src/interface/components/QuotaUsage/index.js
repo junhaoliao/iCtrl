@@ -70,7 +70,7 @@ export default class QuotaUsage extends React.Component {
       quota,
     } = this.state;
     const loading = (quota === 0);
-    const loadFailed = (quota === null);
+    const loadFailed = isNaN(quota);
     return (<div style={{
           width: '100%',
           visibility: loadFailed ? 'hidden' : 'visible',
