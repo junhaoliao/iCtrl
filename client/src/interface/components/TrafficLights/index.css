@@ -28,6 +28,7 @@
 
 #win-close-button {
     background-color: #ff5f57;
+    z-index: 1;
 }
 
 #win-close-text {
@@ -50,4 +51,7 @@
     color: #006000;
 }
 
+#win-close-corner {
+    -webkit-app-region: no-drag;
+}
 

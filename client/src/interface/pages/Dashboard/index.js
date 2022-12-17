@@ -408,9 +408,12 @@ export default class Dashboard extends React.Component {
                 </IconButton>
               </Tooltip>
               <Tooltip title="Add new session" className={'titlebar-buttons'}>
-                <IconButton disabled={loading_sessions} onClick={this.handleAddNewSession} size={'large'}>
+                <span>
+                  <IconButton disabled={loading_sessions}
+                              onClick={this.handleAddNewSession} size={'large'}>
                   <AddBoxIcon style={{color: 'white'}} fontSize="large"/>
                 </IconButton>
+                </span>
               </Tooltip>
               {isLocal ? (platform === 'win32' && <TrafficLights/>) :
                   <Tooltip title="Log out">

@@ -25,9 +25,20 @@ import React from 'react';
 import './index.css';
 import {Tooltip} from '@mui/material';
 
+let ipcRenderer;
+if (window.require) {
+  ipcRenderer = window.require('electron').ipcRenderer;
+} else {
+  // for debugging in browser only
+  ipcRenderer = {
+    send: (...args) => {
+      alert(...args);
+    },
+  };
+}
+
 export default class TrafficLights extends React.Component {
   handleClick = (ev) => {
-    const {ipcRenderer} = window.require('electron');
     const action = ev.target.innerText;
     switch (action) {
       case '−':
@@ -43,27 +54,42 @@ export default class TrafficLights extends React.Component {
   };
 
   render() {
-    return <div id={'traffic-lights-container'}>
-      <Tooltip title={'Minimize'}>
-        <div className={'win-button'} id={'win-min-button'}
-             onClick={this.handleClick}>
-          <div className={'win-text'} id={'win-min-text'}>−</div>
-        </div>
-      </Tooltip>
+    return <>
+      <div id={'traffic-lights-container'}>
+        <Tooltip title={'Minimize'}>
+          <div className={'win-button'} id={'win-min-button'}
+               onClick={this.handleClick}>
+            <div className={'win-text'} id={'win-min-text'}>−</div>
+          </div>
+        </Tooltip>
 
-      <Tooltip title={'Restore'}>
-        <div className={'win-button'} id={'win-max-button'}
-             onClick={this.handleClick}>
-          <div className={'win-text'} id={'win-max-text'}>+</div>
-        </div>
-      </Tooltip>
+        <Tooltip title={'Restore'}>
+          <div className={'win-button'} id={'win-max-button'}
+               onClick={this.handleClick}>
+            <div className={'win-text'} id={'win-max-text'}>+</div>
+          </div>
+        </Tooltip>
+
+        <Tooltip title={'Close'}>
+          <div className={'win-button'} id={'win-close-button'}
+               onClick={this.handleClick}>
+            <div className={'win-text'} id={'win-close-text'}>×</div>
+          </div>
+        </Tooltip>
+      </div>
 
       <Tooltip title={'Close'}>
-        <div className={'win-button'} id={'win-close-button'}
-             onClick={this.handleClick}>
-          <div className={'win-text'} id={'win-close-text'}>×</div>
-        </div>
+        <div id={'win-close-corner'}
+             style={{
+               width: '45px',
+               height: '42px',
+               position: 'fixed',
+               right: 0,
+               top: 0,
+             }}
+             onClick={this.handleClick}
+        />
       </Tooltip>
-    </div>;
+    </>;
   }
 }
