@@ -3,7 +3,7 @@ Pillow==9.2.0
 psycopg2-binary==2.9.3; sys_platform == 'linux'
 pyDes==2.0.1
 bcrypt==3.2.0; sys_platform == 'linux'
-cryptography==38.0.1
+cryptography==38.0.3
 cachetools==5.0.0; sys_platform == 'linux'
 SQLAlchemy==1.4.36; sys_platform == 'linux'
 pyinstaller==5.5
