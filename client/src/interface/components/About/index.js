@@ -71,7 +71,6 @@ const AboutSection = (props) => (
                       url={i.url}>{i.url}
                   </LinkForNewWindow>
                 </div>
-
               }
           />
         </ListItem>))}

@@ -57,6 +57,8 @@ export default class Session extends React.Component {
     this.nicknameAvatarRef = createRef();
     this.lastStoredNickname = '';
 
+    this.moreButtonRef = createRef();
+
     this.state = {
       nickname: '',
       contextMenuAnchorEl: null,
@@ -93,9 +95,9 @@ export default class Session extends React.Component {
     }
   }
 
-  handleContextMenuOpen = (target) => {
+  handleContextMenuOpen = () => {
     this.setState({
-      contextMenuAnchorEl: target,
+      contextMenuAnchorEl: this.moreButtonRef.current,
     });
   };
 
@@ -200,10 +202,7 @@ export default class Session extends React.Component {
                   this.handleContextMenuClose();
 
                   if (contextMenuAnchorEl === null) {
-                    // using this as anchor seems not to cover any valid info
-                    const anchorElem = document.getElementById(
-                        `${sessionID}-username`);
-                    this.handleContextMenuOpen(anchorElem);
+                    this.handleContextMenuOpen();
                   }
                 }}
       >
@@ -248,11 +247,11 @@ export default class Session extends React.Component {
                 wordWrap: 'break-word',
               },
             }}
-            secondary={<div id={`${sessionID}-username`}>
-              {username}
-            </div>}/>
+            secondary={username}
+        />
         <Menu
             anchorEl={contextMenuAnchorEl}
+            anchorOrigin={{vertical: 'bottom', horizontal: 'right'}}
             open={contextMenuAnchorEl !== null}
             onClose={this.handleContextMenuClose}
         >
@@ -260,41 +259,44 @@ export default class Session extends React.Component {
             {showCM &&
                 <MenuItem
                     onClick={() => this.handleContextMenuClick('CM')}>
-                  <ListItemIcon><StorageIcon
-                      style={{color: '#4caf50'}}/></ListItemIcon>
+                  <ListItemIcon>
+                    <StorageIcon style={{color: '#4caf50'}}/>
+                  </ListItemIcon>
                   Change Machine
                 </MenuItem>}
             <MenuItem
                 onClick={() => this.handleContextMenuClick('vnc')}>
-              <ListItemIcon><RemoteDesktopIcon
-                  style={{color: 'lightcoral'}}/>
+              <ListItemIcon>
+                <RemoteDesktopIcon style={{color: 'lightcoral'}}/>
               </ListItemIcon>
               VNC
             </MenuItem>
             <MenuItem
                 onClick={() => this.handleContextMenuClick('term')}>
-              <ListItemIcon><ConsoleIcon
-                  style={{color: 'black'}}/></ListItemIcon>
+              <ListItemIcon>
+                <ConsoleIcon style={{color: 'black'}}/>
+              </ListItemIcon>
               Terminal
             </MenuItem>
             <MenuItem
                 onClick={() => this.handleContextMenuClick('file')}>
-              <ListItemIcon><FileManagerIcon
-                  style={{color: '#1976d2'}}/></ListItemIcon>
+              <ListItemIcon>
+                <FileManagerIcon style={{color: '#1976d2'}}/>
+              </ListItemIcon>
               File Manager
             </MenuItem>
           </Hidden>
           <MenuItem
               onClick={() => this.handleContextMenuClick('resetVNC')}>
-            <ListItemIcon><RefreshIcon
-                style={{color: 'orange'}}/>
+            <ListItemIcon>
+              <RefreshIcon style={{color: 'orange'}}/>
             </ListItemIcon>
             Reset VNC
           </MenuItem>
           <MenuItem
               onClick={() => this.handleContextMenuClick('delete')}>
-            <ListItemIcon><DeleteIcon
-                style={{color: 'grey'}}/></ListItemIcon>
+            <ListItemIcon>
+              <DeleteIcon style={{color: 'grey'}}/></ListItemIcon>
             Delete
           </MenuItem>
         </Menu>
@@ -330,7 +332,8 @@ export default class Session extends React.Component {
           </Hidden>
           <Tooltip title="More Options" aria-label="more options">
             <IconButton
-                onClick={(ev) => this.handleContextMenuOpen(ev.target)}>
+                ref={this.moreButtonRef}
+                onClick={this.handleContextMenuOpen}>
               <MoreVertIcon fontSize={'large'}/>
             </IconButton>
           </Tooltip>
