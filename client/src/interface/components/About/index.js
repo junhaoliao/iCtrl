@@ -64,14 +64,16 @@ const AboutSection = (props) => (
           </ListItemAvatar>}
           <ListItemText
               primary={i.name}
-              secondary={<div>
-                {i.reason && <Typography variant={'body2'}>
-                  {i.reason}
-                </Typography>}
-                <LinkForNewWindow
-                    url={i.url}>{i.url}</LinkForNewWindow>
-              </div>
-              }/>
+              secondary={
+                <div>
+                  <div>{i.reason && i.reason}</div>
+                  <LinkForNewWindow
+                      url={i.url}>{i.url}
+                  </LinkForNewWindow>
+                </div>
+
+              }
+          />
         </ListItem>))}
       </List>
     </>
