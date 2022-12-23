@@ -20,28 +20,28 @@
  *  IN THE SOFTWARE.
  */
 
-export const introduction = `iCtrl is a web-based remote control software, which 
-supports Virtual Network Console (VNC) connections with a graphical interface, 
-Secure Shell (SSH) connections with a terminal interface, user profile 
-management, change machines with workload detection, file transfer, and mobile 
-compatibility. Audio support is experimental at this moment. `;
+export const introduction = `iCtrl is a web-based remote control application, 
+which supports Virtual Network Console (VNC) connections with a graphical 
+interface and audio support, Secure Shell (SSH) connections with a terminal 
+interface, user profile management, change machines with workload detection, 
+file transfer. It is also mobile-friendly. `;
 
 export const disclaimer = <>
-  <p>If you are using the desktop client, your SSH hosts and credentials will be
-    stored locally on the computer you run the program with.
-    In the web service, we store the hosts and credentials in a database on our
-    server. Although we have been trying to protect your information with honest
+  <p>If you are using the desktop client, your SSH hosts and credentials are
+    stored locally on which the computer you run the program.
+    In the web service, hosts and credentials are stored in a database on our
+    server. Although we always try to protect your information with honest
     efforts, we are not cyber security experts and cannot guarantee the program
     is 100% bug-free.
   </p>
   <p>
-    Please do not use the desktop version on a public computer.
+    Please do not use the desktop client on a public computer.
   </p>
   <p>
-    We are not responsible for any unintended use of our program, including but
-    not limited to Academic Misconduct, loss of data when the APIs are called
-    with unofficial web clients, and any hacking behaviour that utilises our
-    tool.
+    We are not responsible for any unintended uses of our program, including but
+    not limited to Academic Misconducts, loss of data when APIs are called
+    with unofficial web clients, and any hacking behaviours that utilise the
+    application.
     However, if you suspect there is any security vulnerability, you are more
     than welcome to email <a
       href={'mailto:support@ictrl.ca?cc=junhao@junhao.ca&subject=Bug%20Report&body=Hi%20there%2C%0D%0A%0D%0AI%20am%20writing%20this%20to%20report%20a%20bug%20in%20iCtrl.%0D%0A%0D%0ABug%20Title%3A%0D%0A%0D%0ADetails%3A%0D%0A%0D%0APlatform%20%5Bweb%2FWindows%2FMac%5D%3A%0D%0A%0D%0AFrequency%20%5Bonce%2Foccasionally%2Falways%5D%3A%0D%0A%0D%0AHow%20to%20reproduce%3A%0D%0A%0D%0A'}>
@@ -60,7 +60,8 @@ export const specialThanks = [
   {
     name: 'Betz, Vaughn',
     url: 'https://www.eecg.utoronto.ca/~vaughn/',
-    reason: `Extensive support for the application's integration into ECE297. `,
+    reason: `Extensive support for the application's integration into course 
+    "ECE297 - Software Design & Communication" at University of Toronto. `,
   },
   {
     name: 'Phang, Khoman',
