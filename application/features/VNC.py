@@ -116,9 +116,14 @@ class VNC(Connection):
             "chmod 600 ~/.vnc/passwd",
         ]
         _, _, _, stderr = self.exec_command_blocking(';'.join(reset_cmd_lst))
+        error_lines = []
         for line in stderr:
             if "Disk quota exceeded" in line:
                 return False, 'Disk quota exceeded'
+            else:
+                error_lines.append(line)
+        if len(error_lines) != 0:
+            return False, "".join(error_lines)
 
         return True, ''
 
