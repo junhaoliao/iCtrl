@@ -23,6 +23,11 @@
 import axios from 'axios';
 import {sortListByKey} from './utils';
 
+export const getAvatarName = (fullname) => {
+  const hostname = fullname.split('.')[0];
+  return hostname === '192' ? fullname.substr(-5, 5) : hostname;
+};
+
 export const session_ruptime = (cm, cancelToken) => {
   axios.post('/api/exec_blocking', {
     session_id: cm.props.session_id,
@@ -67,7 +72,6 @@ export const session_ruptime = (cm, cancelToken) => {
 };
 
 export const session_change_host = (sessionId, host, domain) => {
-  console.log(domain);
   axios.patch('/api/session', {
     session_id: sessionId,
     host: host,
@@ -76,6 +80,34 @@ export const session_change_host = (sessionId, host, domain) => {
     window.location.reload();
   }).catch(error => {
     console.log(error);
+  });
+};
+
+export const session_delete = sessionID => {
+  axios.delete(`/api/session`, {
+    params: {session_id: sessionID},
+  }).then(response => {
+    console.log(response.data);
+    window.location.reload();
+  }).catch(error => {
+    console.log(error);
+  });
+};
+
+export const session_change_nickname = (session, sessionID, nickname, host) => {
+  axios.patch('/api/session', {
+    session_id: sessionID,
+    nickname: nickname,
+  }).then(_ => {
+    const _nickname = nickname === '' ? getAvatarName(host) : nickname;
+    session.setState({
+      nicknameChangeLoading: false,
+      nickname: _nickname,
+    });
+    session.lastStoredNickname = _nickname;
+  }).catch(error => {
+    alert(error);
+    window.location.reload();
   });
 };
 

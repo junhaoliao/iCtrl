@@ -108,29 +108,40 @@ def handle_session():
         session_id = request.json.get('session_id')
         host = request.json.get('host')
         domain = request.json.get('domain')
+        nickname = request.json.get('nickname')
 
-        # terminate old sessions with best efforts
-        # noinspection PyBroadException
-        try:
-            kill_cmd_list = [
-                'vncserver -kill ":*"',
-                'killall -q -w xvfb-run Xtigervnc'
-            ]
-            conn, _ = create_connection(session_id, ConnectionType.GENERAL)
-            threading.Thread(target=conn.exec_command_blocking, args=[';'.join(kill_cmd_list)]).start()
-        except Exception:
-            pass
+        if nickname is not None:
+            if len(nickname) > 8:
+                abort(400, "Entered nickname is too long")
+            # only update name
+            status, reason = profiles.set_session_nickname(session_id, nickname)
+            if not status:
+                abort(403, reason)
+        else:
+            # terminate old sessions with best efforts
+            # noinspection PyBroadException
+            try:
+                kill_cmd_list = [
+                    'vncserver -kill ":*"',
+                    'killall -q -w xvfb-run Xtigervnc'
+                ]
+                conn, _ = create_connection(session_id, ConnectionType.GENERAL)
+                threading.Thread(target=conn.exec_command_blocking, args=[';'.join(kill_cmd_list)]).start()
+            except Exception:
+                pass
 
-        if domain is None:
-            # find the domain when the domain is not specified
-            full_host_name, _, _, _ = profiles.get_session_info(session_id)
-            domain = full_host_name[full_host_name.find('.'):]
+            if domain is None:
+                # find the domain when the domain is not specified
+                full_host_name, _, _, _ = profiles.get_session_info(session_id)
+                if full_host_name is None:
+                    abort(400, f'failed: session {session_id} does not exist')
+                domain = full_host_name[full_host_name.find('.'):]
 
-        host += domain
+            host += domain
 
-        status, reason = profiles.change_host(session_id, host)
-        if not status:
-            abort(403, reason)
+            status, reason = profiles.change_host(session_id, host)
+            if not status:
+                abort(403, reason)
 
         return 'success'
 

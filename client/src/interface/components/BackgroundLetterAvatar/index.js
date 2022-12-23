@@ -21,8 +21,9 @@
  */
 
 // Reference: https://next.material-ui.com/components/avatars/
-import React from 'react';
+import React, {createRef} from 'react';
 import Avatar from '@mui/material/Avatar';
+import {Badge} from '@mui/material';
 
 function stringToColor(string) {
   let hash = 0;
@@ -42,15 +43,69 @@ function stringToColor(string) {
   return color;
 }
 
-const BackgroundLetterAvatar = (props) => {
-  const {name} = props;
-  const hostname = name.split('.')[0];
+class BackgroundLetterAvatar extends React.Component {
+  constructor(props) {
+    super(props);
 
-  return (<Avatar sx={{
-    backgroundColor: stringToColor(name),
-    fontSize: 'small',
-  }}>
-    {hostname === '192' ? name.substr(-5, 5) : hostname}
-  </Avatar>);
-};
+    this.wrapperRef = createRef();
+    this.nameRef = createRef();
+
+    this.state = {
+      fontSize: 12,
+    };
+  }
+
+  setFontSize = () => {
+    if (this.nameRef.current.offsetWidth + 5 <
+        this.wrapperRef.current.offsetWidth - 5) {
+      if (this.nameRef.current.offsetWidth === 0) {
+        return;
+      }
+      this.setState({
+        fontSize: this.state.fontSize + 1,
+      });
+      setTimeout(this.setFontSize, 0);
+    } else if (this.nameRef.current.offsetWidth - 5 >
+        this.wrapperRef.current.offsetWidth - 5) {
+      this.setState({
+        fontSize: this.state.fontSize - 1,
+      });
+      setTimeout(this.setFontSize, 0);
+    }
+  };
+
+  componentDidUpdate(prevProps, prevState, snapshot) {
+    if (prevProps.name !== this.props.name) {
+      this.setFontSize();
+    }
+  }
+
+  componentDidMount() {
+    this.setFontSize();
+  }
+
+  render() {
+    const {name, badgeContent} = this.props;
+    const {fontSize} = this.state;
+
+    return (<Badge
+        ref={this.wrapperRef}
+        overlap="circular"
+        anchorOrigin={{vertical: 'bottom', horizontal: 'right'}}
+        badgeContent={badgeContent}
+    >
+      <Avatar
+          sx={{
+            backgroundColor: stringToColor(name),
+            fontSize: fontSize,
+            whiteSpace: 'nowrap',
+          }}>
+                <span ref={this.nameRef}>
+                    {name}
+                </span>
+      </Avatar>
+    </Badge>);
+  }
+}
+
 export default BackgroundLetterAvatar;

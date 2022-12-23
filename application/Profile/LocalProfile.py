@@ -136,6 +136,22 @@ class LocalProfile(Profile):
 
         return host, username, this_private_key_path, None
 
+    def set_session_nickname(self, session_id, nickname):
+        if session_id not in self._profile['sessions']:
+            return False, f'failed: session {session_id} does not exist'
+
+        if nickname == "":
+            # it is a delete request
+            if 'nickname' in self._profile['sessions'][session_id]:
+                self._profile['sessions'][session_id].pop('nickname')
+        else:
+            # it is an add / update request
+            self._profile['sessions'][session_id]['nickname'] = nickname
+
+        self.save_profile()
+
+        return True, ''
+
     def get_user(self):
         class DummyUser:
             id = 0
