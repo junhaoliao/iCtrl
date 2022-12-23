@@ -111,12 +111,10 @@ def handle_session():
         nickname = request.json.get('nickname')
 
         if nickname is not None:
-            if len(nickname) > 8:
-                abort(400, "Entered nickname is too long")
-            # only update name
+            # only update nickname
             status, reason = profiles.set_session_nickname(session_id, nickname)
             if not status:
-                abort(403, reason)
+                abort(400, reason)
         else:
             # terminate old sessions with best efforts
             # noinspection PyBroadException

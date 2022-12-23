@@ -149,7 +149,9 @@ export default class Session extends React.Component {
 
   componentDidMount() {
     const {host, nickname} = this.props;
-    const _nickname = nickname || getAvatarName(host);
+    const _nickname = (nickname && nickname !== '') ?
+        nickname :
+        getAvatarName(host);
 
     this.lastStoredNickname = _nickname;
     this.setState({nickname: _nickname});

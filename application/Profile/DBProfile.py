@@ -55,6 +55,7 @@ class ActivationType(IntEnum):
 
 
 class DBProfile(Profile):
+
     def __init__(self, app):
         db_passwd = os.environ['DBPASSWD']
         db_address = os.environ['DBADDR']
@@ -112,6 +113,14 @@ class DBProfile(Profile):
             user_id = db.Column(db.Integer, db.ForeignKey('ictrl.user.id'), nullable=False)
 
             host = db.Column(db.String, nullable=False)
+            nickname = db.Column(db.String, nullable=True)
+
+            @validates('nickname')
+            def validate_nickname(self, key, nickname):
+                assert len(nickname) <= 8, \
+                    'Entered nickname is too long'
+                return nickname
+
             username = db.Column(db.String, nullable=False)
             private_key = db.Column(db.Text, nullable=True)
 
@@ -166,6 +175,7 @@ class DBProfile(Profile):
             session_id = session.id.hex
             _profile["sessions"][session_id] = {
                 "host": session.host,
+                "nickname": session.nickname,
                 "username": session.username
             }
 
@@ -297,6 +307,16 @@ class DBProfile(Profile):
         clear_private_key = f.decrypt(crypt_key_bytes).decode('ascii')
 
         return session.host, session.username, None, clear_private_key
+
+    def set_session_nickname(self, session_id, nickname):
+        session = self._get_session(session_id)
+        if session is None:
+            return False, f'failed: session {session_id} does not exist'
+
+        session.nickname = nickname
+        self.save_profile()
+
+        return True, ''
 
     def send_activation_email(self, username):
         user = self.User.query.filter_by(username=username).first()

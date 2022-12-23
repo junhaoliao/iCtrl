@@ -140,6 +140,9 @@ class LocalProfile(Profile):
         if session_id not in self._profile['sessions']:
             return False, f'failed: session {session_id} does not exist'
 
+        if len(nickname) > 8:
+            return False, "Entered nickname is too long"
+
         if nickname == "":
             # it is a delete request
             if 'nickname' in self._profile['sessions'][session_id]:
