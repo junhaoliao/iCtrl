@@ -88,7 +88,10 @@ export default class About extends React.Component {
 
     return <Dialog open={true} fullWidth={true} maxWidth={'md'}>
       <DialogTitle>
-          About iCtrl {version && `(v${version})`} <ICtrlVoiceButton/>
+        <div style={{display: 'flex', alignItems: 'center'}}>
+          <span>About iCtrl {version && `(v${version})`}</span>
+          <ICtrlVoiceButton/>
+        </div>
       </DialogTitle>
       <DialogContent style={{maxHeight: '630px'}}>
         <div>
