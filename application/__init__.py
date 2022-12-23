@@ -43,6 +43,7 @@ try:
     APP_PORT = int(sys.argv[1])
     LOCAL_AUTH_KEY = sys.argv[2]
 except IndexError:
+    print("Debug mode")
     APP_PORT = 5000
     LOCAL_AUTH_KEY = ''
 
