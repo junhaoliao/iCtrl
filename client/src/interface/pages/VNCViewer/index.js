@@ -28,17 +28,18 @@ import Loading from '../../components/Loading';
 import {VNCSteps} from '../../components/Loading/steps';
 import VNCSpeedDial from './VNCSpeedDial';
 import {focusOnKeyboard, vncConnect} from '../../../actions/vnc';
-import {changeFavicon} from '../../utils';
 import Toolbar from '../../components/Toolbar';
 import KeyTable from '@novnc/novnc/core/input/keysym';
 import {isIOS} from '../../../actions/utils';
-import {updateTitle} from '../../../actions/common';
+import {updateTitleAndIcon} from '../../../actions/common';
+import BackgroundLetterAvatar from '../../components/BackgroundLetterAvatar';
+import {COLOR_VNC_VIEWER} from '../../constants';
 
 export default class VNCViewer extends React.Component {
   constructor(props) {
     super(props);
 
-    document.title = 'VNC';
+    this.feature = document.title = 'VNC';
 
     const {
       match: {params},
@@ -55,6 +56,7 @@ export default class VNCViewer extends React.Component {
     this.speedDialOpenTime = 0;
 
     this.state = {
+      sessionNickname: '',
       disconnected: false,
       resetting: false,
       loading: true,
@@ -187,14 +189,14 @@ export default class VNCViewer extends React.Component {
   };
 
   componentDidMount() {
-    updateTitle(this.session_id, 'VNC');
+    updateTitleAndIcon(this);
 
-    changeFavicon(`/api/favicon/vnc/${this.session_id}`);
     vncConnect(this).then();
   }
 
   render() {
     const {
+      sessionNickname,
       authentication,
       currentStep,
       disconnected,
@@ -277,6 +279,19 @@ export default class VNCViewer extends React.Component {
                          this.rfb.sendCtrlAltDel();
                        }}
                        onToolbarHide={this.handleToolbarHide}/>}
+
+          <div style={{position: 'absolute', top: 0, left: '-100px'}}
+               id={'offscreen-favicon'}>
+            <BackgroundLetterAvatar
+                name={sessionNickname}
+                badgeContent={<div style={{
+                  width: '20px',
+                  height: '20px',
+                  backgroundColor: COLOR_VNC_VIEWER,
+                }}
+                />}
+            />
+          </div>
         </div>
     );
   }

@@ -67,9 +67,10 @@ import {
 } from '@mui/icons-material';
 import Button from '@mui/material/Button';
 import NewFolderDialog from './NewFolderDialog';
-import {changeFavicon} from '../../utils';
-import {updateTitle} from '../../../actions/common';
+import {updateTitleAndIcon} from '../../../actions/common';
 import FileCleaner from '../../components/FileCleaner';
+import BackgroundLetterAvatar from '../../components/BackgroundLetterAvatar';
+import {COLOR_FILE_MANAGER} from '../../constants';
 
 const drawerWidth = 200;
 
@@ -77,7 +78,7 @@ export default class FileManager extends React.Component {
   constructor(props) {
     super(props);
 
-    document.title = 'File Manager';
+    this.feature = document.title = 'File Manager';
 
     this.changePermission = React.createRef();
     const {
@@ -89,6 +90,7 @@ export default class FileManager extends React.Component {
     this.clickTimeout = null;
     this.editEnter = null;
     this.state = {
+      sessionNickname: '',
       alertOpen: false,
       alertMsg: null,
       changePermissionOpen: false,
@@ -129,11 +131,11 @@ export default class FileManager extends React.Component {
     sftp_ls(this, path);
   };
 
-  handleSideBarOpen = (ev) => {
+  handleSideBarOpen = () => {
     this.setState({sideBarOpen: true});
   };
 
-  handleSideBarClose = (ev) => {
+  handleSideBarClose = () => {
     this.setState({sideBarOpen: false});
   };
 
@@ -384,15 +386,14 @@ export default class FileManager extends React.Component {
   };
 
   componentDidMount() {
-    updateTitle(this.session_id, 'File Manager');
-
-    changeFavicon(`/api/favicon/fm/${this.session_id}`);
+    updateTitleAndIcon(this);
 
     this.loadDir('');
   }
 
   render() {
     const {
+      sessionNickname,
       sortModel,
       selectionModel,
       editRowsModel,
@@ -619,6 +620,18 @@ export default class FileManager extends React.Component {
           {fileCleanerOpen && <FileCleaner
               sessionID={this.session_id}
               onClose={this.handleFileCleanerClose}/>}
+          <div style={{position: 'absolute', top: 0, left: '-100px'}}
+               id={'offscreen-favicon'}>
+            <BackgroundLetterAvatar
+                name={sessionNickname}
+                badgeContent={<div style={{
+                  width: '20px',
+                  height: '20px',
+                  backgroundColor: COLOR_FILE_MANAGER,
+                }}
+                />}
+            />
+          </div>
         </div>
     );
   }

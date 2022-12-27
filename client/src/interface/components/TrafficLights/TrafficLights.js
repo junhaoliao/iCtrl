@@ -24,18 +24,7 @@ import React from 'react';
 
 import './index.css';
 import {Tooltip} from '@mui/material';
-
-let ipcRenderer;
-if (window.require) {
-  ipcRenderer = window.require('electron').ipcRenderer;
-} else {
-  // for debugging in browser only
-  ipcRenderer = {
-    send: (...args) => {
-      alert(...args);
-    },
-  };
-}
+import {ipcRenderer} from '../../../actions/ipc';
 
 export default class TrafficLights extends React.Component {
   handleClick = (ev) => {

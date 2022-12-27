@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 iCtrl Developers
+ * Copyright (c) 2022 iCtrl Developers
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  *  of this software and associated documentation files (the "Software"), to
@@ -20,7 +20,14 @@
  *  IN THE SOFTWARE.
  */
 
-export const changeFavicon = (href) => {
-  const link = document.getElementById('favicon');
-  link.href = href;
-};
+export let ipcRenderer;
+if (window.require) {
+  ipcRenderer = window.require('electron').ipcRenderer;
+} else {
+  ipcRenderer = {
+    send: (...args) => {
+      // for debugging in browser only
+      // alert(...args);
+    },
+  };
+}

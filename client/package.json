@@ -25,7 +25,8 @@
     "react-easy-marquee": "^1.2.4",
     "vscode-icons-js": "^11.6.1",
     "pako": "^2.0.4",
-    "wcwidth": "^1.0.1"
+    "wcwidth": "^1.0.1",
+    "dom-to-image": "^2.6.0"
   },
   "scripts": {
     "start": "react-scripts start",

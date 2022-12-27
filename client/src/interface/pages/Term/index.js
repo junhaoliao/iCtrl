@@ -23,18 +23,19 @@
 import React from 'react';
 import 'xterm/css/xterm.css';
 import {sendKey, termConnect} from '../../../actions/term';
-import {changeFavicon} from '../../utils';
 import {TermSteps} from '../../components/Loading/steps';
 import Loading from '../../components/Loading';
 import Toolbar from '../../components/Toolbar';
 import {isMobile} from '../../../actions/utils';
-import {updateTitle} from '../../../actions/common';
+import {updateTitleAndIcon} from '../../../actions/common';
+import BackgroundLetterAvatar from '../../components/BackgroundLetterAvatar';
+import {COLOR_TERM_VIEWER} from '../../constants';
 
 export default class Term extends React.Component {
   constructor(props) {
     super(props);
 
-    document.title = 'Terminal';
+    this.feature = document.title = 'Terminal';
 
     const {match: {params}} = this.props;
     this.session_id = params.session_id;
@@ -51,6 +52,7 @@ export default class Term extends React.Component {
     this.touchStartDelta = 0;
 
     this.state = {
+      sessionNickname: '',
       scaleLevel: 1,
       loading: true,
       currentStep: -1,
@@ -110,7 +112,7 @@ export default class Term extends React.Component {
   componentDidMount() {
     if (document.body.style.zoom !== undefined) {
       // the "zoom" attribute is only supported on Chromium
-      document.body.ontouchend = (ev) => {
+      document.body.ontouchend = () => {
         this.touchStartDelta = 0;
       };
       document.addEventListener('touchmove', (ev) => {
@@ -142,15 +144,14 @@ export default class Term extends React.Component {
       }, {passive: false});
     }
 
-    updateTitle(this.session_id, 'Terminal');
-
-    changeFavicon(`/api/favicon/terminal/${this.session_id}`);
+    updateTitleAndIcon(this);
 
     termConnect(this).then();
   }
 
   render() {
     const {
+      sessionNickname,
       authentication,
       currentStep,
       loading,
@@ -183,6 +184,18 @@ export default class Term extends React.Component {
           {isMobile() &&
               <Toolbar onToolbarSendKey={this.handleToolbarSendKey}/>
           }
+          <div style={{position: 'absolute', top: 0, left: '-100px'}}
+               id={'offscreen-favicon'}>
+            <BackgroundLetterAvatar
+                name={sessionNickname}
+                badgeContent={<div style={{
+                  width: '20px',
+                  height: '20px',
+                  backgroundColor: COLOR_TERM_VIEWER,
+                }}
+                />}
+            />
+          </div>
         </div>
     );
   }

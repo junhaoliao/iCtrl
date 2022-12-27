@@ -38,6 +38,7 @@ import {STEP_DONE} from '../../../actions/codes';
 import {LoadingButton} from '@mui/lab';
 import ChangeMachine from '../ChangeMachine';
 import FileCleaner from '../FileCleaner';
+import {COLOR_CHANGE_MACHINE} from '../../constants';
 
 function LinearProgressWithLabel(props) {
   return (
@@ -227,7 +228,7 @@ export default class Loading extends React.Component {
                                     variant={'contained'}
                                     color={'success'}
                                     sx={{
-                                      background: '#4caf50',
+                                      background: COLOR_CHANGE_MACHINE,
                                       '&:hover': {
                                         background: 'rgb(60,140,60)',
                                       },

@@ -21,13 +21,12 @@
 import json
 import threading
 
-from flask import request, abort, send_file
+from flask import request, abort
 
 from .. import api, profiles
 from ..codes import ICtrlError, ConnectionType
 from ..features.Audio import Audio
 from ..features.Connection import Connection
-from ..features.Favicon import Favicon
 from ..features.SFTP import SFTP
 from ..features.Term import Term
 from ..features.VNC import VNC
@@ -35,7 +34,7 @@ from ..utils import int_to_bytes
 
 
 def create_connection(session_id, conn_type):
-    host, username, this_private_key_path, this_private_key_str = profiles.get_session_info(session_id)
+    host, username, this_private_key_path, this_private_key_str, _ = profiles.get_session_info(session_id)
     if host is None:
         abort(403, f'Fail: session {session_id} does not exist')
 
@@ -79,11 +78,12 @@ def get_profiles():
 def handle_session():
     if request.method == 'GET':
         session_id = request.args.get('id')
-        host, username, _, _ = profiles.get_session_info(session_id)
+        host, username, _, _, nickname = profiles.get_session_info(session_id)
 
         return json.dumps({
             'host': host,
-            'username': username
+            'username': username,
+            'nickname': nickname
         })
     elif request.method == 'POST':
         host = request.json.get('host')
@@ -130,7 +130,7 @@ def handle_session():
 
             if domain is None:
                 # find the domain when the domain is not specified
-                full_host_name, _, _, _ = profiles.get_session_info(session_id)
+                full_host_name, _, _, _, _ = profiles.get_session_info(session_id)
                 if full_host_name is None:
                     abort(400, f'failed: session {session_id} does not exist')
                 domain = full_host_name[full_host_name.find('.'):]
@@ -175,14 +175,3 @@ def exec_blocking():
         result = '\n'.join(stdout) + '\n' + '\n'.join(stderr)
 
     return result
-
-
-@api.route('/favicon/<feature>/<session_id>')
-def generate_favicon(feature, session_id):
-    host, _, _, _ = profiles.get_session_info(session_id)
-    if host is None:
-        abort(403, f'failed: session {session_id} does not exist')
-
-    icon = Favicon.generate(host, feature)
-
-    return send_file(icon, mimetype='image/png')

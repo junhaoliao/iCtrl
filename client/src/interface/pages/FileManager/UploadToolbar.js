@@ -32,6 +32,7 @@ import {
   Typography,
 } from '@mui/material';
 import {Close, ExpandLess, ExpandMore} from '@mui/icons-material';
+import {COLOR_FILE_MANAGER} from '../../constants';
 
 const UploadToolbar = (props) => {
   const {fm} = props;
@@ -50,7 +51,7 @@ const UploadToolbar = (props) => {
     });
   };
 
-  const handleUploadWindowClose = (ev) => {
+  const handleUploadWindowClose = () => {
     const shouldPrompt = fm.state.uploadProgress.some(item => {
       if (item.cancelled) {
         return false;
@@ -66,7 +67,7 @@ const UploadToolbar = (props) => {
       setCancelAllPromptOpen(true);
     }
   };
-  const handleUploadWindowCollapse = (ev) => {
+  const handleUploadWindowCollapse = () => {
     fm.setState({
       uploadWindowCollapsed: !fm.state.uploadWindowCollapsed,
     });
@@ -78,7 +79,7 @@ const UploadToolbar = (props) => {
         <div style={{
           display: 'flex',
           height: '50px',
-          background: '#1976d2',
+          background: COLOR_FILE_MANAGER,
           color: 'white',
           alignItems: 'center',
         }}>

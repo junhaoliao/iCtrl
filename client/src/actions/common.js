@@ -21,14 +21,47 @@
  */
 
 import axios from 'axios';
+import domtoimage from 'dom-to-image';
+import {getAvatarName} from './session';
+import {ipcRenderer} from './ipc';
 
-export const updateTitle = (sessionId, feature) => {
+const ICON_SCALE_LEVEL = 5;
+
+export const updateTitleAndIcon = (component) => {
   axios.get('/api/session', {
     params: {
-      id: sessionId,
+      id: component.session_id,
     },
   }).then(response => {
-    const {host, username} = response.data;
-    document.title = `${feature} - ${username}@${host}`;
+    const {host, username, nickname} = response.data;
+    document.title = `${component.feature} - ${username}@${host}`;
+
+    component.setState({
+      sessionNickname: (nickname && nickname !== '') ?
+          nickname :
+          getAvatarName(host),
+    });
+
+    // timeout needed to ensure nickname text has been scaled properly
+    setTimeout(() => {
+      domtoimage.toPng(document.getElementById('offscreen-favicon'),
+          {
+            width: 40 * ICON_SCALE_LEVEL,
+            height: 40 * ICON_SCALE_LEVEL,
+            style: {
+              position: null,
+              left: '0px',
+              transform: `scale(${ICON_SCALE_LEVEL})`,
+              transformOrigin: 'top left',
+            },
+          }).
+          then((dataURL) => {
+            const link = document.getElementById('favicon');
+            link.href = dataURL;
+            link.type = 'image/png';
+
+            ipcRenderer.send('set-icon', dataURL);
+          });
+    }, 100);
   });
 };

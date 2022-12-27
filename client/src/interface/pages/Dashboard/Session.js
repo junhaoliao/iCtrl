@@ -50,6 +50,12 @@ import {
   session_change_nickname,
   session_delete,
 } from '../../../actions/session';
+import {
+  COLOR_CHANGE_MACHINE,
+  COLOR_FILE_MANAGER,
+  COLOR_TERM_VIEWER,
+  COLOR_VNC_VIEWER,
+} from '../../constants';
 
 export default class Session extends React.Component {
   constructor(props) {
@@ -261,28 +267,28 @@ export default class Session extends React.Component {
                 <MenuItem
                     onClick={() => this.handleContextMenuClick('CM')}>
                   <ListItemIcon>
-                    <StorageIcon style={{color: '#4caf50'}}/>
+                    <StorageIcon style={{color: COLOR_CHANGE_MACHINE}}/>
                   </ListItemIcon>
                   Change Machine
                 </MenuItem>}
             <MenuItem
                 onClick={() => this.handleContextMenuClick('vnc')}>
               <ListItemIcon>
-                <RemoteDesktopIcon style={{color: 'lightcoral'}}/>
+                <RemoteDesktopIcon style={{color: COLOR_VNC_VIEWER}}/>
               </ListItemIcon>
               VNC
             </MenuItem>
             <MenuItem
                 onClick={() => this.handleContextMenuClick('term')}>
               <ListItemIcon>
-                <ConsoleIcon style={{color: 'black'}}/>
+                <ConsoleIcon style={{color: COLOR_TERM_VIEWER}}/>
               </ListItemIcon>
               Terminal
             </MenuItem>
             <MenuItem
                 onClick={() => this.handleContextMenuClick('file')}>
               <ListItemIcon>
-                <FileManagerIcon style={{color: '#1976d2'}}/>
+                <FileManagerIcon style={{color: COLOR_FILE_MANAGER}}/>
               </ListItemIcon>
               File Manager
             </MenuItem>
@@ -307,27 +313,30 @@ export default class Session extends React.Component {
                 <Tooltip title="Change Machine" aria-label="change machine">
                   <IconButton
                       onClick={() => this.handleFeatureClick('CM')}>
-                    <StorageIcon style={{color: '#4caf50'}} fontSize={'large'}/>
+                    <StorageIcon style={{color: COLOR_CHANGE_MACHINE}}
+                                 fontSize={'large'}/>
                   </IconButton>
                 </Tooltip>
             }
             <Tooltip title="VNC" aria-label="VNC">
               <IconButton
                   onClick={() => this.handleFeatureClick('vnc')}>
-                <RemoteDesktopIcon style={{color: 'lightcoral'}}
+                <RemoteDesktopIcon style={{color: COLOR_VNC_VIEWER}}
                                    fontSize={'large'}/>
               </IconButton>
             </Tooltip>
             <Tooltip title="Terminal" aria-label="terminal">
               <IconButton
                   onClick={() => this.handleFeatureClick('term')}>
-                <ConsoleIcon style={{color: 'black'}} fontSize={'large'}/>
+                <ConsoleIcon style={{color: COLOR_TERM_VIEWER}}
+                             fontSize={'large'}/>
               </IconButton>
             </Tooltip>
             <Tooltip title="File Manager" aria-label="file manager">
               <IconButton
                   onClick={() => this.handleFeatureClick('file')}>
-                <FileManagerIcon style={{color: '#1976d2'}} fontSize={'large'}/>
+                <FileManagerIcon style={{color: COLOR_FILE_MANAGER}}
+                                 fontSize={'large'}/>
               </IconButton>
             </Tooltip>
           </Hidden>

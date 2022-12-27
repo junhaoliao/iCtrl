@@ -120,33 +120,11 @@ if (ictrl_be !== null) {
   ictrl_be.stderr.on('data', stdoutDataHandler);
 }
 
-const setupNewWindowIcon = (url, newWindow) => {
+const setupNewWindowIcon = (newWindow, dataURL) => {
   const {nativeImage} = require('electron');
-  const {get} = require('https');
 
-  const url_split = url.split('/');
-  const sessionId = url_split[url_split.length - 1];
-  const feature = url_split[url_split.length - 2];
-  get({
-    hostname: '127.0.0.1',
-    port: mainPort,
-    path: `/api/favicon/${feature}/${sessionId}`,
-    headers: {'Authorization': `Bearer ${localAuthKey}`},
-    rejectUnauthorized: false,
-  }, (msg) => {
-    const result = [];
-
-    msg.on('data', (data) => {
-      result.push(data);
-    });
-
-    msg.on('end', () => {
-      const icon = nativeImage.createFromBuffer(Buffer.concat(result));
-      newWindow.setIcon(icon);
-    });
-  }).on('error', (e) => {
-    console.error(e);
-  });
+  const icon = nativeImage.createFromDataURL(dataURL);
+  newWindow.setIcon(icon);
 };
 
 const setupContextMenu = (newWindow) => {
@@ -262,13 +240,15 @@ const createDashboardWindow = () => {
       newWindow.setAppDetails({
         appId: url,
       });
-      setupNewWindowIcon(url, newWindow);
+      ipcMain.once('set-icon', (_, dataURL) => {
+        setupNewWindowIcon(newWindow, dataURL);
+      });
     }
     newWindow.show();
     newWindow.maximize();
 
     newWindow.webContents.session.on('will-download',
-        (event, item, webContents) => {
+        (event, item, _) => {
           const totalBytes = item.getTotalBytes();
           const fileName = item.getFilename();
           const indeterminate = totalBytes === 0;
@@ -299,7 +279,7 @@ const createDashboardWindow = () => {
               }
             }
           });
-          item.once('done', (event, state) => {
+          item.once('done', () => {
             progressBar.close();
           });
         });
@@ -318,25 +298,25 @@ app.whenReady().then(() => {
   // mainWindow.webContents.openDevTools()
 });
 
-ipcMain.on('version', (event, args) => {
+ipcMain.on('version', (event) => {
   event.returnValue = app.getVersion();
 });
 
-ipcMain.on('platform', (event, args) => {
+ipcMain.on('platform', (event) => {
   event.returnValue = process.platform;
 });
 
-ipcMain.on('win-min', (_) => {
+ipcMain.on('win-min', () => {
   mainWindow.minimize();
 });
-ipcMain.on('win-max', (_) => {
+ipcMain.on('win-max', () => {
   if (mainWindow.isMaximized()) {
     mainWindow.restore();
   } else {
     mainWindow.maximize();
   }
 });
-ipcMain.on('win-close', (_) => {
+ipcMain.on('win-close', () => {
   mainWindow.close();
 });
 
@@ -344,7 +324,7 @@ ipcMain.on('win-close', (_) => {
 // The other instance will exit if it finds an already running instance: see
 //  app.requestSingleInstanceLock() above
 app.on('second-instance',
-    (event, commandLine, workingDirectory, additionalData) => {
+    () => {
       if (mainWindow === null) {
         createDashboardWindow();
       }

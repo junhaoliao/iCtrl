@@ -300,13 +300,13 @@ class DBProfile(Profile):
     def get_session_info(self, session_id):
         session = self._get_session(session_id)
         if session is None:
-            return None, None, None
+            return None, None, None, None, None
 
         f = Fernet(flask_session['session_crypt_key'])
         crypt_key_bytes = session.private_key.encode('ascii')
         clear_private_key = f.decrypt(crypt_key_bytes).decode('ascii')
 
-        return session.host, session.username, None, clear_private_key
+        return session.host, session.username, None, clear_private_key, session.nickname
 
     def set_session_nickname(self, session_id, nickname):
         session = self._get_session(session_id)

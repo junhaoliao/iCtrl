@@ -128,13 +128,17 @@ class LocalProfile(Profile):
 
     def get_session_info(self, session_id):
         if session_id not in self._profile['sessions']:
-            return None, None, None, None
+            return None, None, None, None, None
 
         host = self._profile['sessions'][session_id]['host']
         username = self._profile['sessions'][session_id]['username']
         this_private_key_path = os.path.join(PRIVATE_KEY_PATH, session_id)
+        if 'nickname' in self._profile['sessions'][session_id]:
+            nickname = self._profile['sessions'][session_id]['nickname']
+        else:
+            nickname = None
 
-        return host, username, this_private_key_path, None
+        return host, username, this_private_key_path, None, nickname
 
     def set_session_nickname(self, session_id, nickname):
         if session_id not in self._profile['sessions']:
