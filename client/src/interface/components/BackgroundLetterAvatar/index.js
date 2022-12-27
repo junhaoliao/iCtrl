@@ -25,6 +25,15 @@ import React, {createRef} from 'react';
 import Avatar from '@mui/material/Avatar';
 import {Badge} from '@mui/material';
 
+// Reference: https://24ways.org/2010/calculating-color-contrast
+const getContrastYIQ = hexcolor => {
+  const r = parseInt(hexcolor.substr(1, 2), 16);
+  const g = parseInt(hexcolor.substr(3, 2), 16);
+  const b = parseInt(hexcolor.substr(5, 2), 16);
+  const yiq = ((r * 299) + (g * 587) + (b * 114)) / 1000;
+  return (yiq >= 160) ? 'dimgrey' : 'white';
+};
+
 function stringToColor(string) {
   let hash = 0;
   let i;
@@ -87,6 +96,7 @@ class BackgroundLetterAvatar extends React.Component {
   render() {
     const {name, badgeContent} = this.props;
     const {fontSize} = this.state;
+    const backgroundColor = stringToColor(name);
 
     return (<Badge
         ref={this.wrapperRef}
@@ -96,11 +106,13 @@ class BackgroundLetterAvatar extends React.Component {
     >
       <Avatar
           sx={{
-            backgroundColor: stringToColor(name),
+            backgroundColor: backgroundColor,
             fontSize: fontSize,
             whiteSpace: 'nowrap',
           }}>
-                <span ref={this.nameRef}>
+                <span ref={this.nameRef}
+                      style={{color: getContrastYIQ(backgroundColor)}}
+                >
                     {name}
                 </span>
       </Avatar>
