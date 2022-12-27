@@ -24,7 +24,7 @@
     "react-github-btn": "^1.4.0",
     "react-easy-marquee": "^1.2.4",
     "vscode-icons-js": "^11.6.1",
-    "pako": "^2.0.4",
+    "pako": "^2.1.0",
     "wcwidth": "^1.0.1",
     "dom-to-image": "^2.6.0"
   },

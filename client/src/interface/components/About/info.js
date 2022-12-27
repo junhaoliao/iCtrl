@@ -126,14 +126,9 @@ export const projects = [
     name: 'Flask',
     url: 'https://flask.palletsprojects.com/',
   },
-
   {
     name: 'Flask-SQLAlchemy',
     url: 'https://flask-sqlalchemy.palletsprojects.com/',
-  },
-  {
-    name: 'Pillow',
-    url: 'https://python-pillow.org/',
   },
   {
     name: 'pyDes',
@@ -182,5 +177,17 @@ export const projects = [
   {
     name: 'Electron',
     url: 'https://www.electronjs.org/',
+  },
+  {
+    name: 'pako',
+    url: 'http://nodeca.github.io/pako/',
+  },
+  {
+    name: 'wcwidth',
+    url: 'https://github.com/timoxley/wcwidth',
+  },
+  {
+    name: 'DOM to Image',
+    url: 'https://github.com/tsayen/dom-to-image',
   },
 ];
