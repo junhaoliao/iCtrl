@@ -330,9 +330,9 @@ export default class VNCSpeedDial extends React.Component {
 
     document.onfullscreenchange = (ev) => {
       this.setState({
-        isFullscreen: Boolean(document.fullscreenElement)
-      })
-    }
+        isFullscreen: Boolean(document.fullscreenElement),
+      });
+    };
   }
 
   render() {
@@ -407,10 +407,8 @@ export default class VNCSpeedDial extends React.Component {
               tooltipTitle={<Box display={'flex'} width={speedDialTooltipWidth}>
                 <Box flexGrow={1} className={'speed-dial-action-title'}>HD
                   Mode</Box>
-                <Box>{inHdMode ?
-                    <span className={'enabled-text'}> Enabled</span> :
-                    <span className={'disabled-text'}> Disabled</span>
-                }</Box>
+                <IOSSwitch checked={inHdMode}
+                           onChange={this.handleHDModeToggle}/>
               </Box>}
               tooltipOpen
               tooltipPlacement={tooltipPlacement}
