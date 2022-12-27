@@ -24,7 +24,8 @@
     "react-github-btn": "^1.4.0",
     "react-easy-marquee": "^1.2.4",
     "vscode-icons-js": "^11.6.1",
-    "pako": "^2.0.4"
+    "pako": "^2.0.4",
+    "wcwidth": "^1.0.1"
   },
   "scripts": {
     "start": "react-scripts start",
@@ -50,6 +51,6 @@
       "last 1 safari version"
     ]
   },
-  "proxy": "https://localhost:5000",
+  "proxy": "https://127.0.0.1:5000/",
   "//": "https://ictrl.ca"
 }

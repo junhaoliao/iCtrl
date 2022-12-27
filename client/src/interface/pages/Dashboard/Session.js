@@ -44,6 +44,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import {canChangeMachine} from '../../../actions/utils';
 import EditIcon from '@mui/icons-material/Edit';
+import wcwidth from 'wcwidth';
 import {
   getAvatarName,
   session_change_nickname,
@@ -348,10 +349,13 @@ export default class Session extends React.Component {
                onClose={this.handleNicknamePopoverClose}>
         <TextField
             autoFocus={true}
-            sx={{width: '8em'}}
+            sx={{
+              minWidth: nickname === '' ? `${9 * 8 + 28}px` : `${28}px`,
+              width: `${9 * wcwidth(nickname) + 28}px`,
+            }}
             size={'small'}
             placeholder={'Nickname'}
-            inputProps={{maxLength: 8}}
+            inputProps={{maxLength: 8, style: {fontFamily: 'monospace'}}}
             value={nickname}
             onKeyDown={this.handleNicknameInputKeyDown}
             onFocus={(ev) => {
