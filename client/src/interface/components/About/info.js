@@ -82,6 +82,11 @@ export const authors = [
     pic: 'https://junhao.ca/wp-content/uploads/2020/10/portrait-edited-768x768.jpeg',
   },
   {
+    name: 'Leo HC Li',
+    url: 'http://me.leo6leo.cool',
+    pic: '/profile-pics/leo-pic.jpg',
+  },
+  {
     name: 'Jiaxing Li',
     url: 'https://www.linkedin.com/in/jiaxing-leo-li/',
     pic: '/profile-pics/jiaxing-pic.webp',
