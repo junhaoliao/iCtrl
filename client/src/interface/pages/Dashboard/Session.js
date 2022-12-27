@@ -350,8 +350,8 @@ export default class Session extends React.Component {
         <TextField
             autoFocus={true}
             sx={{
-              minWidth: nickname === '' ? `${9 * 8 + 28}px` : `${28}px`,
-              width: `${9 * wcwidth(nickname) + 28}px`,
+              minWidth: nickname === '' ? `${10 * 8 + 28}px` : `${28}px`,
+              width: `${10 * wcwidth(nickname) + 28}px`,
             }}
             size={'small'}
             placeholder={'Nickname'}
