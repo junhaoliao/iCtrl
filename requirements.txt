@@ -2,14 +2,14 @@ websockify==0.10.0
 psycopg2-binary==2.9.3; sys_platform == 'linux'
 pyDes==2.0.1
 bcrypt==3.2.0; sys_platform == 'linux'
-cryptography==38.0.1
+cryptography==38.0.4
 cachetools==5.0.0; sys_platform == 'linux'
 SQLAlchemy==1.4.36; sys_platform == 'linux'
-pyinstaller==5.5
+pyinstaller==5.7.0
 Flask==2.2.2
 Flask-SQLAlchemy==2.5.1; sys_platform == 'linux'
 Werkzeug==2.2.2
 zipstream-new==1.1.8
-paramiko==2.11.0
-numpy==1.23.4
+paramiko==2.12.0
+numpy==1.24.1
 git+https://github.com/junhaoliao/simple-websocket-server#egg=SimpleWebSocketServer
