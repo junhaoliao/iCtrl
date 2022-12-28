@@ -29,6 +29,7 @@ import {
   DialogContent,
   DialogTitle,
   Divider,
+  Unstable_Grid2 as Grid,
   List,
   ListItem,
   ListItemAvatar,
@@ -62,13 +63,13 @@ const AboutSection = (props) => (
       <List className={'selectable'}>
         {props.list.map((i) => (<ListItem key={i.name}>
           {i.pic && <ListItemAvatar>
-            <Avatar src={i.pic}/>
+            <Avatar src={i.pic} sx={{filter:'brightness(120%)'}}/>
           </ListItemAvatar>}
           <ListItemText
               primary={i.name}
               secondary={
                 <div>
-                  <div>{i.reason && i.reason}</div>
+                  <div>{i.desc && i.desc}</div>
                   <LinkForNewWindow
                       url={i.url}>{i.url}
                   </LinkForNewWindow>
@@ -131,11 +132,14 @@ export default class About extends React.Component {
         </div>
         <br/>
 
-        <AboutSection title={'Authors'} list={authors}/>
-        <AboutSection title={'Supervisor'} list={supervisors}/>
-        <AboutSection title={'Special Thanks'} list={specialThanks}/>
-
-        <Divider>
+        <Grid container spacing={1} columns={2}>
+          <Grid xs={2} md={1}>
+            <AboutSection title={'Supervisor'} list={supervisors}/>
+            <AboutSection title={'Authors'} list={authors}/>
+          </Grid>
+          <Grid xs={2} md={1}>
+            <AboutSection title={'Special Thanks'} list={specialThanks}/>
+                    <Divider>
           <Chip label={<b>Open Source Projects</b>} variant={'outlined'}
                 size={'small'}/>
         </Divider>
@@ -143,7 +147,7 @@ export default class About extends React.Component {
           <Typography variant={'body2'}>
             Thanks to the following open source projects:
           </Typography>
-          <Marquee axis={'Y'} height={'200px'} duration={projects.length * 1000}
+          <Marquee axis={'Y'} height={'220px'} duration={projects.length * 1000}
                    reverse={true}
                    pauseOnHover={true}>
             <List>
@@ -158,6 +162,10 @@ export default class About extends React.Component {
             </List>
           </Marquee>
         </div>
+          </Grid>
+        </Grid>
+
+
 
         <Divider>
           <Chip label={<b>Disclaimer</b>} variant={'outlined'} size={'small'}/>

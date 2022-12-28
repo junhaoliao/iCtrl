@@ -53,6 +53,7 @@ export const supervisors = [
   {
     name: 'Timorabadi, Hamid',
     url: 'https://www.ece.utoronto.ca/people/timorabadi-h/',
+    desc: `University of Toronto Electrical & Computer Engineering capstone project supervisor. `,
   },
 ];
 
@@ -60,18 +61,18 @@ export const specialThanks = [
   {
     name: 'Betz, Vaughn',
     url: 'https://www.eecg.utoronto.ca/~vaughn/',
-    reason: `Extensive support for the application's integration into course 
+    desc: `Extensive support for the application's integration into course 
     "ECE297 - Software Design & Communication" at University of Toronto. `,
   },
   {
     name: 'Phang, Khoman',
     url: 'https://www.eecg.utoronto.ca/~kphang/',
-    reason: `Capstone project administrator. `,
+    desc: `University of Toronto Electrical & Computer Engineering capstone project administrator. `,
   },
   {
     name: 'Richard Junjie Shen',
     url: 'https://www.linkedin.com/in/junjie-shen-38a450210/',
-    reason: `Icon designer. `,
+    desc: `Icon designer. `,
   },
 ];
 
@@ -80,26 +81,34 @@ export const authors = [
     name: 'Junhao Liao',
     url: 'https://junhao.ca',
     pic: 'https://junhao.ca/wp-content/uploads/2020/10/portrait-edited-768x768.jpeg',
+    desc: 'University of Toronto - ECE 2T1 + PEY'
   },
   {
     name: 'Leo HC Li',
     url: 'http://me.leo6leo.cool',
     pic: '/profile-pics/leo-pic.jpg',
+        desc: 'University of Toronto - ECE 2T4 + PEY'
   },
   {
     name: 'Jiaxing Li',
     url: 'https://www.linkedin.com/in/jiaxing-leo-li/',
     pic: '/profile-pics/jiaxing-pic.webp',
+        desc: 'University of Toronto - ECE 2T1 + PEY'
+
   },
   {
     name: 'Yizhong Xu',
     url: 'https://www.linkedin.com/in/yizhong-xu-076bb9157/',
     pic: '/profile-pics/yizhong-pic.webp',
+        desc: 'University of Toronto - ECE 2T1 + PEY'
+
   },
   {
     name: 'Haoran Zhang',
     url: 'https://www.linkedin.com/in/haoran-zhang-424b33196/',
     pic: '/profile-pics/haoran-pic.webp',
+        desc: 'University of Toronto - ECE 2T1 + PEY'
+
   },
 ];
 
