@@ -75,6 +75,7 @@ const AboutSection = (props) => (
                   </LinkForNewWindow>
                 </div>
               }
+              secondaryTypographyProps={{component:'div', fontSize:'13.8px'}}
           />
         </ListItem>))}
       </List>
