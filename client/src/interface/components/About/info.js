@@ -81,34 +81,31 @@ export const authors = [
     name: 'Junhao Liao',
     url: 'https://junhao.ca',
     pic: 'https://junhao.ca/wp-content/uploads/2020/10/portrait-edited-768x768.jpeg',
-    desc: 'University of Toronto - ECE 2T1 + PEY'
+    desc: 'University of Toronto - ECE 2T1 + PEY',
   },
   {
     name: 'Leo HC Li',
     url: 'http://me.leo6leo.cool',
-    pic: '/profile-pics/leo-pic.jpg',
-        desc: 'University of Toronto - ECE 2T4 + PEY'
+    pic: '/profile-pics/leo-pic.webp',
+    desc: 'University of Toronto - ECE 2T4 + PEY',
   },
   {
     name: 'Jiaxing Li',
     url: 'https://www.linkedin.com/in/jiaxing-leo-li/',
     pic: '/profile-pics/jiaxing-pic.webp',
-        desc: 'University of Toronto - ECE 2T1 + PEY'
-
+    desc: 'University of Toronto - ECE 2T1 + PEY',
   },
   {
     name: 'Yizhong Xu',
     url: 'https://www.linkedin.com/in/yizhong-xu-076bb9157/',
     pic: '/profile-pics/yizhong-pic.webp',
-        desc: 'University of Toronto - ECE 2T1 + PEY'
-
+    desc: 'University of Toronto - ECE 2T1 + PEY',
   },
   {
     name: 'Haoran Zhang',
     url: 'https://www.linkedin.com/in/haoran-zhang-424b33196/',
     pic: '/profile-pics/haoran-pic.webp',
-        desc: 'University of Toronto - ECE 2T1 + PEY'
-
+    desc: 'University of Toronto - ECE 2T1 + PEY',
   },
 ];
 
