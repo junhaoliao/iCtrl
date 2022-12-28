@@ -3,9 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "devDependencies": {
-    "@mui/material": "^5.6.3",
+    "@mui/material": "^5.11.2",
     "@mui/icons-material": "^5.6.3",
-    "@mui/styles": "^5.6.3",
+    "@mui/styles": "^5.11.2",
     "@mui/x-data-grid": "^5.10.0",
     "@mui/lab": "^5.0.0-alpha.104",
     "@emotion/react": "^11.10.5",

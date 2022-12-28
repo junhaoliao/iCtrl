@@ -29,13 +29,13 @@ import {
   DialogContent,
   DialogTitle,
   Divider,
-  Unstable_Grid2 as Grid,
   List,
   ListItem,
   ListItemAvatar,
   ListItemText,
   Typography,
 } from '@mui/material';
+import Grid from '@mui/material/Unstable_Grid2';
 import Marquee from 'react-easy-marquee';
 import {
   authors,
