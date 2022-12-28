@@ -24,7 +24,7 @@ export const introduction = `iCtrl is a web-based remote control application,
 which supports Virtual Network Console (VNC) connections with a graphical 
 interface and audio support, Secure Shell (SSH) connections with a terminal 
 interface, user profile management, change machines with workload detection, 
-file transfer. It is also design for use on mobiles. `;
+file transfer. It is also designed for mobile devices. `;
 
 export const disclaimer = <>
   <p>If you are using the desktop client, your SSH hosts and credentials are
