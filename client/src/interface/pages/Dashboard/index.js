@@ -42,9 +42,7 @@ import axios from 'axios';
 
 import logo from '../../../icons/logo.webp';
 import ictrlLogo from '../../../icons/logo.webp';
-import {openInNewWindow} from '../../../actions/utils';
 import About from '../../components/About';
-import GitHubButton from 'react-github-btn';
 import ResetVNCDialog from '../../components/ResetVNCDialog';
 import TrafficLights from '../../components/TrafficLights/TrafficLights';
 import Session from './Session';
@@ -177,28 +175,10 @@ export default class Dashboard extends React.Component {
                           sx={{flexGrow: 1}}>
                 iCtrl Dashboard
               </Typography>
-              <div
-                  className={'titlebar-buttons'}
-                  onClick={(ev) => {
-                    openInNewWindow(
-                        'https://github.com/junhaoliao/iCtrl', ev);
-                  }}
-                  style={{
-                    marginTop: '5px',
-                    marginRight: '16px',
-                    overflowX: 'auto',
-                    overflowY: 'hidden',
-                  }}>
-                <GitHubButton
-                    href="https://github.com/junhaoliao/iCtrl"
-                    data-color-scheme="no-preference: light_high_contrast; light: light_high_contrast; dark: light_high_contrast;"
-                    data-show-count="true"
-                    aria-label="Star junhaoliao/iCtrl on GitHub">Star</GitHubButton>
-
-              </div>
               <Tooltip title="About iCtrl"
                        className={'titlebar-buttons'}>
-                <IconButton onClick={this.handleAboutOpen}
+                <IconButton disabled={loading_sessions}
+                            onClick={this.handleAboutOpen}
                             size={'large'}>
                   <InfoIcon style={{color: 'white'}}
                             fontSize="large"/>
@@ -282,5 +262,4 @@ export default class Dashboard extends React.Component {
         </>
     );
   }
-
 }

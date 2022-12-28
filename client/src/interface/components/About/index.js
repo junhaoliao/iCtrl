@@ -50,6 +50,8 @@ import LinkForNewWindow from '../LinkToNewWindow';
 import iCtrlQRCode from './iCtrlQRCode.svg';
 import './index.css';
 import ICtrlVoiceButton from '../iCtrlVoiceButton/iCtrlVoiceButton';
+import GitHubButton from 'react-github-btn';
+import {openInNewWindow} from '../../../actions/utils';
 
 const AboutSection = (props) => (
     <>
@@ -90,8 +92,29 @@ export default class About extends React.Component {
     return <Dialog open={true} fullWidth={true} maxWidth={'md'}>
       <DialogTitle>
         <div style={{display: 'flex', alignItems: 'center'}}>
-          <span>About iCtrl {version && `(v${version})`}</span>
-          <ICtrlVoiceButton/>
+          <div style={{flexGrow: 1, display: 'flex', alignItems: 'center'}}>
+            <span style={{
+              marginLeft: '16px',
+              marginRight: '8px',
+              fontWeight: 'bold',
+              fontSize: '24px',
+            }}>About iCtrl {version && `(v${version})`}</span>
+            <ICtrlVoiceButton/>
+          </div>
+          <div onClick={(ev) => {
+            openInNewWindow(
+                'https://github.com/junhaoliao/iCtrl', ev);
+          }}>
+            <GitHubButton
+                href="https://github.com/junhaoliao/iCtrl"
+                data-color-scheme="no-preference: light_high_contrast; light: light_high_contrast; dark: light_high_contrast;"
+                data-show-count="true"
+                aria-label="Star junhaoliao/iCtrl on GitHub"
+                data-size={'large'}
+            >
+              Star
+            </GitHubButton>
+          </div>
         </div>
       </DialogTitle>
       <DialogContent style={{maxHeight: '630px'}}>
