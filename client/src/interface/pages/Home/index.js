@@ -300,7 +300,8 @@ export default class Home extends React.Component {
                               name: 'mac-arm',
                               fullName: 'ARM Mac',
                             }].map((p) => (
-                              <Tooltip title={showPublishCount &&
+                              <Tooltip key={`download-count-tooltip-${p.name}`}
+                                       title={showPublishCount &&
                                   this.downloadCountString(p.fullName)}
                               placement={'top'}>
                                 <Button id={`download-${p.name}`}
