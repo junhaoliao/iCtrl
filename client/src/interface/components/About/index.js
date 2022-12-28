@@ -89,7 +89,7 @@ export default class About extends React.Component {
     const version = window.require &&
         window.require('electron').ipcRenderer.sendSync('version');
 
-    return <Dialog open={true} fullWidth={true} maxWidth={'md'}>
+    return <Dialog open={true} fullWidth={true} maxWidth={'lg'}>
       <DialogTitle>
         <div style={{display: 'flex', alignItems: 'center'}}>
           <div style={{flexGrow: 1, display: 'flex', alignItems: 'center'}}>
@@ -117,7 +117,7 @@ export default class About extends React.Component {
           </div>
         </div>
       </DialogTitle>
-      <DialogContent style={{maxHeight: '630px'}}>
+      <DialogContent>
         <div>
           <img width={85} src={iCtrlQRCode} alt={'ictrl-qr-code'}
                style={{
@@ -129,6 +129,7 @@ export default class About extends React.Component {
             {introduction}
           </p>
         </div>
+        <br/>
 
         <AboutSection title={'Authors'} list={authors}/>
         <AboutSection title={'Supervisor'} list={supervisors}/>
