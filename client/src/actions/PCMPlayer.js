@@ -107,7 +107,7 @@ export default class PCMPlayer {
     let sampleIdx = 0;
     for (let channel = 0; channel < this.options.numberOfChannels; channel++) {
       // get buffer for the current channel
-      const channelBuffer = audioBuffer.getChannelData(channel);
+      const channelBuffer = audioBuffer.getChannelData(this.options.numberOfChannels - channel - 1);
 
       // the sample starting indexing should be an offset equal to the channel index
       sampleIdx = channel;
