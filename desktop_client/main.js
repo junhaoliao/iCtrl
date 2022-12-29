@@ -228,9 +228,7 @@ const createDashboardWindow = () => {
     });
   }
 
-  mainWindow.webContents.on('new-window', (event, url) => {
-    event.preventDefault();
-
+  mainWindow.webContents.setWindowOpenHandler(({url}) => {
     const newWindow = new BrowserWindow(windowOptions);
     setupContextMenu(newWindow);
 
