@@ -177,12 +177,14 @@ export default class Dashboard extends React.Component {
               </Typography>
               <Tooltip title="About iCtrl"
                        className={'titlebar-buttons'}>
-                <IconButton disabled={loading_sessions}
-                            onClick={this.handleAboutOpen}
-                            size={'large'}>
-                  <InfoIcon style={{color: 'white'}}
-                            fontSize="large"/>
-                </IconButton>
+                <span>
+                  <IconButton disabled={loading_sessions}
+                              onClick={this.handleAboutOpen}
+                              size={'large'}>
+                    <InfoIcon style={{color: 'white'}}
+                              fontSize="large"/>
+                  </IconButton>
+                </span>
               </Tooltip>
               <Tooltip title="Add new session"
                        className={'titlebar-buttons'}>
