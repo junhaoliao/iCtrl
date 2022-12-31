@@ -10,7 +10,7 @@ Although we have been trying to protect your information with honest efforts, we
 Please do not use the program on a public computer. 
 We are not responsible for any unintended use of our program, including but not limited to Academic Misconduct, loss of data when the APIs are called with unofficial web clients, and any hacking behaviour that utilises our tool. However, if you suspect there is any security vulnerability, you are more than welcome to email support@ictrl.ca , and we will try our best to address such issues. 
 
-## Demo Screenshot
+## Demo Screenshots
 <table>
   <tr>
     <th colspan="2">Features</th>
