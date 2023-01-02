@@ -72,6 +72,8 @@ export default class Session extends React.Component {
       nicknameHovering: false,
       nicknamePopoverAnchorEl: null,
       nicknameChangeLoading: false,
+      anchorMouseTop: null,
+      anchorMouseLeft: null,
     };
   }
 
@@ -102,22 +104,31 @@ export default class Session extends React.Component {
     }
   }
 
-  handleContextMenuOpen = () => {
-    this.setState({
-      contextMenuAnchorEl: this.moreButtonRef.current,
-    });
+  handleContextMenuOpen = (ev) => {
+    if (ev.type === 'contextmenu') {
+      this.setState({
+        anchorMouseLeft: ev.clientX,
+        anchorMouseTop: ev.clientY,
+      });
+    } else if (ev.type === 'click') {
+      this.setState({
+        contextMenuAnchorEl: this.moreButtonRef.current,
+      });
+    } else {
+      console.error(`Unknown event type: ${ev.type}`);
+    }
   };
 
-  handleContextMenuClose = (_) => {
+  handleContextMenuClose = () => {
     this.setState({
       contextMenuAnchorEl: null,
+      anchorMouseTop: null,
+      anchorMouseLeft: null,
     });
   };
 
   handleContextMenuClick = (type) => {
-    this.setState({
-      contextMenuAnchorEl: null,
-    });
+    this.handleContextMenuClose();
     this.handleFeatureClick(type);
   };
 
@@ -174,6 +185,8 @@ export default class Session extends React.Component {
       nicknameHovering,
       nicknamePopoverAnchorEl,
       nicknameChangeLoading,
+      anchorMouseTop,
+      anchorMouseLeft,
     } = this.state;
 
     const showCM = canChangeMachine(host);
@@ -208,8 +221,9 @@ export default class Session extends React.Component {
 
                   this.handleContextMenuClose();
 
-                  if (contextMenuAnchorEl === null) {
-                    this.handleContextMenuOpen();
+                  if (contextMenuAnchorEl === null &&
+                      anchorMouseLeft === null) {
+                    this.handleContextMenuOpen(ev);
                   }
                 }}
       >
@@ -259,7 +273,12 @@ export default class Session extends React.Component {
         <Menu
             anchorEl={contextMenuAnchorEl}
             anchorOrigin={{vertical: 'bottom', horizontal: 'right'}}
-            open={contextMenuAnchorEl !== null}
+            anchorReference={anchorMouseTop === null ?
+                'anchorEl' :
+                'anchorPosition'}
+            anchorPosition={anchorMouseTop &&
+                {left: anchorMouseLeft, top: anchorMouseTop}}
+            open={contextMenuAnchorEl !== null || anchorMouseTop !== null}
             onClose={this.handleContextMenuClose}
         >
           <Hidden smUp>
