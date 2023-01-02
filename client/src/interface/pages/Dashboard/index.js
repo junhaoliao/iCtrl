@@ -26,8 +26,13 @@ import './index.css';
 
 import {
   AppBar,
+  Hidden,
   IconButton,
   List,
+  ListItem,
+  ListItemAvatar,
+  ListItemSecondaryAction,
+  ListItemText,
   Skeleton,
   Toolbar,
   Tooltip,
@@ -158,6 +163,13 @@ export default class Dashboard extends React.Component {
                                 {...sessionProps}/>);
     }
 
+    const SkeletonIcon = (_key) =>
+        <IconButton key={_key} disabled={true}>
+          <Skeleton
+              variant={'rounded'}
+              width={36}
+              height={36}/>
+        </IconButton>;
     return (
         <>
           <AppBar position="static" color={'primary'} id={'titlebar'}
@@ -210,10 +222,28 @@ export default class Dashboard extends React.Component {
 
           {/* Display a greyed-out logo when there is no session configured */}
           {loading_sessions ?
-              [...Array(3)].map((e, i) =>
-                  <Skeleton key={`skeleton-${i}`} variant="rectangular"
-                            height={75} style={{marginTop: 8}}/>,
-              )
+              <List>
+                {[...Array(3)].map((e, i) =>
+                    <ListItem key={`skeleton-list-item-${i}`}>
+                      <ListItemAvatar>
+                        <Skeleton variant="circular" width={40} height={40}/>
+                      </ListItemAvatar>
+                      <ListItemText
+                          primary={<Skeleton variant={'text'} width={220}/>}
+                          secondary={<Skeleton variant={'text'} width={120}/>}
+                      />
+                      <ListItemSecondaryAction>
+                        <Hidden smDown>
+                          {[...Array(3)].map(
+                              (e, i) =>
+                                  <SkeletonIcon key={`skeleton-icon-${i}`}/>,
+                          )}
+                        </Hidden>
+                        <SkeletonIcon/>
+                      </ListItemSecondaryAction>
+                    </ListItem>,
+                )}
+              </List>
               :
               (sessionList.length !== 0 ?
                       <List>
