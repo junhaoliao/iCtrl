@@ -217,6 +217,24 @@ export default class Home extends React.Component {
               <Typography style={{flex: 1, fontWeight: 'bold'}} variant="h6">
                 iCtrl
               </Typography>
+
+              <Tooltip title="Magellan didn't circle the globe. Elcano did."
+                       style={{marginRight: '6px'}}>
+                <Button
+                    sx={{padding: '2px', minWidth: 0, backgroundColor: 'white'}}
+                    color={'inherit'}
+                    variant={'contained'}
+                    href={'http://elcano.ictrl.ca'}
+                    size={'large'}>
+                  <img
+                      alt={'elcano-icon'}
+                      width={32}
+                      height={32}
+                      src={'http://elcano.ictrl.ca/favicon.ico'}
+                  />
+                </Button>
+              </Tooltip>
+
               <Tooltip title="About iCtrl" style={{marginRight: '8px'}}>
                 <IconButton onClick={this.handleAboutOpen} size={'large'}>
                   <InfoIcon style={{color: 'white'}} fontSize="large"/>
@@ -302,8 +320,8 @@ export default class Home extends React.Component {
                             }].map((p) => (
                               <Tooltip key={`download-count-tooltip-${p.name}`}
                                        title={showPublishCount &&
-                                  this.downloadCountString(p.fullName)}
-                              placement={'top'}>
+                                           this.downloadCountString(p.fullName)}
+                                       placement={'top'}>
                                 <Button id={`download-${p.name}`}
                                         variant={detectedPlatform === p.name ?
                                             'contained' :
