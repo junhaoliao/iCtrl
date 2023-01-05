@@ -30,6 +30,11 @@ import {
   Box,
   Button,
   ButtonGroup,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
   Divider,
   Hidden,
   IconButton,
@@ -50,6 +55,14 @@ import ICtrlVoiceButton
   from '../../components/iCtrlVoiceButton/iCtrlVoiceButton';
 import {ExpandMore} from '@mui/icons-material';
 
+const ElcanoIcon = (props) => (<img
+        alt={'elcano-icon'}
+        width={props.size || 32}
+        height={props.size || 32}
+        src={'http://elcano.ictrl.ca/favicon.ico'}
+    />
+);
+
 export default class Home extends React.Component {
   constructor(props) {
     super(props);
@@ -62,6 +75,7 @@ export default class Home extends React.Component {
       publishDate: null,
       aboutOpened: false,
       detectedPlatform: null,
+      postDownloadDialogOpen: false,
     };
   }
 
@@ -76,6 +90,9 @@ export default class Home extends React.Component {
       download_link += 'ictrl-desktop-darwin-arm64.dmg';
     }
     window.location.href = download_link;
+    this.setState({
+      postDownloadDialogOpen: true,
+    });
   };
 
   downloadCountString = (platform) => {
@@ -195,12 +212,19 @@ export default class Home extends React.Component {
     }
   }
 
+  handlePostDownloadDialogClose = () => {
+    this.setState({
+      postDownloadDialogOpen: false,
+    });
+  };
+
   render() {
     const {
       publishDate,
       totalDownloadCount,
       aboutOpened,
       detectedPlatform,
+      postDownloadDialogOpen,
     } = this.state;
     const showPublishCount = (publishDate !== null);
 
@@ -219,20 +243,15 @@ export default class Home extends React.Component {
               </Typography>
 
               <Tooltip title="Magellan didn't circle the globe. Elcano did."
-                       target="_blank" rel={'noopener noreferrer'}
                        style={{marginRight: '6px'}}>
                 <Button
                     sx={{padding: '2px', minWidth: 0, backgroundColor: 'white'}}
                     color={'inherit'}
                     variant={'contained'}
                     href={'http://elcano.ictrl.ca'}
+                    target="_blank" rel={'noopener noreferrer'}
                     size={'large'}>
-                  <img
-                      alt={'elcano-icon'}
-                      width={32}
-                      height={32}
-                      src={'http://elcano.ictrl.ca/favicon.ico'}
-                  />
+                  <ElcanoIcon/>
                 </Button>
               </Tooltip>
 
@@ -363,6 +382,54 @@ export default class Home extends React.Component {
           </Box>
 
           {aboutOpened && <About onClose={this.handleAboutClose}/>}
+
+          <Dialog
+              open={postDownloadDialogOpen}
+              onClose={this.handlePostDownloadDialogClose}
+              aria-labelledby="post-download-dialog-title"
+              aria-describedby="post-download-dialog-description"
+          >
+            <DialogTitle id="post-download-dialog-title">
+              {'Thank you for downloading iCtrl! '}
+            </DialogTitle>
+            <DialogContent>
+              <DialogContentText id="post-download-dialog-description">
+                iCtrl is a free and open-source project.
+                <br/>
+                It will be great if you can support us with just a few clicks.
+              </DialogContentText>
+            </DialogContent>
+            <DialogActions>
+              <Tooltip title={'Magellan didn\'t circle the globe. Elcano did.'}>
+                <Button
+                    sx={{
+                      height: '28px',
+                      backgroundColor: 'rgb(50,62,102)',
+                      '&:hover': {
+                        backgroundColor: 'rgba(50,62,102,0.75)',
+                      },
+                      textTransform: 'none',
+                    }}
+                    variant={'contained'} size={'small'}
+                    href={'http://elcano.ictrl.ca'}
+                    target="_blank" rel={'noopener noreferrer'}
+                    startIcon={<ElcanoIcon size={20}/>}
+                >
+                  Try Elcano
+                </Button>
+              </Tooltip>
+
+              <div style={{marginLeft: '12px', height: '28px'}}>
+                <GitHubButton href="https://github.com/junhaoliao/iCtrl"
+                              data-size="large" data-show-count="true"
+                              aria-label="Star junhaoliao/iCtrl on GitHub"
+                              data-color-scheme="no-preference: light_high_contrast; light: light_high_contrast; dark: light_high_contrast;"
+                >
+                  Give us a star
+                </GitHubButton>
+              </div>
+            </DialogActions>
+          </Dialog>
         </div>
     );
   }
