@@ -219,6 +219,7 @@ export default class Home extends React.Component {
               </Typography>
 
               <Tooltip title="Magellan didn't circle the globe. Elcano did."
+                       target="_blank" rel={'noopener noreferrer'}
                        style={{marginRight: '6px'}}>
                 <Button
                     sx={{padding: '2px', minWidth: 0, backgroundColor: 'white'}}
