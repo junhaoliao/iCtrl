@@ -40,6 +40,7 @@ python3 -m pip install --user virtualenv
 python3 -m virtualenv venv
 
 # activate the virual environment
+# if setting up Jenkins, use "." instead of "source" below
 source venv/bin/activate
 
 # install all backend depedencies
