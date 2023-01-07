@@ -131,7 +131,7 @@ class Connection:
             self._client_connect(self._jump_client, 'remote.ecf.utoronto.ca', username, **auth_methods)
             self._jump_channel = self._jump_client.get_transport().open_channel('direct-tcpip',
                                                                                 (host, 22),
-                                                                                ('0.0.0.0', 22))
+                                                                                ('127.0.0.1', 22))
 
     def connect(self, host: str, username: str, **auth_methods):
         try:
