@@ -31,7 +31,7 @@ sys.path.insert(0, '/var/www/ictrl/')
 
 # read the config file
 #  as we don't want to hard-code those sensitive data and commit them into Git
-with open('/var/www/ictrl/ictrl.conf', 'r') as config_file:
+with open('/home/ictrl/ictrl.conf', 'r') as config_file:
     for line in config_file:
         if line.startswith('#'):
             continue
