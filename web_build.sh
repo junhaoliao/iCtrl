@@ -8,6 +8,6 @@ cd ..
 
 
 # build websockify
-cd application/websockify-other/c
+cd ./application/websockify-other/c
 make
 cd ../../..
