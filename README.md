@@ -3,7 +3,9 @@
 **SSH Remote Web Service / Desktop Client** (Previously known as **UG_Remote**)
 
 ## Build Status
-Web Version: [![Build Status](https://jenkins.junhao.ca/buildStatus/icon?job=iCtrl)](https://jenkins.junhao.ca/job/iCtrl/)
+| Platform | Status |
+| --- | --- |
+| Web | [![Build Status](https://jenkins.junhao.ca/buildStatus/icon?job=iCtrl)](https://jenkins.junhao.ca/job/iCtrl/) |
 
 ## Disclaimer
 If you are using the desktop client, your SSH hosts and credentials will be stored locally on the computer you run the program with. 
