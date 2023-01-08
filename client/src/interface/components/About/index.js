@@ -124,8 +124,7 @@ export default class About extends React.Component {
           <img width={85} src={iCtrlQRCode} alt={'ictrl-qr-code'}
                style={{
                  float: 'right',
-                 marginLeft: '10px',
-                 marginBottom: '10px',
+                 marginLeft: '1em'
                }}/>
           <p className={'about-section-container selectable'}>
             {introduction}
