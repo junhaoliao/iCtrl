@@ -35,18 +35,17 @@ We are not responsible for any unintended use of our program, including but not 
 ## Instructions
 The tool is provided in two variants: a web service and a desktop client. You can pick from one of the below options to best suit your need.
 
-### Option I. Web Service
-1. Go to https://ictrl.ca
-2. Under the "Sign Up" tab, register an account with Uoft email
-3. Verify your account by checking your [Uoft email inbox](https://mail.utoronto.ca)
-4. Log in with your credentials
-
-
-### Option II. Desktop Client
+### Option I. Desktop Client
 1. Go to https://ictrl.ca
 2. Download the desktop client for your platform (Mac or Windows)
 3. i. On a Mac computer, you can open the DMG file and drag the app into the "Application" folder. Then you can find the installed app in LaunchPad or "Applications" in Finder. \
    ii. On a Windows computer, the installer download might be blocked. Check your browser settings and click on "Keep Anyways" to download the installer. Once the download is finished, double click on the installer, and the app will be installed in your user directory. You can find the installed app in the Start Menu. 
+
+### Option II. Web Service
+1. Go to https://ictrl.ca
+2. Under the "Sign Up" tab, register an account with Uoft email
+3. Verify your account by checking your [Uoft email inbox](https://mail.utoronto.ca)
+4. Log in with your credentials
 
 Now you can add a new session by clicking the "+" (Plus) button in the upper right corner of the opened app window. 
 
