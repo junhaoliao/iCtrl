@@ -81,7 +81,10 @@ export const authors = [
     name: 'Junhao Liao',
     url: 'https://junhao.ca',
     pic: 'https://junhao.ca/wp-content/uploads/2020/10/portrait-edited-768x768.jpeg',
-    desc: 'University of Toronto - ECE 2T1 + PEY',
+    desc: <>
+      <div>Qualcomm Canada Ulc. - Automotive SW Engineer</div>
+      <div>University of Toronto - ECE 2T1 + PEY</div>
+      </>,
   },
   {
     name: 'Leo HC Li',

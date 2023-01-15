@@ -69,7 +69,7 @@ const AboutSection = (props) => (
               primary={i.name}
               secondary={
                 <div>
-                  <div>{i.desc && i.desc}</div>
+                  {i.desc && <div>{i.desc}</div>}
                   <LinkForNewWindow
                       url={i.url}>{i.url}
                   </LinkForNewWindow>
