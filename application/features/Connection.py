@@ -191,7 +191,7 @@ class Connection:
         exit_status, _, _, _ = self.exec_command_blocking(
             "mkdir -p ~/.ssh && chmod 700 ~/.ssh && echo '%s' >>  ~/.ssh/authorized_keys" % pub_key)
         if exit_status != 0:
-            return False, "Connection::save_keys: unable to save public key"
+            return False, "Connection::save_keys: unable to save public key; Check for disk quota and permissions with any conventional SSH clients. "
 
         return True, ""
 
