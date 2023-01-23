@@ -29,7 +29,6 @@ import {
   AppBar,
   Box,
   Button,
-  ButtonGroup,
   Dialog,
   DialogActions,
   DialogContent,
@@ -38,7 +37,8 @@ import {
   Divider,
   Hidden,
   IconButton,
-  Stack,
+  ToggleButton,
+  ToggleButtonGroup,
   Toolbar,
   Tooltip,
   Typography,
@@ -104,7 +104,7 @@ export default class Home extends React.Component {
       publishDate.getDate(),
     ];
 
-    let count = 0;
+    let count;
     if (platform === 'Windows') {
       count = windowsCount;
     } else if (platform === 'Intel Mac') {
@@ -180,7 +180,7 @@ export default class Home extends React.Component {
   };
 
   componentDidMount() {
-    axios.get('/api/userid').then(response => {
+    axios.get('/api/userid').then(_ => {
       window.location = '/dashboard';
     }).catch(_ => {
       this.updatePlatformDownloadCount();
@@ -312,9 +312,20 @@ export default class Home extends React.Component {
                     <AccordionSummary expandIcon={<ExpandMore/>}>
                       <Tooltip
                           sx={{flexGrow: 1}}
-                          placement={'top'}
+                          placement={'bottom-start'}
                           title={showPublishCount &&
-                              this.downloadCountString('all platforms')}>
+                              this.downloadCountString('all platforms')}
+                          PopperProps={{
+                            modifiers: [
+                              {
+                                name: 'offset',
+                                options: {
+                                  offset: [12, -15],
+                                },
+                              },
+                            ],
+                          }}
+                      >
                         <Typography>
                           1. Download Desktop Client
                         </Typography>
@@ -325,34 +336,52 @@ export default class Home extends React.Component {
                       </Typography>}
                     </AccordionSummary>
                     <AccordionDetails>
-                      <Stack alignItems={'center'}>
-                        <ButtonGroup color={'info'}>
-                          {[
-                            {
-                              name: 'windows',
-                              fullName: 'Windows',
-                            }, {
-                              name: 'mac-intel',
-                              fullName: 'Intel Mac',
-                            }, {
-                              name: 'mac-arm',
-                              fullName: 'ARM Mac',
-                            }].map((p) => (
-                              <Tooltip key={`download-count-tooltip-${p.name}`}
-                                       title={showPublishCount &&
-                                           this.downloadCountString(p.fullName)}
-                                       placement={'top'}>
-                                <Button id={`download-${p.name}`}
-                                        variant={detectedPlatform === p.name ?
-                                            'contained' :
-                                            'outlined'}
-                                        onClick={this.handleDesktopDownload}>
-                                  {p.fullName}
-                                </Button>
-                              </Tooltip>
-                          ))}
-                        </ButtonGroup>
-                      </Stack>
+                      <ToggleButtonGroup color={'info'}
+                                         size={'small'}
+                                         fullWidth={true}
+                                         value={detectedPlatform}>
+                        {[
+                          {
+                            name: 'windows',
+                            fullName: 'Windows',
+                            placement: 'top-start',
+                          }, {
+                            name: 'mac-intel',
+                            fullName: 'Intel Mac',
+                            placement: 'top',
+                          }, {
+                            name: 'mac-arm',
+                            fullName: 'ARM Mac',
+                            placement: 'top-end',
+                          }].map((p) => (
+                            <Tooltip key={`download-count-tooltip-${p.name}`}
+                                     value={p.name}
+                                     title={showPublishCount &&
+                                         this.downloadCountString(p.fullName)}
+                                     placement={p.placement}
+                                     PopperProps={{
+                                       modifiers: [
+                                         {
+                                           name: 'offset',
+                                           options: {
+                                             offset: [0, -8],
+                                           },
+                                         },
+                                       ],
+                                     }}
+                            >
+                              <ToggleButton id={`download-${p.name}`}
+                                            value={p.name}
+                                            sx={{
+                                              fontWeight: 'bold',
+                                              color: 'rgb(40,40,40)',
+                                            }}
+                                            onClick={this.handleDesktopDownload}>
+                                {p.fullName}
+                              </ToggleButton>
+                            </Tooltip>
+                        ))}
+                      </ToggleButtonGroup>
                     </AccordionDetails>
                   </Accordion>
                 </div>
