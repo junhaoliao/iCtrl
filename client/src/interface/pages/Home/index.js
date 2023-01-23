@@ -326,7 +326,7 @@ export default class Home extends React.Component {
                             ],
                           }}
                       >
-                        <Typography>
+                        <Typography fontWeight={'bold'}>
                           1. Download Desktop Client
                         </Typography>
                       </Tooltip>
