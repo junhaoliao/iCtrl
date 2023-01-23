@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 iCtrl Developers
+ * Copyright (c) 2021-2023 iCtrl Developers
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  *  of this software and associated documentation files (the "Software"), to
@@ -34,6 +34,7 @@ import {isIOS} from '../../../actions/utils';
 import {updateTitleAndIcon} from '../../../actions/common';
 import BackgroundLetterAvatar from '../../components/BackgroundLetterAvatar';
 import {COLOR_VNC_VIEWER} from '../../constants';
+import VNCAuthenticationDialog from './VNCAuthenticationDialog';
 
 export default class VNCViewer extends React.Component {
   constructor(props) {
@@ -55,6 +56,8 @@ export default class VNCViewer extends React.Component {
 
     this.speedDialOpenTime = 0;
 
+    this.sendCredentials = null;
+
     this.state = {
       sessionNickname: '',
       disconnected: false,
@@ -68,6 +71,7 @@ export default class VNCViewer extends React.Component {
       isOverloaded: false,
       quotaExceeded: false,
       fabMoving: false,
+      authTypes: null,
     };
   }
 
@@ -208,6 +212,7 @@ export default class VNCViewer extends React.Component {
       isOverloaded,
       quotaExceeded,
       fabMoving,
+      authTypes,
     } = this.state;
 
     if (!resetting && disconnected) {
@@ -279,6 +284,9 @@ export default class VNCViewer extends React.Component {
                          this.rfb.sendCtrlAltDel();
                        }}
                        onToolbarHide={this.handleToolbarHide}/>}
+
+          <VNCAuthenticationDialog types={authTypes}
+                                   vncViewer={this}/>
 
           <div style={{position: 'absolute', top: 0, left: '-100px'}}
                id={'offscreen-favicon'}>

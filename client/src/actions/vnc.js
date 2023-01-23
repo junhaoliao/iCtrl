@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 iCtrl Developers
+ * Copyright (c) 2021-2023 iCtrl Developers
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  *  of this software and associated documentation files (the "Software"), to
@@ -46,7 +46,7 @@ const setupDOM = (port, passwd) => {
           url)
   ;
 
-  /* Setup the VNC default options */
+  /* Set up the VNC default options */
   // Reference: https://github.com/novnc/noVNC/blob/master/docs/API.md
 
   // in case the session doesn't support auto resize
@@ -75,23 +75,28 @@ const setupCredentialsHandlers = (vncViewer) => {
   });
 
   vncViewer.rfb.addEventListener('credentialsrequired', (ev) => {
-    for (let type of ev.detail.types) {
-      // TODO: investigate the need to support more than one auth
-      // make a copy of the VNCAuthentication model
+    if (ev.detail.types.length === 1 && ev.detail.types.includes('password')) {
+      // if only password is needed, use integrated UI to prompt for it
       const myVNCAuthentication = Object.assign(VNCAuthentication);
       VNCAuthentication.label = 'Please enter your VNC password';
       VNCAuthentication.description = 'iCtrl is unable to parse your VNC ' +
           'password. If you know the VNC password, please enter it below. ';
       myVNCAuthentication.submitter = (authInput) => {
         const credentials = {};
-        credentials[type] = authInput;
+        credentials['password'] = authInput;
         vncViewer.rfb.sendCredentials(credentials);
       };
       vncViewer.setState({
         currentStep: ICtrlStep.VNC.PARSE_PASSWD,
         authentication: myVNCAuthentication,
       });
+    } else {
+      // too many authentication types needed, use dialog window
+      vncViewer.setState({
+        authTypes: ev.detail.types,
+      });
     }
+
   });
 
   vncViewer.rfb.addEventListener('securityfailure', (ev) => {
