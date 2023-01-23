@@ -10,7 +10,7 @@
     "@mui/lab": "^5.0.0-alpha.114",
     "@emotion/react": "^11.10.5",
     "@emotion/styled": "^11.10.5",
-    "@novnc/novnc": "^1.4.0-beta",
+    "@novnc/novnc": "^1.4.0",
     "axios": "^1.2.1",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",

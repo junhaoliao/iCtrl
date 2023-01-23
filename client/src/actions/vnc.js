@@ -61,6 +61,19 @@ const setupDOM = (port, passwd) => {
 };
 
 const setupCredentialsHandlers = (vncViewer) => {
+  vncViewer.rfb.addEventListener('securityfailure ', (ev) => {
+    console.log(ev);
+  });
+
+  vncViewer.rfb.addEventListener('serververification', (_) => {
+    // FIXME: this can be unsafe
+    // Timeout needed to run this in the next loop
+    //  or Promise resolving function in the noVNC library will not be set
+    setTimeout(() => {
+      vncViewer.rfb.approveServer();
+    }, 0);
+  });
+
   vncViewer.rfb.addEventListener('credentialsrequired', (ev) => {
     for (let type of ev.detail.types) {
       // TODO: investigate the need to support more than one auth
@@ -315,7 +328,7 @@ export const vncConnect = async (vncViewer) => {
             axios.post('/api/vncpasswd', {
               session_id: vncViewer.session_id,
               passwd: authInput,
-            }).then(response => {
+            }).then(_ => {
               window.location.reload();
             }).catch(error => {
               console.log(error);
