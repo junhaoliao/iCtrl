@@ -305,7 +305,6 @@ class DBProfile(Profile):
 
     def save_profile(self):
         self.db.session.commit()
-        self.db.vnc_credentials.commit()
 
     def get_session_info(self, session_id):
         session = self._get_session(session_id)
