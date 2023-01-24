@@ -49,6 +49,8 @@ export default class VNCViewer extends React.Component {
     this.session_id = params.session_id;
     this.loadCheck = new URLSearchParams(window.location.search).get(
         'load-check') !== 'false';
+    this.loadCredentials = new URLSearchParams(window.location.search).get(
+        'load-credentials') !== 'false';
 
     this.rfb = null;
     this.lastKeyboardinput = null;

@@ -1,4 +1,4 @@
-#  Copyright (c) 2021-2022 iCtrl Developers
+#  Copyright (c) 2021-2023 iCtrl Developers
 # 
 #  Permission is hereby granted, free of charge, to any person obtaining a copy
 #   of this software and associated documentation files (the "Software"), to
@@ -23,7 +23,7 @@ import json
 from flask import request, abort, stream_with_context
 
 from .common import create_connection
-from .. import api, app
+from .. import api, app, profiles
 from ..codes import ICtrlStep, ICtrlError, ConnectionType
 from ..utils import int_to_bytes
 
@@ -32,6 +32,7 @@ from ..utils import int_to_bytes
 def start_vnc():
     session_id = request.json.get('sessionID')
     load_check = request.json.get('loadCheck', True)
+    load_credentials = request.json.get('loadCredentials', True)
 
     def generate():
         yield int_to_bytes(ICtrlStep.VNC.SSH_AUTH)
@@ -49,21 +50,25 @@ def start_vnc():
         # use5900: usually a RealVNC server listening on port 5900
         #  which we don't know how to parse the password
         use5900 = False
-        if vnc.is_ecf():
-            password = None
-        else:
-            status, password = vnc.get_vnc_password()
-
+        credentials = None
+        if not vnc.is_ecf():
             # in case we can read the password while the server is launched at port 5900
             # check whether 5900 is opened anyway
             use5900 = vnc.check_5900_open()
 
-            if not status:
-                if use5900:
-                    password = None
-                else:
-                    yield int_to_bytes(ICtrlError.VNC.PASSWD_MISSING)
-                    return
+            # check if there are any save credentials
+            if load_credentials:
+                vnc_credential_status, credentials = profiles.get_session_vnc_credentials(session_id)
+                if vnc_credential_status is False or credentials == "":
+                    vnc_password_status, password = vnc.get_vnc_password()
+                    if vnc_password_status:
+                        credentials = {'password': password}
+                    elif not use5900:
+                        yield int_to_bytes(ICtrlError.VNC.PASSWD_MISSING)
+                        return
+            else:
+                # remove any saved credentials
+                profiles.set_session_vnc_credentials(session_id, None)
 
         yield int_to_bytes(ICtrlStep.VNC.LAUNCH_VNC)
         if vnc.is_ecf():
@@ -83,7 +88,7 @@ def start_vnc():
         yield int_to_bytes(ICtrlStep.VNC.DONE)
         result = {
             'port': ws_port,
-            'passwd': password
+            'credentials': credentials
         }
         yield json.dumps(result)
 
@@ -115,6 +120,18 @@ def reset_vnc():
         abort(403, description=reason)
 
     status, reason = vnc.remove_vnc_settings()
+    if status is False:
+        abort(403, description=reason)
+
+    return 'success'
+
+
+@api.route('/vnc_credentials', methods=['PUT'])
+def vnc_credentials():
+    session_id = request.json.get('session_id')
+    credentials = request.json.get('credentials')
+
+    status, reason = profiles.set_session_vnc_credentials(session_id, credentials)
     if status is False:
         abort(403, description=reason)
 

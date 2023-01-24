@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 iCtrl Developers
+ * Copyright (c) 2021-2023 iCtrl Developers
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  *  of this software and associated documentation files (the "Software"), to
@@ -57,7 +57,7 @@ export const SSHAuthenticationWrong = {
   validator: null,
   submitterName: 'Close',
   submitter: () => {
-    window.close()
+    window.close();
   },
 };
 
@@ -72,7 +72,9 @@ export const VNCAuthentication = {
     return ' ';
   },
   submitterName: 'Confirm',
-  submitter: (authInput) => {
-    console.log(authInput);
+  submitter: (authInput, save) => {
+    // this is just a placeholder
+    console.log(authInput, save);
   },
+  enableSave: false,
 };

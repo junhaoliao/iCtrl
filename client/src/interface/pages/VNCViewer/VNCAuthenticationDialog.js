@@ -23,26 +23,38 @@
 import React from 'react';
 import {
   Button,
+  Checkbox,
   Dialog,
   DialogActions,
   DialogContent,
   DialogContentText,
   DialogTitle,
+  FormControlLabel,
   Slide,
   TextField,
 } from '@mui/material';
+import {saveVNCCredentials} from '../../../actions/vnc';
 
 const VNC_AUTH_INPUT_PREFIX = 'vnc-auth-input-';
 
 class VNCAuthenticationDialog extends React.Component {
   handleAuthSubmit = () => {
     const {types, vncViewer} = this.props;
+
+    const saveCredentials = document.getElementById(
+        `${VNC_AUTH_INPUT_PREFIX}save-credentials`).checked;
+
     let credentials = {};
     for (let t of types) {
       credentials[t] = document.getElementById(
           `${VNC_AUTH_INPUT_PREFIX}${t}`).value;
     }
+
     vncViewer.rfb.sendCredentials(credentials);
+    if (saveCredentials) {
+      saveVNCCredentials(vncViewer.session_id, credentials);
+    }
+
     vncViewer.setState({
       authTypes: null,
     });
@@ -99,6 +111,12 @@ class VNCAuthenticationDialog extends React.Component {
                                         fullWidth={true}
                                         onKeyDown={this.handleFieldKeyDown}
                 />))}
+        <FormControlLabel
+            control={<Checkbox id={`${VNC_AUTH_INPUT_PREFIX}save-credentials`}
+                               defaultChecked
+            />}
+            label={'Save Credentials'}
+        />
       </DialogContent>
       <DialogActions>
         <Button onClick={this.handleAuthSubmit}>OK</Button>

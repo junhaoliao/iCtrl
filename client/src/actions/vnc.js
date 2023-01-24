@@ -32,15 +32,15 @@ import {
 import axios from 'axios';
 import {htmlResponseToReason, isIOS} from './utils';
 
-const setupDOM = (port, passwd) => {
+const setupDOM = (port, credentials) => {
   /* Creating a new RFB object and start a new connection */
   const url = `wss://${process.env.REACT_APP_DOMAIN_NAME ||
   '127.0.0.1'}:${port}`;
-  const rfb = passwd ?
+  const rfb = credentials ?
       new RFB(
           document.getElementById('screen'),
           url,
-          {credentials: {password: passwd}}) :
+          {credentials: credentials}) :
       new RFB(
           document.getElementById('screen'),
           url)
@@ -78,13 +78,18 @@ const setupCredentialsHandlers = (vncViewer) => {
     if (ev.detail.types.length === 1 && ev.detail.types.includes('password')) {
       // if only password is needed, use integrated UI to prompt for it
       const myVNCAuthentication = Object.assign(VNCAuthentication);
-      VNCAuthentication.label = 'Please enter your VNC password';
-      VNCAuthentication.description = 'iCtrl is unable to parse your VNC ' +
+      myVNCAuthentication.label = 'Please enter your VNC password';
+      myVNCAuthentication.description = 'iCtrl is unable to parse your VNC ' +
           'password. If you know the VNC password, please enter it below. ';
-      myVNCAuthentication.submitter = (authInput) => {
+      myVNCAuthentication.enableSave = true;
+      myVNCAuthentication.submitter = (authInput, save) => {
         const credentials = {};
         credentials['password'] = authInput;
         vncViewer.rfb.sendCredentials(credentials);
+        if (save) {
+          // TODO: to make this block to ensure successful savings
+          saveVNCCredentials(vncViewer.session_id, credentials);
+        }
       };
       vncViewer.setState({
         currentStep: ICtrlStep.VNC.PARSE_PASSWD,
@@ -100,8 +105,11 @@ const setupCredentialsHandlers = (vncViewer) => {
   });
 
   vncViewer.rfb.addEventListener('securityfailure', (ev) => {
-    alert(`[Code ${ev.detail.status}] ${ev.detail.reason}\nClick OK to reload`);
-    window.location.reload();
+    alert(`[Code ${ev.detail.status}]
+${ev.detail.reason}
+Or any saved credentials are no longer matching.
+Click OK to reload`);
+    window.location.search += '&load-credentials=false';
   });
 
 };
@@ -239,8 +247,14 @@ export const vncConnect = async (vncViewer) => {
     body: JSON.stringify({
       sessionID: vncViewer.session_id,
       loadCheck: vncViewer.loadCheck,
+      loadCredentials: vncViewer.loadCredentials,
     }),
   };
+  if (!vncViewer.loadCredentials) {
+    // remove once read
+    window.history.replaceState(null, null, window.location.pathname);
+  }
+
   const response = await fetch(`/api/vnc`, options);
   if (response.status !== 200) {
     console.log(response.body);
@@ -261,9 +275,9 @@ export const vncConnect = async (vncViewer) => {
       const resultArr = new Uint8Array(
           data.slice(data.indexOf(ICtrlStep.VNC.DONE) + 1));
       const decodedStr = new TextDecoder().decode(resultArr);
-      const {port, passwd} = JSON.parse(decodedStr);
+      const {port, credentials} = JSON.parse(decodedStr);
 
-      vncViewer.rfb = setupDOM(port, passwd);
+      vncViewer.rfb = setupDOM(port, credentials);
 
       setupCredentialsHandlers(vncViewer);
 
@@ -375,6 +389,18 @@ export const vncConnect = async (vncViewer) => {
   reader.read().then(readStream);
 };
 
+export const focusOnKeyboard = () => {
+  if (isIOS()) {
+    const canvas = document.getElementById(
+        'screen').lastElementChild.firstElementChild;
+    canvas.setAttribute('contenteditable', 'true');
+    canvas.focus();
+  } else {
+    const textarea = document.getElementById('textarea');
+    textarea.focus();
+  }
+};
+
 export const resetVNC = (sessionID) => {
   axios.post('/api/vnc_reset', {
     session_id: sessionID,
@@ -388,14 +414,11 @@ export const resetVNC = (sessionID) => {
   });
 };
 
-export const focusOnKeyboard = () => {
-  if (isIOS()) {
-    const canvas = document.getElementById(
-        'screen').lastElementChild.firstElementChild;
-    canvas.setAttribute('contenteditable', 'true');
-    canvas.focus();
-  } else {
-    const textarea = document.getElementById('textarea');
-    textarea.focus();
-  }
+export const saveVNCCredentials = (sessionID, credentials) => {
+  axios.put('/api/vnc_credentials', {
+    session_id: sessionID,
+    credentials: credentials,
+  }).catch((error) => {
+    alert(error);
+  });
 };

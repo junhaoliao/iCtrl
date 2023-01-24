@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 iCtrl Developers
+ * Copyright (c) 2021-2023 iCtrl Developers
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  *  of this software and associated documentation files (the "Software"), to
@@ -24,6 +24,8 @@ import React from 'react';
 import {
   Box,
   Button,
+  Checkbox,
+  FormControlLabel,
   LinearProgress,
   Stack,
   Step,
@@ -64,6 +66,7 @@ export default class Loading extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
+      authSave: true,
       authInput: '',
       authHelperText: ' ',
       submitting: false,
@@ -85,7 +88,9 @@ export default class Loading extends React.Component {
     this.setState({
       submitting: true,
     });
-    this.props.authentication.submitter(this.state.authInput);
+    const {authInput, authSave} = this.state;
+
+    this.props.authentication.submitter(authInput, authSave);
     ev.preventDefault();
   };
 
@@ -128,7 +133,12 @@ export default class Loading extends React.Component {
       quotaExceeded,
       sessionId,
     } = this.props;
-    const {submitting, showChangeMachine, showFileCleaner} = this.state;
+    const {
+      authSave,
+      submitting,
+      showChangeMachine,
+      showFileCleaner,
+    } = this.state;
     const progressValue = (currentStep === -1) ? 0 :
         ((currentStep === STEP_DONE) ?
             100 :
@@ -199,6 +209,15 @@ export default class Loading extends React.Component {
                                   {authentication.submitterName}
                                 </LoadingButton>
                               </Stack>
+                              {authentication.enableSave && <FormControlLabel
+                                  control={<Checkbox checked={authSave}
+                                                     onChange={(ev) => {
+                                                       this.setState(
+                                                           {authSave: ev.target.checked});
+                                                     }}
+                                  />}
+                                  label={'Save Credentials'}
+                              />}
                             </form>
                           </StepContent>
                         </>}

@@ -1,4 +1,4 @@
-#  Copyright (c) 2021-2022 iCtrl Developers
+#  Copyright (c) 2021-2023 iCtrl Developers
 # 
 #  Permission is hereby granted, free of charge, to any person obtaining a copy
 #   of this software and associated documentation files (the "Software"), to
@@ -17,7 +17,7 @@
 #   LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 #   FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 #   IN THE SOFTWARE.
-
+import base64
 import copy
 import json
 import uuid
@@ -158,6 +158,34 @@ class LocalProfile(Profile):
         self.save_profile()
 
         return True, ''
+
+    def set_session_vnc_credentials(self, session_id, credentials):
+        if session_id not in self._profile['sessions']:
+            return False, f'failed: session {session_id} does not exist'
+
+        if credentials is None:
+            # it is a delete request
+            if 'vnc_credentials' in self._profile['sessions'][session_id]:
+                self._profile['sessions'][session_id].pop('vnc_credentials')
+        else:
+            # it is an add / update request
+            json_str = json.dumps(credentials)
+            base64_str = base64.b64encode(json_str.encode('ascii'))
+            self._profile['sessions'][session_id]['vnc_credentials'] = base64_str.decode('ascii')
+
+        self.save_profile()
+
+        return True, ''
+
+    def get_session_vnc_credentials(self, session_id):
+        if session_id not in self._profile['sessions']:
+            return False, f'failed: session {session_id} does not exist'
+
+        if 'vnc_credentials' in self._profile['sessions'][session_id]:
+            json_str = base64.b64decode(self._profile['sessions'][session_id]['vnc_credentials'])
+            return True, json.loads(json_str.decode('ascii'))
+        else:
+            return True, ''
 
     def get_user(self):
         class DummyUser:
