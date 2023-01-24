@@ -335,7 +335,7 @@ class DBProfile(Profile):
         if credentials is None:
             # it is a delete request
             vnc_credential = self.VNCCredentials.query.filter_by(session_id=session_id).first()
-            self.db.vnc_credential.delete(vnc_credential)
+            self.db.session.delete(vnc_credential)
         else:
             # it is an add / update request
             json_str = json.dumps(credentials)
