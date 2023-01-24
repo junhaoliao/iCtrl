@@ -170,8 +170,8 @@ class LocalProfile(Profile):
         else:
             # it is an add / update request
             json_str = json.dumps(credentials)
-            base64_str = base64.b64encode(json_str.encode('ascii'))
-            self._profile['sessions'][session_id]['vnc_credentials'] = base64_str.decode('ascii')
+            base64_str = base64.b64encode(json_str.encode('ascii')).decode('ascii')
+            self._profile['sessions'][session_id]['vnc_credentials'] = base64_str
 
         self.save_profile()
 

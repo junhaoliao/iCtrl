@@ -1,4 +1,4 @@
-#  Copyright (c) 2021-2022 iCtrl Developers
+#  Copyright (c) 2021-2023 iCtrl Developers
 # 
 #  Permission is hereby granted, free of charge, to any person obtaining a copy
 #   of this software and associated documentation files (the "Software"), to
@@ -19,6 +19,7 @@
 #   IN THE SOFTWARE.
 
 import base64
+import json
 import os
 import re
 import uuid
@@ -124,8 +125,16 @@ class DBProfile(Profile):
             username = db.Column(db.String, nullable=False)
             private_key = db.Column(db.Text, nullable=True)
 
+        class VNCCredentials(db.Model):
+            __table_args__ = {"schema": "ictrl"}
+
+            session_id = db.Column(UUID(as_uuid=True), db.ForeignKey('ictrl.session.id'), primary_key=True,
+                                   nullable=False)
+            credentials = db.Column(db.Text, nullable=False)
+
         self.User = User
         self.Session = Session
+        self.VNCCredentials = VNCCredentials
 
         # db.drop_all()
         db.engine.execute("CREATE SCHEMA IF NOT EXISTS ictrl;")
@@ -296,6 +305,7 @@ class DBProfile(Profile):
 
     def save_profile(self):
         self.db.session.commit()
+        self.db.vnc_credentials.commit()
 
     def get_session_info(self, session_id):
         session = self._get_session(session_id)
@@ -317,6 +327,34 @@ class DBProfile(Profile):
         self.save_profile()
 
         return True, ''
+
+    def set_session_vnc_credentials(self, session_id, credentials):
+        session = self._get_session(session_id)
+        if session is None:
+            return False, f'failed: session {session_id} does not exist'
+
+        if credentials is None:
+            # it is a delete request
+            vnc_credential = self.VNCCredentials.query.filter_by(session_id=session_id).first()
+            self.db.vnc_credential.delete(vnc_credential)
+        else:
+            # it is an add / update request
+            json_str = json.dumps(credentials)
+            base64_str = base64.b64encode(json_str.encode('ascii')).decode('ascii')
+            vnc_credential = self.VNCCredentials(session_id=session_id, credentials=base64_str)
+            self.db.vnc_credential.add(vnc_credential)
+
+        self.save_profile()
+
+        return True, ''
+
+    def get_session_vnc_credentials(self, session_id):
+        session = self._get_session(session_id)
+        if session is None:
+            return False, f'failed: session {session_id} does not exist'
+
+        vnc_credential = self.VNCCredentials.query.filter_by(session_id=session_id).first()
+        return True, vnc_credential.credentials
 
     def send_activation_email(self, username):
         user = self.User.query.filter_by(username=username).first()
