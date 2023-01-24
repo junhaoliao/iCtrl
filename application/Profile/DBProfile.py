@@ -341,7 +341,7 @@ class DBProfile(Profile):
             json_str = json.dumps(credentials)
             base64_str = base64.b64encode(json_str.encode('ascii')).decode('ascii')
             vnc_credential = self.VNCCredentials(session_id=session_id, credentials=base64_str)
-            self.db.vnc_credential.add(vnc_credential)
+            self.db.session.add(vnc_credential)
 
         self.save_profile()
 
