@@ -340,8 +340,14 @@ class DBProfile(Profile):
             # it is an add / update request
             json_str = json.dumps(credentials)
             base64_str = base64.b64encode(json_str.encode('ascii')).decode('ascii')
-            vnc_credential = self.VNCCredentials(session_id=session_id, credentials=base64_str)
-            self.db.session.add(vnc_credential)
+            vnc_credential = self.VNCCredentials.query.filter_by(session_id=session_id).first()
+            if vnc_credential is not None:
+                # update
+                vnc_credential.credentials = base64_str
+            else:
+                # add
+                vnc_credential = self.VNCCredentials(session_id=session_id, credentials=base64_str)
+                self.db.session.add(vnc_credential)
 
         self.save_profile()
 
