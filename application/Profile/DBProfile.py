@@ -354,7 +354,10 @@ class DBProfile(Profile):
             return False, f'failed: session {session_id} does not exist'
 
         vnc_credential = self.VNCCredentials.query.filter_by(session_id=session_id).first()
-        return True, vnc_credential.credentials
+        if vnc_credential is None:
+            return True, ''
+        else:
+            return True, vnc_credential.credentials
 
     def send_activation_email(self, username):
         user = self.User.query.filter_by(username=username).first()
