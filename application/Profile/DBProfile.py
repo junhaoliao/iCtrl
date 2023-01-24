@@ -356,7 +356,8 @@ class DBProfile(Profile):
         if vnc_credential is None:
             return True, ''
         else:
-            return True, vnc_credential.credentials
+            json_str = base64.b64decode(vnc_credential.credentials)
+            return True, json.loads(json_str.decode('ascii'))
 
     def send_activation_email(self, username):
         user = self.User.query.filter_by(username=username).first()
