@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 iCtrl Developers
+ * Copyright (c) 2022-2023 iCtrl Developers
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  *  of this software and associated documentation files (the "Software"), to
@@ -20,11 +20,12 @@
  *  IN THE SOFTWARE.
  */
 
-export const introduction = `iCtrl is a web-based remote control application, 
+export const introduction = `iCtrl is a web-based remote-control application, 
 which supports Virtual Network Console (VNC) connections with a graphical 
-interface and audio support, Secure Shell (SSH) connections with a terminal 
-interface, user profile management, change machines with workload detection, 
-file transfer. It is also designed for mobile devices. `;
+interface and audio, Secure Shell (SSH) connections with a terminal 
+interface, changing machines with workload detection, file management over SFTP.  
+The web version, designed with mobile accessibilities in mind, allows users to 
+manage and access their own sessions in a browser. `;
 
 export const disclaimer = <>
   <p>If you are using the desktop client, your SSH hosts and credentials are
