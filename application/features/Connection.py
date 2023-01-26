@@ -1,4 +1,4 @@
-#  Copyright (c) 2021-2022 iCtrl Developers
+#  Copyright (c) 2021-2023 iCtrl Developers
 # 
 #  Permission is hereby granted, free of charge, to any person obtaining a copy
 #   of this software and associated documentation files (the "Software"), to
@@ -258,7 +258,9 @@ class Connection:
 
         if pts_count > my_pts_count:  # there are more terminals than mine
             return True
-        elif load_sum > 0.3:  # suspect a high load if the 1-min load average is greater than the threshold
+        elif load_sum > 1.0:
+            # FIXME: revisit whether this number is too high / too low
+            # suspect a high load if the overall average sum is greater than the threshold
             # even if I'm the only user (others might not use a terminal to do port-forwarding),
             #  it is considered a high load
             return True
