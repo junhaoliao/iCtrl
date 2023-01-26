@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 iCtrl Developers
+ * Copyright (c) 2021-2023 iCtrl Developers
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  *  of this software and associated documentation files (the "Software"), to
@@ -57,6 +57,7 @@ import {
   hasUpperCase,
   special_symbols,
 } from './utils';
+import LocalStorage from '../../../actions/LocalStorage';
 
 const status = ['login', 'signup'];
 
@@ -88,7 +89,7 @@ export default class LogIn extends React.Component {
 
     axios.post('/api/resend_activation', {
       username: username,
-    }).then(response => {
+    }).then(_ => {
       this.setState({
         resendRequesting: false,
         errorElem: <Alert severity="info">
@@ -130,6 +131,7 @@ export default class LogIn extends React.Component {
     axios.post('/api/login', {
       username, password,
     }).then(_ => {
+      LocalStorage.setLastUsername(username);
       window.location = '/dashboard';
     }).catch(error => {
       this.setState({
@@ -203,7 +205,7 @@ export default class LogIn extends React.Component {
 
     axios.post('/api/register', {
       username, password, email,
-    }).then(response => {
+    }).then(_ => {
       this.setState({
         loading: false,
         errorElem: <Alert severity="info">
@@ -373,6 +375,7 @@ export default class LogIn extends React.Component {
                 variant={'standard'}
                 id={'username'}
                 label={'Username'}
+                defaultValue={LocalStorage.getLastUsername()}
                 autoComplete={'username'}
                 onChange={(ev) => {
                   this.setState({usernameValid: ev.target.value.length > 0});
