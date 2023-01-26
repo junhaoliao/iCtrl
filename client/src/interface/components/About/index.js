@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 iCtrl Developers
+ * Copyright (c) 2022-2023 iCtrl Developers
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  *  of this software and associated documentation files (the "Software"), to
@@ -38,7 +38,7 @@ import {
 import Grid from '@mui/material/Unstable_Grid2';
 import Marquee from 'react-easy-marquee';
 import {
-  authors,
+  contributors,
   disclaimer,
   introduction,
   projects,
@@ -135,7 +135,7 @@ export default class About extends React.Component {
         <Grid container spacing={1} columns={2}>
           <Grid xs={2} md={1}>
             <AboutSection title={'Supervisor'} list={supervisors}/>
-            <AboutSection title={'Authors'} list={authors}/>
+            <AboutSection title={'Core Contributors'} list={contributors}/>
           </Grid>
           <Grid xs={2} md={1}>
             <AboutSection title={'Special Thanks'} list={specialThanks}/>

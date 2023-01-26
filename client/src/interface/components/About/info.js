@@ -77,7 +77,7 @@ export const specialThanks = [
   },
 ];
 
-export const authors = [
+export const contributors = [
   {
     name: 'Junhao Liao',
     url: 'https://junhao.ca',
@@ -85,7 +85,7 @@ export const authors = [
     desc: <>
       <div>Qualcomm Canada Ulc. - Automotive SW Engineer</div>
       <div>University of Toronto - ECE 2T1 + PEY</div>
-      </>,
+    </>,
   },
   {
     name: 'Leo HC Li',
