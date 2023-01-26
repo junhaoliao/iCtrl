@@ -143,8 +143,13 @@ export default class Loading extends React.Component {
         ((currentStep === STEP_DONE) ?
             100 :
             currentStep / (steps.length - 1) * 100);
-    return (<>
-          <div style={{position: 'fixed', bottom: 0, width: '100vw'}}>
+    return (<div style={{
+          display: 'flex',
+          flexDirection: 'column',
+          minHeight: '100vh',
+        }}>
+          <div style={{flexGrow: 1}}/>
+          <div style={{width: '100vw'}}>
             <Stepper style={{maxWidth: 480, margin: 'auto'}}
                      activeStep={currentStep} orientation="vertical">
               {steps.map((step, index) => (
@@ -296,7 +301,7 @@ export default class Loading extends React.Component {
                   onChangeMenuClose={this.handleCloseChangeMachine}/>}
           {showFileCleaner && <FileCleaner sessionID={sessionId}
                                            onClose={this.handleCloseFileCleaner}/>}
-        </>
+        </div>
 
     );
   }
