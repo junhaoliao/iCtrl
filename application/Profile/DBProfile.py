@@ -263,7 +263,7 @@ class DBProfile(Profile):
             if conn is not None:
                 key_file_obj = StringIO()
                 status, reason = conn.save_keys(key_file_obj=key_file_obj,
-                                                public_key_comment=f'{session.id.replace("-", "")}')
+                                                public_key_comment=f'{session.id.hex}')
                 if not status:
                     self.db.session.delete(session)
                     return status, reason
