@@ -256,18 +256,22 @@ class DBProfile(Profile):
         try:
             session = self.Session(id=uuid.uuid4(), user=user, host=host, username=username)
 
+            # commit to db first so that session.id can be read
+            self.db.session.add(session)
+            self.save_profile()
+
             if conn is not None:
                 key_file_obj = StringIO()
                 status, reason = conn.save_keys(key_file_obj=key_file_obj,
-                                                public_key_comment=f'icrtl-session.id')
+                                                public_key_comment=f'{session.id.replace("-", "")}')
                 if not status:
+                    self.db.session.delete(session)
                     return status, reason
 
                 clear_private_key = key_file_obj.getvalue().encode('ascii')
                 f = Fernet(flask_session['session_crypt_key'])
                 session.private_key = f.encrypt(clear_private_key).decode('ascii')
 
-            self.db.session.add(session)
             self.save_profile()
         except AssertionError as e:
             abort(403, e)
