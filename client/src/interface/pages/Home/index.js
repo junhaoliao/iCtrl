@@ -308,10 +308,17 @@ export default class Home extends React.Component {
                 <br/>
 
                 <div style={{display: 'flex', justifyContent: 'center'}}>
-                  <Accordion style={{width: '30em'}}>
+                  <Accordion style={{width: '32em'}}>
                     <AccordionSummary expandIcon={<ExpandMore/>}>
+                      <div style={{display:'flex', flexGrow: 1, alignItems:'center'}}>
+                        <Typography sx={{marginLeft:'0.5em'}} fontWeight={'bold'}>
+                        Desktop Client
+                      </Typography>
+                        <Typography sx={{marginLeft:'1em'}} variant={'subtitle2'}>
+                        ⭐Recommended
+                      </Typography>
+                      </div>
                       <Tooltip
-                          sx={{flexGrow: 1}}
                           placement={'bottom-start'}
                           title={showPublishCount &&
                               this.downloadCountString('all platforms')}
@@ -320,20 +327,17 @@ export default class Home extends React.Component {
                               {
                                 name: 'offset',
                                 options: {
-                                  offset: [12, -15],
+                                  offset: [-2, -15],
                                 },
                               },
                             ],
                           }}
                       >
-                        <Typography fontWeight={'bold'}>
-                          1. Download Desktop Client
+                        <Typography
+                            sx={{marginRight: '8px', color: 'text.secondary'}}>
+                          Total downloads: {totalDownloadCount}
                         </Typography>
                       </Tooltip>
-                      {(totalDownloadCount !== 0) && <Typography
-                          sx={{marginRight: '8px', color: 'text.secondary'}}>
-                        Total downloads: {totalDownloadCount}
-                      </Typography>}
                     </AccordionSummary>
                     <AccordionDetails>
                       <ToggleButtonGroup color={'info'}
@@ -395,7 +399,7 @@ export default class Home extends React.Component {
                 <Typography
                     align={'center'}
                     variant={'h6'}>
-                  2. Use iCtrl online 👉
+                  Use iCtrl online 👉
                 </Typography>
               </Box>
             </Hidden>
