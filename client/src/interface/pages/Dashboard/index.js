@@ -172,7 +172,7 @@ export default class Dashboard extends React.Component {
         </IconButton>;
     return (
         <>
-          <AppBar position="static" color={'primary'} id={'titlebar'}
+          <AppBar position="sticky" color={'primary'} id={'titlebar'}
                   onDoubleClick={this.handleDoubleClickAppBar}>
             <Toolbar>
               {platform === 'darwin' &&
