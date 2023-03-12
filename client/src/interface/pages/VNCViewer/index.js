@@ -20,37 +20,46 @@
  *  IN THE SOFTWARE.
  */
 
-import React from 'react';
-import {Backdrop, Box, Button, Typography} from '@mui/material';
+import React from "react";
+import {
+  Backdrop,
+  Box,
+  Button,
+  Typography,
+  IconButton,
+  Popover,
+} from "@mui/material";
+import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
 
-import './index.css';
-import Loading from '../../components/Loading';
-import {VNCSteps} from '../../components/Loading/steps';
-import VNCSpeedDial from './VNCSpeedDial';
-import {focusOnKeyboard, vncConnect} from '../../../actions/vnc';
-import Toolbar from '../../components/Toolbar';
-import KeyTable from '@novnc/novnc/core/input/keysym';
-import {isIOS} from '../../../actions/utils';
-import {updateTitleAndIcon} from '../../../actions/common';
-import BackgroundLetterAvatar from '../../components/BackgroundLetterAvatar';
-import {COLOR_VNC_VIEWER} from '../../constants';
-import VNCAuthenticationDialog from './VNCAuthenticationDialog';
+import "./index.css";
+import Loading from "../../components/Loading";
+import { VNCSteps } from "../../components/Loading/steps";
+import VNCSpeedDial from "./VNCSpeedDial";
+import { focusOnKeyboard, vncConnect } from "../../../actions/vnc";
+import Toolbar from "../../components/Toolbar";
+import KeyTable from "@novnc/novnc/core/input/keysym";
+import { isIOS } from "../../../actions/utils";
+import { updateTitleAndIcon } from "../../../actions/common";
+import BackgroundLetterAvatar from "../../components/BackgroundLetterAvatar";
+import { COLOR_VNC_VIEWER } from "../../constants";
+import VNCAuthenticationDialog from "./VNCAuthenticationDialog";
 
 export default class VNCViewer extends React.Component {
   constructor(props) {
     super(props);
 
-    this.feature = document.title = 'VNC';
+    this.feature = document.title = "VNC";
 
     const {
-      match: {params},
+      match: { params },
     } = props;
 
     this.session_id = params.session_id;
-    this.loadCheck = new URLSearchParams(window.location.search).get(
-        'load-check') !== 'false';
-    this.loadCredentials = new URLSearchParams(window.location.search).get(
-        'load-credentials') !== 'false';
+    this.loadCheck =
+      new URLSearchParams(window.location.search).get("load-check") !== "false";
+    this.loadCredentials =
+      new URLSearchParams(window.location.search).get("load-credentials") !==
+      "false";
 
     this.rfb = null;
     this.lastKeyboardinput = null;
@@ -61,7 +70,7 @@ export default class VNCViewer extends React.Component {
     this.sendCredentials = null;
 
     this.state = {
-      sessionNickname: '',
+      sessionNickname: "",
       disconnected: false,
       resetting: false,
       loading: true,
@@ -74,16 +83,17 @@ export default class VNCViewer extends React.Component {
       quotaExceeded: false,
       fabMoving: false,
       authTypes: null,
+      anchorEl: null,
     };
   }
 
   keyboardInputReset = () => {
-    this.keyboardElem.value = new Array(100).join('_');
+    this.keyboardElem.value = new Array(100).join("_");
     this.lastKeyboardinput = this.keyboardElem.value;
   };
 
   handleSpeedDialOpen = (ev) => {
-    if (ev.type === 'mouseenter') {
+    if (ev.type === "mouseenter") {
       return;
     }
 
@@ -100,8 +110,10 @@ export default class VNCViewer extends React.Component {
   };
 
   handleSpeedDialClose = (ev) => {
-    if (ev.type === 'mouseleave' ||
-        (new Date().getTime() - this.speedDialOpenTime) < 200) {
+    if (
+      ev.type === "mouseleave" ||
+      new Date().getTime() - this.speedDialOpenTime < 200
+    ) {
       return;
     }
 
@@ -118,42 +130,42 @@ export default class VNCViewer extends React.Component {
 
   handleToolbarSendKey = (key, down) => {
     switch (key) {
-      case 'Ctrl':
-        this.rfb.sendKey(KeyTable.XK_Control_L, 'ControlLeft', down);
+      case "Ctrl":
+        this.rfb.sendKey(KeyTable.XK_Control_L, "ControlLeft", down);
         break;
-      case 'Alt':
-        this.rfb.sendKey(KeyTable.XK_Alt_L, 'AltLeft', down);
+      case "Alt":
+        this.rfb.sendKey(KeyTable.XK_Alt_L, "AltLeft", down);
         break;
-      case 'Shift':
-        this.rfb.sendKey(KeyTable.XK_Shift_L, 'ShiftLeft', down);
+      case "Shift":
+        this.rfb.sendKey(KeyTable.XK_Shift_L, "ShiftLeft", down);
         this.shiftKeyDown = down;
         break;
-      case '⌘':
-        this.rfb.sendKey(KeyTable.XK_Super_L, 'MetaLeft', down);
+      case "⌘":
+        this.rfb.sendKey(KeyTable.XK_Super_L, "MetaLeft", down);
         break;
-      case 'Tab':
-        this.rfb.sendKey(KeyTable.XK_Tab, 'Tab');
+      case "Tab":
+        this.rfb.sendKey(KeyTable.XK_Tab, "Tab");
         break;
-      case 'Esc':
-        this.rfb.sendKey(KeyTable.XK_Escape, 'Escape');
+      case "Esc":
+        this.rfb.sendKey(KeyTable.XK_Escape, "Escape");
         break;
-      case 'Delete':
-        this.rfb.sendKey(KeyTable.XK_Delete, 'Delete');
+      case "Delete":
+        this.rfb.sendKey(KeyTable.XK_Delete, "Delete");
         break;
-      case '▲':
-        this.rfb.sendKey(KeyTable.XK_Up, 'ArrowUp');
+      case "▲":
+        this.rfb.sendKey(KeyTable.XK_Up, "ArrowUp");
         break;
-      case '▼':
-        this.rfb.sendKey(KeyTable.XK_Down, 'ArrowDown');
+      case "▼":
+        this.rfb.sendKey(KeyTable.XK_Down, "ArrowDown");
         break;
-      case '◀':
-        this.rfb.sendKey(KeyTable.XK_Left, 'ArrowLeft');
+      case "◀":
+        this.rfb.sendKey(KeyTable.XK_Left, "ArrowLeft");
         break;
-      case '▶':
-        this.rfb.sendKey(KeyTable.XK_Right, 'ArrowRight');
+      case "▶":
+        this.rfb.sendKey(KeyTable.XK_Right, "ArrowRight");
         break;
       default:
-        console.log('Unexpected key pressed.');
+        console.log("Unexpected key pressed.");
     }
     focusOnKeyboard();
   };
@@ -176,12 +188,24 @@ export default class VNCViewer extends React.Component {
     });
 
     // on iOS: disable on screen keyboard
-    const canvas = document.getElementById(
-        'screen').lastElementChild.firstElementChild;
-    canvas.setAttribute('contenteditable', 'false');
+    const canvas =
+      document.getElementById("screen").lastElementChild.firstElementChild;
+    canvas.setAttribute("contenteditable", "false");
 
     // on Android browsers: once the screen receive focus, the virtual keyboard will disappear
     this.rfb.focus();
+  };
+
+  handleClick = (event) => {
+    this.setState({
+      anchorEl: event.currentTarget,
+    });
+  };
+
+  handleClose = () => {
+    this.setState({
+      anchorEl: null,
+    });
   };
 
   reloadPage = () => {
@@ -215,94 +239,146 @@ export default class VNCViewer extends React.Component {
       quotaExceeded,
       fabMoving,
       authTypes,
+      anchorEl,
     } = this.state;
 
     if (!resetting && disconnected) {
-      return <Box height={'100vh'}
-                  display={'flex'}
-                  flexDirection={'column'}
-                  justifyContent={'center'}>
-        <Typography variant={'h6'} align={'center'}>
-          The VNC connection has been disconnected. Do you wish to reconnect?
-        </Typography>
-        <br/>
-        <Button
+      return (
+        <Box
+          height={"100vh"}
+          display={"flex"}
+          flexDirection={"column"}
+          justifyContent={"center"}
+        >
+          <Typography variant={"h6"} align={"center"}>
+            The VNC connection has been disconnected. Do you wish to reconnect?
+            {window.requir && (
+              <>
+                <IconButton
+                  aria-label="delete"
+                  size="small"
+                  onClick={this.handleClick}
+                >
+                  <HelpOutlineIcon />
+                </IconButton>
+                <Popover
+                  anchorEl={anchorEl}
+                  open={anchorEl == null ? false : true}
+                  style={{ width: "80%" }}
+                  onClose={this.handleClose}
+                  id={this.anchorEl == null ? "simple-popover" : undefined}
+                  anchorOrigin={{
+                    vertical: "bottom",
+                    horizontal: "left",
+                  }}
+                >
+                  {" "}
+                  <Typography sx={{ p: 2 }}>
+                    If you keep seeing this message repeatedly, firewalls on
+                    your computer might have mistakenly blocked iCtrl from
+                    establishing new connections. Please consider rebooting your
+                    computer after saving all your work, and iCtrl should start
+                    working again at the next boot.{" "}
+                  </Typography>
+                </Popover>
+              </>
+            )}
+          </Typography>
+          <br />
+          <Button
             onClick={this.reloadPage}
-            style={{width: '8em', alignSelf: 'center'}}
-            size={'small'}
-            variant={'outlined'}>
-          Reconnect
-        </Button>
-      </Box>;
+            style={{ width: "8em", alignSelf: "center" }}
+            size={"small"}
+            variant={"outlined"}
+          >
+            Reconnect
+          </Button>
+        </Box>
+      );
     }
 
-    return (<div>
-          <Backdrop id={'speed-dial-backdrop'} open={speedDialOpen}/>
-          {showFab && !loading &&
-              <VNCSpeedDial
-                  session_id={this.session_id}
-                  rfb={this.rfb}
-                  speedDialOpen={speedDialOpen && !fabMoving}
-                  onVNCReset={this.handleVNCReset}
-                  onSpeedDialClose={this.handleSpeedDialClose}
-                  onSpeedDialOpen={this.handleSpeedDialOpen}
-                  closeSpeedDial={this.closeSpeedDial}
-                  onToolbarOpen={this.handleToolbarOpen}
-                  onFabMoveStart={() => {
-                    this.setState({
-                      fabMoving: true,
-                    });
-                  }}
-                  onFabMoveEnd={() => {
-                    this.setState({
-                      fabMoving: false,
-                    });
-                  }}
-                  onFabHide={this.handleFabHide}/>
-          }
+    return (
+      <div>
+        <Backdrop id={"speed-dial-backdrop"} open={speedDialOpen} />
+        {showFab && !loading && (
+          <VNCSpeedDial
+            session_id={this.session_id}
+            rfb={this.rfb}
+            speedDialOpen={speedDialOpen && !fabMoving}
+            onVNCReset={this.handleVNCReset}
+            onSpeedDialClose={this.handleSpeedDialClose}
+            onSpeedDialOpen={this.handleSpeedDialOpen}
+            closeSpeedDial={this.closeSpeedDial}
+            onToolbarOpen={this.handleToolbarOpen}
+            onFabMoveStart={() => {
+              this.setState({
+                fabMoving: true,
+              });
+            }}
+            onFabMoveEnd={() => {
+              this.setState({
+                fabMoving: false,
+              });
+            }}
+            onFabHide={this.handleFabHide}
+          />
+        )}
 
-          {loading &&
-              <Loading
-                  sessionId={this.session_id}
-                  currentStep={currentStep}
-                  steps={VNCSteps}
-                  authentication={authentication}
-                  isOverloaded={isOverloaded}
-                  quotaExceeded={quotaExceeded}
-              />
-          }
+        {loading && (
+          <Loading
+            sessionId={this.session_id}
+            currentStep={currentStep}
+            steps={VNCSteps}
+            authentication={authentication}
+            isOverloaded={isOverloaded}
+            quotaExceeded={quotaExceeded}
+          />
+        )}
 
-          <div style={{display: loading && 'none'}} id={'screen'}
-               className={showToolbar ? 'screen-with-toolbar' : ''}>
-                    <textarea id={'textarea'} autoCapitalize="off"
-                              autoComplete="off" spellCheck="false"
-                              tabIndex="-1"
-                    />
-          </div>
+        <div
+          style={{ display: loading && "none" }}
+          id={"screen"}
+          className={showToolbar ? "screen-with-toolbar" : ""}
+        >
+          <textarea
+            id={"textarea"}
+            autoCapitalize="off"
+            autoComplete="off"
+            spellCheck="false"
+            tabIndex="-1"
+          />
+        </div>
 
-          {showToolbar &&
-              <Toolbar onToolbarSendKey={this.handleToolbarSendKey}
-                       onCtrlAltDelete={() => {
-                         this.rfb.sendCtrlAltDel();
-                       }}
-                       onToolbarHide={this.handleToolbarHide}/>}
+        {showToolbar && (
+          <Toolbar
+            onToolbarSendKey={this.handleToolbarSendKey}
+            onCtrlAltDelete={() => {
+              this.rfb.sendCtrlAltDel();
+            }}
+            onToolbarHide={this.handleToolbarHide}
+          />
+        )}
 
-          <VNCAuthenticationDialog types={authTypes}
-                                   vncViewer={this}/>
+        <VNCAuthenticationDialog types={authTypes} vncViewer={this} />
 
-          <div style={{position: 'absolute', top: 0, left: '-100px'}}
-               id={'offscreen-favicon'}>
-            <BackgroundLetterAvatar
-                name={sessionNickname}
-                badgeContent={<div style={{
-                  width: '20px',
-                  height: '20px',
+        <div
+          style={{ position: "absolute", top: 0, left: "-100px" }}
+          id={"offscreen-favicon"}
+        >
+          <BackgroundLetterAvatar
+            name={sessionNickname}
+            badgeContent={
+              <div
+                style={{
+                  width: "20px",
+                  height: "20px",
                   backgroundColor: COLOR_VNC_VIEWER,
                 }}
-                />}
-            />
-          </div>
+              />
+            }
+          />
         </div>
+      </div>
     );
   }
 }
