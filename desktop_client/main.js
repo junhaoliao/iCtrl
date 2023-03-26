@@ -238,9 +238,15 @@ const createDashboardWindow = () => {
       newWindow.setAppDetails({
         appId: url,
       });
+
       ipcMain.once('set-icon', (_, dataURL) => {
         setupNewWindowIcon(newWindow, dataURL);
       });
+      newWindow.once('close', ()=>{
+        // stop listening in case the set-icon request is not consumed before newWindow is closed,
+        //  causing later set-icon requests in new newWindow to be routed to the already destroyed window
+        ipcMain.removeAllListeners('set-icon');
+      })
     }
     newWindow.show();
     newWindow.maximize();
