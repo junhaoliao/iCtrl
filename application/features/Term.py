@@ -121,12 +121,12 @@ if not app.debug or os.environ.get("WERKZEUG_RUN_MAIN") == "true":
 
     if os.environ.get('SSL_CERT_PATH') is None:
         # no certificate provided, generate self-signing certificate
-        terminal_server = SimpleSSLWebSocketServer('', TERMINAL_PORT, TermWebSocket,
+        terminal_server = SimpleSSLWebSocketServer('127.0.0.1', TERMINAL_PORT, TermWebSocket,
                                                    ssl_context=generate_adhoc_ssl_context())
     else:
         import ssl
 
-        terminal_server = SimpleSSLWebSocketServer('', TERMINAL_PORT, TermWebSocket,
+        terminal_server = SimpleSSLWebSocketServer('0.0.0.0', TERMINAL_PORT, TermWebSocket,
                                                    certfile=os.environ.get('SSL_CERT_PATH'),
                                                    keyfile=os.environ.get('SSL_KEY_PATH'),
                                                    version=ssl.PROTOCOL_TLS)

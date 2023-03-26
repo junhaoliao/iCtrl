@@ -170,12 +170,12 @@ if not app.debug or os.environ.get("WERKZEUG_RUN_MAIN") == "true":
 
     if os.environ.get('SSL_CERT_PATH') is None:
         # no certificate provided, generate self-signing certificate
-        audio_server = SimpleSSLWebSocketServer('', AUDIO_PORT, AudioWebSocket,
+        audio_server = SimpleSSLWebSocketServer('127.0.0.1', AUDIO_PORT, AudioWebSocket,
                                                 ssl_context=generate_adhoc_ssl_context())
     else:
         import ssl
 
-        audio_server = SimpleSSLWebSocketServer('', AUDIO_PORT, AudioWebSocket,
+        audio_server = SimpleSSLWebSocketServer('0.0.0.0', AUDIO_PORT, AudioWebSocket,
                                                 certfile=os.environ.get('SSL_CERT_PATH'),
                                                 keyfile=os.environ.get('SSL_KEY_PATH'),
                                                 version=ssl.PROTOCOL_TLS)
