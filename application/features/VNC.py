@@ -1,4 +1,4 @@
-#  Copyright (c) 2021-2022 iCtrl Developers
+#  Copyright (c) 2021-2023 iCtrl Developers
 # 
 #  Permission is hereby granted, free of charge, to any person obtaining a copy
 #   of this software and associated documentation files (the "Software"), to
@@ -78,7 +78,7 @@ class VNC(Connection):
 
         if result == '':
             # possibly using mac
-            _, _, stdout, _ = self.exec_command_blocking('netstat -an | grep LISTEN | grep .5900')
+            _, _, stdout, _ = self.exec_command_blocking('netstat -an | grep LISTEN | grep "\.5900"')
             result = stdout.readline()
 
         return result != ''
