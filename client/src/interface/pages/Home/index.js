@@ -1,6 +1,5 @@
 /*
- * Copyright (c) 2021-2022 iCtrl Developers
- *
+ * Copyright (c) 2021-2023 iCtrl Developers
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  *  of this software and associated documentation files (the "Software"), to
  *  deal in the Software without restriction, including without limitation the
@@ -54,14 +53,6 @@ import InfoIcon from '@mui/icons-material/Info';
 import ICtrlVoiceButton
   from '../../components/iCtrlVoiceButton/iCtrlVoiceButton';
 import {ExpandMore} from '@mui/icons-material';
-
-const ElcanoIcon = (props) => (<img
-        alt={'elcano-icon'}
-        width={props.size || 32}
-        height={props.size || 32}
-        src={'http://elcano.ictrl.ca/favicon.ico'}
-    />
-);
 
 export default class Home extends React.Component {
   constructor(props) {
@@ -242,19 +233,6 @@ export default class Home extends React.Component {
                 iCtrl
               </Typography>
 
-              <Tooltip title="Magellan didn't circle the globe. Elcano did."
-                       style={{marginRight: '6px'}}>
-                <Button
-                    sx={{padding: '2px', minWidth: 0, backgroundColor: 'white'}}
-                    color={'inherit'}
-                    variant={'contained'}
-                    href={'http://elcano.ictrl.ca'}
-                    target="_blank" rel={'noopener noreferrer'}
-                    size={'large'}>
-                  <ElcanoIcon/>
-                </Button>
-              </Tooltip>
-
               <Tooltip title="About iCtrl" style={{marginRight: '8px'}}>
                 <IconButton onClick={this.handleAboutOpen} size={'large'}>
                   <InfoIcon style={{color: 'white'}} fontSize="large"/>
@@ -433,25 +411,6 @@ export default class Home extends React.Component {
               </DialogContentText>
             </DialogContent>
             <DialogActions>
-              <Tooltip title={'Magellan didn\'t circle the globe. Elcano did.'}>
-                <Button
-                    sx={{
-                      height: '28px',
-                      backgroundColor: 'rgb(50,62,102)',
-                      '&:hover': {
-                        backgroundColor: 'rgba(50,62,102,0.75)',
-                      },
-                      textTransform: 'none',
-                    }}
-                    variant={'contained'} size={'small'}
-                    href={'http://elcano.ictrl.ca'}
-                    target="_blank" rel={'noopener noreferrer'}
-                    startIcon={<ElcanoIcon size={20}/>}
-                >
-                  Try Elcano
-                </Button>
-              </Tooltip>
-
               <div style={{marginLeft: '12px', height: '28px'}}>
                 <GitHubButton href="https://github.com/junhaoliao/iCtrl"
                               data-size="large" data-show-count="true"
