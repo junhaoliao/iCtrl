@@ -73,12 +73,12 @@ class VNC(Connection):
             return True, decrypt_passwd(bytearray.fromhex(hexdump))
 
     def check_5900_open(self):
-        _, _, stdout, _ = self.exec_command_blocking('ss -tulpn | grep LISTEN | grep :5900')
+        _, _, stdout, _ = self.exec_command_blocking('ss -tulpn | grep LISTEN | grep ":5900 "')
         result = stdout.readline()
 
         if result == '':
             # possibly using mac
-            _, _, stdout, _ = self.exec_command_blocking('netstat -an | grep LISTEN | grep "\.5900"')
+            _, _, stdout, _ = self.exec_command_blocking('netstat -an | grep LISTEN | grep "\.5900 "')
             result = stdout.readline()
 
         return result != ''
