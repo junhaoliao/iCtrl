@@ -1,5 +1,5 @@
 XSTARTUP_STR = "\\n".join([
-    "#\!/bin/sh",
+    "#!/bin/sh",
 
     "xrdb $HOME/.Xresources || true",
 
