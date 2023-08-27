@@ -2,6 +2,9 @@
 
 **SSH Remote Web Service / Desktop Client** (Previously known as **UG_Remote**)
 
+
+[![Download Stats](https://img.shields.io/github/downloads/junhaoliao/iCtrl/total)]()
+
 ## Build Status
 | Platform | Status |
 | --- | --- |
