@@ -27,7 +27,6 @@ import {
   AccordionSummary,
   AppBar,
   Box,
-  Button,
   Dialog,
   DialogActions,
   DialogContent,
@@ -53,6 +52,7 @@ import InfoIcon from '@mui/icons-material/Info';
 import ICtrlVoiceButton
   from '../../components/iCtrlVoiceButton/iCtrlVoiceButton';
 import {ExpandMore} from '@mui/icons-material';
+import {IPv6Icon} from '../../../icons';
 
 export default class Home extends React.Component {
   constructor(props) {
@@ -288,13 +288,19 @@ export default class Home extends React.Component {
                 <div style={{display: 'flex', justifyContent: 'center'}}>
                   <Accordion style={{width: '32em'}}>
                     <AccordionSummary expandIcon={<ExpandMore/>}>
-                      <div style={{display:'flex', flexGrow: 1, alignItems:'center'}}>
-                        <Typography sx={{marginLeft:'0.5em'}} fontWeight={'bold'}>
-                        Desktop Client
-                      </Typography>
-                        <Typography sx={{marginLeft:'1em'}} variant={'subtitle2'}>
-                        ⭐Recommended
-                      </Typography>
+                      <div style={{
+                        display: 'flex',
+                        flexGrow: 1,
+                        alignItems: 'center',
+                      }}>
+                        <Typography sx={{marginLeft: '0.5em'}}
+                                    fontWeight={'bold'}>
+                          Desktop Client
+                        </Typography>
+                        <Typography sx={{marginLeft: '1em'}}
+                                    variant={'subtitle2'}>
+                          ⭐Recommended
+                        </Typography>
                       </div>
                       <Tooltip
                           placement={'bottom-start'}
@@ -375,9 +381,20 @@ export default class Home extends React.Component {
                 </Typography>
 
                 <Typography
+                    sx={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    }}
                     align={'center'}
                     variant={'h6'}>
-                  Use iCtrl online (Now IPv6 enabled!!) 👉
+                  Use iCtrl online <Tooltip title="IPv6 Enabled">
+                  <IconButton size={'small'}
+                              href={'https://www.worldipv6launch.org/'}>
+                    <IPv6Icon/>
+                  </IconButton>
+                </Tooltip>
+                  👉
                 </Typography>
               </Box>
             </Hidden>
