@@ -3,9 +3,7 @@
 **SSH Remote Web Service / Desktop Client** (Previously known as **UG_Remote**)
 
 
- <a href="#">
-    <img src="https://img.shields.io/github/downloads/junhaoliao/iCtrl/total" alt="Downloads">
-  </a>
+[![Download Stats](https://img.shields.io/github/downloads/junhaoliao/iCtrl/total)]()
 
 ## Build Status
 | Platform | Status |
