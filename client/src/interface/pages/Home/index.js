@@ -377,7 +377,7 @@ export default class Home extends React.Component {
                 <Typography
                     align={'center'}
                     variant={'h6'}>
-                  Use iCtrl online 👉
+                  Use iCtrl online (Now IPv6 enabled!!) 👉
                 </Typography>
               </Box>
             </Hidden>
