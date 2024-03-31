@@ -44,7 +44,7 @@ The tool is provided in two variants: a web service and a desktop client. You ca
 3. i. On a Mac computer, you can open the DMG file and drag the app into the "Application" folder. Then you can find the installed app in LaunchPad or "Applications" in Finder. \
    ii. On a Windows computer, the installer download might be blocked. Check your browser settings and click on "Keep Anyways" to download the installer. Once the download is finished, double click on the installer, and the app will be installed in your user directory. You can find the installed app in the Start Menu. 
 
-### Option II. Web Service
+### Option II. Web Service (Not available as of Sepetemeber 30, 2023)
 1. Go to https://ictrl.ca
 2. Under the "Sign Up" tab, register an account with Uoft email
 3. Verify your account by checking your [Uoft email inbox](https://mail.utoronto.ca)
