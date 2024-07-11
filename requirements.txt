@@ -5,7 +5,7 @@ bcrypt==3.2.0; sys_platform == 'linux'
 cryptography==39.0.1
 cachetools==5.0.0; sys_platform == 'linux'
 SQLAlchemy==1.4.36; sys_platform == 'linux'
-pyinstaller==5.8.0
+pyinstaller==5.13.2
 Flask==2.2.2
 Flask-SQLAlchemy==2.5.1; sys_platform == 'linux'
 Werkzeug==2.2.2
