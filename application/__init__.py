@@ -17,12 +17,21 @@
 #   LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 #   FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 #   IN THE SOFTWARE.
-
+import logging.config
+import yaml
 import os
 import sys
+import logging_utils
 
 from flask import Flask, Blueprint
 from werkzeug.serving import WSGIRequestHandler
+
+with open('logging_default_config.yaml', 'rt') as config_file:
+    config = yaml.safe_load(config_file.read())
+
+logging.config.dictConfig(config)
+logger = logging.getLogger(__file__)
+logger.debug("successfully set up logger")
 
 from .Profile.Profile import Profile
 
@@ -54,9 +63,11 @@ APP_HOST = '127.0.0.1'
 profiles: Profile
 if os.getenv('DBADDR') is not None:
     from .Profile.DBProfile import DBProfile
+
     profiles = DBProfile(app)
 else:
     from .Profile.LocalProfile import LocalProfile
+
     profiles = LocalProfile()
 
 api = Blueprint('api', __name__)
