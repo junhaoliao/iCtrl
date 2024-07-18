@@ -21,7 +21,6 @@ import logging.config
 import yaml
 import os
 import sys
-import logging_utils
 
 from flask import Flask, Blueprint
 from werkzeug.serving import WSGIRequestHandler
