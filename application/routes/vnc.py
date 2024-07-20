@@ -98,7 +98,6 @@ def start_vnc():
 
 @api.route('/vncpasswd', methods=['POST'])
 def change_vncpasswd():
-    logger.debug("in route /vncpasswd")
     session_id = request.json.get('session_id')
 
     vnc, reason = create_connection(session_id, ConnectionType.VNC)

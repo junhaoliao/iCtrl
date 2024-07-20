@@ -68,10 +68,8 @@ class VNC(Connection):
         return super().connect(*args, **kwargs)
 
     def get_vnc_password(self):
-        # return True, "123456"
         _, _, stdout, _ = self.exec_command_blocking("hexdump --format '16/1 \"%02x\"' ~/.vnc/passwd")
         hexdump = stdout.readline().rstrip()
-        logger.info(f"hexdump = {hexdump}")
         if hexdump == '':
             return False, ''
         else:
@@ -101,8 +99,6 @@ class VNC(Connection):
         return True, ''
 
     def reset_vnc_password(self, password):
-        # hexed_passwd = obfuscate_password(password).hex()
-
         reset_cmd_lst = [
             # killall -q: don't complain if no process found
             #         -w: wait until the processes to die then continue to the next cmd
@@ -137,7 +133,6 @@ class VNC(Connection):
         return True, ''
 
     def launch_vnc(self):
-        logger.debug("launch_vnc")
         ports_by_me = []
         _, _, stdout, _ = self.exec_command_blocking('vncserver -list')
         for line in stdout:
