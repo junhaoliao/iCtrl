@@ -26,7 +26,8 @@ from .common import create_connection
 from .. import api, app, profiles
 from ..codes import ICtrlStep, ICtrlError, ConnectionType
 from ..utils import int_to_bytes
-
+import logging
+logger = logging.getLogger(__name__)
 
 @api.route('/vnc', methods=['POST'])
 def start_vnc():
@@ -97,15 +98,19 @@ def start_vnc():
 
 @api.route('/vncpasswd', methods=['POST'])
 def change_vncpasswd():
+    logger.debug("in route /vncpasswd")
     session_id = request.json.get('session_id')
 
     vnc, reason = create_connection(session_id, ConnectionType.VNC)
     if reason != '':
+        logger.error("create_connection() failed with status=", status)
         abort(403, description=reason)
 
     passwd = request.json.get('passwd')
     status, reason = vnc.reset_vnc_password(passwd)
+
     if not status:
+        logger.error("reset_vnc_password() failed with status=%s", reason)
         abort(403, description=reason)
 
     return 'success'
