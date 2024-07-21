@@ -1,4 +1,4 @@
-#  Copyright (c) 2021-2022 iCtrl Developers
+#  Copyright (c) 2021-2024 iCtrl Developers
 # 
 #  Permission is hereby granted, free of charge, to any person obtaining a copy
 #   of this software and associated documentation files (the "Software"), to
@@ -25,12 +25,15 @@ import sys
 from flask import Flask, Blueprint
 from werkzeug.serving import WSGIRequestHandler
 
-with open('logging_default_config.yaml', 'rt') as config_file:
-    config = yaml.safe_load(config_file.read())
+try:
+    with open('log_config.yaml', 'r') as config_file:
+        config = yaml.safe_load(config_file.read())
+    logging.config.dictConfig(config)
+except Exception as ex:
+    print("Logging setup failed with exception = ", ex)
 
-logging.config.dictConfig(config)
-logger = logging.getLogger(__file__)
-logger.debug("successfully set up logger")
+logger = logging.getLogger(__name__)
+logger.warning(f"Logging is set up with config={config}")
 
 from .Profile.Profile import Profile
 
