@@ -29,7 +29,7 @@ import {VNCSteps} from '../../components/Loading/steps';
 import VNCSpeedDial from './VNCSpeedDial';
 import {focusOnKeyboard, vncConnect} from '../../../actions/vnc';
 import Toolbar from '../../components/Toolbar';
-import KeyTable from '@novnc/novnc/core/input/keysym';
+import KeyTable from '@novnc/novnc/lib/input/keysym';
 import {isIOS} from '../../../actions/utils';
 import {updateTitleAndIcon} from '../../../actions/common';
 import BackgroundLetterAvatar from '../../components/BackgroundLetterAvatar';
