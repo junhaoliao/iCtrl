@@ -18,10 +18,10 @@
 #   FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 #   IN THE SOFTWARE.
 import logging.config
-import yaml
 import os
 import sys
 
+import yaml
 from flask import Flask, Blueprint
 from werkzeug.serving import WSGIRequestHandler
 
