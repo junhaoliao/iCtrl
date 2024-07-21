@@ -18,15 +18,14 @@
 #   FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 #   IN THE SOFTWARE.
 
+import logging
 import os
 import re
-import logging
 import threading
 
 from .Connection import Connection
 from .mywebsockify import MyProxyRequestHandler, MySSLProxyServer
-from .vncpasswd import decrypt_passwd, obfuscate_password
-from ..resources.xstartup import XSTARTUP_STR
+from .vncpasswd import decrypt_passwd
 from ..utils import find_free_port
 
 logger = logging.getLogger(__name__)
@@ -117,7 +116,6 @@ class VNC(Connection):
             "echo '%s'| vncpasswd -f > ~/.vnc/passwd" % password,
             "chmod 600 ~/.vnc/passwd",
         ]
-        logger.debug(f"reset_cmd_lst={reset_cmd_lst}")
         _, _, _, stderr = self.exec_command_blocking(';'.join(reset_cmd_lst))
         error_lines = []
         for line in stderr:
