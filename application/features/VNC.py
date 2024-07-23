@@ -18,15 +18,17 @@
 #   FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 #   IN THE SOFTWARE.
 
+import logging
 import os
 import re
 import threading
 
 from .Connection import Connection
 from .mywebsockify import MyProxyRequestHandler, MySSLProxyServer
-from .vncpasswd import decrypt_passwd, obfuscate_password
-from ..resources.xstartup import XSTARTUP_STR
+from .vncpasswd import decrypt_passwd
 from ..utils import find_free_port
+
+logger = logging.getLogger(__name__)
 
 
 def websocket_proxy_thread(local_websocket_port, local_vnc_port):
@@ -65,8 +67,8 @@ class VNC(Connection):
         return super().connect(*args, **kwargs)
 
     def get_vnc_password(self):
-        _, _, stdout, _ = self.exec_command_blocking('xxd -p ~/.vnc/passwd')
-        hexdump = stdout.readline()
+        _, _, stdout, _ = self.exec_command_blocking("hexdump --format '16/1 \"%02x\"' ~/.vnc/passwd")
+        hexdump = stdout.readline().rstrip()
         if hexdump == '':
             return False, ''
         else:
@@ -96,8 +98,6 @@ class VNC(Connection):
         return True, ''
 
     def reset_vnc_password(self, password):
-        hexed_passwd = obfuscate_password(password).hex()
-
         reset_cmd_lst = [
             # killall -q: don't complain if no process found
             #         -w: wait until the processes to die then continue to the next cmd
@@ -108,16 +108,19 @@ class VNC(Connection):
             "rm -rf ~/.vnc",
             "mkdir ~/.vnc",
 
-            f"printf '{XSTARTUP_STR}' > ~/.vnc/xstartup",
-            "cp /etc/vnc/xstartup ~/.vnc  >& /dev/null",
-            "chmod 700 ~/.vnc/xstartup",
+            # FIXME: re-enable xstartup config
+            # f"printf '{XSTARTUP_STR}' > ~/.vnc/xstartup",
+            # "cp /etc/vnc/xstartup ~/.vnc  >& /dev/null",
+            # "chmod 700 ~/.vnc/xstartup",
 
-            "echo '%s'| xxd -r -p > ~/.vnc/passwd" % hexed_passwd,
+            "echo '%s'| vncpasswd -f > ~/.vnc/passwd" % password,
             "chmod 600 ~/.vnc/passwd",
         ]
         _, _, _, stderr = self.exec_command_blocking(';'.join(reset_cmd_lst))
         error_lines = []
         for line in stderr:
+            logger.error("reset_vnc_password::exec_command_blocking stderr line: %s", line)
+
             if "Disk quota exceeded" in line:
                 return False, 'Disk quota exceeded'
             else:

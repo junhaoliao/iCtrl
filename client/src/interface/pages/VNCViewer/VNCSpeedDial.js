@@ -57,7 +57,7 @@ import './index.css';
 import {focusOnKeyboard} from '../../../actions/vnc';
 import axios from 'axios';
 import {launch_audio} from '../../../actions/audio';
-import RFB from '@novnc/novnc/core/rfb';
+import RFB from '@novnc/novnc/lib/rfb';
 import {IOSSwitch} from '../../components/IOSSwitch';
 import ResetVNCDialog from '../../components/ResetVNCDialog';
 
