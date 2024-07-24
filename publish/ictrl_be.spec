@@ -9,7 +9,7 @@ a = Analysis(['../ictrl_be.py'],
              pathex=['.'],
              binaries=[],
              datas=[('../client/build', './client'),
-                    ('../log_config.yaml', '..')]
+                    ('../log_config.yaml', '.')],
              hiddenimports=[],
              hookspath=[],
              hooksconfig={},
