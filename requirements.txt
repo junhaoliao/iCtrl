@@ -12,4 +12,5 @@ Werkzeug==2.2.2
 zipstream-new==1.1.8
 paramiko==3.0.0
 numpy==1.24.2
+pyyaml==6.0.1
 git+https://github.com/junhaoliao/simple-websocket-server#egg=SimpleWebSocketServer
