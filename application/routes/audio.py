@@ -40,21 +40,21 @@ import application
 @api.route('/audio', methods=['POST'])
 def start_audio():
     #TODO: Request recieved with body
-    application.logger.debug("Received request to start audio with data: {}".format(request.json))
+    application.logger.debug("Audio: Received request to start audio with data: {}".format(request.json))
     session_id = request.json.get('session_id')
     audio, reason = create_connection(session_id, ConnectionType.AUDIO)
     if reason != '':
-        application.logger.warning("Failed to create audio connection: {}".format(reason))
+        application.logger.warning("Audio: Failed to create audio connection: {}".format(reason))
         abort(403, description=reason)
 
     status, reason = audio.launch_audio()
     if status is False:
-        application.logger.error("Audio launch failed: {}".format(reason))
+        application.logger.error("Audio: Audio launch failed: {}".format(reason))
         abort(403, description=reason)
 
     result = {
         'port': AUDIO_PORT,
         'audio_id': audio.id
     }
-    application.logger.info("Audio launched successfully with ID {} on port {}".format(audio.id, AUDIO_PORT))
+    application.logger.info("Audio: Audio launched successfully with ID {} on port {}".format(audio.id, AUDIO_PORT))
     return json.dumps(result)

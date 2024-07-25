@@ -21,14 +21,14 @@
 from flask import request, abort
 
 from .. import api, profiles
-
+import application
 
 # TODO: review the need to remove the argument readings from the APIs, once we finish debugging
 
 @api.route('/userid')
 def index():
     user = profiles.get_user()
-
+    application.logger.info(f"User: Fetching user ID for user: {user.id}")
     return f'{user.id}'
 
 
@@ -39,13 +39,17 @@ def register():
             username = request.args['username']
             password = request.args['password']
             email = request.args['email']
+            application.logger.debug(f"User: Received registration via GET for user: {username}")
         else:
             username = request.json['username']
             password = request.json['password']
             email = request.json['email']
+            application.logger.debug(f"User: Received registration via POST for user: {username}")
 
         profiles.add_user(username, password, email)
+        application.logger.info(f"User: User registered successfully: {username}")
     except KeyError as e:
+        application.logger.error(f"User: Registration failed, {e} is missing")
         abort(403, f'{e} is missing')
 
     return 'Registration Successful'
@@ -57,12 +61,16 @@ def login():
         if request.method == 'GET':
             username = request.args['username']
             password = request.args['password']
+            application.logger.debug(f"User: Received login via GET for user: {username}")
         else:
             username = request.json['username']
             password = request.json['password']
+            application.logger.debug(f"User: Received login via POST for user: {username}")
 
         profiles.login(username, password)
+        application.logger.info(f"User: User logged in successfully: {username}")
     except KeyError as e:
+        application.logger.error(f"User: Login failed, {e} is missing")
         abort(403, f'{e} is missing')
 
     return 'logged in'
@@ -71,7 +79,7 @@ def login():
 @api.route('/logout')
 def logout():
     profiles.logout()
-
+    application.logger.info("User: User logged out successfully")
     return f'logged out'
 
 
@@ -80,7 +88,9 @@ def resend():
     try:
         username = request.json['username']
         profiles.send_activation_email(username)
+        application.logger.info(f"User: Activation email resent to user: {username}")
     except KeyError as e:
+        application.logger.error(f"User: Resend activation failed, {e} is missing")
         abort(403, f'{e} is missing')
     return 'sent'
 
@@ -90,10 +100,12 @@ def activate():
     try:
         userid = request.args['userid']
         code = request.args['code']
-
+        application.logger.debug(f"User: Attempting to activate user: {userid}")
         if profiles.activate_user(userid, code):
+            application.logger.info(f"User: User activated successfully: {userid}")
             return 'Your account has been activated. '
     except KeyError as e:
+        application.logger.error(f"User: Activation failed, {e} is missing")
         abort(403, f'{e} is missing')
 
     return 'Failed to activate. ' \
