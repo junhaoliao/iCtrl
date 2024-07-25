@@ -27,12 +27,12 @@ from .Connection import Connection
 from .mywebsockify import MyProxyRequestHandler, MySSLProxyServer
 from .vncpasswd import decrypt_passwd
 from ..utils import find_free_port
-import application
+
+logger = logging.getLogger(__name__)
+
 
 def websocket_proxy_thread(local_websocket_port, local_vnc_port):
-    application.logger.debug("VNC: Start websocket proxy thread")
     if os.environ.get('SSL_CERT_PATH') is None:
-        application.logger.debug("VNC: SSL Certification Path not set. Initialize SSL Proxy Server.")
         proxy_server = MySSLProxyServer(RequestHandlerClass=MyProxyRequestHandler,
                                         listen_port=local_websocket_port, target_host='',
                                         target_port=local_vnc_port)
@@ -41,24 +41,16 @@ def websocket_proxy_thread(local_websocket_port, local_vnc_port):
         #  1st: first handshake: upgrade the HTTP request
         #  2nd: actually serve the ws connection
         for _ in range(2):
-            if _ == 0:
-                application.logger.debug("VNC: Handle HTTP request")
-            else:
-                application.logger.debug("VNC: Handle WebSocket connection")
             proxy_server.handle_request()
-        application.logger.debug("VNC: Close SSL Proxy Server")
         proxy_server.server_close()
     else:
-        application.logger.debug("VNC: SSL Certification Path exists")
         import subprocess
 
-        application.logger.debug(f"VNC: Run websockify on websocket port {local_websocket_port} and vncport {local_vnc_port}")
         subprocess.run(["/var/www/ictrl/application/websockify-other/c/websockify",
                         f'{local_websocket_port}', f':{local_vnc_port}',
                         '--run-once', '--ssl-only',
                         '--cert', os.environ.get('SSL_CERT_PATH'),
                         '--key', os.environ.get('SSL_KEY_PATH')])
-    application.logger.debug("VNC: End websocket proxy thread")
 
 
 class VNC(Connection):
@@ -72,14 +64,12 @@ class VNC(Connection):
         super().__del__()
 
     def connect(self, *args, **kwargs):
-        application.logger.debug("VNC: Establishing VNC connection")
         return super().connect(*args, **kwargs)
 
     def get_vnc_password(self):
         _, _, stdout, _ = self.exec_command_blocking("hexdump --format '16/1 \"%02x\"' ~/.vnc/passwd")
         hexdump = stdout.readline().rstrip()
         if hexdump == '':
-            application.logger.warning("VNC: VNC Password is empty")
             return False, ''
         else:
             return True, decrypt_passwd(bytearray.fromhex(hexdump))
@@ -103,7 +93,6 @@ class VNC(Connection):
         _, _, _, stderr = self.exec_command_blocking(';'.join(remove_cmd_lst))
         stderr_text = "\n".join(stderr)
         if len(stderr_text):
-            application.logger.warning(f"VNC: Error removing VNC settings: {stderr_text}")
             return False, stderr_text
 
         return True, ''
@@ -130,7 +119,7 @@ class VNC(Connection):
         _, _, _, stderr = self.exec_command_blocking(';'.join(reset_cmd_lst))
         error_lines = []
         for line in stderr:
-            application.logger.warning("VNC: Error resetting VNC password: %s", line)
+            logger.error("reset_vnc_password::exec_command_blocking stderr line: %s", line)
 
             if "Disk quota exceeded" in line:
                 return False, 'Disk quota exceeded'
@@ -144,15 +133,12 @@ class VNC(Connection):
     def launch_vnc(self):
         ports_by_me = []
         _, _, stdout, _ = self.exec_command_blocking('vncserver -list')
-        application.logger.debug("VNC: Listing vnc servers")
         for line in stdout:
             if 'stale' not in line:
                 # if the server was improperly terminated, the status is 'stale'
                 this_port_by_me = re.findall(r'\d+', line)
                 if len(this_port_by_me) != 0:
                     ports_by_me.append(this_port_by_me[0])
-            if line.strip() != "":
-                application.logger.debug("VNC: VNC server list output: %s", line.strip())
 
         # FIXME: handle disk quota issue when launching vncserver
         relaunch = False
@@ -162,13 +148,11 @@ class VNC(Connection):
             'vncserver'
         ]
         if len(ports_by_me) > 1 or len(ports_by_me) == 0:
-            application.logger.debug("VNC: Relaunch VNC servers")
             # TODO: might recover the valid ones
             # more than one VNC servers are listening and therefore all killed above to prevent unexpected results
             _, _, stdout, stderr = self.exec_command_blocking(';'.join(relaunch_cmd_list))
             stderr_lines = "".join(stderr.readlines())
             if len(stderr_lines) != 0:
-                application.logger.warning("VNC: Error relaunching VNC servers: %s", stderr_lines)
                 if 'quota' in stderr_lines:
                     return False, 'QUOTA'
                 else:
@@ -185,7 +169,6 @@ class VNC(Connection):
                 if match:
                     vnc_port = int(match.group(1))
                     break
-        application.logger.debug("VNC: VNC port: %s", vnc_port)
 
         # FIXME: use a better condition than is_eecg
         """
@@ -201,8 +184,7 @@ class VNC(Connection):
     def create_tunnel(self, remote_port):
         local_vnc_port = find_free_port()
         local_websocket_port = find_free_port()
-        application.logger.debug(f"VNC: Local VNC Port is {local_vnc_port}")
-        application.logger.debug(f"VNC: Local Web Socket Port is {local_websocket_port}")
+
         self.port_forward(local_vnc_port, remote_port)
 
         proxy_thread = threading.Thread(target=websocket_proxy_thread,

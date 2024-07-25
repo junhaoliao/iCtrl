@@ -19,7 +19,6 @@
 #   IN THE SOFTWARE.
 
 import pyDes
-import application
 
 KEY = [232, 74, 214, 96, 196, 114, 26, 224]
 CRYPT = pyDes.des(KEY)
@@ -43,7 +42,6 @@ def vncpasswd(passwd_path, password=None):
 
     with open(passwd_path, "wb") as passwd:
         passwd.write(obfuscated)
-        application.logger.debug("Vnc Password: Write obfuscated password to {}".format(passwd_path))
 
     return obfuscated
 
