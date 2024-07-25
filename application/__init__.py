@@ -22,7 +22,8 @@ import os
 import sys
 
 import yaml
-from flask import Flask, Blueprint
+from flask import Flask, Blueprint, jsonify
+from werkzeug.exceptions import HTTPException
 from werkzeug.serving import WSGIRequestHandler
 
 try:
@@ -45,6 +46,17 @@ if getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS'):
     app = Flask(__name__, static_folder=os.path.join(os.getcwd(), 'client'))
 else:
     app = Flask(__name__, static_folder="../client/build")
+
+
+@app.errorhandler(Exception)
+def exception_handler(error):
+    if isinstance(error, HTTPException):
+        app.logger.exception(str(error))
+        return error.get_response(), error.code
+
+    app.logger.exception(error)
+    return jsonify(error=str(error)), 500
+
 
 app.secret_key = os.getenv('SECRET_KEY', os.urandom(16))
 
