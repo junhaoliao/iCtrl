@@ -1,4 +1,4 @@
-#  Copyright (c) 2021-2022 iCtrl Developers
+#  Copyright (c) 2021-2024 iCtrl Developers
 # 
 #  Permission is hereby granted, free of charge, to any person obtaining a copy
 #   of this software and associated documentation files (the "Software"), to
@@ -17,12 +17,23 @@
 #   LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 #   FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 #   IN THE SOFTWARE.
-
+import logging.config
 import os
 import sys
 
+import yaml
 from flask import Flask, Blueprint
 from werkzeug.serving import WSGIRequestHandler
+
+try:
+    with open('log_config.yaml', 'r') as config_file:
+        config = yaml.safe_load(config_file.read())
+    logging.config.dictConfig(config)
+except Exception as ex:
+    print("Logging setup failed with exception = ", ex)
+
+logger = logging.getLogger(__name__)
+logger.warning(f"Logging is set up with config={config}")
 
 from .Profile.Profile import Profile
 
@@ -54,9 +65,11 @@ APP_HOST = '127.0.0.1'
 profiles: Profile
 if os.getenv('DBADDR') is not None:
     from .Profile.DBProfile import DBProfile
+
     profiles = DBProfile(app)
 else:
     from .Profile.LocalProfile import LocalProfile
+
     profiles = LocalProfile()
 
 api = Blueprint('api', __name__)

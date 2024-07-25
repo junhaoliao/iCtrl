@@ -21,9 +21,9 @@
  */
 
 import {ICtrlError, ICtrlStep} from './codes';
-import RFB from '@novnc/novnc/core/rfb';
-import KeyTable from '@novnc/novnc/core/input/keysym';
-import keysyms from '@novnc/novnc/core/input/keysymdef';
+import RFB from '@novnc/novnc/lib/rfb';
+import KeyTable from '@novnc/novnc/lib/input/keysym';
+import keysyms from '@novnc/novnc/lib/input/keysymdef';
 import {
   SSHAuthenticationWrong,
   SSHHostUnreachableRefresh,
