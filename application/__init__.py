@@ -33,6 +33,7 @@ except Exception as ex:
     print("Logging setup failed with exception = ", ex)
 
 logger = logging.getLogger(__name__)
+#Setting the message to warning in case logging set up from dictConfig was not successful
 logger.warning(f"Logging is set up with config={config}")
 
 from .Profile.Profile import Profile
