@@ -27,20 +27,22 @@ from io import StringIO
 import paramiko
 import select
 
-import application
+import logging.config
+
+logger = logging.getLogger(__name__)
 
 class ForwardServerHandler(socketserver.BaseRequestHandler):
     def handle(self):
         self.server: ForwardServer
         try:
-            application.logger.debug("Connection: Open forward server channel")
+            logger.debug("Connection: Open forward server channel")
             chan = self.server.ssh_transport.open_channel(
                 "direct-tcpip",
                 ("127.0.0.1", self.server.chain_port),
                 self.request.getpeername(),
             )
         except Exception as e:
-            application.logger.warning(f"Connection: Incoming request to 127.0.0.1:{self.server.chain_port} failed: {repr(e)}")
+            logger.warning(f"Connection: Incoming request to 127.0.0.1:{self.server.chain_port} failed: {repr(e)}")
             return False, "Incoming request to %s:%d failed: %s" % (
                 "127.0.0.1", self.server.chain_port, repr(e))
 
@@ -52,7 +54,7 @@ class ForwardServerHandler(socketserver.BaseRequestHandler):
                 ("127.0.0.1", self.server.chain_port),
             )
         )
-        application.logger.debug(
+        logger.debug(
             "Connected!  Tunnel open %r -> %r -> %r"
             % (
                 self.request.getpeername(),
@@ -75,15 +77,15 @@ class ForwardServerHandler(socketserver.BaseRequestHandler):
                         break
                     self.request.send(data)
         except Exception as e:
-            application.logger.error(f"Connection: Request transmission failure: {e}")
+            logger.error(f"Connection: Request transmission failure: {e}")
             # print(e)
 
         try:
-            application.logger.debug("Connection: Close forward server channel")
+            logger.debug("Connection: Close forward server channel")
             chan.close()
             self.server.shutdown()
         except Exception as e:
-            application.logger.error(f"Connection: Close forward server channel failed: {e}")
+            logger.error(f"Connection: Close forward server channel failed: {e}")
             # print(e)
 
 
@@ -117,8 +119,8 @@ class Connection:
                         host, username,
                         password=None, key_filename=None, private_key_str=None):
         if self._jump_channel != None:
-            application.logger.debug("Connection: Connection initialized through Jump Channel")
-        application.logger.debug(f"Connection: Connecting to {username}@{host}")
+            logger.debug("Connection: Connection initialized through Jump Channel")
+        logger.debug(f"Connection: Connecting to {username}@{host}")
         if password is not None:
             client.connect(host, username=username, password=password, timeout=15, sock=self._jump_channel)
         elif key_filename is not None:
@@ -127,7 +129,7 @@ class Connection:
             pkey = paramiko.RSAKey.from_private_key(StringIO(private_key_str))
             client.connect(host, username=username, pkey=pkey, timeout=15, sock=self._jump_channel)
         else:
-            application.logger.error("Connection: no valid SSH auth given.")
+            logger.error("Connection: no valid SSH auth given.")
             # raise ValueError("Connection: no valid SSH auth given.")
 
     def _init_jump_channel(self, host, username, **auth_methods):
@@ -142,33 +144,33 @@ class Connection:
         """
         if (host.endswith('ecf.utoronto.ca') or host.endswith('ecf.toronto.edu')) and not host.startswith('remote'):
             if self._jump_client is not None:
-                application.logger.error("Connection: API misuse: should not invoke connect twice on the same Connection object")
+                logger.error("Connection: API misuse: should not invoke connect twice on the same Connection object")
                 # raise ValueError("API misuse: should not invoke connect twice on the same Connection object")
 
             self._jump_client = paramiko.SSHClient()
             self._jump_client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-            application.logger.debug(f"Connection: Initialize Jump Client for connection to {username}@remote.ecf.utoronto.ca")
+            logger.debug(f"Connection: Initialize Jump Client for connection to {username}@remote.ecf.utoronto.ca")
             self._client_connect(self._jump_client, 'remote.ecf.utoronto.ca', username, **auth_methods)
-            application.logger.debug(f"Connection: Open Jump channel connection to {host} at port 22")
+            logger.debug(f"Connection: Open Jump channel connection to {host} at port 22")
             self._jump_channel = self._jump_client.get_transport().open_channel('direct-tcpip',
                                                                                 (host, 22),
                                                                                 ('127.0.0.1', 22))
 
     def connect(self, host: str, username: str, **auth_methods):
         try:
-            application.logger.debug(f"Connection: Connection attempt to {username}@{host}")
+            logger.debug(f"Connection: Connection attempt to {username}@{host}")
             self._init_jump_channel(host, username, **auth_methods)
             self._client_connect(self.client, host, username, **auth_methods)
         except Exception as e:
             # raise e
             # print('Connection::connect() exception:')
-            application.logger.warning(f"Connection: Connection failed due to {str(e)}")
+            logger.warning(f"Connection: Connection failed due to {str(e)}")
             return False, str(e)
 
         self.host = host
         self.username = username
 
-        application.logger.debug(f"Connection: Successfully connected to {username}@{host}")
+        logger.debug(f"Connection: Successfully connected to {username}@{host}")
         return True, ''
 
     @staticmethod
@@ -184,13 +186,13 @@ class Connection:
 
         # save the private key
         if key_filename is not None:
-            application.logger.debug(f"Connection: RSA SSH private key written to {key_filename}")
+            logger.debug(f"Connection: RSA SSH private key written to {key_filename}")
             rsa_key.write_private_key_file(key_filename)
         elif key_file_obj is not None:
             rsa_key.write_private_key(key_file_obj)
-            application.logger.debug(f"Connection: RSA SSH private key written to {key_file_obj}")
+            logger.debug(f"Connection: RSA SSH private key written to {key_file_obj}")
         else:
-            application.logger.error("Connection: Neither key_filename nor key_file_obj is provided.")
+            logger.error("Connection: Neither key_filename nor key_file_obj is provided.")
             # raise ValueError('Neither key_filename nor key_file_obj is provided.')
 
         # ssh-rsa: key type
@@ -212,16 +214,16 @@ class Connection:
             # generate key pairs and save the private key in the key file object
             pub_key = Connection.ssh_keygen(key_file_obj=key_file_obj, public_key_comment=public_key_comment)
         else:
-            application.logger.error("Connection: Neither key_filename nor key_file_obj is provided.")
+            logger.error("Connection: Neither key_filename nor key_file_obj is provided.")
             # raise ValueError('Neither key_filename nor key_file_obj is provided.')
 
         # save the public key onto the remote server
         exit_status, _, _, _ = self.exec_command_blocking(
             "mkdir -p ~/.ssh && chmod 700 ~/.ssh && echo '%s' >>  ~/.ssh/authorized_keys" % pub_key)
         if exit_status != 0:
-            application.logger.warning("Connection: unable to save public key; Check for disk quota and permissions with any conventional SSH clients. ")
+            logger.warning("Connection: unable to save public key; Check for disk quota and permissions with any conventional SSH clients. ")
             return False, "Connection::save_keys: unable to save public key; Check for disk quota and permissions with any conventional SSH clients. "
-        application.logger.debug("Connection: Public ssh key saved to remove server ~/.ssh/authorized_keys")
+        logger.debug("Connection: Public ssh key saved to remove server ~/.ssh/authorized_keys")
 
         return True, ""
 
@@ -247,7 +249,7 @@ class Connection:
         return '\n'.join(stdout) + '\n' + '\n'.join(stderr)
 
     def _port_forward_thread(self, local_port, remote_port):
-        application.logger.debug("Connection: Port forward thread started")
+        logger.debug("Connection: Port forward thread started")
         forward_server = ForwardServer(("", local_port), ForwardServerHandler)
 
         forward_server.ssh_transport = self.client.get_transport()
@@ -255,7 +257,7 @@ class Connection:
 
         forward_server.serve_forever()
         forward_server.server_close()
-        application.logger.debug("Connection: Port forward thread ended")
+        logger.debug("Connection: Port forward thread ended")
 
     def port_forward(self, *args):
         forwarding_thread = threading.Thread(target=self._port_forward_thread, args=args)
@@ -263,12 +265,12 @@ class Connection:
 
     def is_eecg(self):
         if 'eecg' in self.host:
-            application.logger.debug("Connection: Target host is eecg")
+            logger.debug("Connection: Target host is eecg")
         return 'eecg' in self.host
 
     def is_ecf(self):
         if 'ecf' in self.host:
-            application.logger.debug("Connection: Target host is ecf")
+            logger.debug("Connection: Target host is ecf")
         return 'ecf' in self.host
 
     def is_uoft(self):
@@ -292,8 +294,8 @@ class Connection:
 
         my_pts_count = len(output) - 1  # -1: excluding the `uptime` output
 
-        application.logger.debug(f"Connection: pts count: {pts_count}; my pts count: {my_pts_count}")
-        application.logger.debug(f"Connection: load sum: {load_sum}")
+        logger.debug(f"Connection: pts count: {pts_count}; my pts count: {my_pts_count}")
+        logger.debug(f"Connection: load sum: {load_sum}")
 
         if pts_count > my_pts_count:  # there are more terminals than mine
             return True
