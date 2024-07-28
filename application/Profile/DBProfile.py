@@ -432,6 +432,7 @@ class DBProfile(Profile):
         return True, ''
 
     def get_session_vnc_credentials(self, session_id):
+        logger.debug(f'Getting vnc credentials for session: {session_id}')
         session = self._get_session(session_id)
         if session is None:
             return False, f'failed: session {session_id} does not exist'
