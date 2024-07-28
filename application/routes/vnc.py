@@ -19,7 +19,7 @@
 #   IN THE SOFTWARE.
 
 import json
-import logging
+
 
 from flask import request, abort, stream_with_context
 
@@ -28,6 +28,7 @@ from .. import api, app, profiles
 from ..codes import ICtrlStep, ICtrlError, ConnectionType
 from ..utils import int_to_bytes
 import application
+import logging
 logger = logging.getLogger(__name__)
 
 

@@ -31,13 +31,14 @@ from ..features.SFTP import SFTP
 from ..features.Term import Term
 from ..features.VNC import VNC
 from ..utils import int_to_bytes
-import application
+import logging
+logger = logging.getLogger(__name__)
 
 def create_connection(session_id, conn_type):
-    application.logger.debug(f"Common: Attempting to create connection: session_id={session_id}, conn_type={conn_type}")
+    logger.debug(f"Common: Attempting to create connection: session_id={session_id}, conn_type={conn_type}")
     host, username, this_private_key_path, this_private_key_str, _ = profiles.get_session_info(session_id)
     if host is None:
-        application.logger.warning(f"Common: Session not found: {session_id}")
+        logger.warning(f"Common: Session not found: {session_id}")
         abort(403, f'Fail: session {session_id} does not exist')
 
     if conn_type == ConnectionType.GENERAL:
@@ -51,13 +52,13 @@ def create_connection(session_id, conn_type):
     elif conn_type == ConnectionType.AUDIO:
         conn = Audio()
     else:
-        application.logger.error(f"Common: Invalid connection type requested: {conn_type}")
+        logger.error(f"Common: Invalid connection type requested: {conn_type}")
         raise TypeError(f'Invalid type: {conn_type}')
 
     status, reason = conn.connect(host, username,
                                   key_filename=this_private_key_path, private_key_str=this_private_key_str)
     if status is False:
-        application.logger.error(f"Common: Connection failed: {reason}")
+        logger.error(f"Common: Connection failed: {reason}")
         if reason.startswith('[Errno 60]') \
                 or reason.startswith('[Errno 64]') \
                 or reason.startswith('[Errno 51]') \
@@ -75,13 +76,13 @@ def create_connection(session_id, conn_type):
 
 @api.route('/profiles')
 def get_profiles():
-    application.logger.info("Common: Fetching all profiles")
+    logger.info("Common: Fetching all profiles")
     return profiles.query()
 
 
 @api.route('/session', methods=['GET', 'POST', 'PATCH', 'DELETE'])
 def handle_session():
-    application.logger.debug(f"Common: Session operation: {request.method}")
+    logger.debug(f"Common: Session operation: {request.method}")
     if request.method == 'GET':
         session_id = request.args.get('id')
         host, username, _, _, nickname = profiles.get_session_info(session_id)
@@ -96,18 +97,18 @@ def handle_session():
         username = request.json.get('username')
         # FIXME: password should be optional
         password = request.json.get("password")
-        application.logger.debug("Common: Creating new session")
+        logger.debug("Common: Creating new session")
         conn = Connection()
 
         status, reason = conn.connect(host, username, password=password)
         if status is False:
-            application.logger.warning(f"Common: Failed to create session: {reason}")
+            logger.warning(f"Common: Failed to create session: {reason}")
             abort(403, reason)
 
         # FIXME: password should be optional: only pass 'conn' if password is given
         status, reason = profiles.add_session(host, username, conn)
         if status is False:
-            application.logger.error("Common: Failed to save session info")
+            logger.error("Common: Failed to save session info")
             abort(500, reason)
 
         return 'success'
@@ -120,12 +121,12 @@ def handle_session():
 
         if nickname is not None:
             # only update nickname
-            application.logger.info(f"Common: Updating nickname for session {session_id}")
+            logger.info(f"Common: Updating nickname for session {session_id}")
             status, reason = profiles.set_session_nickname(session_id, nickname)
             if not status:
                 abort(400, reason)
         else:
-            application.logger.info("Common: Terminating old session")
+            logger.info("Common: Terminating old session")
             # terminate old sessions with best efforts
             # noinspection PyBroadException
             try:
@@ -155,7 +156,7 @@ def handle_session():
 
     elif request.method == 'DELETE':
         session_id = request.args.get('session_id')
-        application.logger.info(f"Common: Deleting session {session_id}")
+        logger.info(f"Common: Deleting session {session_id}")
         status, reason = profiles.delete_session(session_id)
         if not status:
             abort(403, reason)
@@ -170,7 +171,7 @@ def exec_blocking():
     session_id = request.json.get('session_id')
     cmd = request.json.get('cmd')
     large = request.json.get('large', False)
-    application.logger.debug("Common: Executing blocking command")
+    logger.debug("Common: Executing blocking command")
     conn, reason = create_connection(session_id, ConnectionType.GENERAL)
     if reason != '':
         abort(403, reason)
@@ -181,7 +182,7 @@ def exec_blocking():
     else:
         status, _, stdout, stderr = conn.exec_command_blocking(cmd)
         if status is False:
-            application.logger.error("Common: Command execution failed")
+            logger.error("Common: Command execution failed")
             abort(500, 'exec failed')
         result = '\n'.join(stdout) + '\n' + '\n'.join(stderr)
 
