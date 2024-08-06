@@ -32,7 +32,7 @@ fi
 
 echo ------------------------     Build the Web Client       ------------------------
 cd client || exit
-npm i --force
+npm i
 npm run build
 cd ..
 
