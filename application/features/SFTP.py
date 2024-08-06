@@ -26,7 +26,9 @@ import zipstream
 from paramiko.sftp_client import SFTPClient
 
 from .Connection import Connection
+import logging.config
 
+logger = logging.getLogger(__name__)
 
 class SFTP(Connection):
     def __init__(self):
@@ -41,14 +43,18 @@ class SFTP(Connection):
         super().__del__()
 
     def connect(self, *args, **kwargs):
+        logger.debug("SFTP: Establishing SFTP connection")
         status, reason = super().connect(*args, **kwargs)
         if not status:
+            logger.warning(f"SFTP: connect failed due to {reason}")
             return status, reason
 
         try:
+            logger.debug("SFTP: Open SFTP client connection")
             self.sftp = self.client.open_sftp()
             self.sftp.chdir(".")
         except Exception as e:
+            logger.warning(f"SFTP: Client connect failed due to {e}")
             return False, str(e)
 
         return True, ''
@@ -59,6 +65,7 @@ class SFTP(Connection):
                 self.sftp.chdir(path)
             cwd = self.sftp.getcwd()
             attrs = self.sftp.listdir_attr(cwd)
+            logger.debug(f"SFTP: ls {cwd}: {attrs}")
 
             file_list = []
             # TODO: should support uid and gid later
@@ -72,6 +79,7 @@ class SFTP(Connection):
                 }
                 file_list.append(file)
         except Exception as e:
+            logger.warning(f"SFTP: 'ls' failed due to {e}")
             return False, repr(e), []
 
         return True, cwd, file_list
@@ -92,6 +100,7 @@ class SFTP(Connection):
                     yield chunk
                     chunk = f.read(paramiko.sftp_file.SFTPFile.MAX_REQUEST_SIZE)
         except PermissionError:
+            logger.warning(f"SFTP: dl_generator Permission denied reading {path}")
             yield bytes()
 
     def _zip_dir_recurse(self, z, parent, file):
@@ -100,9 +109,11 @@ class SFTP(Connection):
             mode = self.sftp.stat(fullpath).st_mode
             if stat.S_ISREG(mode):
                 # print(fullpath, 'is file')
+                logger.debug(f"SFTP: {fullpath} is a file")
                 z.write_iter(fullpath, self.dl_generator(fullpath))
             elif stat.S_ISDIR(mode):
                 # print(fullpath, 'is dir')
+                logger.debug(f"SFTP: {fullpath} is a directory")
                 # TODO: support writing an empty directory if len(dir_ls)==0
                 #  That will involve modifying the zipstream library
                 dir_ls = self.sftp.listdir(fullpath)
@@ -111,15 +122,19 @@ class SFTP(Connection):
         except FileNotFoundError:
             # likely due to a symlink that cannot be resolved
             # do nothing for now
+            logger.warning(f"SFTP: zip_dir_recurse failed on {fullpath} due to FileNotFoundError")
             return
         except PermissionError:
+            logger.warning(f"SFTP: zip_dir_recurse failed on {fullpath} due to PermissionError")
             return
 
     def zip_generator(self, cwd, file_list):
+        logger.debug(f"SFTP: zip_generator on directory: {cwd}")
         self.sftp.chdir(cwd)
         z = zipstream.ZipFile(compression=zipstream.ZIP_DEFLATED, allowZip64=True)
 
         for file in file_list:
+            logger.debug(f"SFTP: zip_generator on file: {file}")
             self._zip_dir_recurse(z, '', file)
 
         return z
@@ -128,7 +143,9 @@ class SFTP(Connection):
         try:
             self.sftp.chdir(cwd)
             self.sftp.rename(old, new)
+            logger.debug(f"SFTP: Rename {old} in directory {cwd} to {new}")
         except Exception as e:
+            logger.warning(f"SFTP: Rename failed due to {e}")
             return False, repr(e)
 
         return True, ''
@@ -136,9 +153,11 @@ class SFTP(Connection):
     def chmod(self, path, mode, recursive):
         _, _, _, stderr = self.exec_command_blocking(
             f'chmod {"-R" if recursive else ""} {"{0:0{1}o}".format(mode, 3)} "{path}"')
+        logger.debug("SFTP: Change permission on " + path + " to '{0:0{1}o}'".format(mode, 3))
         stderr_lines = stderr.readlines()
         if len(stderr_lines) != 0:
-            print(stderr_lines)
+            logger.warning(f"SFTP: chmod failed due to {stderr_lines}")
+            # print(stderr_lines)
             return False, 'Some files were not applied with the request mode due to permission issues.'
 
         return True, ''
@@ -159,20 +178,24 @@ class SFTP(Connection):
 
             counter += 1
             if counter == 50:
+                logger.debug(f"SFTP: Execute Command {' '.join(cmd_list)}")
                 _, _, stderr = self.client.exec_command(" ".join(cmd_list))
                 stderr_lines = stderr.readlines()
                 if len(stderr_lines) != 0:
-                    print(stderr_lines)
+                    logger.warning(f"SFTP: rm file failed due to {stderr_lines}")
+                    # print(stderr_lines)
                     result = 'Some files are not removed due to insufficient permissions'
 
                 # reset counter
                 counter = 0
                 cmd_list = [f'cd "{cwd}" && rm -rf']
 
+        logger.debug(f"SFTP: Execute Command {' '.join(cmd_list)}")
         _, _, stderr = self.client.exec_command(" ".join(cmd_list))
         stderr_lines = stderr.readlines()
         if len(stderr_lines) != 0:
-            print(stderr_lines)
+            logger.warning(f"SFTP: rm file failed due to {stderr_lines}")
+            # print(stderr_lines)
             result = 'Some files are not removed due to insufficient permissions'
 
         if result != '':
@@ -180,8 +203,10 @@ class SFTP(Connection):
         return True, ''
 
     def mkdir(self, cwd, name):
+        logger.debug(f"SFTP: Make directory {name} at {cwd}")
         _, _, _, stderr = self.exec_command_blocking(f'cd "{cwd}"&& mkdir "{name}"')
         stderr_lines = stderr.readlines()
         if len(stderr_lines) != 0:
+            logger.warning(f"SFTP: mkdir {name} in {cwd} failed due to {stderr_lines}")
             return False, stderr_lines[0]
         return True, ''

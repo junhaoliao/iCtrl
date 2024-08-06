@@ -31,6 +31,9 @@ from werkzeug.serving import generate_adhoc_ssl_context
 from .Connection import Connection
 from .. import app
 from ..utils import find_free_port, get_headers_dict_from_str, local_auth
+import logging.config
+
+logger = logging.getLogger(__name__)
 
 AUDIO_CONNECTIONS = {}
 
@@ -57,13 +60,16 @@ class Audio(Connection):
         super().__del__()
 
     def connect(self, *args, **kwargs):
+        logger.debug("Audio: Establishing Audio connection")
         return super().connect(*args, **kwargs)
 
     def launch_audio(self):
         try:
+            logger.debug("Audio: Launching Audio connection. Forwarding request to 127.0.0.1, port 0.")
             self.transport = self.client.get_transport()
             self.remote_port = self.transport.request_port_forward('127.0.0.1', 0)
         except Exception as e:
+            logger.warning("Audio: exception raised during launch audio: {}".format(e))
             return False, str(e)
 
         self.id = uuid.uuid4().hex
@@ -83,11 +89,12 @@ class AudioWebSocket(WebSocket):
         headers = get_headers_dict_from_str(headers)
         if not local_auth(headers=headers, abort_func=self.close):
             # local auth failure
+            logger.warning("AudioWebSocket: Local Authentication Failure")
             return
 
         audio_id = self.request.path[1:]
         if audio_id not in AUDIO_CONNECTIONS:
-            print(f'AudioWebSocket: Requested audio_id={audio_id} does not exist.')
+            logger.warning(f'AudioWebSocket: Requested audio_id={audio_id} does not exist.')
             self.close()
             return
 
@@ -103,26 +110,31 @@ class AudioWebSocket(WebSocket):
                               f'module-null-sink sink_name={sink_name} '
         exit_status, _, stdout, _ = self.audio.exec_command_blocking(load_module_command)
         if exit_status != 0:
-            print(f'AudioWebSocket: audio_id={audio_id}: unable to load pactl module-null-sink sink_name={sink_name}')
+            logger.warning(f'AudioWebSocket: audio_id={audio_id}: unable to load pactl module-null-sink sink_name={sink_name}')
             return
         load_module_stdout_lines = stdout.readlines()
+        logger.debug("AudioWebSocket: Load Module: {}".format(load_module_stdout_lines))
         self.module_id = int(load_module_stdout_lines[0])
 
         keep_launching_ffmpeg = True
 
         def ffmpeg_launcher():
+            logger.debug("AudioWebSocket: ffmpeg_launcher thread started")
             # TODO: support requesting audio format from the client
             launch_ffmpeg_command = f'killall ffmpeg; ffmpeg -f pulse -i "{sink_name}.monitor" ' \
                                     f'-ac 2 -acodec pcm_s16le -ar 44100 -f s16le "tcp://127.0.0.1:{self.audio.remote_port}"'
             # keep launching if the connection is not accepted in the writer() below
             while keep_launching_ffmpeg:
+                logger.debug(f"AudioWebSocket: Launch ffmpeg: {launch_ffmpeg_command}")
                 _, ffmpeg_stdout, _ = self.audio.client.exec_command(launch_ffmpeg_command)
                 ffmpeg_stdout.channel.recv_exit_status()
                 # if `ffmpeg` launches successfully, `ffmpeg_stdout.channel.recv_exit_status` should not return
+            logger.debug("AudioWebSocket: ffmpeg_launcher thread ended")
 
         ffmpeg_launcher_thread = threading.Thread(target=ffmpeg_launcher)
 
         def writer():
+            logger.debug("AudioWebSocket: writer thread started")
             channel = self.audio.transport.accept(FFMPEG_LOAD_TIME * TRY_FFMPEG_MAX_COUNT)
 
             nonlocal keep_launching_ffmpeg
@@ -130,22 +142,26 @@ class AudioWebSocket(WebSocket):
 
             if channel is None:
                 ffmpeg_launcher_thread.join()
-                raise ConnectionError("AudioWebSocket:handleConnected: Unable to launch audio socket on the remote "
-                                      "target. ")
+                logger.error("AudioWebSocket:handleConnected: Unable to launch audio socket on the remote target. ")
+                # raise ConnectionError("AudioWebSocket:handleConnected: Unable to launch audio socket on the remote "
+                #                       "target. ")
 
             # use a buffer to reduce transfer frequency
             buffer = b''
             while True:
                 data = channel.recv(AUDIO_BUFFER_SIZE)
                 if not data:
+                    logger.debug("AudioWebSocket: Close audio socket connection")
                     self.close()
                     break
                 buffer += data
                 if len(buffer) >= AUDIO_BUFFER_SIZE:
                     compressed = zlib.compress(buffer, level=4)
+                    logger.debug(f"AudioWebSocket: Send compressed message of size {len(compressed)}")
                     self.sendMessage(compressed)
                     # print(len(compressed) / len(buffer) * 100)
                     buffer = b''
+            logger.debug("AudioWebSocket: write thread ended")
 
         writer_thread = threading.Thread(target=writer)
 
@@ -155,8 +171,10 @@ class AudioWebSocket(WebSocket):
     def handleClose(self):
         if self.module_id is not None:
             # unload the module before leaving
+            logger.debug(f"AudioWebSocket: Unload module {self.module_id}")
             self.audio.client.exec_command(f'pactl unload-module {self.module_id}')
 
+        logger.debug(f"AudioWebSocket: End audio socket {self.audio.id} connection")
         del AUDIO_CONNECTIONS[self.audio.id]
         del self.audio
 
@@ -166,13 +184,16 @@ class AudioWebSocket(WebSocket):
 # if we are in debug mode, run the server in the second round
 if not app.debug or os.environ.get("WERKZEUG_RUN_MAIN") == "true":
     AUDIO_PORT = find_free_port()
-    print("AUDIO_PORT =", AUDIO_PORT)
+    # print("AUDIO_PORT =", AUDIO_PORT)
+    logger.debug("Audio: Audio port {}".format(AUDIO_PORT))
 
     if os.environ.get('SSL_CERT_PATH') is None:
+        logger.debug("Audio: SSL Certification Path not set. Generating self-signing certificate")
         # no certificate provided, generate self-signing certificate
         audio_server = SimpleSSLWebSocketServer('127.0.0.1', AUDIO_PORT, AudioWebSocket,
                                                 ssl_context=generate_adhoc_ssl_context())
     else:
+        logger.debug("Audio: SSL Certification Path exists")
         import ssl
 
         audio_server = SimpleSSLWebSocketServer('0.0.0.0', AUDIO_PORT, AudioWebSocket,
