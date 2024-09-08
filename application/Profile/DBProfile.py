@@ -97,10 +97,11 @@ class DBProfile(Profile):
 
             @validates('username')
             def validate_username(self, key, username):
+                username_error = 'User name should contain only letters, numbers, underscores and dashes'
                 try:
                     assert re.match("^[A-Za-z0-9_-]+$", username)
-                except AssertionError as ae:
-                    logger.error("User name should contain only letters, numbers, underscores and dashes")
+                except AssertionError(username_error) as ae:
+                    logger.error(username_error)
                     raise ae
 
                 return username
@@ -113,17 +114,19 @@ class DBProfile(Profile):
 
             @validates('email')
             def validate_email(self, key, email):
+                invalid_email_error = f'Invalid email address: "{email}"'
                 try:
                     assert re.match(r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b', email)
-                except AssertionError as ae:
-                    logger.error(f'Invalid email address: "{email}"')
+                except AssertionError(invalid_email_error) as ae:
+                    logger.error(invalid_email_error)
                     raise ae
 
                 # FIXME: remove this utoronto mail restriction in the future
+                not_uoft_email_error = "Currently, only UofT emails are supported, emails must end with utoronto.ca"
                 try:
                     assert email.endswith('utoronto.ca')
-                except AssertionError as ae:
-                    logger.error(f"Currently, only UofT emails are supported, emails must end with utoronto.ca")
+                except AssertionError(not_uoft_email_error) as ae:
+                    logger.error(not_uoft_email_error)
                     raise ae
 
                 return email
@@ -143,10 +146,11 @@ class DBProfile(Profile):
 
             @validates('nickname')
             def validate_nickname(self, key, nickname):
+                nickname_too_long = 'Entered nickname is too long'
                 try:
                     assert len(nickname) <= 8
-                except AssertionError as ae:
-                    logger.error('Entered nickname is too long')
+                except AssertionError(nickname_too_long) as ae:
+                    logger.error(nickname_too_long)
                     raise ae
 
                 return nickname
@@ -179,7 +183,6 @@ class DBProfile(Profile):
         password_bytes = password.encode('ascii')
 
         user = self.User.query.filter_by(username=username).first()
-        hashed_password_bytes = user.password.encode('ascii')
         if user is None:
             abort(403, 'ACCOUNT_WRONG_USERNAME')
 
@@ -253,9 +256,9 @@ class DBProfile(Profile):
         except sqlalchemy.exc.IntegrityError as e:
             error_info = e.orig.args[0]
             if 'user_username_key' in error_info:
-                abort(422, 'Failed to add user: ACCOUNT_DUPLICATE_USERNAME')
+                abort(422, 'ACCOUNT_DUPLICATE_USERNAME')
             elif 'user_email_key' in error_info:
-                abort(422, 'Failed to add user: ACCOUNT_DUPLICATE_EMAIL')
+                abort(422, 'ACCOUNT_DUPLICATE_EMAIL')
 
             abort(403, e)
 
@@ -287,7 +290,7 @@ class DBProfile(Profile):
 
         user = self.User.query.filter_by(id=userid).first()
         if user is None:
-            abort(403, f'Cannot find any matching record: userid = {userid}')
+            abort(403, 'Cannot find any matching record')
 
         logger.info(f'Successfully retrieved user with userid={userid}')
         return user
@@ -429,7 +432,8 @@ class DBProfile(Profile):
         if user is None:
             abort(403, f'Cannot find any matching user with username={username}')
         elif self.resend_cooldown.get(str(user.id), None):
-            abort(429, f'Too soon to resend. Please check your email junk box or try again in {RESEND_COOLDOWN_TTL_SECOND} seconds.')
+            abort(429, f'Too soon to resend. Please check your email junk box or try again in '
+                       f'{RESEND_COOLDOWN_TTL_SECOND} seconds. ')
 
         user_id = str(user.id)
         code = str(uuid.uuid4())

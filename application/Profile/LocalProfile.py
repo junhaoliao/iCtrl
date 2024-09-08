@@ -84,7 +84,7 @@ class LocalProfile(Profile):
 
         except Exception as e:
             self._profile = copy.deepcopy(_EMPTY_USER_PROFILE)
-            logger.error(f"Error loading profile: {e}")
+            logger.error(f"LocalProfile: Error loading profile: {e}")
             logger.warning("Unable to load the user profile. Using the default profile instead.")
 
     def query(self):
