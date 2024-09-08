@@ -57,6 +57,10 @@ def exception_handler(error):
     app.logger.exception(error)
     return jsonify(error=str(error)), 500
 
+@app.after_request
+def AfterRequestFunc(response):
+    app.logger.info(response.status)
+    return response
 
 app.secret_key = os.getenv('SECRET_KEY', os.urandom(16))
 
