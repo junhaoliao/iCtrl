@@ -118,7 +118,6 @@ def local_auth(headers, abort_func):
             auth_passed = False
 
         if not auth_passed:
-            logger.debug('Authentication failed, you are not authorized to access this API.')
             abort_func(403, "You are not authorized to access this API.")
 
     return auth_passed

@@ -180,19 +180,15 @@ class DBProfile(Profile):
 
         user = self.User.query.filter_by(username=username).first()
         hashed_password_bytes = user.password.encode('ascii')
-        if (user is None) or (not bcrypt.checkpw(password_bytes, hashed_password_bytes)):
-            #Reason being is for security concern, we want to be as ambiguous as possible
-            #In a scenario a hacker wants to hack into an account
-            #You wouldn't want him to know whether your username or your password is correct
-            #If he guesses the username then he can guess the password next, given by the original error messages
-            error_msg = 'ACCOUNT_WRONG_USERNAME or ACCOUNT_WRONG_PASSWORD'
-            logger.error(error_msg)
-            abort(403, error_msg)
+        if user is None:
+            abort(403, 'ACCOUNT_WRONG_USERNAME')
 
         if user.activation_type == ActivationType.NOT_ACTIVATED:
-            error_msg = 'ACCOUNT_NOT_ACTIVATED'
-            logger.error(error_msg)
-            abort(401, error_msg)
+            abort(401, 'ACCOUNT_NOT_ACTIVATED')
+
+        hashed_password_bytes = user.password.encode('ascii')
+        if not bcrypt.checkpw(password_bytes, hashed_password_bytes):
+            abort(403, 'ACCOUNT_WRONG_PASSWORD')
 
         flask_session.clear()
         flask_session['userid'] = user.id
@@ -239,7 +235,6 @@ class DBProfile(Profile):
 
         password_ok, password_reason = validate_password(password)
         if not password_ok:
-            logger.warning(f'Password is not allowed, reason: {password_reason}')
             abort(422, password_reason)
 
         # hash the password before storing
@@ -258,15 +253,10 @@ class DBProfile(Profile):
         except sqlalchemy.exc.IntegrityError as e:
             error_info = e.orig.args[0]
             if 'user_username_key' in error_info:
-                error = 'Failed to add user: ACCOUNT_DUPLICATE_USERNAME'
-                logger.error(error)
-                abort(422, error)
+                abort(422, 'Failed to add user: ACCOUNT_DUPLICATE_USERNAME')
             elif 'user_email_key' in error_info:
-                error = 'Failed to add user: ACCOUNT_DUPLICATE_EMAIL'
-                logger .error(error)
-                abort(422, error)
+                abort(422, 'Failed to add user: ACCOUNT_DUPLICATE_EMAIL')
 
-            logger.error('Failed to add user: other reasons')
             abort(403, e)
 
         return True, ''
@@ -279,9 +269,7 @@ class DBProfile(Profile):
         elif cached_code == code:
             user = self.User.query.filter_by(id=userid).first()
             if user is None:
-                error = f'Cannot find any matching user with userid={userid}'
-                logger.error(error)
-                abort(403, error)
+                abort(403, f'Cannot find any matching user with userid={userid}')
 
             user.activation_type = ActivationType.NORMAL_USER
             self.save_profile()
@@ -294,16 +282,12 @@ class DBProfile(Profile):
 
     def get_user(self):
         if 'userid' not in flask_session:
-            error = 'You are not logged in'
-            logger.error(error)
-            abort(403, error)
+            abort(403, 'You are not logged in')
         userid = flask_session['userid']
 
         user = self.User.query.filter_by(id=userid).first()
         if user is None:
-            error = f'Cannot find any matching record: userid = {userid}'
-            logger.error(error)
-            abort(403, error)
+            abort(403, f'Cannot find any matching record: userid = {userid}')
 
         logger.info(f'Successfully retrieved user with userid={userid}')
         return user
@@ -333,19 +317,15 @@ class DBProfile(Profile):
 
             logger.info(f'Successfully added a new session: session_id = {session.id}')
         except AssertionError as e:
-            logger.error(f'Error: {e}')
             abort(403, e)
         except sqlalchemy.exc.IntegrityError as e:
-            logger.error(f'Error: {e}')
             abort(403, e)
 
         return True, ''
 
     def _get_session(self, session_id):
         if 'userid' not in flask_session:
-            error = 'You are not logged in'
-            logger.error(error)
-            abort(403, error)
+            abort(403, 'You are not logged in')
         userid = flask_session['userid']
 
         logger.info(f'Returning session, session_id = {session_id}')
@@ -447,13 +427,9 @@ class DBProfile(Profile):
     def send_activation_email(self, username):
         user = self.User.query.filter_by(username=username).first()
         if user is None:
-            error = f'Cannot find any matching user with username={username}'
-            logger.error(error)
-            abort(403, error)
+            abort(403, f'Cannot find any matching user with username={username}')
         elif self.resend_cooldown.get(str(user.id), None):
-            error = f'Too soon to resend. Please check your email junk box or try again in {RESEND_COOLDOWN_TTL_SECOND} seconds.'
-            logger.error(error)
-            abort(429, error)
+            abort(429, f'Too soon to resend. Please check your email junk box or try again in {RESEND_COOLDOWN_TTL_SECOND} seconds.')
 
         user_id = str(user.id)
         code = str(uuid.uuid4())
