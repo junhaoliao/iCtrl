@@ -8,7 +8,12 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+
+    "lint": "npm run lint:check",
+    "lint:check": "eslint src",
+    "lint:ci": "npm run lint:check -- --format json --output-file eslint-report.json",
+    "lint:fix": "npm run lint:check -- --fix"
   },
   "dependencies": {
     "@emotion/react": "^11.10.5",
