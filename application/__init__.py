@@ -57,10 +57,13 @@ def exception_handler(error):
     app.logger.exception(error)
     return jsonify(error=str(error)), 500
 
+
 @app.after_request
-def AfterRequestFunc(response):
-    app.logger.info(response.status)
+def handle_after_request(response: Flask.response_class):
+    if response.content_type == 'application/json':
+        app.logger.info(response.get_data(as_text=True))
     return response
+
 
 app.secret_key = os.getenv('SECRET_KEY', os.urandom(16))
 
