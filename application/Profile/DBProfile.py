@@ -20,6 +20,7 @@
 
 import base64
 import json
+import logging
 import os
 import re
 import uuid
@@ -55,6 +56,9 @@ class ActivationType(IntEnum):
     NORMAL_USER = 1
 
 
+logger = logging.getLogger(__name__)
+
+
 class DBProfile(Profile):
 
     def __init__(self, app):
@@ -67,13 +71,21 @@ class DBProfile(Profile):
         self.salt = bcrypt.gensalt()
 
         # key: user_id, value: activation code
-        self.activation_cache = TTLCache(maxsize=1024, ttl=ACTIVATION_TTL_SECOND)
+        size = 1024
+        self.activation_cache = TTLCache(maxsize=size, ttl=ACTIVATION_TTL_SECOND)
+        logger.debug(f"activation_cache set up with {size}, expiration time = {ACTIVATION_TTL_SECOND}")
 
         # key: user_id, value: True (to indicate the entry exists; can be any dummy value)
-        self.resend_cooldown = TTLCache(maxsize=1024, ttl=RESEND_COOLDOWN_TTL_SECOND)
+        self.resend_cooldown = TTLCache(maxsize=size, ttl=RESEND_COOLDOWN_TTL_SECOND)
+        logger.debug(f"resend_cooldown cache set up with {size}, expiration time = {RESEND_COOLDOWN_TTL_SECOND}")
 
-        with open('/var/www/ictrl/application/resources/activation_email_template.html', 'r') as f:
-            self.activation_email_body_template = f.read()
+        activation_email_template = '/var/www/ictrl/application/resources/activation_email_template.html'
+        logger.debug(f"Opening {activation_email_template} in read-only mode")
+        try:
+            with open(activation_email_template, 'r') as f:
+                self.activation_email_body_template = f.read()
+        except IOError as e:
+            logger.error(f"Failed to open {activation_email_template}, does file exist? Error: {e}")
 
         class User(db.Model):
             __table_args__ = {"schema": "ictrl"}
@@ -85,8 +97,13 @@ class DBProfile(Profile):
 
             @validates('username')
             def validate_username(self, key, username):
-                assert re.match("^[A-Za-z0-9_-]+$", username), \
-                    'User name should contain only letters, numbers, underscores and dashes'
+                username_error = 'User name should contain only letters, numbers, underscores and dashes'
+                try:
+                    assert re.match("^[A-Za-z0-9_-]+$", username)
+                except AssertionError(username_error) as ae:
+                    logger.error(username_error)
+                    raise ae
+
                 return username
 
             # this field is for the hashed passwords
@@ -97,15 +114,26 @@ class DBProfile(Profile):
 
             @validates('email')
             def validate_email(self, key, email):
-                assert re.match(r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b', email), \
-                    f'Invalid email address: "{email}"'
+                invalid_email_error = f'Invalid email address: "{email}"'
+                try:
+                    assert re.match(r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b', email)
+                except AssertionError(invalid_email_error) as ae:
+                    logger.error(invalid_email_error)
+                    raise ae
 
                 # FIXME: remove this utoronto mail restriction in the future
-                assert email.endswith('utoronto.ca'), "Currently, only Uoft emails are supported"
+                not_uoft_email_error = "Currently, only UofT emails are supported, emails must end with utoronto.ca"
+                try:
+                    assert email.endswith('utoronto.ca')
+                except AssertionError(not_uoft_email_error) as ae:
+                    logger.error(not_uoft_email_error)
+                    raise ae
 
                 return email
 
             activation_type = db.Column(db.Integer, nullable=False, default=ActivationType.NOT_ACTIVATED)
+
+            logger.info("Defined a database table: User")
 
         class Session(db.Model):
             __table_args__ = {"schema": "ictrl"}
@@ -118,12 +146,19 @@ class DBProfile(Profile):
 
             @validates('nickname')
             def validate_nickname(self, key, nickname):
-                assert len(nickname) <= 8, \
-                    'Entered nickname is too long'
+                nickname_too_long = 'Entered nickname is too long'
+                try:
+                    assert len(nickname) <= 8
+                except AssertionError(nickname_too_long) as ae:
+                    logger.error(nickname_too_long)
+                    raise ae
+
                 return nickname
 
             username = db.Column(db.String, nullable=False)
             private_key = db.Column(db.Text, nullable=True)
+
+            logger.info("Defined a database table: Session")
 
         class VNCCredentials(db.Model):
             __table_args__ = {"schema": "ictrl"}
@@ -132,6 +167,8 @@ class DBProfile(Profile):
                                    nullable=False)
             credentials = db.Column(db.Text, nullable=False)
 
+            logger.info("Defined a database table: VNCCredentials")
+
         self.User = User
         self.Session = Session
         self.VNCCredentials = VNCCredentials
@@ -139,6 +176,7 @@ class DBProfile(Profile):
         # db.drop_all()
         db.engine.execute("CREATE SCHEMA IF NOT EXISTS ictrl;")
         db.create_all()
+        logger.info("Created database SCHEMA ictrl and created all databases defined")
 
     def login(self, username, password):
         username = username.lower()
@@ -169,7 +207,8 @@ class DBProfile(Profile):
     @staticmethod
     def logout():
         # remove the username from the session if it's there
-        flask_session.pop('userid', None)
+        userid = flask_session.pop('userid', None)
+        logger.info(f'Removed session user: {userid}')
 
         return True
 
@@ -187,6 +226,8 @@ class DBProfile(Profile):
                 "nickname": session.nickname,
                 "username": session.username
             }
+
+        logger.info("Query user sessions successful")
 
         return _profile
 
@@ -236,6 +277,8 @@ class DBProfile(Profile):
             user.activation_type = ActivationType.NORMAL_USER
             self.save_profile()
 
+            logger.info(f"Successfully activated user with userid={userid}")
+
             return True
 
         return False
@@ -249,6 +292,7 @@ class DBProfile(Profile):
         if user is None:
             abort(403, 'Cannot find any matching record')
 
+        logger.info(f'Successfully retrieved user with userid={userid}')
         return user
 
     def add_session(self, host, username, conn=None):
@@ -273,6 +317,8 @@ class DBProfile(Profile):
                 session.private_key = f.encrypt(clear_private_key).decode('ascii')
 
             self.save_profile()
+
+            logger.info(f'Successfully added a new session: session_id = {session.id}')
         except AssertionError as e:
             abort(403, e)
         except sqlalchemy.exc.IntegrityError as e:
@@ -285,6 +331,7 @@ class DBProfile(Profile):
             abort(403, 'You are not logged in')
         userid = flask_session['userid']
 
+        logger.info(f'Returning session, session_id = {session_id}')
         return self.Session.query.filter_by(id=session_id, user_id=userid).first()
 
     def delete_session(self, session_id):
@@ -294,6 +341,8 @@ class DBProfile(Profile):
 
         self.db.session.delete(session)
         self.save_profile()
+
+        logger.info(f'Successfully deleted session, session_id = {session_id}')
 
         return True, ''
 
@@ -305,14 +354,18 @@ class DBProfile(Profile):
         session.host = new_host
         self.save_profile()
 
+        logger.info(f'Successfully changed host for session, session_id = {session_id}')
+
         return True, ''
 
     def save_profile(self):
         self.db.session.commit()
+        logger.info("Profile saved")
 
     def get_session_info(self, session_id):
         session = self._get_session(session_id)
         if session is None:
+            logger.debug(f"Session {session_id} does not exist, cannot retrieve session info")
             return None, None, None, None, None
 
         f = Fernet(flask_session['session_crypt_key'])
@@ -329,6 +382,8 @@ class DBProfile(Profile):
         session.nickname = nickname
         self.save_profile()
 
+        logger.info(f'Successfully set session nickname={nickname} for session {session_id}')
+
         return True, ''
 
     def set_session_vnc_credentials(self, session_id, credentials):
@@ -340,6 +395,7 @@ class DBProfile(Profile):
             # it is a delete request
             vnc_credential = self.VNCCredentials.query.filter_by(session_id=session_id).first()
             self.db.session.delete(vnc_credential)
+            logger.info(f'Successfully deleted vnc credentials for session {session_id}')
         else:
             # it is an add / update request
             json_str = json.dumps(credentials)
@@ -352,12 +408,14 @@ class DBProfile(Profile):
                 # add
                 vnc_credential = self.VNCCredentials(session_id=session_id, credentials=base64_str)
                 self.db.session.add(vnc_credential)
+            logger.info(f'Successfully added/updated vnc credentials for session {session_id}')
 
         self.save_profile()
 
         return True, ''
 
     def get_session_vnc_credentials(self, session_id):
+        logger.debug(f'Getting vnc credentials for session: {session_id}')
         session = self._get_session(session_id)
         if session is None:
             return False, f'failed: session {session_id} does not exist'
@@ -388,5 +446,7 @@ class DBProfile(Profile):
             code=code,
             expire_min=int(ACTIVATION_TTL_SECOND / 60))
         send_email(user.email, 'Activate Your iCtrl Account', body)
+
+        logger.info(f'Successfully sent out activation email to email={user.email}')
 
         return True
