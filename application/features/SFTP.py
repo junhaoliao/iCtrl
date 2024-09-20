@@ -46,7 +46,6 @@ class SFTP(Connection):
         logger.debug("SFTP: Establishing SFTP connection")
         status, reason = super().connect(*args, **kwargs)
         if not status:
-            logger.warning(f"SFTP: connect failed due to {reason}")
             return status, reason
 
         try:
@@ -54,7 +53,6 @@ class SFTP(Connection):
             self.sftp = self.client.open_sftp()
             self.sftp.chdir(".")
         except Exception as e:
-            logger.warning(f"SFTP: Client connect failed due to {e}")
             return False, str(e)
 
         return True, ''
@@ -79,7 +77,6 @@ class SFTP(Connection):
                 }
                 file_list.append(file)
         except Exception as e:
-            logger.warning(f"SFTP: 'ls' failed due to {e}")
             return False, repr(e), []
 
         return True, cwd, file_list
@@ -100,7 +97,6 @@ class SFTP(Connection):
                     yield chunk
                     chunk = f.read(paramiko.sftp_file.SFTPFile.MAX_REQUEST_SIZE)
         except PermissionError:
-            logger.warning(f"SFTP: dl_generator Permission denied reading {path}")
             yield bytes()
 
     def _zip_dir_recurse(self, z, parent, file):
@@ -122,10 +118,8 @@ class SFTP(Connection):
         except FileNotFoundError:
             # likely due to a symlink that cannot be resolved
             # do nothing for now
-            logger.warning(f"SFTP: zip_dir_recurse failed on {fullpath} due to FileNotFoundError")
             return
         except PermissionError:
-            logger.warning(f"SFTP: zip_dir_recurse failed on {fullpath} due to PermissionError")
             return
 
     def zip_generator(self, cwd, file_list):
@@ -145,7 +139,6 @@ class SFTP(Connection):
             self.sftp.rename(old, new)
             logger.debug(f"SFTP: Rename {old} in directory {cwd} to {new}")
         except Exception as e:
-            logger.warning(f"SFTP: Rename failed due to {e}")
             return False, repr(e)
 
         return True, ''
@@ -182,8 +175,7 @@ class SFTP(Connection):
                 _, _, stderr = self.client.exec_command(" ".join(cmd_list))
                 stderr_lines = stderr.readlines()
                 if len(stderr_lines) != 0:
-                    logger.warning(f"SFTP: rm file failed due to {stderr_lines}")
-                    # print(stderr_lines)
+                    print(stderr_lines)
                     result = 'Some files are not removed due to insufficient permissions'
 
                 # reset counter
@@ -194,8 +186,7 @@ class SFTP(Connection):
         _, _, stderr = self.client.exec_command(" ".join(cmd_list))
         stderr_lines = stderr.readlines()
         if len(stderr_lines) != 0:
-            logger.warning(f"SFTP: rm file failed due to {stderr_lines}")
-            # print(stderr_lines)
+            print(stderr_lines)
             result = 'Some files are not removed due to insufficient permissions'
 
         if result != '':
@@ -207,6 +198,5 @@ class SFTP(Connection):
         _, _, _, stderr = self.exec_command_blocking(f'cd "{cwd}"&& mkdir "{name}"')
         stderr_lines = stderr.readlines()
         if len(stderr_lines) != 0:
-            logger.warning(f"SFTP: mkdir {name} in {cwd} failed due to {stderr_lines}")
             return False, stderr_lines[0]
         return True, ''

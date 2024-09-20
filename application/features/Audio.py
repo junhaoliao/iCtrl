@@ -142,9 +142,8 @@ class AudioWebSocket(WebSocket):
 
             if channel is None:
                 ffmpeg_launcher_thread.join()
-                logger.error("AudioWebSocket:handleConnected: Unable to launch audio socket on the remote target. ")
-                # raise ConnectionError("AudioWebSocket:handleConnected: Unable to launch audio socket on the remote "
-                #                       "target. ")
+                raise ConnectionError("AudioWebSocket:handleConnected: Unable to launch audio socket on the remote "
+                                      "target. ")
 
             # use a buffer to reduce transfer frequency
             buffer = b''

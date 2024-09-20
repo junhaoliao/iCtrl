@@ -42,7 +42,6 @@ class ForwardServerHandler(socketserver.BaseRequestHandler):
                 self.request.getpeername(),
             )
         except Exception as e:
-            logger.warning(f"Connection: Incoming request to 127.0.0.1:{self.server.chain_port} failed: {repr(e)}")
             return False, "Incoming request to %s:%d failed: %s" % (
                 "127.0.0.1", self.server.chain_port, repr(e))
 
@@ -77,16 +76,14 @@ class ForwardServerHandler(socketserver.BaseRequestHandler):
                         break
                     self.request.send(data)
         except Exception as e:
-            logger.error(f"Connection: Request transmission failure: {e}")
-            # print(e)
+            print(e)
 
         try:
             logger.debug("Connection: Close forward server channel")
             chan.close()
             self.server.shutdown()
         except Exception as e:
-            logger.error(f"Connection: Close forward server channel failed: {e}")
-            # print(e)
+            print(e)
 
 
 class ForwardServer(socketserver.ThreadingTCPServer):
@@ -129,8 +126,7 @@ class Connection:
             pkey = paramiko.RSAKey.from_private_key(StringIO(private_key_str))
             client.connect(host, username=username, pkey=pkey, timeout=15, sock=self._jump_channel)
         else:
-            logger.error("Connection: no valid SSH auth given.")
-            # raise ValueError("Connection: no valid SSH auth given.")
+            raise ValueError("Connection: no valid SSH auth given.")
 
     def _init_jump_channel(self, host, username, **auth_methods):
         """
@@ -144,8 +140,7 @@ class Connection:
         """
         if (host.endswith('ecf.utoronto.ca') or host.endswith('ecf.toronto.edu')) and not host.startswith('remote'):
             if self._jump_client is not None:
-                logger.error("Connection: API misuse: should not invoke connect twice on the same Connection object")
-                # raise ValueError("API misuse: should not invoke connect twice on the same Connection object")
+                raise ValueError("API misuse: should not invoke connect twice on the same Connection object")
 
             self._jump_client = paramiko.SSHClient()
             self._jump_client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
@@ -164,7 +159,6 @@ class Connection:
         except Exception as e:
             # raise e
             # print('Connection::connect() exception:')
-            logger.warning(f"Connection: Connection failed due to {str(e)}")
             return False, str(e)
 
         self.host = host
@@ -192,8 +186,7 @@ class Connection:
             rsa_key.write_private_key(key_file_obj)
             logger.debug(f"Connection: RSA SSH private key written to {key_file_obj}")
         else:
-            logger.error("Connection: Neither key_filename nor key_file_obj is provided.")
-            # raise ValueError('Neither key_filename nor key_file_obj is provided.')
+            raise ValueError('Neither key_filename nor key_file_obj is provided.')
 
         # ssh-rsa: key type
         # rsa_key.get_base64(): key phrase
@@ -214,14 +207,12 @@ class Connection:
             # generate key pairs and save the private key in the key file object
             pub_key = Connection.ssh_keygen(key_file_obj=key_file_obj, public_key_comment=public_key_comment)
         else:
-            logger.error("Connection: Neither key_filename nor key_file_obj is provided.")
-            # raise ValueError('Neither key_filename nor key_file_obj is provided.')
+            raise ValueError('Neither key_filename nor key_file_obj is provided.')
 
         # save the public key onto the remote server
         exit_status, _, _, _ = self.exec_command_blocking(
             "mkdir -p ~/.ssh && chmod 700 ~/.ssh && echo '%s' >>  ~/.ssh/authorized_keys" % pub_key)
         if exit_status != 0:
-            logger.warning("Connection: unable to save public key; Check for disk quota and permissions with any conventional SSH clients. ")
             return False, "Connection::save_keys: unable to save public key; Check for disk quota and permissions with any conventional SSH clients. "
         logger.debug("Connection: Public ssh key saved to remove server ~/.ssh/authorized_keys")
 
