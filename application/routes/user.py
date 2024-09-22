@@ -50,7 +50,6 @@ def register():
         profiles.add_user(username, password, email)
         logger.info(f"User: User registered successfully: {username}")
     except KeyError as e:
-        logger.error(f"User: Registration failed, {e} is missing")
         abort(403, f'{e} is missing')
 
     return 'Registration Successful'
@@ -71,7 +70,6 @@ def login():
         profiles.login(username, password)
         logger.info(f"User: User logged in successfully: {username}")
     except KeyError as e:
-        logger.error(f"User: Login failed, {e} is missing")
         abort(403, f'{e} is missing')
 
     return 'logged in'
@@ -91,7 +89,6 @@ def resend():
         profiles.send_activation_email(username)
         logger.info(f"User: Activation email resent to user: {username}")
     except KeyError as e:
-        logger.error(f"User: Resend activation failed, {e} is missing")
         abort(403, f'{e} is missing')
     return 'sent'
 
@@ -106,7 +103,6 @@ def activate():
             logger.info(f"User: User activated successfully: {userid}")
             return 'Your account has been activated. '
     except KeyError as e:
-        logger.error(f"User: Activation failed, {e} is missing")
         abort(403, f'{e} is missing')
 
     return 'Failed to activate. ' \
