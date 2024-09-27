@@ -21,7 +21,7 @@
 import json
 import logging
 
-from flask import request, abort, stream_with_context
+from flask import request, abort, stream_with_context, jsonify
 
 from .common import create_connection
 from .. import api, app, profiles
@@ -93,7 +93,7 @@ def start_vnc():
             'port': ws_port,
             'credentials': credentials
         }
-        yield json.dumps(result)
+        yield jsonify(result)
 
     return app.response_class(stream_with_context(generate()), mimetype='application/octet-stream')
 

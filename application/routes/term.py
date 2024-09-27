@@ -20,7 +20,7 @@
 
 import json
 
-from flask import request, abort, stream_with_context
+from flask import request, abort, stream_with_context, jsonify
 
 from .common import create_connection
 from .. import api, app
@@ -59,7 +59,7 @@ def start_terminal():
             'port': TERMINAL_PORT,
             'term_id': term.id
         }
-        yield json.dumps(result)
+        yield jsonify(result)
 
     return app.response_class(stream_with_context(generate()), mimetype='application/octet-stream')
 
