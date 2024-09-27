@@ -23,7 +23,7 @@ import posixpath
 from datetime import datetime
 from pathlib import Path
 
-from flask import request, abort, stream_with_context
+from flask import request, abort, stream_with_context, jsonify
 
 from .common import create_connection
 from .. import api, app
@@ -48,7 +48,7 @@ def sftp_ls(session_id):
         'cwd': cwd,
         'files': file_list
     }
-    return json.dumps(result)
+    return jsonify(result)
 
 
 @api.route('/sftp_dl/<session_id>')
