@@ -21,8 +21,7 @@ import logging.config
 
 import os
 import sys
-# sys.path.insert(0, 'D:/test/iCtrl/clp-loglib-py/src/')
-# from clp_logging.handlers import clp_logging.handlers
+
 from clp_logging.handlers import CLPFileHandler
 from pathlib import Path
 import yaml
@@ -30,7 +29,6 @@ from flask import Flask, Blueprint, jsonify
 from werkzeug.exceptions import HTTPException
 from werkzeug.serving import WSGIRequestHandler
 
-clp_handler = CLPFileHandler(Path("example.clp.zst"))
 
 try:
     with open('log_config.yaml', 'r') as config_file:
@@ -40,8 +38,9 @@ except Exception as ex:
     print("Logging setup failed with exception = ", ex)
 
 logger = logging.getLogger(__name__)
-# logger.handlers = []
-# logger.addHandler(clp_handler)
+logger.handlers = []
+clp_handler = CLPFileHandler(Path("example.clp.zst"))
+logger.addHandler(clp_handler)
 logger.warning(f"Logging is set up with config={config}")
 
 from .Profile.Profile import Profile
