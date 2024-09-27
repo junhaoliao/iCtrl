@@ -7,12 +7,27 @@ formatters:
         datefmt: '%Y-%m-%d %H:%M:%S'
 
 handlers:
-    console:
-        class: logging.StreamHandler
-        level: DEBUG
-        formatter: default
-        stream: ext://sys.stderr
+    clp_file:
+        class: clp_logging.handlers.CLPFileHandler
+        level: INFO
+        formatter: standard
+        filename: 'D:\\test\\iCtrl\\example.clp.zst'
+
+    clp_sock:
+        class: clp_logging.handlers.CLPSockHandler
+        level: INFO
+        formatter: standard
+        filename: 'D:\\test\\iCtrl\\example.clp.zst'
+        mode: 'a'
+        encoding: 'utf-8'
+        create_listener: true
+
+    loggers:
+        "":
+            level: INFO
+            handlers: [clp_file, clp_sock ]
+            propagate: no
 
 root:
     level: DEBUG
-    handlers: [console]
+    handlers: [clp_file]
