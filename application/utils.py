@@ -18,11 +18,15 @@
 #   FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 #   IN THE SOFTWARE.
 
+import logging
 import os
 import smtplib
 import socket
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
+
+
+logger = logging.getLogger(__name__)
 
 
 def int_to_bytes(num):
@@ -32,7 +36,9 @@ def int_to_bytes(num):
 def find_free_port():
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
         sock.bind(('', 0))
-        return sock.getsockname()[1]
+        socket_info = sock.getsockname()
+        logger.info(f"Socket binded to address {socket_info[0]} at port {socket_info[1]}")
+        return socket_info[1]
 
 
 def send_email(to_email, subject, body):
@@ -53,6 +59,9 @@ def send_email(to_email, subject, body):
     server_ssl.login(sender_email, sender_password)
 
     server_ssl.sendmail(sender_email, to_email, msg.as_string())
+
+    logger.info(f'Successfully sent email from {sender_email} to {to_email}')
+
     server_ssl.close()
 
 
@@ -77,6 +86,7 @@ def validate_password(password):
         reason = f'Password should have at least one of the symbols [{"".join(special_symbols)}]'
 
     if reason is not None:
+        logger.error(f'Failed to validate password, reason: {reason}')
         return False, reason
     else:
         return True, None
@@ -90,6 +100,8 @@ def get_headers_dict_from_str(headers_str):
             continue
         header_name, header_value = line.split(': ', 1)
         headers[header_name] = header_value
+
+    logger.debug(f'Extracted HTTP headers, headers = {headers}')
 
     return headers
 
