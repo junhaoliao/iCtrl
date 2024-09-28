@@ -38,9 +38,6 @@ except Exception as ex:
     print("Logging setup failed with exception = ", ex)
 
 logger = logging.getLogger(__name__)
-logger.handlers = []
-clp_handler = CLPFileHandler(Path("example.clp.zst"))
-logger.addHandler(clp_handler)
 logger.warning(f"Logging is set up with config={config}")
 
 from .Profile.Profile import Profile
