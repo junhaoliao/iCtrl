@@ -54,8 +54,15 @@
             color: black;
         }
 
-        #download-count {
+        #download-count,
+        #last-publish-line,
+        #total-downloads-span {
             visibility: hidden;
+        }
+
+        #github-and-bug-report-links {
+            display: flex;
+            gap: 2rem;
         }
 
         #body-wrapper {
@@ -110,6 +117,14 @@
         iCtrl
     </h1>
     <h2 id="description">A Simple VNC + SSH Console + SFTP Client</h2>
+    <h5>
+       <span id="total-downloads-span">
+           Total Downloads: <span id="total-downloads"></span> |&nbsp;
+       </span>
+       <span id="last-publish-span">
+           Last Published at: <span id="last-published-at"></span>
+       </span>
+    </h5>
     <table>
         <tr>
             <td>
@@ -139,16 +154,11 @@
             <td><abbr title="ARM Mac Latest Version Downloads" id="darwin-arm64-download-count"></abbr></td>
         </tr>
     </table>
-    <table id="view_source_bug_report">
-        <tr>
-            <td>
-                <a target="_blank" href="https://github.com/junhaoliao/iCtrl">View on GitHub</a>
-            </td>
-            <td>
-                <a target="_blank" style="margin-left: 30px" href="https://github.com/junhaoliao/iCtrl/issues">Bug Report</a>
-            </td>
-        </tr>
-    </table>
+    <br/>
+    <div id="github-and-bug-report-links">
+        <a target="_blank" href="https://github.com/junhaoliao/iCtrl">View on GitHub</a>
+        <a target="_blank" href="https://github.com/junhaoliao/iCtrl/issues">Bug Report</a>
+    </div>
 </div>
 <div class="copyright"><a target="_blank" href="https://junhao.ca">Copyright (C) 2020-2022 iCtrl Developers</a></div>
 <script>
@@ -181,13 +191,13 @@
         document.getElementById('downloaded_dimmer').classList.remove('active');
     };
 
-    const xhr = new XMLHttpRequest();
-    xhr.onreadystatechange = function () {
-        if (xhr.readyState === XMLHttpRequest.DONE) {
+    const lastReleaseXhr = new XMLHttpRequest();
+    lastReleaseXhr.onreadystatechange = function () {
+        if (lastReleaseXhr.readyState === XMLHttpRequest.DONE) {
             let win64 = 0;
             let darwin_x64 = 0;
             let darwin_arm64 = 0;
-            const {assets} = JSON.parse(xhr.responseText);
+            const {assets, published_at} = JSON.parse(lastReleaseXhr.responseText);
             for (const asset of assets) {
                 if (asset['name'].includes('exe') || asset['name'].includes('nupkg')) {
                     win64 += asset['download_count'];
@@ -197,14 +207,38 @@
                     darwin_arm64 += asset['download_count'];
                 }
             }
+            document.getElementById('last-published-at').innerText = new Date(published_at)
+                .toLocaleString(undefined, {timeZoneName: "long"});
+            document.getElementById('last-publish-span').style.visibility = 'visible';
             document.getElementById('windows-download-count').innerText = win64.toString();
             document.getElementById('darwin-x64-download-count').innerText = darwin_x64.toString();
             document.getElementById('darwin-arm64-download-count').innerText = darwin_arm64.toString();
             document.getElementById('download-count').style.visibility = 'visible';
         }
     }
-    xhr.open("GET", 'https://api.github.com/repos/junhaoliao/iCtrl/releases/latest', true);
-    xhr.send();
+    lastReleaseXhr.open("GET", 'https://api.github.com/repos/junhaoliao/iCtrl/releases/latest', true);
+    lastReleaseXhr.send();
+
+    const totalDownloadCountXhr = new XMLHttpRequest();
+    totalDownloadCountXhr.onreadystatechange = function () {
+        if (totalDownloadCountXhr.readyState === XMLHttpRequest.DONE) {
+            const data = JSON.parse(totalDownloadCountXhr.responseText);
+            let totalDownloadCount = 0;
+            for (const release of data) {
+                for (const asset of release["assets"]) {
+                    // exclude those named "RELEASE" because the file
+                    //  is used for Windows auto-update
+                    if (asset["name"] !== "RELEASES") {
+                        totalDownloadCount += asset["download_count"];
+                    }
+                }
+            }
+            document.getElementById('total-downloads').innerText = totalDownloadCount.toString(10);
+            document.getElementById('total-downloads-span').style.visibility = 'visible';
+        }
+    }
+    totalDownloadCountXhr.open("GET", 'https://api.github.com/repos/junhaoliao/iCtrl/releases', true);
+    totalDownloadCountXhr.send();
 </script>
 <script src="https://cdn.jsdelivr.net/npm/semantic-ui/dist/semantic.min.js"></script>
 <script async defer src="https://buttons.github.io/buttons.js"></script>
