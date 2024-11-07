@@ -29,12 +29,6 @@ def calculate_sha256_hash(file_path):
             hash.update(chunk)
     return hash.hexdigest()
 
-def calculate_segment_sha256_hash(data):
-    hash = hashlib.sha256()
-    hash.update(data)
-    return base64.b64encode(hash.digest()).decode('utf-8')
-
-
 class LogNamePolicy:
 
     # Create remote folder path
@@ -275,8 +269,6 @@ def main():
     local_path = os.getcwd() + '\\testfile'
     log_name = LogNamePolicy()
     obj_key = log_name.generate_obj_key(EXTENSION)
-
-    # TODO: detect updates in examples.clp.zst and then upload
 
 
     # Test upload file in local_path
