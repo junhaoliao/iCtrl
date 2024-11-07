@@ -3,6 +3,7 @@ import os
 import sys
 import threading
 import datetime
+import base64
 
 import boto3
 import time
@@ -21,22 +22,31 @@ def calculate_hash(file_path):
             hash.update(chunk)
     return hash.hexdigest()
 
+def calculate_sha256_hash(file_path):
+    hash = hashlib.sha256()
+    with open(file_path, 'rb') as f:
+        for chunk in iter(lambda: f.read(4096), b''):
+            hash.update(chunk)
+    return hash.hexdigest()
+
+def calculate_segment_sha256_hash(data):
+    hash = hashlib.sha256()
+    hash.update(data)
+    return base64.b64encode(hash.digest()).decode('utf-8')
+
 
 class LogNamePolicy:
-    def __init__(self):
-        # TODO: log type should be an input, modify this when integrating with iCtrl
-        self.log_type = 'debug'
 
     # Create remote folder path
     def path_name(self):
         current_time = datetime.datetime.now()
-        folder_path = f'logs/{current_time.year}/{current_time.month}/{current_time.day}/{self.log_type}'
+        folder_path = f'logs/{current_time.year}/{current_time.month}/{current_time.day}'
         return folder_path
 
     # S3 object key contains remote path and remote filename
     def generate_obj_key(self, extension):
         timestamp = datetime.datetime.now()
-        folder_path = f'logs/{timestamp.year}/{timestamp.month}/{timestamp.day}/{self.log_type}'
+        folder_path = f'logs/{timestamp.year}/{timestamp.month}/{timestamp.day}'
         # File name identified by time
         file_name = f'{folder_path}/ictrl_log_{timestamp.strftime("%Y-%m-%d-%H%M%S")}{extension}'
         return file_name
@@ -74,6 +84,12 @@ class RemoteHandler():
         self.s3_client = boto3.client('s3')
         self.bucket = bucket
         self.obj_key = obj_key
+        self.multipart_upload = {
+            'size': 1024 * 1024 * 5,  # 5KB for testing purpose
+            'index': 1,
+            'pos': 0,
+            'uploaded parts': []
+        }
 
     # TODO: May need a method to create bucket
 
@@ -127,8 +143,7 @@ class RemoteHandler():
         self.report_transfer_result(transfer_callback.thread_info, end_time - start_time)
 
     #  Compare hash key between local and remote file
-    def transfer_upload_with_check(self, local_path, file_size, all_remote_files):
-        local_hash = calculate_hash(local_path)
+    def compare_local_and_remote_files(self, local_path, all_remote_files):
 
         try:
             # Iterate through all files in the remote folder path
@@ -137,57 +152,149 @@ class RemoteHandler():
             for obj in all_remote_files:
                 # Get the S3 object's ETag
                 s3_object = self.s3_client.head_object(Bucket=self.bucket, Key=obj)
-                s3_hash = s3_object['ETag'].strip('"')
 
-                # Compare hashes
-                if local_hash == s3_hash:
-                    print(f'File content matches with S3 object: {obj}')
-                    print('Abort Upload')
-                    return
+                # If SHA256 hash key exist on remote
+                if 'ChecksumSHA256' in s3_object:
+                    print('Checking SHA256 values of file')
+                    s3_hash = s3_object['ChecksumSHA256'].strip('"')
+                    # Compare SHA256 hash key
+                    if calculate_sha256_hash(local_path) == s3_hash:
+                        print(f'File content matches with S3 object: {obj}')
+                        print('Abort Upload')
+                        return False
 
-            # If no matching hash was found, upload the file
-            print(f'Uploading file to {self.obj_key}')
-            self.transfer_upload(local_path, file_size)
+                # Use MD5 (default) hash key if SHA256 hash key does not exist
+                else:
+                    print('Checking MD5 values of file')
+                    s3_hash = s3_object['ETag'].strip('"')
+
+                    # Compare ETag with MD5 hashes
+                    if calculate_hash(local_path) == s3_hash:
+                        print(f'File content matches with S3 object: {obj}')
+                        print('Abort Upload')
+                        return False
+
+            return True
+
 
         except ClientError as e:
             print(f'Error: {e}')
+            return False
+
+    def transfer_upload_from_pos(self, local_path, upload_id):
+        with open(local_path, 'rb') as f:
+            f.seek(self.multipart_upload['pos'])
+            upload_data = f.read(self.multipart_upload['size'])
+
+        print('Part Number: ', self.multipart_upload['index'])
+        part_checksum = calculate_segment_sha256_hash(upload_data)
+        response = self.s3_client.upload_part(Bucket=self.bucket, Key=self.obj_key, Body=upload_data,
+                                              PartNumber=self.multipart_upload['index'], UploadId=upload_id,
+                                              ChecksumSHA256=part_checksum)
+
+
+        # Report unique part number and associated entity tag
+        return {'PartNumber': self.multipart_upload['index'], 'ETag': response['ETag'], 'ChecksumSHA256': response['ChecksumSHA256']}
+
+    def transfer_multipart_upload(self, local_path):
+        # Request to initiate a multipart upload to obtain upload ID
+        response = self.s3_client.create_multipart_upload(Bucket=self.bucket, Key=self.obj_key, ChecksumAlgorithm='SHA256')
+        upload_id = response['UploadId']
+        print(f'Upload starting...\n')
+
+        try:
+            file_growth_counter = 0
+            while True:
+                file_size = os.path.getsize(local_path)
+
+                # Upload once the file exceeds set size
+                if file_size - self.multipart_upload['pos'] >= self.multipart_upload['size']:
+                    response = self.transfer_upload_from_pos(local_path, upload_id)
+                    self.multipart_upload['index'] += 1
+                    self.multipart_upload['pos'] += self.multipart_upload['size']
+                    print(response)
+
+                    # AWS S3 Part number restriction
+                    if self.multipart_upload['index'] < 1 or self.multipart_upload['index'] > 10000:
+                        # TODO: Need to start a new multipart upload session here
+                        break
+                    self.multipart_upload['uploaded parts'].append(response)
+                    file_growth_counter = 0
+                # Pause if the file is not growing
+                elif os.path.getsize(local_path) == file_size:
+                    time.sleep(10)  # Wait 10 seconds to check if the file size is updated
+                    file_growth_counter += 1
+
+                # If file does not grow within a set period of time
+                if file_growth_counter >= 3:
+                    break
+
+            # Concatenate the parts in ascending part number order
+            response = self.s3_client.complete_multipart_upload(
+                Bucket=self.bucket,
+                Key=self.obj_key,
+                UploadId=upload_id,
+                MultipartUpload={
+                    'Parts': [
+                        {
+                            'PartNumber': part['PartNumber'],
+                            'ETag': part['ETag'],
+                            'ChecksumSHA256': part['ChecksumSHA256']
+                        }
+                        for part in self.multipart_upload['uploaded parts']
+                    ]
+                }
+            )
+            print(f'Upload successful. Uploaded {self.multipart_upload["index"]-1} segments.')
+            return response['ChecksumSHA256']
+        except Exception as e:
+            print('Upload aborted.', e)
+            self.s3_client.abort_multipart_upload(Bucket=self.bucket, Key=self.obj_key, UploadId=upload_id)
+
+    def multipart_upload_mechanism(self, local_path):
+        name = LogNamePolicy()
+        all_remote_files = self.list_remote_files(name.path_name())
+
+        ret = self.compare_local_and_remote_files(local_path, all_remote_files)
+        if ret:
+            # If no matching hash was found, upload the file
+            print(f'Uploading file to {self.obj_key}')
+            self.transfer_multipart_upload(local_path)
 
     def upload_mechanism(self, local_path, file_size):
         name = LogNamePolicy()
 
         all_remote_files = self.list_remote_files(name.path_name())
 
-        self.transfer_upload_with_check(local_path, file_size, all_remote_files)
+        ret = self.compare_local_and_remote_files(local_path, all_remote_files)
+        if ret:
+            # If no matching hash was found, upload the file
+            print(f'Uploading file to {self.obj_key}')
+            self.transfer_upload(local_path, file_size)
 
-    # TODO: download does not work yet
-    def transfer_download(self, local_path, file_size):
-        start_time = time.perf_counter()
-        transfer_callback = TransferCallback(file_size)
-        self.s3.Bucket(self.bucket).Object(self.obj_key).download_file(local_path, Callback=transfer_callback)
-        end_time = time.perf_counter()
-        self.report_transfer_result(transfer_callback.thread_info, end_time - start_time)
+
 
 def main():
-    local_path = os.getcwd() + '\\example.clp.zst'
+    local_path = os.getcwd() + '\\remotehandler.py'
     log_name = LogNamePolicy()
     obj_key = log_name.generate_obj_key(EXTENSION)
 
     # TODO: detect updates in examples.clp.zst and then upload
 
+
     # Test upload file in local_path
+    '''
     print(f'=====Upload {local_path} Start=====')
     a = RemoteHandler(S3_BUCKET, obj_key)
     a.upload_mechanism(local_path, file_size=100)
     print(f'=====Upload {local_path} End=====')
+    '''
 
-    # Test download file in local_path
-    # Download does not work yet
-    '''
-    download_local_path = os.path.join(os.getcwd(),'local_store').replace('\\'','/')
-    print(f'=====Download {download_local_path} Start=====')
-    a.transfer_download(local_path, 100)
-    print(f'=====Download {download_local_path} End=====')
-    '''
+
+    print(f'=====Multipart Upload {local_path} Start=====\n')
+    upload_inst = RemoteHandler(S3_BUCKET, obj_key)
+    upload_inst.transfer_multipart_upload(local_path)
+    print(f'=====Multipart Upload {local_path} End=====\n')
 
 
 if __name__ == '__main__':
