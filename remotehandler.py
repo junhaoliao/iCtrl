@@ -187,18 +187,16 @@ class RemoteHandler():
             upload_data = f.read(self.multipart_upload['size'])
 
         print('Part Number: ', self.multipart_upload['index'])
-        part_checksum = calculate_segment_sha256_hash(upload_data)
         response = self.s3_client.upload_part(Bucket=self.bucket, Key=self.obj_key, Body=upload_data,
-                                              PartNumber=self.multipart_upload['index'], UploadId=upload_id,
-                                              ChecksumSHA256=part_checksum)
+                                              PartNumber=self.multipart_upload['index'], UploadId=upload_id)
 
 
         # Report unique part number and associated entity tag
-        return {'PartNumber': self.multipart_upload['index'], 'ETag': response['ETag'], 'ChecksumSHA256': response['ChecksumSHA256']}
+        return {'PartNumber': self.multipart_upload['index'], 'ETag': response['ETag']}
 
     def transfer_multipart_upload(self, local_path):
         # Request to initiate a multipart upload to obtain upload ID
-        response = self.s3_client.create_multipart_upload(Bucket=self.bucket, Key=self.obj_key, ChecksumAlgorithm='SHA256')
+        response = self.s3_client.create_multipart_upload(Bucket=self.bucket, Key=self.obj_key)
         upload_id = response['UploadId']
         print(f'Upload starting...\n')
 
@@ -238,15 +236,14 @@ class RemoteHandler():
                     'Parts': [
                         {
                             'PartNumber': part['PartNumber'],
-                            'ETag': part['ETag'],
-                            'ChecksumSHA256': part['ChecksumSHA256']
+                            'ETag': part['ETag']
                         }
                         for part in self.multipart_upload['uploaded parts']
                     ]
                 }
             )
             print(f'Upload successful. Uploaded {self.multipart_upload["index"]-1} segments.')
-            return response['ChecksumSHA256']
+            return response
         except Exception as e:
             print('Upload aborted.', e)
             self.s3_client.abort_multipart_upload(Bucket=self.bucket, Key=self.obj_key, UploadId=upload_id)
@@ -275,7 +272,7 @@ class RemoteHandler():
 
 
 def main():
-    local_path = os.getcwd() + '\\remotehandler.py'
+    local_path = os.getcwd() + '\\testfile'
     log_name = LogNamePolicy()
     obj_key = log_name.generate_obj_key(EXTENSION)
 
