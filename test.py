@@ -1,5 +1,4 @@
-#  Copyright (c) 2021-2022 iCtrl Developers
-#
+#  Copyright (c) 2024 iCtrl Developers
 #  Permission is hereby granted, free of charge, to any person obtaining a copy
 #   of this software and associated documentation files (the "Software"), to
 #   deal in the Software without restriction, including without limitation the
@@ -18,29 +17,16 @@
 #   FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 #   IN THE SOFTWARE.
 
-if __name__ == '__main__':
-    from application import api, app, APP_HOST, APP_PORT
-    from application.utils import local_auth
+from pathlib import Path
+from typing import List
 
-    if not app.debug:
-        import os
+from clp_logging.readers import CLPFileReader, Log
 
-        from flask import abort, request, send_from_directory
+# create a list of all Log objects
+log_objects: List[Log] = []
+with CLPFileReader(Path("example.clp.zst")) as clp_reader:
+    for log in clp_reader:
+        print(log)
+        log_objects.append(log)
 
-
-        @app.before_request
-        def before_request():
-            local_auth(headers=request.headers, abort_func=abort)
-
-        # Reference: https://stackoverflow.com/questions/44209978/serving-a-front-end-created-with-create-react-app-with
-        # -flask
-        @app.route('/', defaults={'path': ''})
-        @app.route('/<path:path>')
-        def serve(path):
-            if path != "" and os.path.exists(os.path.join(app.static_folder, path)):
-                return send_from_directory(app.static_folder, path)
-            else:
-                return send_from_directory(app.static_folder, 'index.html')
-
-    app.register_blueprint(api, url_prefix='/api')
-    app.run(host=APP_HOST, port=APP_PORT, ssl_context="adhoc")
+print(log_objects)

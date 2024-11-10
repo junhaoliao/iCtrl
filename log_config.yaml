@@ -7,12 +7,19 @@ formatters:
         datefmt: '%Y-%m-%d %H:%M:%S'
 
 handlers:
-    console:
-        class: logging.StreamHandler
-        level: DEBUG
+    file:
+        class: logging.FileHandler
+        level: NOTSET
         formatter: default
-        stream: ext://sys.stderr
+        filename: 'example.log'  # Output file path
+        encoding: utf-8
+        mode: w  # 'w' to overwrite each time, 'a' to append
+
+    CLP_file:
+        class: clp_logging.handlers.CLPFileHandler
+        level: NOTSET
+        fpath: 'example.clp.zst'
 
 root:
-    level: DEBUG
-    handlers: [console]
+    level: NOTSET
+    handlers: [file, CLP_file]

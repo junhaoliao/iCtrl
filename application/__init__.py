@@ -18,13 +18,17 @@
 #   FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 #   IN THE SOFTWARE.
 import logging.config
+
 import os
 import sys
 
+from clp_logging.handlers import CLPFileHandler
+from pathlib import Path
 import yaml
 from flask import Flask, Blueprint, jsonify
 from werkzeug.exceptions import HTTPException
 from werkzeug.serving import WSGIRequestHandler
+
 
 try:
     with open('log_config.yaml', 'r') as config_file:
@@ -34,7 +38,6 @@ except Exception as ex:
     print("Logging setup failed with exception = ", ex)
 
 logger = logging.getLogger(__name__)
-#Setting the message to warning in case logging set up from dictConfig was not successful
 logger.warning(f"Logging is set up with config={config}")
 
 from .Profile.Profile import Profile
@@ -74,7 +77,7 @@ try:
     APP_PORT = int(sys.argv[1])
     LOCAL_AUTH_KEY = sys.argv[2]
 except IndexError:
-    logger.debug("Running in debug mode")
+    print("Debug mode")
     APP_PORT = 5000
     LOCAL_AUTH_KEY = ''
 
