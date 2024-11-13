@@ -146,6 +146,7 @@ class RemoteHandler():
             for obj in all_remote_files:
                 # Get the S3 object's ETag
                 s3_object = self.s3_client.head_object(Bucket=self.bucket, Key=obj)
+                print(s3_object)
 
                 # If SHA256 hash key exist on remote
                 if 'ChecksumSHA256' in s3_object:
@@ -282,7 +283,7 @@ def main():
 
     print(f'=====Multipart Upload {local_path} Start=====\n')
     upload_inst = RemoteHandler(S3_BUCKET, obj_key)
-    upload_inst.transfer_multipart_upload(local_path)
+    upload_inst.multipart_upload_mechanism(local_path)
     print(f'=====Multipart Upload {local_path} End=====\n')
 
 
