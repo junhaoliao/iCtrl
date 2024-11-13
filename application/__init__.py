@@ -22,6 +22,8 @@ import logging.config
 import os
 import sys
 
+import datetime
+
 from clp_logging.handlers import CLPFileHandler
 from pathlib import Path
 import yaml
@@ -29,10 +31,16 @@ from flask import Flask, Blueprint, jsonify
 from werkzeug.exceptions import HTTPException
 from werkzeug.serving import WSGIRequestHandler
 
+timestamp = datetime.datetime.now()
+file_name = timestamp.strftime("%Y-%m-%d-%H-%M")
+log_dir = os.path.join(os.getcwd(), 'logs')
+os.makedirs(log_dir, exist_ok=True)
+file_path = os.path.join(log_dir, f'ictrl_{file_name}.clp.zst')
 
 try:
     with open('log_config.yaml', 'r') as config_file:
         config = yaml.safe_load(config_file.read())
+        config['handlers']['CLP_file']['fpath'] = str(file_path)
     logging.config.dictConfig(config)
 except Exception as ex:
     print("Logging setup failed with exception = ", ex)
