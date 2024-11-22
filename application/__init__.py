@@ -40,7 +40,6 @@ file_path = os.path.join(log_dir, f'ictrl_{file_name}.clp.zst')
 try:
     with open('log_config.yaml', 'r') as config_file:
         config = yaml.safe_load(config_file.read())
-        config['handlers']['CLP_file']['fpath'] = str(file_path)
     logging.config.dictConfig(config)
 except Exception as ex:
     print("Logging setup failed with exception = ", ex)

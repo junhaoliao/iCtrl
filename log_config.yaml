@@ -16,9 +16,15 @@ handlers:
         mode: w  # 'w' to overwrite each time, 'a' to append
 
     CLP_file:
-        class: clp_logging.handlers.CLPFileHandler
+        class: application.logger.RotatingCLPFileHandler
         level: NOTSET
-        fpath: 'example.clp.zst'
+        formatter: default
+        filename_prefix: 'ictrl_'
+        log_dir: 'logs'
+        max_bytes: 8192  # Rotate after 8 KB
+        backup_count: 10  # Keep 10 backup files
+        enable_compression: True
+        timestamp_format: '%Y-%m-%d_%H-%M-%S'
 
 root:
     level: NOTSET
