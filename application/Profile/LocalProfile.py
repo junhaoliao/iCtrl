@@ -25,6 +25,7 @@ import uuid
 
 from application.paths import *
 from .Profile import Profile
+from typing import Any, Dict, Tuple
 
 _PROFILE_VERSION = 1  # in case the schema changes in the future
 
@@ -87,11 +88,11 @@ class LocalProfile(Profile):
             logger.error(f"LocalProfile: Error loading profile: {e}")
             logger.warning("Unable to load the user profile. Using the default profile instead.")
 
-    def query(self):
+    def query(self) -> Dict[str, Any]:
         logger.info("querying profile")
         return self._profile
 
-    def add_session(self, host, username, conn=None):
+    def add_session(self, host, username, conn=None) -> Tuple[bool, str]:
         session = copy.deepcopy(_EMPTY_SESSION)
 
         session_id = uuid.uuid4().hex
@@ -104,15 +105,15 @@ class LocalProfile(Profile):
             status, reason = conn.save_keys(key_filename=this_private_key_path,
                                             public_key_comment=this_private_key_path)
             if not status:
-                logger.warning(f"Failed to save RSA SSH private key in {this_private_key_path}")
+                logger.warning(f'Failed to save RSA SSH private key in {this_private_key_path}')
                 return status, reason
 
         self.save_profile()
 
-        logger.info(f"Successfully saved RSA SSH private key")
+        logger.info('Successfully saved RSA SSH private key')
         return True, ''
 
-    def delete_session(self, session_id):
+    def delete_session(self, session_id) -> Tuple[bool, str]:
         if session_id not in self._profile['sessions']:
             logger.error(f"Cannot delete session {session_id}, session does not exist")
             return False, f'failed: session {session_id} does not exist'
@@ -120,7 +121,7 @@ class LocalProfile(Profile):
         try:
             os.remove(os.path.join(PRIVATE_KEY_PATH, session_id))
         except FileNotFoundError:
-            logger.error('Not valid SSH key found for deletion')
+            logger.exception('No valid SSH key found for deletion')
 
         self._profile['sessions'].pop(session_id)
         self.save_profile()
@@ -129,7 +130,7 @@ class LocalProfile(Profile):
 
         return True, ''
 
-    def change_host(self, session_id, new_host):
+    def change_host(self, session_id, new_host) -> Tuple[bool, str]:
         if session_id not in self._profile['sessions']:
             logger.error(f'Cannot change host, session {session_id} does not exist')
             return False, f'failed: session {session_id} does not exist'
@@ -150,7 +151,7 @@ class LocalProfile(Profile):
             # need to handle any write permission issues, once observed
             raise e
 
-    def get_session_info(self, session_id):
+    def get_session_info(self, session_id) -> Tuple[Any, Any, Any, None, Any]:
         if session_id not in self._profile['sessions']:
             logger.error(f"Cannot retrieve session {session_id}, session does not exist")
             return None, None, None, None, None
@@ -167,13 +168,13 @@ class LocalProfile(Profile):
 
         return host, username, this_private_key_path, None, nickname
 
-    def set_session_nickname(self, session_id, nickname):
+    def set_session_nickname(self, session_id, nickname) -> Tuple[bool, str]:
         if session_id not in self._profile['sessions']:
             logger.error(f"Cannot retrieve session {session_id}, session does not exist")
             return False, f'failed: session {session_id} does not exist'
 
         if len(nickname) > 8:
-            logger.debug(f"Entered nickname must be under 8 characters")
+            logger.debug('Entered nickname must be under 8 characters')
             return False, "Entered nickname is too long"
 
         if nickname == "":
@@ -190,7 +191,7 @@ class LocalProfile(Profile):
 
         return True, ''
 
-    def set_session_vnc_credentials(self, session_id, credentials):
+    def set_session_vnc_credentials(self, session_id, credentials) -> Tuple[bool, str]:
         if session_id not in self._profile['sessions']:
             logger.error(f"Cannot retrieve session {session_id}, session does not exist")
             return False, f'failed: session {session_id} does not exist'
@@ -211,7 +212,7 @@ class LocalProfile(Profile):
 
         return True, ''
 
-    def get_session_vnc_credentials(self, session_id):
+    def get_session_vnc_credentials(self, session_id) -> Tuple[bool, Any]:
         if session_id not in self._profile['sessions']:
             logger.error(f"Cannot retrieve session {session_id}, session does not exist")
             return False, f'failed: session {session_id} does not exist'
