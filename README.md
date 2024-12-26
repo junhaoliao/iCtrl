@@ -62,11 +62,20 @@ Now you can add a new session by clicking the "+" (Plus) button in the upper rig
    - **Material UI**: https://mui.com/
 - **Richard Junjie Shen**, a graduated Uoft Architecture undergraduate student, who designed the logo
 
-## Authors
-- Junhao Liao
-- Kruzer Yizhong Xu
-- Kevin Haoran Zhang
-- Leo Jiaxing Li
+## Contributors
+### Since 2019
+- [@junhaoliao](https://www.github.com/junhaoliao) Junhao Liao
+### Since 2021
+- [@Kruz-X](https://www.github.com/Kruz-X) Kruzer Yizhong Xu
+- [@KevinHaoranZhang](https://www.github.com/KevinHaoranZhang) Kevin Haoran Zhang
+- [@leojiaxingli](https://www.github.com/leojiaxingli) Leo Jiaxing Li
+### Since 2023
+- [@Leo6Leo](https://www.github.com/Leo6Leo) Leo Haocheng Li
+### Since 2024
+- [@xx12345798](https://www.github.com/xx12345798) Xuan Xu
+- [@li-ruihao](https://www.github.com/li-ruihao) Ruihao Li
+- [@IreneLime](https://www.github.com/IreneLime) Irene Li
+- [@Nuovaxu](https://www.github.com/Nuovaxu) Nuova Nuo Xu
 
 ## Docs
  - [Deployment](https://github.com/junhaoliao/iCtrl/blob/main/docs/deployment.md)
