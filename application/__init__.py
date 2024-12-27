@@ -41,7 +41,7 @@ else:
     # As well, to ensure that logging configuration succeeded regardless
     # of a successful dictConfig execution, log a warning message
     # to see whether the configuration was actually successful
-    logger.warning(f"Logging is set up with config={config}")
+    logger.warning("Logging is set up with config=%s", config)
 
 from .Profile.Profile import Profile
 
