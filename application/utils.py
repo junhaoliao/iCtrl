@@ -86,7 +86,7 @@ def validate_password(password):
         reason = f'Password should have at least one of the symbols [{"".join(special_symbols)}]'
 
     if reason is not None:
-        logger.error('Failed to validate password, reason: %s', reason)
+        logger.warning('Failed to validate password, reason: %s', reason)
         return False, reason
     else:
         return True, None
@@ -101,7 +101,7 @@ def get_headers_dict_from_str(headers_str):
         header_name, header_value = line.split(': ', 1)
         headers[header_name] = header_value
 
-    logger.debug(f'Extracted HTTP headers, headers = {headers}')
+    logger.debug(f'Extracted HTTP headers, headers = %s', headers)
 
     return headers
 
