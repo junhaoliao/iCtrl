@@ -37,7 +37,7 @@ def find_free_port():
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
         sock.bind(('', 0))
         socket_info = sock.getsockname()
-        logger.info(f"Socket binded to address {socket_info[0]} at port {socket_info[1]}")
+        logger.info("Socket binded to address %s at port %s", socket_info[0], socket_info[1])
         return socket_info[1]
 
 
@@ -60,7 +60,7 @@ def send_email(to_email, subject, body):
 
     server_ssl.sendmail(sender_email, to_email, msg.as_string())
 
-    logger.info(f'Successfully sent email from {sender_email} to {to_email}')
+    logger.info('Successfully sent email from %s to %s', sender_email, to_email)
 
     server_ssl.close()
 
@@ -86,7 +86,7 @@ def validate_password(password):
         reason = f'Password should have at least one of the symbols [{"".join(special_symbols)}]'
 
     if reason is not None:
-        logger.error(f'Failed to validate password, reason: {reason}')
+        logger.error('Failed to validate password, reason: %s', reason)
         return False, reason
     else:
         return True, None
