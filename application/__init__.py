@@ -38,6 +38,9 @@ except:
     logger.exception("Logging setup failed")
 else:
     # Initialize the logger after dictConfig succeeds
+    # As well, to ensure that logging configuration succeeded regardless
+    # of a successful dictConfig execution, log a warning message
+    # to see whether the configuration was actually successful
     logger.warning(f"Logging is set up with config={config}")
 
 from .Profile.Profile import Profile
