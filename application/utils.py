@@ -101,7 +101,7 @@ def get_headers_dict_from_str(headers_str):
         header_name, header_value = line.split(': ', 1)
         headers[header_name] = header_value
 
-    logger.debug(f'Extracted HTTP headers, headers = %s', headers)
+    logger.debug('Extracted HTTP headers, headers = %s', headers)
 
     return headers
 
