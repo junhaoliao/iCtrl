@@ -73,19 +73,19 @@ class DBProfile(Profile):
         # key: user_id, value: activation code
         size = 1024
         self.activation_cache = TTLCache(maxsize=size, ttl=ACTIVATION_TTL_SECOND)
-        logger.debug(f"activation_cache set up with {size}, expiration time = {ACTIVATION_TTL_SECOND}")
+        logger.debug("activation_cache set up with %d, expiration time = %d", size, ACTIVATION_TTL_SECOND)
 
         # key: user_id, value: True (to indicate the entry exists; can be any dummy value)
         self.resend_cooldown = TTLCache(maxsize=size, ttl=RESEND_COOLDOWN_TTL_SECOND)
-        logger.debug(f"resend_cooldown cache set up with {size}, expiration time = {RESEND_COOLDOWN_TTL_SECOND}")
+        logger.debug("resend_cooldown cache set up with %d, expiration time = %d", size, RESEND_COOLDOWN_TTL_SECOND)
 
         activation_email_template = '/var/www/ictrl/application/resources/activation_email_template.html'
-        logger.debug(f"Opening {activation_email_template} in read-only mode")
+        logger.debug("Opening %s in read-only mode", activation_email_template)
         try:
-            with open(activation_email_template, 'r') as f:
+            with open(activation_email_template) as f:
                 self.activation_email_body_template = f.read()
         except IOError as e:
-            logger.error(f"Failed to open {activation_email_template}, does file exist? Error: {e}")
+            logger.exception(f"Failed to open {activation_email_template}, does file exist? Error: {e}")
 
         class User(db.Model):
             __table_args__ = {"schema": "ictrl"}
@@ -98,11 +98,9 @@ class DBProfile(Profile):
             @validates('username')
             def validate_username(self, key, username):
                 username_error = 'User name should contain only letters, numbers, underscores and dashes'
-                try:
-                    assert re.match("^[A-Za-z0-9_-]+$", username)
-                except AssertionError(username_error) as ae:
+                if not re.match("^[A-Za-z0-9_-]+$", username):
                     logger.error(username_error)
-                    raise ae
+                    raise AssertionError(username_error)
 
                 return username
 
@@ -115,19 +113,15 @@ class DBProfile(Profile):
             @validates('email')
             def validate_email(self, key, email):
                 invalid_email_error = f'Invalid email address: "{email}"'
-                try:
-                    assert re.match(r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b', email)
-                except AssertionError(invalid_email_error) as ae:
+                if not re.match(r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b', email):
                     logger.error(invalid_email_error)
-                    raise ae
+                    raise AssertionError(invalid_email_error)
 
                 # FIXME: remove this utoronto mail restriction in the future
                 not_uoft_email_error = "Currently, only UofT emails are supported, emails must end with utoronto.ca"
-                try:
-                    assert email.endswith('utoronto.ca')
-                except AssertionError(not_uoft_email_error) as ae:
+                if not email.endswith('utoronto.ca'):
                     logger.error(not_uoft_email_error)
-                    raise ae
+                    raise AssertionError(not_uoft_email_error)
 
                 return email
 
@@ -147,11 +141,9 @@ class DBProfile(Profile):
             @validates('nickname')
             def validate_nickname(self, key, nickname):
                 nickname_too_long = 'Entered nickname is too long'
-                try:
-                    assert len(nickname) <= 8
-                except AssertionError(nickname_too_long) as ae:
+                if len(nickname) > 8:
                     logger.error(nickname_too_long)
-                    raise ae
+                    raise AssertionError(nickname_too_long)
 
                 return nickname
 
