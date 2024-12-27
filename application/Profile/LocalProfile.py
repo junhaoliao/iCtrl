@@ -71,7 +71,7 @@ class LocalProfile(Profile):
     def __init__(self):
         self._profile = copy.deepcopy(_EMPTY_USER_PROFILE)
         try:
-            logger.debug(f"Attempting to open file: {USER_PROFILE_PATH}")
+            logger.debug("Attempting to open file: %s", USER_PROFILE_PATH)
             with open(USER_PROFILE_PATH, "r") as infile:
                 json_data = json.load(infile)
 
@@ -104,7 +104,7 @@ class LocalProfile(Profile):
             status, reason = conn.save_keys(key_filename=this_private_key_path,
                                             public_key_comment=this_private_key_path)
             if not status:
-                logger.warning(f'Failed to save RSA SSH private key in {this_private_key_path}')
+                logger.warning("Failed to save RSA SSH private key in %s", this_private_key_path)
                 return status, reason
 
         self.save_profile()
@@ -114,7 +114,7 @@ class LocalProfile(Profile):
 
     def delete_session(self, session_id) -> tuple[bool, str]:
         if session_id not in self._profile['sessions']:
-            logger.error(f"Cannot delete session {session_id}, session does not exist")
+            logger.error('Cannot delete session %s, session does not exist', session_id)
             return False, f'failed: session {session_id} does not exist'
 
         try:
@@ -125,19 +125,19 @@ class LocalProfile(Profile):
         self._profile['sessions'].pop(session_id)
         self.save_profile()
 
-        logger.info(f'Successfully deleted session {session_id}')
+        logger.info("Successfully deleted session %s", session_id)
 
         return True, ''
 
     def change_host(self, session_id, new_host) -> tuple[bool, str]:
         if session_id not in self._profile['sessions']:
-            logger.error(f'Cannot change host, session {session_id} does not exist')
+            logger.error("Cannot change host, session %s does not exist", session_id)
             return False, f'failed: session {session_id} does not exist'
 
         self._profile["sessions"][session_id]['host'] = new_host
         self.save_profile()
 
-        logger.info(f"Successfully changed host for session {session_id} to new host {new_host}")
+        logger.info("Successfully changed host for session %s to new host %s", session_id, new_host)
 
         return True, ''
 
@@ -152,7 +152,7 @@ class LocalProfile(Profile):
 
     def get_session_info(self, session_id) -> tuple[object, object, object, None, object]:
         if session_id not in self._profile['sessions']:
-            logger.error(f"Cannot retrieve session {session_id}, session does not exist")
+            logger.error("Cannot retrieve session %s, session does not exist", session_id)
             return None, None, None, None, None
 
         host = self._profile['sessions'][session_id]['host']
@@ -163,28 +163,28 @@ class LocalProfile(Profile):
         else:
             nickname = None
 
-        logger.info(f"Successfully retrieved session info for {session_id}")
+        logger.info("Successfully retrieved session info for %s", session_id)
 
         return host, username, this_private_key_path, None, nickname
 
     def set_session_nickname(self, session_id, nickname) -> tuple[bool, str]:
         if session_id not in self._profile['sessions']:
-            logger.error(f"Cannot retrieve session {session_id}, session does not exist")
+            logger.error("Cannot retrieve session %s, session does not exist", session_id)
             return False, f'failed: session {session_id} does not exist'
 
         if len(nickname) > 8:
-            logger.debug('Entered nickname must be under 8 characters')
+            logger.debug("Entered nickname must be under 8 characters")
             return False, "Entered nickname is too long"
 
         if nickname == "":
             # it is a delete request
             if 'nickname' in self._profile['sessions'][session_id]:
                 self._profile['sessions'][session_id].pop('nickname')
-                logger.info(f'Successfully deleted nickname from session {session_id}')
+                logger.info("Successfully deleted nickname from session %s", session_id)
         else:
             # it is an add / update request
             self._profile['sessions'][session_id]['nickname'] = nickname
-            logger.info(f'Successfully added/updated nickname for session {session_id}')
+            logger.info("Successfully added/updated nickname for session %s", session_id)
 
         self.save_profile()
 
@@ -192,20 +192,20 @@ class LocalProfile(Profile):
 
     def set_session_vnc_credentials(self, session_id, credentials) -> tuple[bool, str]:
         if session_id not in self._profile['sessions']:
-            logger.error(f"Cannot retrieve session {session_id}, session does not exist")
+            logger.error("Cannot retrieve session %s, session does not exist", session_id)
             return False, f'failed: session {session_id} does not exist'
 
         if credentials is None:
             # it is a delete request
             if 'vnc_credentials' in self._profile['sessions'][session_id]:
                 self._profile['sessions'][session_id].pop('vnc_credentials')
-                logger.info(f"Successfully deleted vnc credentials for session {session_id}")
+                logger.info("Successfully deleted vnc credentials for session %s", session_id)
         else:
             # it is an add / update request
             json_str = json.dumps(credentials)
             base64_str = base64.b64encode(json_str.encode('ascii')).decode('ascii')
             self._profile['sessions'][session_id]['vnc_credentials'] = base64_str
-            logger.info(f"Successfully added/updated vnc credentials for session {session_id}")
+            logger.info("Successfully added/updated vnc credentials for session %s", session_id)
 
         self.save_profile()
 
@@ -213,10 +213,10 @@ class LocalProfile(Profile):
 
     def get_session_vnc_credentials(self, session_id) -> tuple[bool, object]:
         if session_id not in self._profile['sessions']:
-            logger.error(f"Cannot retrieve session {session_id}, session does not exist")
+            logger.error("Cannot retrieve session %s, session does not exist", session_id)
             return False, f'failed: session {session_id} does not exist'
 
-        logger.info(f"Retrieving vnc credentials for session {session_id}")
+        logger.info("Retrieving vnc credentials for session %s", session_id)
         if 'vnc_credentials' in self._profile['sessions'][session_id]:
             json_str = base64.b64decode(self._profile['sessions'][session_id]['vnc_credentials'])
             return True, json.loads(json_str.decode('ascii'))
@@ -229,5 +229,5 @@ class LocalProfile(Profile):
 
         dummy_user = DummyUser()
 
-        logger.info(f'Returning user: {dummy_user}')
+        logger.info("Returning user: %s", dummy_user)
         return dummy_user

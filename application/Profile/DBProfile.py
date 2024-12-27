@@ -85,7 +85,7 @@ class DBProfile(Profile):
             with open(activation_email_template) as f:
                 self.activation_email_body_template = f.read()
         except IOError as e:
-            logger.exception(f"Failed to open {activation_email_template}, does file exist? Error: {e}")
+            logger.exception("Failed to open %s, does file exist? Error: %s", activation_email_template, e)
 
         class User(db.Model):
             __table_args__ = {"schema": "ictrl"}
@@ -200,7 +200,7 @@ class DBProfile(Profile):
     def logout():
         # remove the username from the session if it's there
         userid = flask_session.pop('userid', None)
-        logger.info(f'Removed session user: {userid}')
+        logger.info("Removed session user: %s", userid)
 
         return True
 
@@ -269,7 +269,7 @@ class DBProfile(Profile):
             user.activation_type = ActivationType.NORMAL_USER
             self.save_profile()
 
-            logger.info(f"Successfully activated user with userid={userid}")
+            logger.info("Successfully activated user with userid=%s", userid)
 
             return True
 
@@ -284,7 +284,7 @@ class DBProfile(Profile):
         if user is None:
             abort(403, 'Cannot find any matching record')
 
-        logger.info(f'Successfully retrieved user with userid={userid}')
+        logger.info("Successfully retrieved user with userid=%s", userid)
         return user
 
     def add_session(self, host, username, conn=None):
@@ -310,7 +310,7 @@ class DBProfile(Profile):
 
             self.save_profile()
 
-            logger.info(f'Successfully added a new session: session_id = {session.id}')
+            logger.info("Successfully added a new session: session_id = %s", session.id)
         except AssertionError as e:
             abort(403, e)
         except sqlalchemy.exc.IntegrityError as e:
@@ -323,7 +323,7 @@ class DBProfile(Profile):
             abort(403, 'You are not logged in')
         userid = flask_session['userid']
 
-        logger.info(f'Returning session, session_id = {session_id}')
+        logger.info("Returning session, session_id = %s", session_id)
         return self.Session.query.filter_by(id=session_id, user_id=userid).first()
 
     def delete_session(self, session_id):
@@ -334,7 +334,7 @@ class DBProfile(Profile):
         self.db.session.delete(session)
         self.save_profile()
 
-        logger.info(f'Successfully deleted session, session_id = {session_id}')
+        logger.info("Successfully deleted session, session_id = %s", session_id)
 
         return True, ''
 
@@ -346,7 +346,7 @@ class DBProfile(Profile):
         session.host = new_host
         self.save_profile()
 
-        logger.info(f'Successfully changed host for session, session_id = {session_id}')
+        logger.info("Successfully changed host for session, session_id = %s", session_id)
 
         return True, ''
 
@@ -357,7 +357,7 @@ class DBProfile(Profile):
     def get_session_info(self, session_id):
         session = self._get_session(session_id)
         if session is None:
-            logger.debug(f"Session {session_id} does not exist, cannot retrieve session info")
+            logger.debug("Session %s does not exist, cannot retrieve session info", session_id)
             return None, None, None, None, None
 
         f = Fernet(flask_session['session_crypt_key'])
@@ -374,7 +374,7 @@ class DBProfile(Profile):
         session.nickname = nickname
         self.save_profile()
 
-        logger.info(f'Successfully set session nickname={nickname} for session {session_id}')
+        logger.info("Successfully set session nickname=%s for session %s", nickname, session_id)
 
         return True, ''
 
@@ -387,7 +387,7 @@ class DBProfile(Profile):
             # it is a delete request
             vnc_credential = self.VNCCredentials.query.filter_by(session_id=session_id).first()
             self.db.session.delete(vnc_credential)
-            logger.info(f'Successfully deleted vnc credentials for session {session_id}')
+            logger.info("Successfully deleted vnc credentials for session %s", session_id)
         else:
             # it is an add / update request
             json_str = json.dumps(credentials)
@@ -400,14 +400,14 @@ class DBProfile(Profile):
                 # add
                 vnc_credential = self.VNCCredentials(session_id=session_id, credentials=base64_str)
                 self.db.session.add(vnc_credential)
-            logger.info(f'Successfully added/updated vnc credentials for session {session_id}')
+            logger.info("Successfully added/updated vnc credentials for session %s", session_id)
 
         self.save_profile()
 
         return True, ''
 
     def get_session_vnc_credentials(self, session_id):
-        logger.debug(f'Getting vnc credentials for session: {session_id}')
+        logger.debug("Getting vnc credentials for session: %s", session_id)
         session = self._get_session(session_id)
         if session is None:
             return False, f'failed: session {session_id} does not exist'
@@ -439,6 +439,6 @@ class DBProfile(Profile):
             expire_min=int(ACTIVATION_TTL_SECOND / 60))
         send_email(user.email, 'Activate Your iCtrl Account', body)
 
-        logger.info(f'Successfully sent out activation email to email={user.email}')
+        logger.info("Successfully sent out activation email to email=%s", user.email)
 
         return True
