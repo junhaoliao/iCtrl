@@ -21,7 +21,7 @@ handlers:
         formatter: default
         filename_prefix: 'ictrl_'
         log_dir: 'logs'
-        max_bytes: 8192  # Rotate after 8 KB
+        max_bytes: 5242880  # Rotate after 5 MB
         backup_count: 10  # Keep 10 backup files
         enable_compression: True
         timestamp_format: '%Y-%m-%d_%H-%M-%S'
