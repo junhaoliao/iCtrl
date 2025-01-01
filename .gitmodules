@@ -1,3 +1,6 @@
 [submodule "application/websockify-other"]
 	path = application/websockify-other
 	url = https://github.com/novnc/websockify-other.git
+[submodule "clp-loglib-py"]
+	path = clp-loglib-py
+	url = https://github.com/y-scope/clp-loglib-py.git

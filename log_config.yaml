@@ -7,12 +7,25 @@ formatters:
         datefmt: '%Y-%m-%d %H:%M:%S'
 
 handlers:
-    console:
-        class: logging.StreamHandler
-        level: DEBUG
+    file:
+        class: logging.FileHandler
+        level: NOTSET
         formatter: default
-        stream: ext://sys.stderr
+        filename: 'example.log'  # Output file path
+        encoding: utf-8
+        mode: w  # 'w' to overwrite each time, 'a' to append
+
+    CLP_file:
+        class: application.logger.RotatingCLPFileHandler
+        level: NOTSET
+        formatter: default
+        filename_prefix: 'ictrl_'
+        log_dir: 'logs'
+        max_bytes: 5242880  # Rotate after 5 MB
+        backup_count: 10  # Keep 10 backup files
+        enable_compression: True
+        timestamp_format: '%Y-%m-%d_%H-%M-%S'
 
 root:
-    level: DEBUG
-    handlers: [console]
+    level: NOTSET
+    handlers: [file, CLP_file]
