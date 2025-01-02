@@ -1,0 +1,14 @@
+{
+  "title": {
+    "message": "iCtrl",
+    "description": "The title in the navbar"
+  },
+  "logo.alt": {
+    "message": "iCtrl Logo",
+    "description": "The alt text of navbar logo"
+  },
+  "item.label.About": {
+    "message": "关于",
+    "description": "Navbar item with label About"
+  }
+}
