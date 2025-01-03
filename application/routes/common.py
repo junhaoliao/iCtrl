@@ -21,7 +21,7 @@
 import json
 import threading
 
-from flask import request, abort
+from flask import request, abort, jsonify
 
 from .. import api, profiles
 from ..codes import ICtrlError, ConnectionType
@@ -80,7 +80,7 @@ def handle_session():
         session_id = request.args.get('id')
         host, username, _, _, nickname = profiles.get_session_info(session_id)
 
-        return json.dumps({
+        return jsonify({
             'host': host,
             'username': username,
             'nickname': nickname
