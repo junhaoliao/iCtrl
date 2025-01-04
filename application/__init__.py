@@ -34,6 +34,7 @@ except Exception as ex:
     print("Logging setup failed with exception = ", ex)
 
 logger = logging.getLogger(__name__)
+#Setting the message to warning in case logging set up from dictConfig was not successful
 logger.warning(f"Logging is set up with config={config}")
 
 from .Profile.Profile import Profile
@@ -73,7 +74,7 @@ try:
     APP_PORT = int(sys.argv[1])
     LOCAL_AUTH_KEY = sys.argv[2]
 except IndexError:
-    print("Debug mode")
+    logger.debug("Running in debug mode")
     APP_PORT = 5000
     LOCAL_AUTH_KEY = ''
 

@@ -18,13 +18,18 @@
 #   FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 #   IN THE SOFTWARE.
 
+import logging
 import os
 import platform
+
+
+logger = logging.getLogger(__name__)
 
 
 def makedir_if_not_exists(path):
     if not os.path.exists(path):
         os.mkdir(path)
+    logger.info(f'Created directory, path = {path}')
 
 
 # setup profile path
@@ -33,7 +38,9 @@ if platform.system() == "Windows":
 elif platform.system() == "Darwin" or 'Linux':
     PROFILE_PATH = os.path.join(os.path.expanduser("~"), ".ictrl")
 else:
-    raise SystemError(f"Operating System: {platform.system()} not supported")
+    error = f"Operating System: {platform.system()} not supported"
+    logger.error(error)
+    raise SystemError(error)
 
 makedir_if_not_exists(PROFILE_PATH)
 USER_PROFILE_PATH = os.path.join(PROFILE_PATH, "user_profile.json")
