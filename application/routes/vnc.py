@@ -19,7 +19,7 @@
 #   IN THE SOFTWARE.
 
 import json
-import logging
+
 
 from flask import request, abort, stream_with_context
 
@@ -27,7 +27,8 @@ from .common import create_connection
 from .. import api, app, profiles
 from ..codes import ICtrlStep, ICtrlError, ConnectionType
 from ..utils import int_to_bytes
-
+import application
+import logging
 logger = logging.getLogger(__name__)
 
 
@@ -36,16 +37,19 @@ def start_vnc():
     session_id = request.json.get('sessionID')
     load_check = request.json.get('loadCheck', True)
     load_credentials = request.json.get('loadCredentials', True)
-
+    logger.debug("Starting VNC session: %s with load check: %s and load credentials: %s", session_id, load_check, load_credentials)
+    
     def generate():
         yield int_to_bytes(ICtrlStep.VNC.SSH_AUTH)
         vnc, reason = create_connection(session_id, ConnectionType.VNC)
         if reason != '':
             yield reason
+            logger.error("Failed to create VNC connection: %s", reason)
             return
 
         yield int_to_bytes(ICtrlStep.VNC.CHECK_LOAD)
         if vnc.is_uoft() and load_check and vnc.is_load_high():
+            logger.warning("VNC session load is too high for session: %s", session_id)
             yield int_to_bytes(ICtrlError.SSH.OVER_LOADED)
             return
 
@@ -67,6 +71,7 @@ def start_vnc():
                     if vnc_password_status:
                         credentials = {'password': password}
                     elif not use5900:
+                        logger.error("VNC password missing for non-ECF and port 5900 not open")
                         yield int_to_bytes(ICtrlError.VNC.PASSWD_MISSING)
                         return
             else:
@@ -82,12 +87,13 @@ def start_vnc():
             status, vnc_port = vnc.launch_vnc()
             if not status:
                 # TODO: handle the other failures
+                logger.error("Failed to launch VNC server")
                 yield int_to_bytes(ICtrlError.VNC.QUOTA_EXCEEDED)
                 return
 
         yield int_to_bytes(ICtrlStep.VNC.CREATE_TUNNEL)
         ws_port = vnc.create_tunnel(vnc_port)
-
+        logger.info("VNC session started successfully on websocket port: %s", ws_port)
         yield int_to_bytes(ICtrlStep.VNC.DONE)
         result = {
             'port': ws_port,
@@ -101,34 +107,38 @@ def start_vnc():
 @api.route('/vncpasswd', methods=['POST'])
 def change_vncpasswd():
     session_id = request.json.get('session_id')
+    logger.debug("Changing VNC password for session: %s", session_id)
 
     vnc, reason = create_connection(session_id, ConnectionType.VNC)
     if reason != '':
-        logger.error("create_connection() failed with status=", status)
+        logger.error("create_connection() failed with reason=%s", reason)
         abort(403, description=reason)
 
     passwd = request.json.get('passwd')
     status, reason = vnc.reset_vnc_password(passwd)
 
     if not status:
-        logger.error("reset_vnc_password() failed with status=%s", reason)
+        logger.error("reset_vnc_password() failed with reason=%s", reason)
         abort(403, description=reason)
-
+    logger.info("VNC password changed successfully for session: %s", session_id)
     return 'success'
 
 
 @api.route('/vnc_reset', methods=['POST'])
 def reset_vnc():
     session_id = request.json.get('session_id')
-
+    logger.debug("Resetting VNC settings for session: %s", session_id)
     vnc, reason = create_connection(session_id, ConnectionType.VNC)
     if reason != '':
+        logger.error("Failed to create VNC connection for reset with reason=%s", reason)
         abort(403, description=reason)
 
     status, reason = vnc.remove_vnc_settings()
     if status is False:
+        logger.error("Failed to reset VNC settings with reason=%s", reason)
         abort(403, description=reason)
 
+    logger.info("VNC settings reset successfully for session: %s", session_id)
     return 'success'
 
 
@@ -136,9 +146,11 @@ def reset_vnc():
 def vnc_credentials():
     session_id = request.json.get('session_id')
     credentials = request.json.get('credentials')
-
+    logger.debug("Updating VNC credentials for session: %s", session_id)
     status, reason = profiles.set_session_vnc_credentials(session_id, credentials)
     if status is False:
+        logger.error("Failed to update VNC credentials with reason=%s", reason)
         abort(403, description=reason)
 
+    logger.info("VNC credentials updated successfully for session: %s", session_id)
     return 'success'

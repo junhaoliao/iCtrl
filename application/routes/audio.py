@@ -35,22 +35,27 @@ from .common import create_connection
 from .. import api
 from ..codes import ConnectionType
 from ..features.Audio import AUDIO_PORT
-
+import logging
+logger = logging.getLogger(__name__)
 
 @api.route('/audio', methods=['POST'])
 def start_audio():
+    #TODO: Request recieved with body
+    logger.debug("Audio: Received request to start audio with data: %s", request.json)
     session_id = request.json.get('session_id')
     audio, reason = create_connection(session_id, ConnectionType.AUDIO)
     if reason != '':
+        logger.warning("Audio: Failed to create audio connection: %s", reason)
         abort(403, description=reason)
 
     status, reason = audio.launch_audio()
     if status is False:
+        logger.error("Audio: Audio launch failed: %s", reason)
         abort(403, description=reason)
 
     result = {
         'port': AUDIO_PORT,
         'audio_id': audio.id
     }
-
+    logger.info("Audio: Audio launched successfully with ID %s on port %s", audio.id, AUDIO_PORT)
     return json.dumps(result)
