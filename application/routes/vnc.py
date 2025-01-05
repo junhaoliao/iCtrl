@@ -21,7 +21,7 @@
 import json
 import logging
 
-from flask import request, abort, stream_with_context, jsonify
+from flask import request, abort, stream_with_context
 
 from .common import create_connection
 from .. import api, app, profiles
@@ -93,7 +93,7 @@ def start_vnc():
             'port': ws_port,
             'credentials': credentials
         }
-        yield jsonify(result)
+        yield json.dumps(result)
 
     return app.response_class(stream_with_context(generate()), mimetype='application/octet-stream')
 
@@ -104,7 +104,7 @@ def change_vncpasswd():
 
     vnc, reason = create_connection(session_id, ConnectionType.VNC)
     if reason != '':
-        logger.error("create_connection() failed with status=", status)
+        logger.error("create_connection() failed with status=", reason)
         abort(403, description=reason)
 
     passwd = request.json.get('passwd')

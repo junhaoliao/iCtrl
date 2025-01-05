@@ -27,7 +27,6 @@
 #   furnished to do so, subject to the following conditions:
 #
 #
-import json
 
 from flask import request, abort, jsonify
 
