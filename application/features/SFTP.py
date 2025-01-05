@@ -63,7 +63,7 @@ class SFTP(Connection):
                 self.sftp.chdir(path)
             cwd = self.sftp.getcwd()
             attrs = self.sftp.listdir_attr(cwd)
-            logger.debug(f"SFTP: ls {cwd}: {attrs}")
+            logger.debug("SFTP: ls %s: %s", cwd, attrs)
 
             file_list = []
             # TODO: should support uid and gid later
@@ -104,12 +104,10 @@ class SFTP(Connection):
         try:
             mode = self.sftp.stat(fullpath).st_mode
             if stat.S_ISREG(mode):
-                # print(fullpath, 'is file')
-                logger.debug(f"SFTP: {fullpath} is a file")
+                logger.debug("SFTP: %s is a file", fullpath)
                 z.write_iter(fullpath, self.dl_generator(fullpath))
             elif stat.S_ISDIR(mode):
-                # print(fullpath, 'is dir')
-                logger.debug(f"SFTP: {fullpath} is a directory")
+                logger.debug("SFTP: %s is a directory", fullpath)
                 # TODO: support writing an empty directory if len(dir_ls)==0
                 #  That will involve modifying the zipstream library
                 dir_ls = self.sftp.listdir(fullpath)
@@ -123,12 +121,12 @@ class SFTP(Connection):
             return
 
     def zip_generator(self, cwd, file_list):
-        logger.debug(f"SFTP: zip_generator on directory: {cwd}")
+        logger.debug("SFTP: zip_generator on directory: %s", cwd)
         self.sftp.chdir(cwd)
         z = zipstream.ZipFile(compression=zipstream.ZIP_DEFLATED, allowZip64=True)
 
         for file in file_list:
-            logger.debug(f"SFTP: zip_generator on file: {file}")
+            logger.debug("SFTP: zip_generator on file: %s", file)
             self._zip_dir_recurse(z, '', file)
 
         return z
@@ -137,7 +135,7 @@ class SFTP(Connection):
         try:
             self.sftp.chdir(cwd)
             self.sftp.rename(old, new)
-            logger.debug(f"SFTP: Rename {old} in directory {cwd} to {new}")
+            logger.debug("SFTP: Rename %s in directory %s to %s", old, cwd, new)
         except Exception as e:
             return False, repr(e)
 
@@ -146,11 +144,10 @@ class SFTP(Connection):
     def chmod(self, path, mode, recursive):
         _, _, _, stderr = self.exec_command_blocking(
             f'chmod {"-R" if recursive else ""} {"{0:0{1}o}".format(mode, 3)} "{path}"')
-        logger.debug("SFTP: Change permission on " + path + " to '{0:0{1}o}'".format(mode, 3))
+        logger.debug("SFTP: Change permission on %s to '%s'", path, "{0:0{1}o}".format(mode, 3))
         stderr_lines = stderr.readlines()
         if len(stderr_lines) != 0:
-            logger.warning(f"SFTP: chmod failed due to {stderr_lines}")
-            # print(stderr_lines)
+            logger.warning("SFTP: chmod failed due to %s", stderr_lines)
             return False, 'Some files were not applied with the request mode due to permission issues.'
 
         return True, ''
@@ -171,7 +168,7 @@ class SFTP(Connection):
 
             counter += 1
             if counter == 50:
-                logger.debug(f"SFTP: Execute Command {' '.join(cmd_list)}")
+                logger.debug("SFTP: Execute Command %s", ' '.join(cmd_list))
                 _, _, stderr = self.client.exec_command(" ".join(cmd_list))
                 stderr_lines = stderr.readlines()
                 if len(stderr_lines) != 0:
@@ -182,7 +179,7 @@ class SFTP(Connection):
                 counter = 0
                 cmd_list = [f'cd "{cwd}" && rm -rf']
 
-        logger.debug(f"SFTP: Execute Command {' '.join(cmd_list)}")
+        logger.debug("SFTP: Execute Command %s", ' '.join(cmd_list))
         _, _, stderr = self.client.exec_command(" ".join(cmd_list))
         stderr_lines = stderr.readlines()
         if len(stderr_lines) != 0:
@@ -194,7 +191,7 @@ class SFTP(Connection):
         return True, ''
 
     def mkdir(self, cwd, name):
-        logger.debug(f"SFTP: Make directory {name} at {cwd}")
+        logger.debug("SFTP: Make directory %s at %s", name, cwd)
         _, _, _, stderr = self.exec_command_blocking(f'cd "{cwd}"&& mkdir "{name}"')
         stderr_lines = stderr.readlines()
         if len(stderr_lines) != 0:

@@ -68,7 +68,7 @@ class Term(Connection):
 
     def resize(self, width, height):
         try:
-            logger.debug(f"Term: Resizing Term to {width}x{height}")
+            logger.debug("Term: Resizing Term to %sx%s", width, height)
             self.channel.resize_pty(width, height)
         except Exception as e:
             return False, str(e)
@@ -82,7 +82,7 @@ class TermWebSocket(WebSocket):
         self.term = None
 
     def handleMessage(self):
-        logger.debug(f"TermWebSocket: Send message {self.data}")
+        logger.debug("TermWebSocket: Send message %s", self.data)
         self.term.channel.send(self.data)
 
     def handleConnected(self):
@@ -93,12 +93,11 @@ class TermWebSocket(WebSocket):
             logger.warning("TermWebSocket: Local Authentication Failure")
             return
 
-        logger.debug(f"TermWebSocket: connected to {self.address}")
+        logger.debug("TermWebSocket: connected to %s", self.address)
         print(self.address, 'connected')
         terminal_id = self.request.path[1:]
         if terminal_id not in TERM_CONNECTIONS:
-            # print(f'TermWebSocket: Requested terminal_id={terminal_id} does not exist.')
-            logger.warning(f"TermWebSocket: Requested terminal_id={terminal_id} does not exist.")
+            logger.warning("TermWebSocket: Requested terminal_id=%s does not exist.", terminal_id)
             self.close()
             return
 
@@ -109,8 +108,7 @@ class TermWebSocket(WebSocket):
             while True:
                 data = self.term.channel.recv(1024)
                 if not data:
-                    # print(f"\r\n*** {terminal_id}: Shell EOF ***\r\n\r\n")
-                    logger.debug(f"TermWebSocket: \r\n*** {terminal_id}: Shell EOF ***\r\n\r\n")
+                    logger.debug("TermWebSocket: \r\n*** %s: Shell EOF ***\r\n\r\n", terminal_id)
                     self.close()
                     break
                 self.sendMessage(data)
@@ -120,7 +118,7 @@ class TermWebSocket(WebSocket):
         writer.start()
 
     def handleClose(self):
-        logger.debug(f"TermWebSocket: Closing terminal {self.term.id} connection")
+        logger.debug("TermWebSocket: Closing terminal %s connection", self.term.id)
         del TERM_CONNECTIONS[self.term.id]
         del self.term
 
@@ -131,7 +129,7 @@ class TermWebSocket(WebSocket):
 if not app.debug or os.environ.get("WERKZEUG_RUN_MAIN") == "true":
     TERMINAL_PORT = find_free_port()
     print("TERMINAL_PORT =", TERMINAL_PORT)
-    logger.debug("Term: Terminal port {}".format(TERMINAL_PORT))
+    logger.debug("Term: Terminal port %s", TERMINAL_PORT)
 
     if os.environ.get('SSL_CERT_PATH') is None:
         logger.debug("Term: SSL Certification Path not set. Generating self-signing certificate")

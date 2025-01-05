@@ -54,12 +54,10 @@ class ForwardServerHandler(socketserver.BaseRequestHandler):
             )
         )
         logger.debug(
-            "Connected!  Tunnel open %r -> %r -> %r"
-            % (
-                self.request.getpeername(),
-                chan.getpeername(),
-                ("127.0.0.1", self.server.chain_port),
-            )
+            "Connected!  Tunnel open %r -> %r -> %r",
+            self.request.getpeername(),
+            chan.getpeername(),
+            ("127.0.0.1", self.server.chain_port),
         )
 
         try:
@@ -115,9 +113,9 @@ class Connection:
     def _client_connect(self, client: paramiko.SSHClient,
                         host, username,
                         password=None, key_filename=None, private_key_str=None):
-        if self._jump_channel != None:
+        if self._jump_channel is not None:
             logger.debug("Connection: Connection initialized through Jump Channel")
-        logger.debug(f"Connection: Connecting to {username}@{host}")
+        logger.debug("Connection: Connecting to %s@%s", username, host)
         if password is not None:
             client.connect(host, username=username, password=password, timeout=15, sock=self._jump_channel)
         elif key_filename is not None:
@@ -144,16 +142,16 @@ class Connection:
 
             self._jump_client = paramiko.SSHClient()
             self._jump_client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-            logger.debug(f"Connection: Initialize Jump Client for connection to {username}@remote.ecf.utoronto.ca")
+            logger.debug("Connection: Initialize Jump Client for connection to %s@remote.ecf.utoronto.ca", username)
             self._client_connect(self._jump_client, 'remote.ecf.utoronto.ca', username, **auth_methods)
-            logger.debug(f"Connection: Open Jump channel connection to {host} at port 22")
+            logger.debug("Connection: Open Jump channel connection to %s at port 22", host)
             self._jump_channel = self._jump_client.get_transport().open_channel('direct-tcpip',
                                                                                 (host, 22),
                                                                                 ('127.0.0.1', 22))
 
     def connect(self, host: str, username: str, **auth_methods):
         try:
-            logger.debug(f"Connection: Connection attempt to {username}@{host}")
+            logger.debug("Connection: Connection attempt to %s@%s", username, host)
             self._init_jump_channel(host, username, **auth_methods)
             self._client_connect(self.client, host, username, **auth_methods)
         except Exception as e:
@@ -164,7 +162,7 @@ class Connection:
         self.host = host
         self.username = username
 
-        logger.debug(f"Connection: Successfully connected to {username}@{host}")
+        logger.debug("Connection: Successfully connected to %s@%s", username, host)
         return True, ''
 
     @staticmethod
@@ -180,11 +178,11 @@ class Connection:
 
         # save the private key
         if key_filename is not None:
-            logger.debug(f"Connection: RSA SSH private key written to {key_filename}")
+            logger.debug("Connection: RSA SSH private key written to %s", key_filename)
             rsa_key.write_private_key_file(key_filename)
         elif key_file_obj is not None:
             rsa_key.write_private_key(key_file_obj)
-            logger.debug(f"Connection: RSA SSH private key written to {key_file_obj}")
+            logger.debug("Connection: RSA SSH private key written to %s", key_file_obj)
         else:
             raise ValueError('Neither key_filename nor key_file_obj is provided.')
 
@@ -285,8 +283,8 @@ class Connection:
 
         my_pts_count = len(output) - 1  # -1: excluding the `uptime` output
 
-        logger.debug(f"Connection: pts count: {pts_count}; my pts count: {my_pts_count}")
-        logger.debug(f"Connection: load sum: {load_sum}")
+        logger.debug("Connection: pts count: %s; my pts count: %s", pts_count, my_pts_count)
+        logger.debug("Connection: load sum: %s", load_sum)
 
         if pts_count > my_pts_count:  # there are more terminals than mine
             return True

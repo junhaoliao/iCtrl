@@ -45,7 +45,7 @@ def vncpasswd(passwd_path, password=None):
 
     with open(passwd_path, "wb") as passwd:
         passwd.write(obfuscated)
-        logger.debug("Vnc Password: Write obfuscated password to {}".format(passwd_path))
+        logger.debug("Vnc Password: Write obfuscated password to %s", passwd_path)
 
     return obfuscated
 

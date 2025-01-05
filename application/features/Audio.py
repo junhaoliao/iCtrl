@@ -69,7 +69,7 @@ class Audio(Connection):
             self.transport = self.client.get_transport()
             self.remote_port = self.transport.request_port_forward('127.0.0.1', 0)
         except Exception as e:
-            logger.warning("Audio: exception raised during launch audio: {}".format(e))
+            logger.warning("Audio: exception raised during launch audio: %s", e)
             return False, str(e)
 
         self.id = uuid.uuid4().hex
@@ -94,7 +94,7 @@ class AudioWebSocket(WebSocket):
 
         audio_id = self.request.path[1:]
         if audio_id not in AUDIO_CONNECTIONS:
-            logger.warning(f'AudioWebSocket: Requested audio_id={audio_id} does not exist.')
+            logger.warning("AudioWebSocket: Requested audio_id=%s does not exist.", audio_id)
             self.close()
             return
 
@@ -110,10 +110,14 @@ class AudioWebSocket(WebSocket):
                               f'module-null-sink sink_name={sink_name} '
         exit_status, _, stdout, _ = self.audio.exec_command_blocking(load_module_command)
         if exit_status != 0:
-            logger.warning(f'AudioWebSocket: audio_id={audio_id}: unable to load pactl module-null-sink sink_name={sink_name}')
+            logger.warning(
+                "AudioWebSocket: audio_id=%s: unable to load pactl module-null-sink sink_name=%s",
+                audio_id,
+                sink_name
+            )
             return
         load_module_stdout_lines = stdout.readlines()
-        logger.debug("AudioWebSocket: Load Module: {}".format(load_module_stdout_lines))
+        logger.debug("AudioWebSocket: Load Module: %s", load_module_stdout_lines)
         self.module_id = int(load_module_stdout_lines[0])
 
         keep_launching_ffmpeg = True
@@ -125,7 +129,7 @@ class AudioWebSocket(WebSocket):
                                     f'-ac 2 -acodec pcm_s16le -ar 44100 -f s16le "tcp://127.0.0.1:{self.audio.remote_port}"'
             # keep launching if the connection is not accepted in the writer() below
             while keep_launching_ffmpeg:
-                logger.debug(f"AudioWebSocket: Launch ffmpeg: {launch_ffmpeg_command}")
+                logger.debug("AudioWebSocket: Launch ffmpeg: %s", launch_ffmpeg_command)
                 _, ffmpeg_stdout, _ = self.audio.client.exec_command(launch_ffmpeg_command)
                 ffmpeg_stdout.channel.recv_exit_status()
                 # if `ffmpeg` launches successfully, `ffmpeg_stdout.channel.recv_exit_status` should not return
@@ -156,7 +160,7 @@ class AudioWebSocket(WebSocket):
                 buffer += data
                 if len(buffer) >= AUDIO_BUFFER_SIZE:
                     compressed = zlib.compress(buffer, level=4)
-                    logger.debug(f"AudioWebSocket: Send compressed message of size {len(compressed)}")
+                    logger.debug("AudioWebSocket: Send compressed message of size %s", len(compressed))
                     self.sendMessage(compressed)
                     # print(len(compressed) / len(buffer) * 100)
                     buffer = b''
@@ -170,10 +174,10 @@ class AudioWebSocket(WebSocket):
     def handleClose(self):
         if self.module_id is not None:
             # unload the module before leaving
-            logger.debug(f"AudioWebSocket: Unload module {self.module_id}")
+            logger.debug("AudioWebSocket: Unload module %s", self.module_id)
             self.audio.client.exec_command(f'pactl unload-module {self.module_id}')
 
-        logger.debug(f"AudioWebSocket: End audio socket {self.audio.id} connection")
+        logger.debug("AudioWebSocket: End audio socket %s connection", self.audio.id)
         del AUDIO_CONNECTIONS[self.audio.id]
         del self.audio
 
@@ -183,8 +187,7 @@ class AudioWebSocket(WebSocket):
 # if we are in debug mode, run the server in the second round
 if not app.debug or os.environ.get("WERKZEUG_RUN_MAIN") == "true":
     AUDIO_PORT = find_free_port()
-    # print("AUDIO_PORT =", AUDIO_PORT)
-    logger.debug("Audio: Audio port {}".format(AUDIO_PORT))
+    logger.debug("Audio: Audio port %s", AUDIO_PORT)
 
     if os.environ.get('SSL_CERT_PATH') is None:
         logger.debug("Audio: SSL Certification Path not set. Generating self-signing certificate")

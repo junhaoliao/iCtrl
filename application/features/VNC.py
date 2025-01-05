@@ -54,7 +54,7 @@ def websocket_proxy_thread(local_websocket_port, local_vnc_port):
         logger.debug("VNC: SSL Certification Path exists")
         import subprocess
 
-        logger.debug(f"VNC: Run websockify on websocket port {local_websocket_port} and vncport {local_vnc_port}")
+        logger.debug("VNC: Run websockify on websocket port %d and vncport %d", local_websocket_port, local_vnc_port)
         subprocess.run(["/var/www/ictrl/application/websockify-other/c/websockify",
                         f'{local_websocket_port}', f':{local_vnc_port}',
                         '--run-once', '--ssl-only',
@@ -105,7 +105,7 @@ class VNC(Connection):
         _, _, _, stderr = self.exec_command_blocking(';'.join(remove_cmd_lst))
         stderr_text = "\n".join(stderr)
         if len(stderr_text):
-            logger.warning(f"VNC: Error removing VNC settings: {stderr_text}")
+            logger.warning("VNC: Error removing VNC settings: %s", stderr_text)
             return False, stderr_text
 
         return True, ''
@@ -203,8 +203,8 @@ class VNC(Connection):
     def create_tunnel(self, remote_port):
         local_vnc_port = find_free_port()
         local_websocket_port = find_free_port()
-        logger.debug(f"VNC: Local VNC Port is {local_vnc_port}")
-        logger.debug(f"VNC: Local Web Socket Port is {local_websocket_port}")
+        logger.debug("VNC: Local VNC Port is %s", local_vnc_port)
+        logger.debug("VNC: Local Web Socket Port is %s", local_websocket_port)
         self.port_forward(local_vnc_port, remote_port)
 
         proxy_thread = threading.Thread(target=websocket_proxy_thread,
