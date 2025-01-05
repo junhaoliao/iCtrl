@@ -27,9 +27,8 @@
 #   furnished to do so, subject to the following conditions:
 #
 #
-import json
 
-from flask import request, abort
+from flask import request, abort, jsonify
 
 from .common import create_connection
 from .. import api
@@ -53,4 +52,4 @@ def start_audio():
         'audio_id': audio.id
     }
 
-    return json.dumps(result)
+    return jsonify(result)
