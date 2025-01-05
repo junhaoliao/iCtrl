@@ -22,37 +22,34 @@ import json
 import posixpath
 from datetime import datetime
 from pathlib import Path
-import logging
-logger = logging.getLogger(__name__)
 from flask import request, abort, stream_with_context
-
 from .common import create_connection
 from .. import api, app
 from ..codes import ConnectionType
-
+import logging
+logger = logging.getLogger(__name__)
 UPLOAD_CHUNK_SIZE = 1024 * 1024
-
 
 @api.route('/sftp_ls/<session_id>')
 def sftp_ls(session_id):
     path = request.args.get('path')
 
-    logger.debug(f"Sftp: Listing SFTP directory: {path} for session {session_id}")
+    logger.debug("Sftp: Listing SFTP directory: %s for session %s", path, session_id)
     sftp, reason = create_connection(session_id, ConnectionType.SFTP)
     if reason != '':
-        logger.error(f"Sftp: SFTP connection failed: {reason}")
+        logger.error("Sftp: SFTP connection failed: %s", reason)
         abort(403, description=reason)
 
     status, cwd, file_list = sftp.ls(path)
     if status is False:
-        logger.error(f"Sftp: Failed to list directory: {cwd}")
+        logger.error("Sftp: Failed to list directory: %s", cwd)
         abort(400, description=cwd)
 
     result = {
         'cwd': cwd,
         'files': file_list
     }
-    logger.info(f"Sftp: Directory listed successfully: {cwd}")
+    logger.info("Sftp: Directory listed successfully: %s", cwd)
     return json.dumps(result)
 
 
@@ -60,10 +57,10 @@ def sftp_ls(session_id):
 def sftp_dl(session_id):
     cwd = request.args.get('cwd')
     args_files = request.args.get('files')
-    logger.debug(f"Sftp: Downloading files: {args_files} from {cwd} for session {session_id}")
+    logger.debug("Sftp: Downloading files: %s from %s for session %s", args_files, cwd, session_id)
     sftp, reason = create_connection(session_id, ConnectionType.SFTP)
     if reason != '':
-        logger.error(f"Sftp: SFTP connection failed: {reason}")
+        logger.error("Sftp: SFTP connection failed: %s", reason)
         abort(403, description=reason)
 
     files = json.loads(args_files)
@@ -81,12 +78,12 @@ def sftp_dl(session_id):
         dt_str = datetime.now().strftime('_%Y%m%d_%H%M%S')
         zip_name = posixpath.basename(cwd) + dt_str + '.zip'
         r.headers.set('Content-Disposition', 'attachment', filename=zip_name)
-        logger.info(f"Sftp: Sending zip file: {zip_name}")
+        logger.info("Sftp: Sending zip file: %s", zip_name)
     else:
         r = app.response_class(stream_with_context(sftp.dl_generator(files[0])), mimetype='application/octet-stream')
         r.headers.set('Content-Disposition', 'attachment', filename=files[0])
         r.headers.set('Content-Length', size)
-        logger.info(f"Sftp: Sending file: {files[0]}")
+        logger.info("Sftp: Sending file: %s", files[0])
     return r
 
 
@@ -95,17 +92,17 @@ def sftp_rename(session_id):
     cwd = request.json.get('cwd')
     old = request.json.get('old')
     new = request.json.get('new')
-    logger.debug(f"Sftp: Renaming file from {old} to {new} in {cwd} for session {session_id}")
+    logger.debug("Sftp: Renaming file from %s to %s in %s for session %s", old, new, cwd, session_id)
     sftp, reason = create_connection(session_id, ConnectionType.SFTP)
     if reason != '':
-        logger.error(f"Sftp: SFTP connection failed: {reason}")
+        logger.error("Sftp: SFTP connection failed: %s", reason)
         abort(403, description=reason)
 
     status, reason = sftp.rename(cwd, old, new)
     if not status:
-        logger.error(f"Sftp: Rename failed: {reason}")
+        logger.error("Sftp: Rename failed: %s", reason)
         abort(400, reason)
-    logger.info("Sftp: Rename successful")
+    logger.info("Sftp: Rename successful from %s to %s", old, new)
     return 'success'
 
 
@@ -114,19 +111,19 @@ def sftp_chmod(session_id):
     path = request.json.get('path')
     mode = request.json.get('mode')
     recursive = request.json.get('recursive')
-    logger.debug(f"Sftp: Changing file mode for {path} to {mode}, recursive: {recursive} in session {session_id}")
+    logger.debug("Sftp: Changing file mode for %s to %s, recursive: %s in session %s", path, mode, recursive, session_id)
 
     sftp, reason = create_connection(session_id, ConnectionType.SFTP)
     if reason != '':
-        logger.error(f"Sftp: SFTP connection failed: {reason}")
+        logger.error("Sftp: SFTP connection failed: %s", reason)
         abort(403, description=reason)
 
     status, reason = sftp.chmod(path, mode, recursive)
     if not status:
-        logger.error(f"Sftp: CHMOD failed: {reason}")
+        logger.error("Sftp: CHMOD failed: %s", reason)
         abort(400, reason)
 
-    logger.info("Sftp: CHMOD successful")
+    logger.info("Sftp: CHMOD successful for %s", path)
     return 'success'
 
 
@@ -134,18 +131,18 @@ def sftp_chmod(session_id):
 def sftp_mkdir(session_id):
     cwd = request.json.get('cwd')
     name = request.json.get('name')
-    logger.debug(f"Sftp: Creating directory {name} in {cwd} for session {session_id}")
+    logger.debug("Sftp: Creating directory %s in %s for session %s", name, cwd, session_id)
     sftp, reason = create_connection(session_id, ConnectionType.SFTP)
     if reason != '':
-        logger.error(f"Sftp: SFTP connection failed: {reason}")
+        logger.error("Sftp: SFTP connection failed: %s", reason)
         abort(403, description=reason)
 
     status, reason = sftp.mkdir(cwd, name)
     if status is False:
-        logger.error(f"Sftp: Directory creation failed: {reason}")
+        logger.error("Sftp: Directory creation failed: %s", reason)
         abort(400, description=reason)
 
-    logger.info("Sftp: Directory created successfully")
+    logger.info("Sftp: Directory created successfully: %s", name)
     return 'success'
 
 
@@ -155,11 +152,11 @@ def sftp_ul(session_id):
     # no need to use secure_filename because the user should be responsible for her/his input
     #  when not using the client
     relative_path = request.headers.get('Path')
-    logger.debug(f"Sftp: Uploading file {relative_path} to {cwd} for session {session_id}")
+    logger.debug("Sftp: Uploading file %s to %s for session %s", relative_path, cwd, session_id)
 
     sftp, reason = create_connection(session_id, ConnectionType.SFTP)
     if reason != '':
-        logger.error(f"Sftp: SFTP connection failed: {reason}")
+        logger.error("Sftp: SFTP connection failed: %s", reason)
         abort(403, description=reason)
 
     p = Path(relative_path)
@@ -169,6 +166,7 @@ def sftp_ul(session_id):
     if str(relative_dir_path) != '.':
         cwd = posixpath.join(cwd, relative_dir_path)
         # TODO: check: will this ever fail?
+        logger.debug("Sftp: Creating directories recursively for %s", cwd)
         sftp.exec_command_blocking(f'mkdir -p "{cwd}"')
 
     sftp.sftp.chdir(path=cwd)
@@ -180,7 +178,7 @@ def sftp_ul(session_id):
         chunk = request.stream.read(UPLOAD_CHUNK_SIZE)
 
     sftp_file.close()
-    logger.info(f"Sftp: File uploaded successfully: {request_filename}")
+    logger.info("Sftp: File uploaded successfully: %s", request_filename)
     return 'success'
 
 
@@ -188,16 +186,16 @@ def sftp_ul(session_id):
 def sftp_rm(session_id):
     cwd = request.json.get('cwd')
     files = request.json.get('files')
-    logger.debug(f"Sftp: Removing files {files} from {cwd} for session {session_id}")
+    logger.debug("Sftp: Removing files %s from %s for session %s", files, cwd, session_id)
     sftp, reason = create_connection(session_id, ConnectionType.SFTP)
     if reason != '':
-        logger.error(f"Sftp: SFTP connection failed: {reason}")
+        logger.error("Sftp: SFTP connection failed: %s", reason)
         abort(403, description=reason)
 
     status, reason = sftp.rm(cwd, files)
     if not status:
-        logger.error(f"Sftp: File removal failed: {reason}")
+        logger.error("Sftp: File removal failed: %s", reason)
         abort(400, description=reason)
 
-    logger.info("Sftp: Files removed successfully")
+    logger.info("Sftp: Files removed successfully from %s", cwd)
     return 'success'
