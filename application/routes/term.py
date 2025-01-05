@@ -56,7 +56,6 @@ def start_terminal():
         yield int_to_bytes(ICtrlStep.Term.LAUNCH_SHELL)
         status, reason = term.launch_shell()
         if status is False:
-            logger.error("Term: Failed to launch terminal shell: %s", reason)
             abort(403, description=reason)
 
         yield int_to_bytes(ICtrlStep.Term.DONE)
@@ -74,7 +73,6 @@ def start_terminal():
 def resize_terminal():
     term_id = request.json.get('term_id')
     if term_id not in TERM_CONNECTIONS:
-        logger.error("Term: Invalid terminal ID for resize: %s", term_id)
         abort(403, description='invalid term_id')
 
     width = request.json.get('w')
@@ -83,7 +81,6 @@ def resize_terminal():
     term = TERM_CONNECTIONS[term_id]
     status, reason = term.resize(width, height)
     if status is False:
-        logger.error("Term: Failed to resize terminal %s: %s", term_id, reason)
         abort(403, description=reason)
 
     logger.info("Term: Terminal %s resized successfully", term_id)

@@ -111,14 +111,12 @@ def change_vncpasswd():
 
     vnc, reason = create_connection(session_id, ConnectionType.VNC)
     if reason != '':
-        logger.error("create_connection() failed with reason=%s", reason)
         abort(403, description=reason)
 
     passwd = request.json.get('passwd')
     status, reason = vnc.reset_vnc_password(passwd)
 
     if not status:
-        logger.error("reset_vnc_password() failed with reason=%s", reason)
         abort(403, description=reason)
     logger.info("VNC password changed successfully for session: %s", session_id)
     return 'success'
@@ -130,12 +128,10 @@ def reset_vnc():
     logger.debug("Resetting VNC settings for session: %s", session_id)
     vnc, reason = create_connection(session_id, ConnectionType.VNC)
     if reason != '':
-        logger.error("Failed to create VNC connection for reset with reason=%s", reason)
         abort(403, description=reason)
 
     status, reason = vnc.remove_vnc_settings()
     if status is False:
-        logger.error("Failed to reset VNC settings with reason=%s", reason)
         abort(403, description=reason)
 
     logger.info("VNC settings reset successfully for session: %s", session_id)
@@ -149,7 +145,6 @@ def vnc_credentials():
     logger.debug("Updating VNC credentials for session: %s", session_id)
     status, reason = profiles.set_session_vnc_credentials(session_id, credentials)
     if status is False:
-        logger.error("Failed to update VNC credentials with reason=%s", reason)
         abort(403, description=reason)
 
     logger.info("VNC credentials updated successfully for session: %s", session_id)

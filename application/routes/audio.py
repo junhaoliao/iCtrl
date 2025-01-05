@@ -45,12 +45,10 @@ def start_audio():
     session_id = request.json.get('session_id')
     audio, reason = create_connection(session_id, ConnectionType.AUDIO)
     if reason != '':
-        logger.warning("Audio: Failed to create audio connection: %s", reason)
         abort(403, description=reason)
 
     status, reason = audio.launch_audio()
     if status is False:
-        logger.error("Audio: Audio launch failed: %s", reason)
         abort(403, description=reason)
 
     result = {

@@ -37,12 +37,10 @@ def sftp_ls(session_id):
     logger.debug("Sftp: Listing SFTP directory: %s for session %s", path, session_id)
     sftp, reason = create_connection(session_id, ConnectionType.SFTP)
     if reason != '':
-        logger.error("Sftp: SFTP connection failed: %s", reason)
         abort(403, description=reason)
 
     status, cwd, file_list = sftp.ls(path)
     if status is False:
-        logger.error("Sftp: Failed to list directory: %s", cwd)
         abort(400, description=cwd)
 
     result = {
@@ -60,7 +58,6 @@ def sftp_dl(session_id):
     logger.debug("Sftp: Downloading files: %s from %s for session %s", args_files, cwd, session_id)
     sftp, reason = create_connection(session_id, ConnectionType.SFTP)
     if reason != '':
-        logger.error("Sftp: SFTP connection failed: %s", reason)
         abort(403, description=reason)
 
     files = json.loads(args_files)
@@ -95,12 +92,10 @@ def sftp_rename(session_id):
     logger.debug("Sftp: Renaming file from %s to %s in %s for session %s", old, new, cwd, session_id)
     sftp, reason = create_connection(session_id, ConnectionType.SFTP)
     if reason != '':
-        logger.error("Sftp: SFTP connection failed: %s", reason)
         abort(403, description=reason)
 
     status, reason = sftp.rename(cwd, old, new)
     if not status:
-        logger.error("Sftp: Rename failed: %s", reason)
         abort(400, reason)
     logger.info("Sftp: Rename successful from %s to %s", old, new)
     return 'success'
@@ -115,12 +110,10 @@ def sftp_chmod(session_id):
 
     sftp, reason = create_connection(session_id, ConnectionType.SFTP)
     if reason != '':
-        logger.error("Sftp: SFTP connection failed: %s", reason)
         abort(403, description=reason)
 
     status, reason = sftp.chmod(path, mode, recursive)
     if not status:
-        logger.error("Sftp: CHMOD failed: %s", reason)
         abort(400, reason)
 
     logger.info("Sftp: CHMOD successful for %s", path)
@@ -134,12 +127,10 @@ def sftp_mkdir(session_id):
     logger.debug("Sftp: Creating directory %s in %s for session %s", name, cwd, session_id)
     sftp, reason = create_connection(session_id, ConnectionType.SFTP)
     if reason != '':
-        logger.error("Sftp: SFTP connection failed: %s", reason)
         abort(403, description=reason)
 
     status, reason = sftp.mkdir(cwd, name)
     if status is False:
-        logger.error("Sftp: Directory creation failed: %s", reason)
         abort(400, description=reason)
 
     logger.info("Sftp: Directory created successfully: %s", name)
@@ -156,7 +147,6 @@ def sftp_ul(session_id):
 
     sftp, reason = create_connection(session_id, ConnectionType.SFTP)
     if reason != '':
-        logger.error("Sftp: SFTP connection failed: %s", reason)
         abort(403, description=reason)
 
     p = Path(relative_path)
@@ -189,12 +179,10 @@ def sftp_rm(session_id):
     logger.debug("Sftp: Removing files %s from %s for session %s", files, cwd, session_id)
     sftp, reason = create_connection(session_id, ConnectionType.SFTP)
     if reason != '':
-        logger.error("Sftp: SFTP connection failed: %s", reason)
         abort(403, description=reason)
 
     status, reason = sftp.rm(cwd, files)
     if not status:
-        logger.error("Sftp: File removal failed: %s", reason)
         abort(400, description=reason)
 
     logger.info("Sftp: Files removed successfully from %s", cwd)

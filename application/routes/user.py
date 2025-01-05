@@ -50,7 +50,6 @@ def register():
         profiles.add_user(username, password, email)
         logger.info("User: User registered successfully: %s", username)
     except KeyError as e:
-        logger.error("User: Missing required field during registration: %s", e)
         abort(403, f'{e} is missing')
 
     return 'Registration Successful'
@@ -71,7 +70,6 @@ def login():
         profiles.login(username, password)
         logger.info("User: User logged in successfully: %s", username)
     except KeyError as e:
-        logger.error("User: Missing required field during login: %s", e)
         abort(403, f'{e} is missing')
 
     return 'logged in'
@@ -91,7 +89,6 @@ def resend():
         profiles.send_activation_email(username)
         logger.info("User: Activation email resent to user: %s", username)
     except KeyError as e:
-        logger.error("User: Missing required field during activation email resend: %s", e)
         abort(403, f'{e} is missing')
     return 'sent'
 
@@ -106,7 +103,6 @@ def activate():
             logger.info("User: User activated successfully: %s", userid)
             return 'Your account has been activated. '
     except KeyError as e:
-        logger.error("User: Missing required field during activation: %s", e)
         abort(403, f'{e} is missing')
 
     logger.warning("User: Failed to activate user. Invalid or expired link for userid: %s", userid)
