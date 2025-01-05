@@ -1,0 +1,49 @@
+name: "deploy-github-pages"
+
+on:
+  push:
+    branches: ["main"]
+
+permissions: {}
+
+concurrency:
+  group: "${{github.workflow}}-${{github.ref}}"
+
+  # Cancel in-progress jobs for efficiency
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: "ubuntu-latest"
+    steps:
+      - uses: "actions/checkout@v4"
+      - uses: "actions/setup-node@v4"
+        with:
+          node-version: "22"
+          cache: "npm"
+          cache-dependency-path: "./docs/package-lock.json"
+
+      - run: "npm --prefix docs/ install"
+      - run: "npm --prefix docs/ run build"
+
+      - name: "Upload static files as artifact"
+        uses: "actions/upload-pages-artifact@v3"
+        with:
+          path: "./docs/build"
+
+  deploy:
+    needs: "build"
+    permissions:
+      # To deploy to Pages
+      pages: "write"
+
+      # To request a JWT from GitHub for certifying the origin of the deployment
+      id-token: "write"
+    runs-on: "ubuntu-latest"
+    environment:
+      name: "github-pages"
+      url: "${{steps.deployment.outputs.page_url}}"
+    steps:
+      - name: "Deploy to GitHub Pages"
+        id: "deployment"
+        uses: "actions/deploy-pages@v4"

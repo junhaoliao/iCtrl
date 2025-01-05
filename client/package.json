@@ -11,8 +11,7 @@
     "eject": "react-scripts eject",
 
     "lint": "npm run lint:check",
-    "lint:check": "eslint src",
-    "lint:ci": "npm run lint:check -- --format json --output-file eslint-report.json",
+    "lint:check": "eslint src --max-warnings 0",
     "lint:fix": "npm run lint:check -- --fix"
   },
   "dependencies": {
