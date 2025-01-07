@@ -140,7 +140,7 @@ class SFTP(Connection):
         try:
             self.sftp.chdir(cwd)
             self.sftp.rename(old, new)
-            logger.debug("SFTP: Rename %s in directory %s to %s", old, cwd, new)
+            logger.debug("SFTP: File rename operation completed")
         except Exception as e:
             logger.exception("SFTP: Rename failed")
             return False, repr(e)
@@ -150,10 +150,10 @@ class SFTP(Connection):
     def chmod(self, path, mode, recursive):
         _, _, _, stderr = self.exec_command_blocking(
             f'chmod {"-R" if recursive else ""} {"{0:0{1}o}".format(mode, 3)} "{path}"')
-        logger.debug("SFTP: Change permission on %s to '%s'", path, "{0:0{1}o}".format(mode, 3))
+        logger.debug("SFTP: Change permission to '%s'",  "{0:0{1}o}".format(mode, 3))
         stderr_lines = stderr.readlines()
         if len(stderr_lines) != 0:
-            logger.warning("SFTP: chmod failed due to %s", stderr_lines)
+            logger.warning(f"SFTP: chmod operation failed")
             return False, 'Some files were not applied with the request mode due to permission issues.'
 
         return True, ''
@@ -197,7 +197,7 @@ class SFTP(Connection):
         return True, ''
 
     def mkdir(self, cwd, name):
-        logger.debug("SFTP: Make directory %s at %s", name, cwd)
+        logger.debug("SFTP: Creating new directory")
         _, _, _, stderr = self.exec_command_blocking(f'cd "{cwd}"&& mkdir "{name}"')
         stderr_lines = stderr.readlines()
         if len(stderr_lines) != 0:
