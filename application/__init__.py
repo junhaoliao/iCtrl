@@ -35,7 +35,10 @@ except Exception as ex:
 
 logger = logging.getLogger(__name__)
 #Setting the message to warning in case logging set up from dictConfig was not successful
-logger.warning(f"Logging is set up with config={config}")
+if 'config' in locals() and config is not None:
+    logger.warning("Logging is set up with config=%s", config)
+else:
+    logger.warning("Logging config is None")
 
 from .Profile.Profile import Profile
 

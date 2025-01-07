@@ -41,7 +41,9 @@ from sqlalchemy.orm import validates
 from .Profile import Profile
 from ..utils import send_email, validate_password
 
+ACTIVATION_EMAIL_TEMPLATE = '/var/www/ictrl/application/resources/activation_email_template.html'
 ACTIVATION_TTL_SECOND = 60 * 30
+MAX_PENDING_ACTIVATION_NUM = 1024
 RESEND_COOLDOWN_TTL_SECOND = 30
 
 SESSION_CRYPT_SALT = b'>@\x05[N%\xcf]+\x82\xc3\xcd\xde\xa6a\xeb'
@@ -71,21 +73,17 @@ class DBProfile(Profile):
         self.salt = bcrypt.gensalt()
 
         # key: user_id, value: activation code
-        size = 1024
-        self.activation_cache = TTLCache(maxsize=size, ttl=ACTIVATION_TTL_SECOND)
-        logger.debug("activation_cache set up with %d, expiration time = %d", size, ACTIVATION_TTL_SECOND)
+        self.activation_cache = TTLCache(maxsize=MAX_PENDING_ACTIVATION_NUM, ttl=ACTIVATION_TTL_SECOND)
 
         # key: user_id, value: True (to indicate the entry exists; can be any dummy value)
-        self.resend_cooldown = TTLCache(maxsize=size, ttl=RESEND_COOLDOWN_TTL_SECOND)
-        logger.debug("resend_cooldown cache set up with %d, expiration time = %d", size, RESEND_COOLDOWN_TTL_SECOND)
+        self.resend_cooldown = TTLCache(maxsize=MAX_PENDING_ACTIVATION_NUM, ttl=RESEND_COOLDOWN_TTL_SECOND)
 
-        activation_email_template = '/var/www/ictrl/application/resources/activation_email_template.html'
-        logger.debug("Opening %s in read-only mode", activation_email_template)
         try:
-            with open(activation_email_template) as f:
+            with open(ACTIVATION_EMAIL_TEMPLATE) as f:
                 self.activation_email_body_template = f.read()
-        except IOError as e:
-            logger.exception("Failed to open %s, does file exist? Error: %s", activation_email_template, e)
+        except OSError as e:
+            logger.exception('Failed to open "%s"', ACTIVATION_EMAIL_TEMPLATE)
+            raise e
 
         class User(db.Model):
             __table_args__ = {"schema": "ictrl"}
@@ -168,7 +166,7 @@ class DBProfile(Profile):
         # db.drop_all()
         db.engine.execute("CREATE SCHEMA IF NOT EXISTS ictrl;")
         db.create_all()
-        logger.info("Created database SCHEMA ictrl and created all databases defined")
+        logger.info("Database initialization is done.")
 
     def login(self, username, password):
         username = username.lower()
@@ -200,7 +198,7 @@ class DBProfile(Profile):
     def logout():
         # remove the username from the session if it's there
         userid = flask_session.pop('userid', None)
-        logger.info("Removed session user: %s", userid)
+        logger.info("Removed user session: %s", userid)
 
         return True
 
@@ -219,7 +217,7 @@ class DBProfile(Profile):
                 "username": session.username
             }
 
-        logger.info("Query user sessions successful")
+        logger.info("Query user sessions successful, all user sessions:\n%s", json.dumps(_profile))
 
         return _profile
 
@@ -310,7 +308,7 @@ class DBProfile(Profile):
 
             self.save_profile()
 
-            logger.info("Successfully added a new session: session_id = %s", session.id)
+            logger.info("Successfully added a new session: session_id=%s", session.id)
         except AssertionError as e:
             abort(403, e)
         except sqlalchemy.exc.IntegrityError as e:
@@ -323,7 +321,6 @@ class DBProfile(Profile):
             abort(403, 'You are not logged in')
         userid = flask_session['userid']
 
-        logger.info("Returning session, session_id = %s", session_id)
         return self.Session.query.filter_by(id=session_id, user_id=userid).first()
 
     def delete_session(self, session_id):
@@ -334,7 +331,7 @@ class DBProfile(Profile):
         self.db.session.delete(session)
         self.save_profile()
 
-        logger.info("Successfully deleted session, session_id = %s", session_id)
+        logger.info("Successfully deleted session, session_id=%s", session_id)
 
         return True, ''
 
@@ -346,7 +343,7 @@ class DBProfile(Profile):
         session.host = new_host
         self.save_profile()
 
-        logger.info("Successfully changed host for session, session_id = %s", session_id)
+        logger.info("Successfully changed host for session, session_id=%s", session_id)
 
         return True, ''
 
@@ -357,7 +354,7 @@ class DBProfile(Profile):
     def get_session_info(self, session_id):
         session = self._get_session(session_id)
         if session is None:
-            logger.debug("Session %s does not exist, cannot retrieve session info", session_id)
+            logger.debug("Cannot retrieve session info: session_id=%s", session_id)
             return None, None, None, None, None
 
         f = Fernet(flask_session['session_crypt_key'])

@@ -34,6 +34,10 @@ def int_to_bytes(num):
 
 
 def find_free_port():
+    """
+        Binds a socket on a random free port and returns it.
+        :return: int - The free port number.
+    """
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
         sock.bind(('', 0))
         socket_info = sock.getsockname()

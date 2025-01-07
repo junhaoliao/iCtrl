@@ -43,30 +43,20 @@ logger = logging.getLogger(__name__)
 
 class LocalProfile(Profile):
     def login(self, username, password):
-        not_implemented_error = f'Method {__name__} should not be invoke from {__class__}'
-        logger.error(not_implemented_error)
-        raise NotImplementedError(not_implemented_error)
+        raise NotImplementedError(f'Method {__name__} should not be invoke from {__class__}')
 
     @staticmethod
     def logout():
-        not_implemented_error = f'Method {__name__} should not be invoke from {__class__}'
-        logger.error(not_implemented_error)
-        raise NotImplementedError(not_implemented_error)
+        raise NotImplementedError(f'Method {__name__} should not be invoke from {__class__}')
 
     def add_user(self, username, password, email):
-        not_implemented_error = f'Method {__name__} should not be invoke from {__class__}'
-        logger.error(not_implemented_error)
-        raise NotImplementedError(not_implemented_error)
+        raise NotImplementedError(f'Method {__name__} should not be invoke from {__class__}')
 
     def activate_user(self, userid, code):
-        not_implemented_error = f'Method {__name__} should not be invoke from {__class__}'
-        logger.error(not_implemented_error)
-        raise NotImplementedError(not_implemented_error)
+        raise NotImplementedError(f'Method {__name__} should not be invoke from {__class__}')
 
     def send_activation_email(self, username):
-        not_implemented_error = f'Method {__name__} should not be invoke from {__class__}'
-        logger.error(not_implemented_error)
-        raise NotImplementedError(not_implemented_error)
+        raise NotImplementedError(f'Method {__name__} should not be invoke from {__class__}')
 
     def __init__(self):
         self._profile = copy.deepcopy(_EMPTY_USER_PROFILE)
@@ -84,7 +74,7 @@ class LocalProfile(Profile):
 
         except Exception as e:
             self._profile = copy.deepcopy(_EMPTY_USER_PROFILE)
-            logger.error(f"LocalProfile: Error loading profile: {e}")
+            logger.exception('LocalProfile: Error loading profile: %s', e)
             logger.warning("Unable to load the user profile. Using the default profile instead.")
 
     def query(self) -> dict[str, object]:
@@ -173,7 +163,7 @@ class LocalProfile(Profile):
             return False, f'failed: session {session_id} does not exist'
 
         if len(nickname) > 8:
-            logger.debug("Entered nickname must be under 8 characters")
+            logger.error("Entered nickname must be under 8 characters")
             return False, "Entered nickname is too long"
 
         if nickname == "":
@@ -229,5 +219,5 @@ class LocalProfile(Profile):
 
         dummy_user = DummyUser()
 
-        logger.info("Returning user: %s", dummy_user)
+        logger.debug("Returning user: %s", dummy_user)
         return dummy_user
