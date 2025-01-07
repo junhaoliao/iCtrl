@@ -61,10 +61,12 @@ class SFTP(Connection):
     def ls(self, path=""):
         try:
             if path != "":
+                logger.debug("SFTP: Execute ls on path %s", path)
                 self.sftp.chdir(path)
+            else:
+                logger.debug("SFTP: Execute ls on the current working directory")
             cwd = self.sftp.getcwd()
             attrs = self.sftp.listdir_attr(cwd)
-            logger.debug("SFTP: ls %s: %s", cwd, attrs)
 
             file_list = []
             # TODO: should support uid and gid later
@@ -77,6 +79,7 @@ class SFTP(Connection):
                     "mtime": file_attr.st_mtime
                 }
                 file_list.append(file)
+            logger.debug("SFTP: ls completed successfully")
         except Exception as e:
             logger.exception("SFTP: ls failed")
             return False, repr(e), []
@@ -171,7 +174,7 @@ class SFTP(Connection):
 
             counter += 1
             if counter == 50:
-                logger.debug("SFTP: Execute Command %s", ' '.join(cmd_list))
+                logger.debug("SFTP: Execute Command %s with file counter of 50", ' '.join(cmd_list))
                 _, _, stderr = self.client.exec_command(" ".join(cmd_list))
                 stderr_lines = stderr.readlines()
                 if len(stderr_lines) != 0:
