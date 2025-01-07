@@ -53,6 +53,7 @@ class SFTP(Connection):
             self.sftp = self.client.open_sftp()
             self.sftp.chdir(".")
         except Exception as e:
+            logger.exception("SFTP: Open SFTP client connection failed")
             return False, str(e)
 
         return True, ''
@@ -77,6 +78,7 @@ class SFTP(Connection):
                 }
                 file_list.append(file)
         except Exception as e:
+            logger.exception("SFTP: ls failed")
             return False, repr(e), []
 
         return True, cwd, file_list
@@ -137,6 +139,7 @@ class SFTP(Connection):
             self.sftp.rename(old, new)
             logger.debug("SFTP: Rename %s in directory %s to %s", old, cwd, new)
         except Exception as e:
+            logger.exception("SFTP: Rename failed")
             return False, repr(e)
 
         return True, ''

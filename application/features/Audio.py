@@ -69,7 +69,7 @@ class Audio(Connection):
             self.transport = self.client.get_transport()
             self.remote_port = self.transport.request_port_forward('127.0.0.1', 0)
         except Exception as e:
-            logger.warning("Audio: exception raised during launch audio: %s", e)
+            logger.exception("Audio: exception raised during launch audio")
             return False, str(e)
 
         self.id = uuid.uuid4().hex

@@ -42,6 +42,7 @@ class ForwardServerHandler(socketserver.BaseRequestHandler):
                 self.request.getpeername(),
             )
         except Exception as e:
+            logger.exception("Connection: Incoming request to 127.0.0.1:%d failed", self.server.chain_port)
             return False, "Incoming request to %s:%d failed: %s" % (
                 "127.0.0.1", self.server.chain_port, repr(e))
 
@@ -75,6 +76,7 @@ class ForwardServerHandler(socketserver.BaseRequestHandler):
                     self.request.send(data)
         except Exception as e:
             print(e)
+            logger.exception("Connection: Error occurred during data transfer")
 
         try:
             logger.debug("Connection: Close forward server channel")
@@ -82,6 +84,7 @@ class ForwardServerHandler(socketserver.BaseRequestHandler):
             self.server.shutdown()
         except Exception as e:
             print(e)
+            logger.exception("Connection: Close forward server channel failed")
 
 
 class ForwardServer(socketserver.ThreadingTCPServer):
@@ -155,8 +158,7 @@ class Connection:
             self._init_jump_channel(host, username, **auth_methods)
             self._client_connect(self.client, host, username, **auth_methods)
         except Exception as e:
-            # raise e
-            # print('Connection::connect() exception:')
+            logger.exception("Connection: Connection attempt to %s@%s failed", username, host)
             return False, str(e)
 
         self.host = host

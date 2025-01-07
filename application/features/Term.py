@@ -59,6 +59,7 @@ class Term(Connection):
             logger.debug("Term: Launching Shell Terminal")
             self.channel = self.client.invoke_shell('xterm-256color')
         except Exception as e:
+            logger.exception("Term: Launch Shell Terminal failed")
             return False, str(e)
 
         self.id = uuid.uuid4().hex
@@ -71,6 +72,7 @@ class Term(Connection):
             logger.debug("Term: Resizing Term to %sx%s", width, height)
             self.channel.resize_pty(width, height)
         except Exception as e:
+            logger.exception("Term: Resize Term failed")
             return False, str(e)
 
         return True, ''
