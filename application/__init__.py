@@ -34,14 +34,10 @@ try:
     logging.config.dictConfig(config)
 except Exception:
     # Fallback to a basic configuration
-    logging.basicConfig(format='%(asctime)s - %(levelname)s - %(message)s')
+    logging.basicConfig(format='%(asctime)s %(levelname)s [%(name)s:%(lineno)d] %(message)s', level=logging.INFO, force=True)
     logger.exception("Logging setup failed")
 else:
-    # Initialize the logger after dictConfig succeeds
-    # As well, to ensure that logging configuration succeeded regardless
-    # of a successful dictConfig execution, log a warning message
-    # to see whether the configuration was actually successful
-    logger.warning("Logging is set up with config=%s", config)
+    logger.warning("Logging setup is completed with config=%s", config)
 
 from .Profile.Profile import Profile
 
