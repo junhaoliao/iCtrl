@@ -109,10 +109,10 @@ class SFTP(Connection):
         try:
             mode = self.sftp.stat(fullpath).st_mode
             if stat.S_ISREG(mode):
-                logger.debug("SFTP: %s is a file", fullpath)
+                logger.debug("SFTP: The given path is a file")
                 z.write_iter(fullpath, self.dl_generator(fullpath))
             elif stat.S_ISDIR(mode):
-                logger.debug("SFTP: %s is a directory", fullpath)
+                logger.debug("SFTP: The given path is a directory")
                 # TODO: support writing an empty directory if len(dir_ls)==0
                 #  That will involve modifying the zipstream library
                 dir_ls = self.sftp.listdir(fullpath)

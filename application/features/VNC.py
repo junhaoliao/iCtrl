@@ -53,7 +53,7 @@ def websocket_proxy_thread(local_websocket_port, local_vnc_port):
         logger.debug("VNC: SSL Certification Path exists")
         import subprocess
 
-        logger.debug("VNC: Run websockify on websocket port %d and vncport %d", local_websocket_port, local_vnc_port)
+        logger.debug("VNC: Run websockify on websocket port %s and vncport %s", local_websocket_port, local_vnc_port)
         subprocess.run(["/var/www/ictrl/application/websockify-other/c/websockify",
                         f'{local_websocket_port}', f':{local_vnc_port}',
                         '--run-once', '--ssl-only',

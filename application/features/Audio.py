@@ -65,7 +65,7 @@ class Audio(Connection):
 
     def launch_audio(self):
         try:
-            logger.debug("Audio: Launching Audio connection. Forwarding request to 127.0.0.1, port 0.")
+            logger.debug("Audio: Launching Audio connection. Forwarding request to 127.0.0.1, port 0")
             self.transport = self.client.get_transport()
             self.remote_port = self.transport.request_port_forward('127.0.0.1', 0)
         except Exception as e:
@@ -94,7 +94,7 @@ class AudioWebSocket(WebSocket):
 
         audio_id = self.request.path[1:]
         if audio_id not in AUDIO_CONNECTIONS:
-            logger.warning("AudioWebSocket: Requested audio_id=%s does not exist.", audio_id)
+            logger.warning("AudioWebSocket: Requested audio_id=%s does not exist", audio_id)
             self.close()
             return
 
