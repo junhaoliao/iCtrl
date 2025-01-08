@@ -104,7 +104,7 @@ def change_vncpasswd():
 
     vnc, reason = create_connection(session_id, ConnectionType.VNC)
     if reason != '':
-        logger.error("create_connection() failed with status=", reason)
+        logger.error("create_connection() failed with status=%s", reason)
         abort(403, description=reason)
 
     passwd = request.json.get('passwd')
