@@ -27,7 +27,7 @@ from io import StringIO
 import paramiko
 import select
 
-import logging.config
+import logging
 
 logger = logging.getLogger(__name__)
 

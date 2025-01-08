@@ -27,7 +27,6 @@ from .Connection import Connection
 from .mywebsockify import MyProxyRequestHandler, MySSLProxyServer
 from .vncpasswd import decrypt_passwd
 from ..utils import find_free_port
-import logging.config
 
 logger = logging.getLogger(__name__)
 

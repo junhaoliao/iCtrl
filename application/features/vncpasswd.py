@@ -19,7 +19,7 @@
 #   IN THE SOFTWARE.
 
 import pyDes
-import logging.config
+import logging
 
 logger = logging.getLogger(__name__)
 

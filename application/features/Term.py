@@ -30,7 +30,7 @@ from werkzeug.serving import generate_adhoc_ssl_context
 from .Connection import Connection
 from .. import app
 from ..utils import find_free_port, local_auth, get_headers_dict_from_str
-import logging.config
+import logging
 
 logger = logging.getLogger(__name__)
 TERM_CONNECTIONS = {}

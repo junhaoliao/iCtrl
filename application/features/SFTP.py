@@ -26,7 +26,7 @@ import zipstream
 from paramiko.sftp_client import SFTPClient
 
 from .Connection import Connection
-import logging.config
+import logging
 
 logger = logging.getLogger(__name__)
 
