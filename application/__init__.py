@@ -26,15 +26,18 @@ from flask import Flask, Blueprint, jsonify
 from werkzeug.exceptions import HTTPException
 from werkzeug.serving import WSGIRequestHandler
 
+logger = logging.getLogger(__name__)
+
 try:
-    with open('log_config.yaml', 'r') as config_file:
+    with open('log_config.yaml') as config_file:
         config = yaml.safe_load(config_file.read())
     logging.config.dictConfig(config)
-except Exception as ex:
-    print("Logging setup failed with exception = ", ex)
-
-logger = logging.getLogger(__name__)
-logger.warning(f"Logging is set up with config={config}")
+except Exception:
+    # Fallback to a basic configuration
+    logging.basicConfig(format='%(asctime)s %(levelname)s [%(name)s:%(lineno)d] %(message)s', level=logging.INFO, force=True)
+    logger.exception("Logging setup failed")
+else:
+    logger.warning("Logging setup is completed with config=%s", config)
 
 from .Profile.Profile import Profile
 
