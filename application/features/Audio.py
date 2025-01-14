@@ -65,7 +65,7 @@ class Audio(Connection):
 
     def launch_audio(self):
         try:
-            logger.debug("Audio: Launching Audio connection. Forwarding request to 127.0.0.1, port 0")
+            logger.debug("Audio: Launching Audio connection.")
             self.transport = self.client.get_transport()
             self.remote_port = self.transport.request_port_forward('127.0.0.1', 0)
         except Exception as e:
@@ -160,9 +160,9 @@ class AudioWebSocket(WebSocket):
                 buffer += data
                 if len(buffer) >= AUDIO_BUFFER_SIZE:
                     compressed = zlib.compress(buffer, level=4)
-                    logger.debug("AudioWebSocket: Send compressed message of size %s", len(compressed))
+                    logger.debug("AudioWebSocket: Send compressed message of size %d", compressed)
                     self.sendMessage(compressed)
-                    # print(len(compressed) / len(buffer) * 100)
+                    logger.debug("Audio: Audio port %s", AUDIO_PORT)
                     buffer = b''
             logger.debug("AudioWebSocket: write thread ended")
 
@@ -174,7 +174,7 @@ class AudioWebSocket(WebSocket):
     def handleClose(self):
         if self.module_id is not None:
             # unload the module before leaving
-            logger.debug("AudioWebSocket: Unload module %s", self.module_id)
+            logger.debug("AudioWebSocket: Unload module %d", self.module_id)
             self.audio.client.exec_command(f'pactl unload-module {self.module_id}')
 
         logger.debug("AudioWebSocket: End audio socket %s connection", self.audio.id)

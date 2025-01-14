@@ -46,15 +46,7 @@ class ForwardServerHandler(socketserver.BaseRequestHandler):
             return False, "Incoming request to %s:%d failed: %s" % (
                 "127.0.0.1", self.server.chain_port, repr(e))
 
-        print(
-            "Connected!  Tunnel open %r -> %r -> %r"
-            % (
-                self.request.getpeername(),
-                chan.getpeername(),
-                ("127.0.0.1", self.server.chain_port),
-            )
-        )
-        logger.debug(
+        logger.info(
             "Connected!  Tunnel open %r -> %r -> %r",
             self.request.getpeername(),
             chan.getpeername(),
@@ -75,7 +67,6 @@ class ForwardServerHandler(socketserver.BaseRequestHandler):
                         break
                     self.request.send(data)
         except Exception as e:
-            print(e)
             logger.exception("Connection: Error occurred during data transfer")
 
         try:
@@ -257,7 +248,9 @@ class Connection:
     def is_eecg(self):
         if 'eecg' in self.host:
             logger.debug("Connection: Target host is eecg")
-        return 'eecg' in self.host
+            return True
+
+        return False
 
     def is_ecf(self):
         if 'ecf' in self.host:
@@ -285,8 +278,8 @@ class Connection:
 
         my_pts_count = len(output) - 1  # -1: excluding the `uptime` output
 
-        logger.debug("Connection: pts count: %s; my pts count: %s", pts_count, my_pts_count)
-        logger.debug("Connection: load sum: %s", load_sum)
+        logger.debug("Connection: pts count: %d; my pts count: %d", pts_count, my_pts_count)
+        logger.debug("Connection: load sum: %d", load_sum)
 
         if pts_count > my_pts_count:  # there are more terminals than mine
             return True

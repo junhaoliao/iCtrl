@@ -61,10 +61,10 @@ class SFTP(Connection):
     def ls(self, path=""):
         try:
             if path != "":
-                logger.debug("SFTP: Execute ls on path %s", path)
+                logger.debug("SFTP: Executing ls on path %s", path)
                 self.sftp.chdir(path)
             else:
-                logger.debug("SFTP: Execute ls on the current working directory")
+                logger.debug("SFTP: Executing ls on the current working directory")
             cwd = self.sftp.getcwd()
             attrs = self.sftp.listdir_attr(cwd)
 
@@ -148,9 +148,9 @@ class SFTP(Connection):
         return True, ''
 
     def chmod(self, path, mode, recursive):
+        logger.debug("SFTP: Changing permission to '%03o'", mode)
         _, _, _, stderr = self.exec_command_blocking(
             f'chmod {"-R" if recursive else ""} {"{0:0{1}o}".format(mode, 3)} "{path}"')
-        logger.debug("SFTP: Change permission to '%s'",  "{0:0{1}o}".format(mode, 3))
         stderr_lines = stderr.readlines()
         if len(stderr_lines) != 0:
             logger.warning(f"SFTP: chmod operation failed")
@@ -174,7 +174,7 @@ class SFTP(Connection):
 
             counter += 1
             if counter == 50:
-                logger.debug("SFTP: Execute Command %s with file counter of 50", ' '.join(cmd_list))
+                logger.debug("SFTP: Batch removing files with command: %r", cmd_list)
                 _, _, stderr = self.client.exec_command(" ".join(cmd_list))
                 stderr_lines = stderr.readlines()
                 if len(stderr_lines) != 0:
@@ -185,7 +185,7 @@ class SFTP(Connection):
                 counter = 0
                 cmd_list = [f'cd "{cwd}" && rm -rf']
 
-        logger.debug("SFTP: Execute Command %s", ' '.join(cmd_list))
+        logger.debug("SFTP: Batch removing files with command: %r", cmd_list)
         _, _, stderr = self.client.exec_command(" ".join(cmd_list))
         stderr_lines = stderr.readlines()
         if len(stderr_lines) != 0:

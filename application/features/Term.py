@@ -69,7 +69,7 @@ class Term(Connection):
 
     def resize(self, width, height):
         try:
-            logger.debug("Term: Resizing Term to %sx%s", width, height)
+            logger.debug("Term: Resizing Term to %dx%d", width, height)
             self.channel.resize_pty(width, height)
         except Exception as e:
             logger.exception("Term: Resize Term failed")
@@ -95,8 +95,7 @@ class TermWebSocket(WebSocket):
             logger.warning("TermWebSocket: Local Authentication Failure")
             return
 
-        logger.debug("TermWebSocket: connected to %s", self.address)
-        print(self.address, 'connected')
+        logger.debug("TermWebSocket: connected to %r", self.address)
         terminal_id = self.request.path[1:]
         if terminal_id not in TERM_CONNECTIONS:
             logger.warning("TermWebSocket: Requested terminal_id=%s does not exist.", terminal_id)
@@ -130,8 +129,7 @@ class TermWebSocket(WebSocket):
 # if we are in debug mode, run the server in the second round
 if not app.debug or os.environ.get("WERKZEUG_RUN_MAIN") == "true":
     TERMINAL_PORT = find_free_port()
-    print("TERMINAL_PORT =", TERMINAL_PORT)
-    logger.debug("Term: Terminal port %s", TERMINAL_PORT)
+    logger.debug("Term: Terminal port %d", TERMINAL_PORT)
 
     if os.environ.get('SSL_CERT_PATH') is None:
         logger.debug("Term: SSL Certification Path not set. Generating self-signing certificate")
