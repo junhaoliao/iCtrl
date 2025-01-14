@@ -84,7 +84,7 @@ class TermWebSocket(WebSocket):
         self.term = None
 
     def handleMessage(self):
-        logger.debug("TermWebSocket: Send message %s", self.data)
+        logger.debug("TermWebSocket: Sending message")
         self.term.channel.send(self.data)
 
     def handleConnected(self):

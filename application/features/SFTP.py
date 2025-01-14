@@ -126,12 +126,12 @@ class SFTP(Connection):
             return
 
     def zip_generator(self, cwd, file_list):
-        logger.debug("SFTP: zip_generator on directory: %s", cwd)
+        logger.debug("SFTP: Starting zip generation process")
         self.sftp.chdir(cwd)
         z = zipstream.ZipFile(compression=zipstream.ZIP_DEFLATED, allowZip64=True)
 
+        logger.debug("SFTP: Recursively zipping files")
         for file in file_list:
-            logger.debug("SFTP: zip_generator on file: %s", file)
             self._zip_dir_recurse(z, '', file)
 
         return z
@@ -153,7 +153,7 @@ class SFTP(Connection):
             f'chmod {"-R" if recursive else ""} {"{0:0{1}o}".format(mode, 3)} "{path}"')
         stderr_lines = stderr.readlines()
         if len(stderr_lines) != 0:
-            logger.warning(f"SFTP: chmod operation failed")
+            logger.warning("SFTP: chmod operation failed")
             return False, 'Some files were not applied with the request mode due to permission issues.'
 
         return True, ''
