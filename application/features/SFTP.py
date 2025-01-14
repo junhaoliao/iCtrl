@@ -26,7 +26,9 @@ import zipstream
 from paramiko.sftp_client import SFTPClient
 
 from .Connection import Connection
+import logging
 
+logger = logging.getLogger(__name__)
 
 class SFTP(Connection):
     def __init__(self):
@@ -41,14 +43,17 @@ class SFTP(Connection):
         super().__del__()
 
     def connect(self, *args, **kwargs):
+        logger.debug("SFTP: Establishing SFTP connection")
         status, reason = super().connect(*args, **kwargs)
         if not status:
             return status, reason
 
         try:
+            logger.debug("SFTP: Open SFTP client connection")
             self.sftp = self.client.open_sftp()
             self.sftp.chdir(".")
         except Exception as e:
+            logger.exception("SFTP: Open SFTP client connection failed")
             return False, str(e)
 
         return True, ''
@@ -56,7 +61,10 @@ class SFTP(Connection):
     def ls(self, path=""):
         try:
             if path != "":
+                logger.debug("SFTP: Executing ls on path %s", path)
                 self.sftp.chdir(path)
+            else:
+                logger.debug("SFTP: Executing ls on the current working directory")
             cwd = self.sftp.getcwd()
             attrs = self.sftp.listdir_attr(cwd)
 
@@ -71,7 +79,9 @@ class SFTP(Connection):
                     "mtime": file_attr.st_mtime
                 }
                 file_list.append(file)
+            logger.debug("SFTP: ls completed successfully")
         except Exception as e:
+            logger.exception("SFTP: ls failed")
             return False, repr(e), []
 
         return True, cwd, file_list
@@ -99,10 +109,10 @@ class SFTP(Connection):
         try:
             mode = self.sftp.stat(fullpath).st_mode
             if stat.S_ISREG(mode):
-                # print(fullpath, 'is file')
+                logger.debug("SFTP: The given path is a file")
                 z.write_iter(fullpath, self.dl_generator(fullpath))
             elif stat.S_ISDIR(mode):
-                # print(fullpath, 'is dir')
+                logger.debug("SFTP: The given path is a directory")
                 # TODO: support writing an empty directory if len(dir_ls)==0
                 #  That will involve modifying the zipstream library
                 dir_ls = self.sftp.listdir(fullpath)
@@ -116,9 +126,11 @@ class SFTP(Connection):
             return
 
     def zip_generator(self, cwd, file_list):
+        logger.debug("SFTP: Starting zip generation process")
         self.sftp.chdir(cwd)
         z = zipstream.ZipFile(compression=zipstream.ZIP_DEFLATED, allowZip64=True)
 
+        logger.debug("SFTP: Recursively zipping files")
         for file in file_list:
             self._zip_dir_recurse(z, '', file)
 
@@ -128,17 +140,20 @@ class SFTP(Connection):
         try:
             self.sftp.chdir(cwd)
             self.sftp.rename(old, new)
+            logger.debug("SFTP: File rename operation completed")
         except Exception as e:
+            logger.exception("SFTP: Rename failed")
             return False, repr(e)
 
         return True, ''
 
     def chmod(self, path, mode, recursive):
+        logger.debug("SFTP: Changing permission to '%03o'", mode)
         _, _, _, stderr = self.exec_command_blocking(
             f'chmod {"-R" if recursive else ""} {"{0:0{1}o}".format(mode, 3)} "{path}"')
         stderr_lines = stderr.readlines()
         if len(stderr_lines) != 0:
-            print(stderr_lines)
+            logger.warning("SFTP: chmod operation failed")
             return False, 'Some files were not applied with the request mode due to permission issues.'
 
         return True, ''
@@ -159,6 +174,7 @@ class SFTP(Connection):
 
             counter += 1
             if counter == 50:
+                logger.debug("SFTP: Batch removing files with command: %r", cmd_list)
                 _, _, stderr = self.client.exec_command(" ".join(cmd_list))
                 stderr_lines = stderr.readlines()
                 if len(stderr_lines) != 0:
@@ -169,6 +185,7 @@ class SFTP(Connection):
                 counter = 0
                 cmd_list = [f'cd "{cwd}" && rm -rf']
 
+        logger.debug("SFTP: Batch removing files with command: %r", cmd_list)
         _, _, stderr = self.client.exec_command(" ".join(cmd_list))
         stderr_lines = stderr.readlines()
         if len(stderr_lines) != 0:
@@ -180,6 +197,7 @@ class SFTP(Connection):
         return True, ''
 
     def mkdir(self, cwd, name):
+        logger.debug("SFTP: Creating new directory")
         _, _, _, stderr = self.exec_command_blocking(f'cd "{cwd}"&& mkdir "{name}"')
         stderr_lines = stderr.readlines()
         if len(stderr_lines) != 0:

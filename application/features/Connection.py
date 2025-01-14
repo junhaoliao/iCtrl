@@ -27,27 +27,30 @@ from io import StringIO
 import paramiko
 import select
 
+import logging
+
+logger = logging.getLogger(__name__)
 
 class ForwardServerHandler(socketserver.BaseRequestHandler):
     def handle(self):
         self.server: ForwardServer
         try:
+            logger.debug("Connection: Open forward server channel")
             chan = self.server.ssh_transport.open_channel(
                 "direct-tcpip",
                 ("127.0.0.1", self.server.chain_port),
                 self.request.getpeername(),
             )
         except Exception as e:
+            logger.exception("Connection: Incoming request to 127.0.0.1:%d failed", self.server.chain_port)
             return False, "Incoming request to %s:%d failed: %s" % (
                 "127.0.0.1", self.server.chain_port, repr(e))
 
-        print(
-            "Connected!  Tunnel open %r -> %r -> %r"
-            % (
-                self.request.getpeername(),
-                chan.getpeername(),
-                ("127.0.0.1", self.server.chain_port),
-            )
+        logger.info(
+            "Connected!  Tunnel open %r -> %r -> %r",
+            self.request.getpeername(),
+            chan.getpeername(),
+            ("127.0.0.1", self.server.chain_port),
         )
 
         try:
@@ -64,13 +67,15 @@ class ForwardServerHandler(socketserver.BaseRequestHandler):
                         break
                     self.request.send(data)
         except Exception as e:
-            print(e)
+            logger.exception("Connection: Error occurred during data transfer")
 
         try:
+            logger.debug("Connection: Close forward server channel")
             chan.close()
             self.server.shutdown()
         except Exception as e:
             print(e)
+            logger.exception("Connection: Close forward server channel failed")
 
 
 class ForwardServer(socketserver.ThreadingTCPServer):
@@ -102,6 +107,9 @@ class Connection:
     def _client_connect(self, client: paramiko.SSHClient,
                         host, username,
                         password=None, key_filename=None, private_key_str=None):
+        if self._jump_channel is not None:
+            logger.debug("Connection: Connection initialized through Jump Channel")
+        logger.debug("Connection: Connecting to %s@%s", username, host)
         if password is not None:
             client.connect(host, username=username, password=password, timeout=15, sock=self._jump_channel)
         elif key_filename is not None:
@@ -128,23 +136,26 @@ class Connection:
 
             self._jump_client = paramiko.SSHClient()
             self._jump_client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+            logger.debug("Connection: Initialize Jump Client for connection to %s@remote.ecf.utoronto.ca", username)
             self._client_connect(self._jump_client, 'remote.ecf.utoronto.ca', username, **auth_methods)
+            logger.debug("Connection: Open Jump channel connection to %s at port 22", host)
             self._jump_channel = self._jump_client.get_transport().open_channel('direct-tcpip',
                                                                                 (host, 22),
                                                                                 ('127.0.0.1', 22))
 
     def connect(self, host: str, username: str, **auth_methods):
         try:
+            logger.debug("Connection: Connection attempt to %s@%s", username, host)
             self._init_jump_channel(host, username, **auth_methods)
             self._client_connect(self.client, host, username, **auth_methods)
         except Exception as e:
-            # raise e
-            # print('Connection::connect() exception:')
+            logger.exception("Connection: Connection attempt to %s@%s failed", username, host)
             return False, str(e)
 
         self.host = host
         self.username = username
 
+        logger.debug("Connection: Successfully connected to %s@%s", username, host)
         return True, ''
 
     @staticmethod
@@ -160,9 +171,11 @@ class Connection:
 
         # save the private key
         if key_filename is not None:
+            logger.debug("Connection: RSA SSH private key written to %s", key_filename)
             rsa_key.write_private_key_file(key_filename)
         elif key_file_obj is not None:
             rsa_key.write_private_key(key_file_obj)
+            logger.debug("Connection: RSA SSH private key written to %s", key_file_obj)
         else:
             raise ValueError('Neither key_filename nor key_file_obj is provided.')
 
@@ -192,6 +205,7 @@ class Connection:
             "mkdir -p ~/.ssh && chmod 700 ~/.ssh && echo '%s' >>  ~/.ssh/authorized_keys" % pub_key)
         if exit_status != 0:
             return False, "Connection::save_keys: unable to save public key; Check for disk quota and permissions with any conventional SSH clients. "
+        logger.debug("Connection: Public ssh key saved to remove server ~/.ssh/authorized_keys")
 
         return True, ""
 
@@ -217,6 +231,7 @@ class Connection:
         return '\n'.join(stdout) + '\n' + '\n'.join(stderr)
 
     def _port_forward_thread(self, local_port, remote_port):
+        logger.debug("Connection: Port forward thread started")
         forward_server = ForwardServer(("", local_port), ForwardServerHandler)
 
         forward_server.ssh_transport = self.client.get_transport()
@@ -224,15 +239,22 @@ class Connection:
 
         forward_server.serve_forever()
         forward_server.server_close()
+        logger.debug("Connection: Port forward thread ended")
 
     def port_forward(self, *args):
         forwarding_thread = threading.Thread(target=self._port_forward_thread, args=args)
         forwarding_thread.start()
 
     def is_eecg(self):
-        return 'eecg' in self.host
+        if 'eecg' in self.host:
+            logger.debug("Connection: Target host is eecg")
+            return True
+
+        return False
 
     def is_ecf(self):
+        if 'ecf' in self.host:
+            logger.debug("Connection: Target host is ecf")
         return 'ecf' in self.host
 
     def is_uoft(self):
@@ -255,6 +277,9 @@ class Connection:
         load_sum = load1 + load5 + load15
 
         my_pts_count = len(output) - 1  # -1: excluding the `uptime` output
+
+        logger.debug("Connection: pts count: %d; my pts count: %d", pts_count, my_pts_count)
+        logger.debug("Connection: load sum: %d", load_sum)
 
         if pts_count > my_pts_count:  # there are more terminals than mine
             return True

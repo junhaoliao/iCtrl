@@ -30,7 +30,9 @@ from werkzeug.serving import generate_adhoc_ssl_context
 from .Connection import Connection
 from .. import app
 from ..utils import find_free_port, local_auth, get_headers_dict_from_str
+import logging
 
+logger = logging.getLogger(__name__)
 TERM_CONNECTIONS = {}
 
 
@@ -49,12 +51,15 @@ class Term(Connection):
         super().__del__()
 
     def connect(self, *args, **kwargs):
+        logger.debug("Term: Establishing Term connection")
         return super().connect(*args, **kwargs)
 
     def launch_shell(self):
         try:
+            logger.debug("Term: Launching Shell Terminal")
             self.channel = self.client.invoke_shell('xterm-256color')
         except Exception as e:
+            logger.exception("Term: Launch Shell Terminal failed")
             return False, str(e)
 
         self.id = uuid.uuid4().hex
@@ -64,8 +69,10 @@ class Term(Connection):
 
     def resize(self, width, height):
         try:
+            logger.debug("Term: Resizing Term to %dx%d", width, height)
             self.channel.resize_pty(width, height)
         except Exception as e:
+            logger.exception("Term: Resize Term failed")
             return False, str(e)
 
         return True, ''
@@ -77,6 +84,7 @@ class TermWebSocket(WebSocket):
         self.term = None
 
     def handleMessage(self):
+        logger.debug("TermWebSocket: Sending message")
         self.term.channel.send(self.data)
 
     def handleConnected(self):
@@ -84,30 +92,34 @@ class TermWebSocket(WebSocket):
         headers = get_headers_dict_from_str(headers)
         if not local_auth(headers=headers, abort_func=self.close):
             # local auth failure
+            logger.warning("TermWebSocket: Local Authentication Failure")
             return
 
-        print(self.address, 'connected')
+        logger.debug("TermWebSocket: connected to %r", self.address)
         terminal_id = self.request.path[1:]
         if terminal_id not in TERM_CONNECTIONS:
-            print(f'TermWebSocket: Requested terminal_id={terminal_id} does not exist.')
+            logger.warning("TermWebSocket: Requested terminal_id=%s does not exist.", terminal_id)
             self.close()
             return
 
         self.term = TERM_CONNECTIONS[terminal_id]
 
         def writeall():
+            logger.debug("TermWebSocket: Writeall thread started")
             while True:
                 data = self.term.channel.recv(1024)
                 if not data:
-                    print(f"\r\n*** {terminal_id}: Shell EOF ***\r\n\r\n")
+                    logger.debug("TermWebSocket: \r\n*** %s: Shell EOF ***\r\n\r\n", terminal_id)
                     self.close()
                     break
                 self.sendMessage(data)
+            logger.debug("TermWebSocket: Writeall thread ended")
 
         writer = threading.Thread(target=writeall)
         writer.start()
 
     def handleClose(self):
+        logger.debug("TermWebSocket: Closing terminal %s connection", self.term.id)
         del TERM_CONNECTIONS[self.term.id]
         del self.term
 
@@ -117,13 +129,15 @@ class TermWebSocket(WebSocket):
 # if we are in debug mode, run the server in the second round
 if not app.debug or os.environ.get("WERKZEUG_RUN_MAIN") == "true":
     TERMINAL_PORT = find_free_port()
-    print("TERMINAL_PORT =", TERMINAL_PORT)
+    logger.debug("Term: Terminal port %d", TERMINAL_PORT)
 
     if os.environ.get('SSL_CERT_PATH') is None:
+        logger.debug("Term: SSL Certification Path not set. Generating self-signing certificate")
         # no certificate provided, generate self-signing certificate
         terminal_server = SimpleSSLWebSocketServer('127.0.0.1', TERMINAL_PORT, TermWebSocket,
                                                    ssl_context=generate_adhoc_ssl_context())
     else:
+        logger.debug("Term: SSL Certification Path exists")
         import ssl
 
         terminal_server = SimpleSSLWebSocketServer('0.0.0.0', TERMINAL_PORT, TermWebSocket,
