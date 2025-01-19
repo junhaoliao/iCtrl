@@ -15,7 +15,7 @@ handlers:
     file_rotating:
         class: logging.handlers.TimedRotatingFileHandler
         level: DEBUG
-        filename: ictrl_log.log
+        filename: logs/ictrl_log.log
         formatter: default
         when: 'midnight'
         interval: 1

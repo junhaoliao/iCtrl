@@ -31,6 +31,8 @@ logger = logging.getLogger(__name__)
 try:
     with open('log_config.yaml') as config_file:
         config = yaml.safe_load(config_file.read())
+
+    os.makedirs(os.path.join(os.getcwd(), 'logs'), exist_ok=True)
     logging.config.dictConfig(config)
 except Exception:
     # Fallback to a basic configuration
