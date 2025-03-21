@@ -7,12 +7,17 @@ formatters:
         datefmt: '%Y-%m-%d %H:%M:%S'
 
 handlers:
-    console:
-        class: logging.StreamHandler
+    CLP_file:
+        class: application.log_handlers.handlers.RotatingCLPFileHandler
         level: DEBUG
         formatter: default
-        stream: ext://sys.stderr
+        filename_prefix: 'ictrl'
+        log_dir: 'logs'
+        max_bytes: 5242880  # Rotate after 5 MB
+        backup_count: 20  # Keep 20 backup files
+        enable_compression: True
+        timestamp_format: '%Y-%m-%d_%H-%M-%S'
 
 root:
     level: DEBUG
-    handlers: [console]
+    handlers: [CLP_file]
