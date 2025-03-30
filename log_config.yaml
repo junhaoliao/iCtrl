@@ -12,7 +12,16 @@ handlers:
         level: DEBUG
         formatter: default
         stream: ext://sys.stderr
+    timedRotatingFile:
+        class: logging.handlers.TimedRotatingFileHandler
+        level: DEBUG
+        formatter: default
+        when: H
+        interval: 3
+        # See discussion on backupCount decision: https://github.com/junhaoliao/iCtrl/pull/46/files/0c148d0e47dc9ae42014f10a4a04e0aaffca7cbd#r1921487166
+        backupCount: 112
+        # filename: To be dynamically assigned upon application initialization.
 
 root:
     level: DEBUG
-    handlers: [console]
+    handlers: [console, timedRotatingFile]
