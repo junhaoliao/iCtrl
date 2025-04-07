@@ -25,12 +25,22 @@ import yaml
 from flask import Flask, Blueprint, jsonify
 from werkzeug.exceptions import HTTPException
 from werkzeug.serving import WSGIRequestHandler
+from clp_logging.handlers import CLPFileHandler
+from datetime import datetime
 
 logger = logging.getLogger(__name__)
 
 try:
     with open('log_config.yaml') as config_file:
         config = yaml.safe_load(config_file.read())
+    if 'handlers' in config and 'CLP_file' in config['handlers']:
+        logDir = "logs"
+        os.makedirs(logDir, exist_ok=True)
+
+        currentDateTime = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
+        filename = f"{currentDateTime}.clp.zst"
+        log_path = os.path.join(logDir, filename)
+        config['handlers']['CLP_file']['fpath'] = log_path
     logging.config.dictConfig(config)
 except Exception:
     # Fallback to a basic configuration

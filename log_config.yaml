@@ -7,12 +7,11 @@ formatters:
         datefmt: '%Y-%m-%d %H:%M:%S'
 
 handlers:
-    console:
-        class: logging.StreamHandler
+    CLP_file:
+        class: clp_logging.handlers.CLPFileHandler
         level: DEBUG
-        formatter: default
-        stream: ext://sys.stderr
+        fpath: 'example.clp.zst'
 
 root:
     level: DEBUG
-    handlers: [console]
+    handlers: [CLP_file]
