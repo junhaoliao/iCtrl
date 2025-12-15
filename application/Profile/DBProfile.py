@@ -41,7 +41,8 @@ from .Profile import Profile
 from ..utils import send_email, validate_password
 
 ACTIVATION_TTL_SECOND = 60 * 30
-RESEND_COOLDOWN_TTL_SECOND = 30
+# Resend cooldown can be configured via environment variable for testing
+RESEND_COOLDOWN_TTL_SECOND = int(os.environ.get('ICTRL_RESEND_COOLDOWN_SEC', 30))
 
 SESSION_CRYPT_SALT = b'>@\x05[N%\xcf]+\x82\xc3\xcd\xde\xa6a\xeb'
 
@@ -58,8 +59,8 @@ class ActivationType(IntEnum):
 class DBProfile(Profile):
 
     def __init__(self, app):
-        db_passwd = os.environ['DBPASSWD']
-        db_address = os.environ['DBADDR']
+        db_passwd = os.environ['ICTRL_DBPASSWD']
+        db_address = os.environ['ICTRL_DBADDR']
         app.config["SQLALCHEMY_DATABASE_URI"] = f"postgresql://postgres:{db_passwd}@{db_address}"
         app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
@@ -72,7 +73,9 @@ class DBProfile(Profile):
         # key: user_id, value: True (to indicate the entry exists; can be any dummy value)
         self.resend_cooldown = TTLCache(maxsize=1024, ttl=RESEND_COOLDOWN_TTL_SECOND)
 
-        with open('/var/www/ictrl/application/resources/activation_email_template.html', 'r') as f:
+        # Use relative path from this module's location
+        template_path = os.path.join(os.path.dirname(__file__), '..', 'resources', 'activation_email_template.html')
+        with open(template_path, 'r') as f:
             self.activation_email_body_template = f.read()
 
         class User(db.Model):

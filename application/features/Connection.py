@@ -238,31 +238,84 @@ class Connection:
     def is_uoft(self):
         return self.is_eecg() or self.is_ecf()
 
+    def supports_load_check(self):
+        """Check if the target machine supports load checking.
+
+        Returns True if the machine has the necessary commands (uptime, who)
+        to perform load checking. This replaces the hardcoded is_uoft() check.
+        """
+        # Check if uptime command exists and works
+        exit_status, _, stdout, _ = self.exec_command_blocking('command -v uptime && command -v who')
+        if exit_status != 0:
+            return False
+
+        # Verify uptime produces parseable output
+        exit_status, _, stdout, _ = self.exec_command_blocking('uptime')
+        if exit_status != 0:
+            return False
+
+        output = stdout.readline().strip()
+        # Check if uptime output contains load averages (format: "load average: X.XX, X.XX, X.XX")
+        if 'load average' not in output:
+            return False
+
+        return True
+
     def is_load_high(self):
-        _, _, stdout, _ = self.exec_command_blocking('uptime && who | grep $USER')
+        """Check if the current machine has high load.
 
-        output = stdout.readlines()
+        Returns True if:
+        - There are more terminal sessions than the current user's sessions
+        - The sum of load averages exceeds 1.0
 
-        uptime_output = output[0].strip().split(',')
+        Returns False if load checking fails or load is acceptable.
+        """
+        # Get uptime and who output separately to handle grep returning exit code 1
+        # when no users are logged in (common in Docker/CI environments)
+        exit_status, _, stdout, _ = self.exec_command_blocking('uptime')
 
-        pts_count, = re.findall(r'\d+', uptime_output[-4])
-        pts_count = int(pts_count)
+        if exit_status != 0:
+            # If uptime fails, assume load is not high (fail open)
+            return False
 
-        load1, = re.findall(r"\d+\.\d+", uptime_output[-3])
-        load5, = re.findall(r"\d+\.\d+", uptime_output[-2])
-        load15, = re.findall(r"\d+\.\d+", uptime_output[-1])
-        load1, load5, load15 = float(load1), float(load5), float(load15)
-        load_sum = load1 + load5 + load15
+        uptime_line = stdout.readline().strip()
+        if not uptime_line:
+            return False
 
-        my_pts_count = len(output) - 1  # -1: excluding the `uptime` output
+        try:
+            uptime_output = uptime_line.split(',')
 
-        if pts_count > my_pts_count:  # there are more terminals than mine
-            return True
-        elif load_sum > 1.0:
-            # FIXME: revisit whether this number is too high / too low
-            # suspect a high load if the overall average sum is greater than the threshold
-            # even if I'm the only user (others might not use a terminal to do port-forwarding),
-            #  it is considered a high load
-            return True
+            # Parse user/pts count from uptime output
+            # Format varies: "X user" or "X users"
+            pts_count, = re.findall(r'\d+', uptime_output[-4])
+            pts_count = int(pts_count)
+
+            # Parse load averages
+            load1, = re.findall(r"\d+\.\d+", uptime_output[-3])
+            load5, = re.findall(r"\d+\.\d+", uptime_output[-2])
+            load15, = re.findall(r"\d+\.\d+", uptime_output[-1])
+            load1, load5, load15 = float(load1), float(load5), float(load15)
+            load_sum = load1 + load5 + load15
+
+            # Get current user's session count
+            # Use $(whoami) instead of $USER since $USER may not be set in all SSH environments
+            exit_status, _, stdout, _ = self.exec_command_blocking('who | grep $(whoami) | wc -l')
+            if exit_status == 0:
+                my_pts_count = int(stdout.readline().strip() or '0')
+            else:
+                my_pts_count = 0
+
+            if pts_count > my_pts_count:  # there are more terminals than mine
+                return True
+            elif load_sum > 1.0:
+                # FIXME: revisit whether this number is too high / too low
+                # suspect a high load if the overall average sum is greater than the threshold
+                # even if I'm the only user (others might not use a terminal to do port-forwarding),
+                #  it is considered a high load
+                return True
+
+        except (ValueError, IndexError):
+            # If parsing fails, assume load is not high
+            return False
 
         return False

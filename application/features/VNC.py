@@ -32,7 +32,7 @@ logger = logging.getLogger(__name__)
 
 
 def websocket_proxy_thread(local_websocket_port, local_vnc_port):
-    if os.environ.get('SSL_CERT_PATH') is None:
+    if os.environ.get('ICTRL_SSL_CERT_PATH') is None:
         proxy_server = MySSLProxyServer(RequestHandlerClass=MyProxyRequestHandler,
                                         listen_port=local_websocket_port, target_host='',
                                         target_port=local_vnc_port)
@@ -49,8 +49,8 @@ def websocket_proxy_thread(local_websocket_port, local_vnc_port):
         subprocess.run(["/var/www/ictrl/application/websockify-other/c/websockify",
                         f'{local_websocket_port}', f':{local_vnc_port}',
                         '--run-once', '--ssl-only',
-                        '--cert', os.environ.get('SSL_CERT_PATH'),
-                        '--key', os.environ.get('SSL_KEY_PATH')])
+                        '--cert', os.environ.get('ICTRL_SSL_CERT_PATH'),
+                        '--key', os.environ.get('ICTRL_SSL_KEY_PATH')])
 
 
 class VNC(Connection):

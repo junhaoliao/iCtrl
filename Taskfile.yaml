@@ -1,0 +1,194 @@
+version: '3'
+
+vars:
+  COMPOSE_FILE: docker-compose.test.yml
+  COVERAGE_DIR: coverage-data
+  CERTS_DIR: tests/docker/certs
+
+tasks:
+  # =============================================================================
+  # Certificate Generation
+  # =============================================================================
+  certs:generate:
+    desc: Generate test SSL certificates
+    dir: "{{.CERTS_DIR}}"
+    status:
+      - test -f cert.pem
+      - test -f key.pem
+      - test -f ca-cert.pem
+    cmds:
+      - mkdir -p .
+      - echo "Generating test SSL certificates..."
+      # Generate CA
+      - openssl genrsa -out ca-key.pem 4096
+      - openssl req -new -x509 -days 3650 -key ca-key.pem -out ca-cert.pem -subj "/CN=iCtrl Test CA/O=iCtrl Test/C=CA"
+      # Generate server key and CSR
+      - openssl genrsa -out key.pem 4096
+      - openssl req -new -key key.pem -out cert.csr -subj "/CN=localhost/O=iCtrl Test/C=CA"
+      # Sign certificate with SAN (include all service hostnames)
+      - |
+        openssl x509 -req -in cert.csr -CA ca-cert.pem -CAkey ca-key.pem -CAcreateserial \
+          -out cert.pem -days 3650 \
+          -extfile <(printf "authorityKeyIdentifier=keyid,issuer\nbasicConstraints=CA:FALSE\nkeyUsage=digitalSignature,nonRepudiation,keyEncipherment,dataEncipherment\nsubjectAltName=DNS:localhost,DNS:mailpit,DNS:ictrl-local-be,DNS:ictrl-server-be,IP:127.0.0.1")
+      # Cleanup and permissions
+      - rm -f cert.csr ca-cert.srl
+      - chmod 644 *.pem
+      - echo "Certificates generated in {{.CERTS_DIR}}"
+
+  certs:clean:
+    desc: Remove all generated certificates
+    cmds:
+      - rm -rf {{.CERTS_DIR}}
+
+  # =============================================================================
+  # Docker Management
+  # =============================================================================
+  docker:up:
+    desc: Start all Docker test services
+    deps: [certs:generate]
+    cmds:
+      - docker compose -f {{.COMPOSE_FILE}} up -d --wait
+
+  docker:down:
+    desc: Stop all Docker test services
+    cmds:
+      - docker compose -f {{.COMPOSE_FILE}} down
+
+  docker:build:
+    desc: Build Docker test images
+    cmds:
+      - docker compose -f {{.COMPOSE_FILE}} build
+
+  docker:logs:
+    desc: Show Docker container logs
+    cmds:
+      - docker compose -f {{.COMPOSE_FILE}} logs -f
+
+  # =============================================================================
+  # Unit Tests
+  # =============================================================================
+  test:unit:
+    desc: Run unit tests with coverage
+    cmds:
+      - python -m pytest tests/unit/ --cov=application --cov-report=term-missing {{.CLI_ARGS}}
+
+  # =============================================================================
+  # Integration Tests
+  # =============================================================================
+  test:integration:
+    desc: Run integration tests (requires Docker services running)
+    deps: [certs:generate]
+    cmds:
+      - docker compose -f {{.COMPOSE_FILE}} up -d --wait
+      - defer: docker compose -f {{.COMPOSE_FILE}} down
+      - python -m pytest tests/integration/ {{.CLI_ARGS}}
+
+  test:integration:quick:
+    desc: Run integration tests without waiting (assumes services already running)
+    cmds:
+      - python -m pytest tests/integration/ {{.CLI_ARGS}}
+
+  # =============================================================================
+  # Coverage Collection
+  # =============================================================================
+  coverage:clean:
+    desc: Clean coverage data directory
+    cmds:
+      - rm -rf {{.COVERAGE_DIR}}/*
+      - rm -f .coverage .coverage.*
+      - mkdir -p {{.COVERAGE_DIR}}
+
+  coverage:rebuild:
+    desc: Rebuild Docker images with coverage support
+    cmds:
+      - docker compose -f {{.COMPOSE_FILE}} build ictrl-local-be ictrl-server-be
+
+  coverage:start:
+    desc: Start iCtrl containers with coverage enabled
+    deps: [certs:generate]
+    cmds:
+      - task: coverage:clean
+      - docker compose -f {{.COMPOSE_FILE}} up -d --wait
+      - docker compose -f {{.COMPOSE_FILE}} ps
+
+  coverage:stop:
+    desc: Stop iCtrl containers and flush coverage data
+    cmds:
+      - docker compose -f {{.COMPOSE_FILE}} stop ictrl-local-be ictrl-server-be
+      - sleep 1
+      - echo "Coverage files generated:"
+      - ls -la {{.COVERAGE_DIR}}/
+
+  coverage:combine:
+    desc: Combine coverage data from containers
+    dir: "{{.COVERAGE_DIR}}"
+    cmds:
+      - rm -f .coverage
+      - coverage combine
+      - cp .coverage ../coverage-data/.coverage.combined
+
+  coverage:integration:
+    desc: Run integration tests with coverage collection
+    cmds:
+      - task: coverage:start
+      - defer: docker compose -f {{.COMPOSE_FILE}} down
+      - python -m pytest tests/integration/ -v --tb=short
+      - task: coverage:stop
+      - task: coverage:combine
+      - echo ""
+      - echo "=== Integration Test Coverage ==="
+      - coverage report --data-file={{.COVERAGE_DIR}}/.coverage.combined
+
+  coverage:integration:report:
+    desc: Show integration test coverage report (assumes data already collected)
+    cmds:
+      - coverage report --data-file={{.COVERAGE_DIR}}/.coverage.combined --show-missing
+
+  # =============================================================================
+  # Combined Coverage (Unit + Integration)
+  # =============================================================================
+  coverage:all:
+    desc: Run all tests and combine coverage
+    cmds:
+      - task: coverage:start
+      - defer: docker compose -f {{.COMPOSE_FILE}} down
+      - python -m pytest tests/integration/ -v --tb=short
+      - task: coverage:stop
+      - task: coverage:combine
+      # Run unit tests
+      - rm -f .coverage
+      - python -m pytest tests/unit/ --cov=application --cov-report=''
+      - cp .coverage .coverage.unit
+      # Combine unit + integration
+      - rm -f .coverage
+      - coverage combine .coverage.unit {{.COVERAGE_DIR}}/.coverage.combined
+      - echo ""
+      - echo "=== Combined Coverage (Unit + Integration) ==="
+      - coverage report --show-missing
+      - coverage html -d htmlcov-combined
+      - echo ""
+      - echo "HTML report generated at htmlcov-combined/index.html"
+
+  coverage:report:
+    desc: Show combined coverage report
+    cmds:
+      - coverage report --show-missing
+
+  coverage:html:
+    desc: Generate HTML coverage report
+    cmds:
+      - coverage html -d htmlcov
+      - echo "HTML report generated at htmlcov/index.html"
+
+  # =============================================================================
+  # Shortcuts
+  # =============================================================================
+  test:
+    desc: Run all tests (unit only, no Docker required)
+    cmds:
+      - task: test:unit
+
+  ci:
+    desc: Run full CI pipeline (unit tests with coverage check)
+    cmds:
+      - python -m pytest tests/unit/ --cov=application --cov-report=term-missing --cov-fail-under=85

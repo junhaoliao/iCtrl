@@ -45,7 +45,7 @@ def start_vnc():
             return
 
         yield int_to_bytes(ICtrlStep.VNC.CHECK_LOAD)
-        if vnc.is_uoft() and load_check and vnc.is_load_high():
+        if load_check and vnc.supports_load_check() and vnc.is_load_high():
             yield int_to_bytes(ICtrlError.SSH.OVER_LOADED)
             return
 

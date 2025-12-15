@@ -9,3 +9,7 @@
 /build
 
 /ictrl.conf
+
+# Test generated assets
+/tests/docker/certs/
+/coverage-data/

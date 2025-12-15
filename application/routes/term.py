@@ -45,7 +45,7 @@ def start_terminal():
             return
 
         yield int_to_bytes(ICtrlStep.Term.CHECK_LOAD)
-        if term.is_uoft() and load_check and term.is_load_high():
+        if load_check and term.supports_load_check() and term.is_load_high():
             yield int_to_bytes(ICtrlError.SSH.OVER_LOADED)
             return
 

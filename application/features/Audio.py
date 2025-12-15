@@ -29,7 +29,7 @@ from SimpleWebSocketServer import SimpleSSLWebSocketServer, WebSocket
 from werkzeug.serving import generate_adhoc_ssl_context
 
 from .Connection import Connection
-from .. import app
+from .. import app, APP_HOST
 from ..utils import find_free_port, get_headers_dict_from_str, local_auth
 
 AUDIO_CONNECTIONS = {}
@@ -168,16 +168,16 @@ if not app.debug or os.environ.get("WERKZEUG_RUN_MAIN") == "true":
     AUDIO_PORT = find_free_port()
     print("AUDIO_PORT =", AUDIO_PORT)
 
-    if os.environ.get('SSL_CERT_PATH') is None:
+    if os.environ.get('ICTRL_SSL_CERT_PATH') is None:
         # no certificate provided, generate self-signing certificate
-        audio_server = SimpleSSLWebSocketServer('127.0.0.1', AUDIO_PORT, AudioWebSocket,
+        audio_server = SimpleSSLWebSocketServer(APP_HOST, AUDIO_PORT, AudioWebSocket,
                                                 ssl_context=generate_adhoc_ssl_context())
     else:
         import ssl
 
-        audio_server = SimpleSSLWebSocketServer('0.0.0.0', AUDIO_PORT, AudioWebSocket,
-                                                certfile=os.environ.get('SSL_CERT_PATH'),
-                                                keyfile=os.environ.get('SSL_KEY_PATH'),
+        audio_server = SimpleSSLWebSocketServer(APP_HOST, AUDIO_PORT, AudioWebSocket,
+                                                certfile=os.environ.get('ICTRL_SSL_CERT_PATH'),
+                                                keyfile=os.environ.get('ICTRL_SSL_KEY_PATH'),
                                                 version=ssl.PROTOCOL_TLS)
 
     threading.Thread(target=audio_server.serveforever, daemon=True).start()

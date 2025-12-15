@@ -1,0 +1,173 @@
+# Multi-distro SSH/VNC/Audio test target
+#
+# Supported base images:
+#   - ubuntu:22.04 (Jammy) - default
+#   - ubuntu:24.04 (Noble)
+#   - ubuntu:20.04 (Focal)
+#   - debian:13 (Trixie)
+#   - debian:12 (Bookworm)
+#   - debian:11 (Bullseye)
+#
+# Supported VNC servers:
+#   - tigervnc (default) - TigerVNC
+#   - tightvnc - TightVNC
+#   - x11vnc - x11vnc (screen sharing style)
+#
+# Build examples:
+#   docker build --build-arg BASE_IMAGE=debian:12 --build-arg VNC_SERVER=tigervnc -t ictrl-test-ssh .
+#   docker build --build-arg BASE_IMAGE=ubuntu:24.04 --build-arg VNC_SERVER=tightvnc -t ictrl-test-ssh .
+
+ARG BASE_IMAGE=ubuntu:22.04
+FROM ${BASE_IMAGE}
+
+ARG VNC_SERVER=tigervnc
+
+ENV DEBIAN_FRONTEND=noninteractive
+ENV TZ=UTC
+
+# Install base packages (common across all distros)
+RUN apt-get update && apt-get install -y \
+    # SSH
+    openssh-server \
+    # Desktop environment (minimal)
+    xfce4 \
+    xfce4-terminal \
+    dbus-x11 \
+    # Audio - PulseAudio
+    pulseaudio \
+    pulseaudio-utils \
+    # FFmpeg for audio streaming
+    ffmpeg \
+    # Utilities
+    sudo \
+    vim \
+    net-tools \
+    iputils-ping \
+    procps \
+    psmisc \
+    xvfb \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install VNC server based on build argument
+RUN apt-get update && \
+    case "${VNC_SERVER}" in \
+        tigervnc) \
+            apt-get install -y tigervnc-standalone-server tigervnc-common ;; \
+        tightvnc) \
+            apt-get install -y tightvncserver ;; \
+        x11vnc) \
+            apt-get install -y x11vnc ;; \
+        *) \
+            echo "Unknown VNC server: ${VNC_SERVER}" && exit 1 ;; \
+    esac && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
+# Install autocutsel if available (not on all distros)
+RUN apt-get update && apt-get install -y autocutsel || true && \
+    apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# Store VNC server type for runtime scripts
+ENV VNC_SERVER_TYPE=${VNC_SERVER}
+
+# Create test user with known credentials
+ARG TEST_USER=testuser
+ARG TEST_PASSWORD=TestPass123!
+
+RUN useradd -m -s /bin/bash ${TEST_USER} \
+    && echo "${TEST_USER}:${TEST_PASSWORD}" | chpasswd \
+    && usermod -aG sudo ${TEST_USER} \
+    && echo "${TEST_USER} ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
+
+# Configure SSH
+RUN mkdir /var/run/sshd \
+    && sed -i 's/#PermitRootLogin prohibit-password/PermitRootLogin no/' /etc/ssh/sshd_config \
+    && sed -i 's/#PasswordAuthentication yes/PasswordAuthentication yes/' /etc/ssh/sshd_config \
+    && sed -i 's/#PubkeyAuthentication yes/PubkeyAuthentication yes/' /etc/ssh/sshd_config \
+    && sed -i 's/#PermitUserEnvironment no/PermitUserEnvironment yes/' /etc/ssh/sshd_config \
+    && echo 'PermitUserEnvironment yes' >> /etc/ssh/sshd_config
+
+# Setup VNC for test user
+USER ${TEST_USER}
+WORKDIR /home/${TEST_USER}
+
+# Create VNC directory and password (password: "testpass")
+# Handle different VNC server password formats
+RUN mkdir -p ~/.vnc && \
+    if [ "${VNC_SERVER_TYPE}" = "tigervnc" ] || [ "${VNC_SERVER_TYPE}" = "tightvnc" ]; then \
+        echo "testpass" | vncpasswd -f > ~/.vnc/passwd && \
+        chmod 600 ~/.vnc/passwd; \
+    elif [ "${VNC_SERVER_TYPE}" = "x11vnc" ]; then \
+        x11vnc -storepasswd testpass ~/.vnc/passwd; \
+    fi
+
+# Create xstartup for VNC (TigerVNC and TightVNC)
+RUN echo '#!/bin/sh\n\
+unset SESSION_MANAGER\n\
+unset DBUS_SESSION_BUS_ADDRESS\n\
+exec startxfce4' > ~/.vnc/xstartup \
+    && chmod +x ~/.vnc/xstartup
+
+# Create SSH directory for authorized_keys
+RUN mkdir -p ~/.ssh && chmod 700 ~/.ssh
+
+# Set XDG_RUNTIME_DIR in user's environment for SSH sessions
+RUN echo 'export XDG_RUNTIME_DIR=/run/user/1000' >> ~/.bashrc && \
+    echo 'export XDG_RUNTIME_DIR=/run/user/1000' >> ~/.profile && \
+    echo 'XDG_RUNTIME_DIR=/run/user/1000' >> ~/.ssh/environment
+
+# Setup PulseAudio config for headless operation
+# Note: Do NOT set default-server - let PulseAudio auto-detect the socket
+RUN mkdir -p ~/.config/pulse \
+    && echo "autospawn = yes" > ~/.config/pulse/client.conf \
+    && echo "daemon-binary = /usr/bin/pulseaudio" >> ~/.config/pulse/client.conf
+
+# Create PulseAudio daemon config for virtual audio
+RUN mkdir -p ~/.config/pulse \
+    && echo "load-module module-null-sink sink_name=virtual_speaker sink_properties=device.description=VirtualSpeaker\n\
+load-module module-native-protocol-tcp auth-anonymous=1\n\
+load-module module-native-protocol-unix" > ~/.config/pulse/default.pa
+
+USER root
+
+# Configure system-wide PulseAudio for container use
+RUN mkdir -p /etc/pulse && \
+    echo "load-module module-native-protocol-unix auth-anonymous=1\n\
+load-module module-native-protocol-tcp auth-anonymous=1 listen=127.0.0.1\n\
+load-module module-always-sink\n\
+load-module module-null-sink" >> /etc/pulse/default.pa
+
+# Create startup script
+RUN echo '#!/bin/bash\n\
+set -e\n\
+\n\
+# Start SSH\n\
+service ssh start\n\
+\n\
+# Create runtime directory for PulseAudio\n\
+mkdir -p /run/user/1000/pulse\n\
+chown -R testuser:testuser /run/user/1000\n\
+export XDG_RUNTIME_DIR=/run/user/1000\n\
+\n\
+# Create SSH environment file for pactl to work in SSH sessions\n\
+# This needs to be done at runtime because home dir may be volume-mounted\n\
+echo "XDG_RUNTIME_DIR=/run/user/1000" > /home/testuser/.ssh/environment\n\
+chown testuser:testuser /home/testuser/.ssh/environment\n\
+\n\
+# Create PulseAudio client config at runtime (in case home dir is volume-mounted)\n\
+mkdir -p /home/testuser/.config/pulse\n\
+echo "autospawn = yes" > /home/testuser/.config/pulse/client.conf\n\
+echo "daemon-binary = /usr/bin/pulseaudio" >> /home/testuser/.config/pulse/client.conf\n\
+chown -R testuser:testuser /home/testuser/.config/pulse\n\
+\n\
+# Start PulseAudio as test user with proper environment\n\
+su - testuser -c "export XDG_RUNTIME_DIR=/run/user/1000 && pulseaudio --daemonize --exit-idle-time=-1 --log-target=stderr 2>/dev/null || true"\n\
+\n\
+# Keep container running\n\
+tail -f /dev/null\n\
+' > /start.sh && chmod +x /start.sh
+
+EXPOSE 22 5901
+
+CMD ["/start.sh"]

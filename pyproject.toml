@@ -1,0 +1,81 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ictrl"
+version = "6.4.6"
+description = "Remote SSH/VNC/SFTP/Terminal/Audio management application"
+readme = "README.md"
+license = {text = "MIT"}
+requires-python = ">=3.10"
+
+[tool.pytest.ini_options]
+minversion = "7.0"
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = [
+    "-v",
+    "--tb=short",
+    "-ra",
+    "--strict-markers",
+]
+markers = [
+    "unit: Unit tests (no external dependencies)",
+    "integration: Integration tests (require Docker services)",
+    "local_mode: Tests for Local profile mode",
+    "db_mode: Tests for Database profile mode",
+    "ssh: Tests requiring SSH connection",
+    "vnc: Tests requiring VNC server",
+    "sftp: Tests requiring SFTP",
+    "audio: Tests requiring PulseAudio + FFmpeg",
+    "slow: Slow tests (>5s)",
+]
+filterwarnings = [
+    "ignore::DeprecationWarning",
+    "ignore::PendingDeprecationWarning",
+]
+asyncio_mode = "auto"
+
+[tool.coverage.run]
+source = ["application"]
+branch = true
+omit = [
+    "application/__init__.py",  # Hard to test module-level initialization
+    "*/__pycache__/*",
+]
+# Lines to exclude from coverage
+# These are platform-specific or external binary paths that can't be tested in Docker
+parallel = true
+relative_files = true
+
+[tool.coverage.paths]
+# Map Docker container paths to local paths for coverage combine
+source = [
+    "application/",
+    "/app/application/",
+]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:",
+    "if TYPE_CHECKING:",
+    # Platform-specific code
+    'platform.system\\(\\) == "Windows"',
+    # External binary execution (websockify C binary)
+    "subprocess.run.*websockify-other",
+]
+fail_under = 85
+show_missing = true
+precision = 2
+
+[tool.coverage.html]
+directory = "htmlcov"
+
+[tool.coverage.xml]
+output = "coverage.xml"

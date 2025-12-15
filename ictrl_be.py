@@ -18,7 +18,9 @@
 #   FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 #   IN THE SOFTWARE.
 
-if __name__ == '__main__':
+
+def main():
+    """Run the iCtrl local mode server."""
     from application import api, app, APP_HOST, APP_PORT
     from application.utils import local_auth
 
@@ -26,7 +28,6 @@ if __name__ == '__main__':
         import os
 
         from flask import abort, request, send_from_directory
-
 
         @app.before_request
         def before_request():
@@ -44,3 +45,7 @@ if __name__ == '__main__':
 
     app.register_blueprint(api, url_prefix='/api')
     app.run(host=APP_HOST, port=APP_PORT, ssl_context="adhoc")
+
+
+if __name__ == '__main__':
+    main()

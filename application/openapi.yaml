@@ -1,0 +1,1644 @@
+openapi: 3.1.0
+info:
+  title: iCtrl API
+  description: |
+    iCtrl is a remote SSH/VNC/SFTP/Terminal/Audio management application.
+
+    This API provides endpoints for:
+    - User authentication and account management
+    - SSH session management
+    - VNC (Virtual Network Computing) remote desktop
+    - Terminal/Shell access via WebSocket
+    - SFTP file transfer operations
+    - Remote audio streaming
+
+    ## Authentication
+
+    The API supports two authentication modes:
+
+    ### Local Mode (Desktop App)
+    Uses Bearer token authentication via `LOCAL_AUTH_KEY` passed as a command-line argument.
+    Required header: `Authorization: Bearer <LOCAL_AUTH_KEY>`
+
+    ### Database Mode (Web App)
+    Uses Flask session-based authentication with cookies.
+    Requires login via `/api/login` endpoint first.
+
+    ## Profile Storage
+
+    - **Local Mode**: Stores profiles in `~/.ictrl/user_profile.json` (Linux/macOS) or `%LOCALAPPDATA%\ictrl\user_profile.json` (Windows)
+    - **Database Mode**: Uses PostgreSQL with SQLAlchemy ORM
+
+  version: 1.0.0
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+  contact:
+    name: iCtrl Developers
+    email: support@ictrl.ca
+    url: https://ictrl.ca
+
+servers:
+  - url: http://127.0.0.1:{port}/api
+    description: Local development server (Desktop App mode)
+    variables:
+      port:
+        default: "5000"
+        description: Port number (passed as command-line argument)
+  - url: https://ictrl.ca/api
+    description: Production server (Web App mode)
+
+tags:
+  - name: User
+    description: User authentication and account management
+  - name: Session
+    description: SSH session management (profiles)
+  - name: Terminal
+    description: Terminal/Shell access operations
+  - name: VNC
+    description: VNC remote desktop operations
+  - name: SFTP
+    description: SFTP file transfer operations
+  - name: Audio
+    description: Remote audio streaming operations
+  - name: Command
+    description: Remote command execution
+
+paths:
+  # ============================================================================
+  # USER ROUTES (routes/user.py)
+  # ============================================================================
+
+  /userid:
+    get:
+      tags:
+        - User
+      summary: Get current user ID
+      description: |
+        Returns the ID of the currently logged-in user.
+        - In Local mode: Always returns 0 (dummy user)
+        - In Database mode: Returns the actual user ID from session
+      operationId: getUserId
+      responses:
+        "200":
+          description: User ID as plain text
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: "123"
+        "403":
+          description: Not logged in (Database mode only)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /register:
+    post:
+      tags:
+        - User
+      summary: Register a new user account
+      description: |
+        Creates a new user account (Database mode only).
+
+        **Password Requirements:**
+        - Length: 6-32 characters
+        - Must contain at least one digit
+        - Must contain at least one uppercase letter
+        - Must contain at least one lowercase letter
+        - Must contain at least one special symbol: `!@#$%^&*()-+`
+
+        **Email Restrictions:**
+        - Currently only University of Toronto emails (`*@utoronto.ca`) are supported
+
+        **Username Requirements:**
+        - Only letters, numbers, underscores, and dashes allowed
+        - Stored as lowercase
+
+        After registration, an activation email is sent automatically.
+      operationId: registerUser
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - username
+                - password
+                - email
+              properties:
+                username:
+                  type: string
+                  description: Username (alphanumeric, underscores, dashes only)
+                  pattern: "^[A-Za-z0-9_-]+$"
+                  example: "john_doe"
+                password:
+                  type: string
+                  description: Password (6-32 chars with complexity requirements)
+                  minLength: 6
+                  maxLength: 32
+                  example: "SecurePass1!"
+                email:
+                  type: string
+                  format: email
+                  description: Email address (must end with utoronto.ca)
+                  example: "john.doe@utoronto.ca"
+      responses:
+        "200":
+          description: Registration successful
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: "Registration Successful"
+        "403":
+          description: Missing required field
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "422":
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              examples:
+                duplicate_username:
+                  value:
+                    error: "ACCOUNT_DUPLICATE_USERNAME"
+                duplicate_email:
+                  value:
+                    error: "ACCOUNT_DUPLICATE_EMAIL"
+                invalid_password:
+                  value:
+                    error: "Password length should be at least 6 characters"
+    get:
+      tags:
+        - User
+      summary: Register a new user account (GET method)
+      description: |
+        Alternative GET method for registration (for debugging purposes).
+        Same functionality as POST but with query parameters.
+      operationId: registerUserGet
+      deprecated: true
+      parameters:
+        - name: username
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: password
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: email
+          in: query
+          required: true
+          schema:
+            type: string
+            format: email
+      responses:
+        "200":
+          description: Registration successful
+          content:
+            text/plain:
+              schema:
+                type: string
+
+  /login:
+    post:
+      tags:
+        - User
+      summary: Login to user account
+      description: |
+        Authenticates user and creates a session (Database mode only).
+
+        On successful login:
+        - Sets `userid` in Flask session
+        - Derives `session_crypt_key` from password using PBKDF2HMAC (SHA256, 1M iterations)
+        - The derived key is used to encrypt/decrypt private SSH keys stored in database
+      operationId: loginUser
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - username
+                - password
+              properties:
+                username:
+                  type: string
+                  example: "john_doe"
+                password:
+                  type: string
+                  example: "SecurePass1!"
+      responses:
+        "200":
+          description: Login successful
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: "logged in"
+        "401":
+          description: Account not activated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                error: "ACCOUNT_NOT_ACTIVATED"
+        "403":
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              examples:
+                wrong_username:
+                  value:
+                    error: "ACCOUNT_WRONG_USERNAME"
+                wrong_password:
+                  value:
+                    error: "ACCOUNT_WRONG_PASSWORD"
+    get:
+      tags:
+        - User
+      summary: Login to user account (GET method)
+      deprecated: true
+      operationId: loginUserGet
+      parameters:
+        - name: username
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: password
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Login successful
+          content:
+            text/plain:
+              schema:
+                type: string
+
+  /logout:
+    get:
+      tags:
+        - User
+      summary: Logout from current session
+      description: Removes the userid from Flask session (Database mode only)
+      operationId: logoutUser
+      responses:
+        "200":
+          description: Logout successful
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: "logged out"
+
+  /resend_activation:
+    post:
+      tags:
+        - User
+      summary: Resend activation email
+      description: |
+        Resends the activation email to the user.
+
+        **Rate limiting:** Must wait 30 seconds between requests.
+        **Activation link expiry:** 30 minutes
+      operationId: resendActivation
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - username
+              properties:
+                username:
+                  type: string
+                  example: "john_doe"
+      responses:
+        "200":
+          description: Email sent
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: "sent"
+        "403":
+          description: Username not found or missing
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "429":
+          description: Rate limited - too soon to resend
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /activate:
+    get:
+      tags:
+        - User
+      summary: Activate user account
+      description: |
+        Activates a user account using the link sent via email.
+        Called when user clicks the activation link in their email.
+      operationId: activateUser
+      parameters:
+        - name: userid
+          in: query
+          required: true
+          description: User ID
+          schema:
+            type: string
+        - name: code
+          in: query
+          required: true
+          description: Activation code (UUID)
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Activation result
+          content:
+            text/html:
+              schema:
+                type: string
+              examples:
+                success:
+                  value: "Your account has been activated. "
+                failure:
+                  value: |
+                    Failed to activate. Your activation link might have been expired or replaced.
+                    Please visit <a href="https://ictrl.ca">https://ictrl.ca</a> to login / register.
+
+  # ============================================================================
+  # COMMON/SESSION ROUTES (routes/common.py)
+  # ============================================================================
+
+  /profiles:
+    get:
+      tags:
+        - Session
+      summary: Get all user profiles/sessions
+      description: |
+        Returns all SSH sessions/profiles for the current user.
+
+        **Response structure:**
+        ```json
+        {
+          "version": 1,  // Only in Local mode
+          "sessions": {
+            "<session_id>": {
+              "host": "hostname.example.com",
+              "username": "user",
+              "nickname": "optional_nickname"  // May be null
+            }
+          }
+        }
+        ```
+      operationId: getProfiles
+      responses:
+        "200":
+          description: User profiles
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProfilesResponse"
+        "403":
+          description: Not logged in
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /session:
+    get:
+      tags:
+        - Session
+      summary: Get session information
+      description: Returns detailed information about a specific session
+      operationId: getSession
+      parameters:
+        - name: id
+          in: query
+          required: true
+          description: Session ID (UUID hex string)
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Session information
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  host:
+                    type: string
+                    description: Remote hostname
+                    example: "ug251.eecg.utoronto.ca"
+                  username:
+                    type: string
+                    description: SSH username
+                    example: "student1"
+                  nickname:
+                    type: string
+                    nullable: true
+                    description: Optional session nickname (max 8 chars)
+                    example: "EECG"
+
+    post:
+      tags:
+        - Session
+      summary: Create a new SSH session
+      description: |
+        Creates a new SSH session by:
+        1. Connecting to the remote host with provided credentials
+        2. Generating an RSA key pair (3072 bits)
+        3. Saving public key to remote `~/.ssh/authorized_keys`
+        4. Saving private key locally (file or encrypted in DB)
+
+        **Note:** Password is only used for initial setup; subsequent connections use SSH keys.
+      operationId: createSession
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - host
+                - username
+                - password
+              properties:
+                host:
+                  type: string
+                  description: Remote hostname
+                  example: "ug251.eecg.utoronto.ca"
+                username:
+                  type: string
+                  description: SSH username
+                  example: "student1"
+                password:
+                  type: string
+                  description: SSH password (used only for initial key setup)
+                  example: "mypassword"
+      responses:
+        "200":
+          description: Session created successfully
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: "success"
+        "403":
+          description: Connection or authentication failed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "500":
+          description: Failed to save keys
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+    patch:
+      tags:
+        - Session
+      summary: Update session (change host or nickname)
+      description: |
+        Updates an existing session. Two modes of operation:
+
+        **1. Update nickname only:**
+        Provide `session_id` and `nickname`. Nickname max length is 8 characters.
+        Empty string removes the nickname.
+
+        **2. Change host:**
+        Provide `session_id` and `host` (and optionally `domain`).
+        This will:
+        - Terminate old VNC sessions on the old host (best effort)
+        - Update the host in the profile
+
+        If `domain` is not provided, it's extracted from the existing full hostname.
+      operationId: updateSession
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              oneOf:
+                - type: object
+                  title: Update Nickname
+                  required:
+                    - session_id
+                    - nickname
+                  properties:
+                    session_id:
+                      type: string
+                      format: uuid
+                    nickname:
+                      type: string
+                      maxLength: 8
+                      description: New nickname (empty string to remove)
+                - type: object
+                  title: Change Host
+                  required:
+                    - session_id
+                    - host
+                  properties:
+                    session_id:
+                      type: string
+                      format: uuid
+                    host:
+                      type: string
+                      description: New hostname (without domain)
+                      example: "ug252"
+                    domain:
+                      type: string
+                      description: Domain suffix (optional, extracted from current if not provided)
+                      example: ".eecg.utoronto.ca"
+      responses:
+        "200":
+          description: Update successful
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: "success"
+        "400":
+          description: Invalid request or nickname too long
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "403":
+          description: Session not found or connection failed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+    delete:
+      tags:
+        - Session
+      summary: Delete a session
+      description: |
+        Deletes a session from the user's profile.
+        Also removes the associated private key file (Local mode).
+      operationId: deleteSession
+      parameters:
+        - name: session_id
+          in: query
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Deletion successful
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: "success"
+        "403":
+          description: Session not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /exec_blocking:
+    post:
+      tags:
+        - Command
+      summary: Execute a blocking command on remote host
+      description: |
+        Executes a command on the remote host and waits for completion.
+        Returns the combined stdout and stderr output.
+
+        **Use cases:**
+        - Running quick commands that complete within timeout
+        - Retrieving command output
+
+        **Note:** For long-running or interactive commands, use the Terminal WebSocket instead.
+      operationId: execBlocking
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - session_id
+                - cmd
+              properties:
+                session_id:
+                  type: string
+                  format: uuid
+                  description: Session ID
+                cmd:
+                  type: string
+                  description: Command to execute
+                  example: "ls -la"
+                large:
+                  type: boolean
+                  default: false
+                  description: |
+                    If true, uses large output mode which handles very large outputs better
+                    but doesn't return exit status separately
+      responses:
+        "200":
+          description: Command output
+          content:
+            text/plain:
+              schema:
+                type: string
+                description: Combined stdout and stderr
+        "403":
+          description: Session not found or connection failed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "500":
+          description: Command execution failed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  # ============================================================================
+  # TERMINAL ROUTES (routes/term.py)
+  # ============================================================================
+
+  /terminal:
+    post:
+      tags:
+        - Terminal
+      summary: Start a terminal session
+      description: |
+        Initiates a new terminal/shell session on the remote host.
+        Returns a streaming response with progress steps and final connection info.
+
+        **Response format:** Binary stream with step indicators followed by JSON result
+
+        **Step bytes:**
+        - `0x00` (0): SSH_AUTH - Authenticating SSH connection
+        - `0x01` (1): CHECK_LOAD - Checking server load (UofT servers only)
+        - `0x02` (2): LAUNCH_SHELL - Launching interactive shell
+        - `0x1F` (31): DONE - Session ready
+
+        **Error bytes:**
+        - `0xC8` (200): SSH General error
+        - `0xC9` (201): Host unreachable
+        - `0xCA` (202): Auth missing
+        - `0xCB` (203): Auth wrong
+        - `0xCC` (204): Server overloaded
+
+        **Final JSON payload (after DONE):**
+        ```json
+        {
+          "port": 12345,
+          "term_id": "abc123..."
+        }
+        ```
+
+        After receiving the response, connect to the Terminal WebSocket at:
+        `wss://127.0.0.1:{port}/{term_id}`
+      operationId: startTerminal
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - sessionID
+              properties:
+                sessionID:
+                  type: string
+                  format: uuid
+                  description: Session ID
+                loadCheck:
+                  type: boolean
+                  default: true
+                  description: |
+                    Whether to check server load before connecting.
+                    Only applies to UofT (EECG/ECF) servers.
+                    If server is overloaded, returns error 0xCC.
+      responses:
+        "200":
+          description: Streaming response with progress and connection info
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+        "403":
+          description: Session not found or shell launch failed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /terminal_resize:
+    patch:
+      tags:
+        - Terminal
+      summary: Resize terminal
+      description: |
+        Resizes the PTY (pseudo-terminal) dimensions for an active terminal session.
+        Should be called when the client terminal window is resized.
+      operationId: resizeTerminal
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - term_id
+                - w
+                - h
+              properties:
+                term_id:
+                  type: string
+                  description: Terminal ID (from /terminal response)
+                  example: "abc123def456..."
+                w:
+                  type: integer
+                  description: Width in columns
+                  example: 80
+                h:
+                  type: integer
+                  description: Height in rows
+                  example: 24
+      responses:
+        "200":
+          description: Resize successful
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: "success"
+        "403":
+          description: Invalid terminal ID or resize failed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  # ============================================================================
+  # VNC ROUTES (routes/vnc.py)
+  # ============================================================================
+
+  /vnc:
+    post:
+      tags:
+        - VNC
+      summary: Start a VNC session
+      description: |
+        Initiates a VNC (remote desktop) session on the remote host.
+        Returns a streaming response with progress steps and final connection info.
+
+        **Response format:** Binary stream with step indicators followed by JSON result
+
+        **Step bytes:**
+        - `0x00` (0): SSH_AUTH - Authenticating SSH connection
+        - `0x01` (1): CHECK_LOAD - Checking server load (UofT servers only)
+        - `0x02` (2): PARSE_PASSWD - Reading/parsing VNC password from ~/.vnc/passwd
+        - `0x03` (3): LAUNCH_VNC - Launching VNC server
+        - `0x04` (4): CREATE_TUNNEL - Creating SSH tunnel and WebSocket proxy
+        - `0x1F` (31): DONE - Session ready
+
+        **Error bytes:**
+        - `0x78` (120): VNC General error
+        - `0x79` (121): VNC password missing
+        - `0x7A` (122): VNC quota exceeded
+        - `0xCC` (204): Server overloaded
+
+        **Final JSON payload (after DONE):**
+        ```json
+        {
+          "port": 12345,
+          "credentials": {
+            "password": "vncpassword"
+          }
+        }
+        ```
+
+        **Special handling:**
+        - **ECF machines:** Uses port 1000 (predefined VNC server)
+        - **Port 5900:** Checks if RealVNC is listening; if so, credentials may not be available
+        - **Other:** Launches vncserver dynamically
+
+        After receiving the response, connect to the VNC WebSocket at:
+        `wss://127.0.0.1:{port}/` using a noVNC client
+      operationId: startVNC
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - sessionID
+              properties:
+                sessionID:
+                  type: string
+                  format: uuid
+                  description: Session ID
+                loadCheck:
+                  type: boolean
+                  default: true
+                  description: Whether to check server load
+                loadCredentials:
+                  type: boolean
+                  default: true
+                  description: |
+                    Whether to load saved VNC credentials.
+                    If false, removes any saved credentials and requires password from ~/.vnc/passwd
+      responses:
+        "200":
+          description: Streaming response with progress and connection info
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+        "403":
+          description: Session not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /vncpasswd:
+    post:
+      tags:
+        - VNC
+      summary: Reset VNC password
+      description: |
+        Resets/sets the VNC password on the remote host.
+
+        **Actions performed:**
+        1. Kills any running VNC servers (`xvfb-run`, `Xtigervnc`)
+        2. Removes existing `~/.vnc` directory
+        3. Creates new `~/.vnc` directory
+        4. Creates password file using `vncpasswd -f`
+        5. Sets proper permissions (600)
+      operationId: changeVNCPassword
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - session_id
+                - passwd
+              properties:
+                session_id:
+                  type: string
+                  format: uuid
+                passwd:
+                  type: string
+                  description: New VNC password (will be piped to vncpasswd)
+      responses:
+        "200":
+          description: Password reset successful
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: "success"
+        "403":
+          description: Session not found or password reset failed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              examples:
+                disk_quota:
+                  value:
+                    error: "Disk quota exceeded"
+
+  /vnc_reset:
+    post:
+      tags:
+        - VNC
+      summary: Reset VNC settings
+      description: |
+        Completely removes VNC settings from the remote host.
+
+        **Actions performed:**
+        1. Kills any running VNC servers
+        2. Removes `~/.vnc` directory
+      operationId: resetVNC
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - session_id
+              properties:
+                session_id:
+                  type: string
+                  format: uuid
+      responses:
+        "200":
+          description: Reset successful
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: "success"
+        "403":
+          description: Session not found or reset failed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /vnc_credentials:
+    put:
+      tags:
+        - VNC
+      summary: Save VNC credentials
+      description: |
+        Saves VNC credentials for a session.
+        Credentials are stored base64-encoded.
+
+        **Note:** In Database mode, credentials are stored in a separate table.
+        In Local mode, credentials are stored in the profile JSON.
+      operationId: saveVNCCredentials
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - session_id
+                - credentials
+              properties:
+                session_id:
+                  type: string
+                  format: uuid
+                credentials:
+                  type: object
+                  nullable: true
+                  description: |
+                    Credentials object to save. Set to null to delete saved credentials.
+                  properties:
+                    password:
+                      type: string
+                      description: VNC password
+                  example:
+                    password: "vncpass123"
+      responses:
+        "200":
+          description: Credentials saved
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: "success"
+        "403":
+          description: Session not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  # ============================================================================
+  # SFTP ROUTES (routes/sftp.py)
+  # ============================================================================
+
+  /sftp_ls/{session_id}:
+    get:
+      tags:
+        - SFTP
+      summary: List directory contents
+      description: |
+        Lists files and directories at the specified path on the remote host.
+
+        **File attributes returned:**
+        - `id`: Filename
+        - `mode`: Unix file mode (permission bits)
+        - `size`: File size in bytes
+        - `atime`: Access time (Unix timestamp)
+        - `mtime`: Modification time (Unix timestamp)
+      operationId: sftpList
+      parameters:
+        - name: session_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: path
+          in: query
+          required: false
+          description: |
+            Path to list. Can be absolute or relative to current directory.
+            If not provided, lists current working directory.
+          schema:
+            type: string
+            example: "/home/user/documents"
+      responses:
+        "200":
+          description: Directory listing
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  cwd:
+                    type: string
+                    description: Current working directory (absolute path)
+                    example: "/home/user/documents"
+                  files:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/SFTPFile"
+        "400":
+          description: Path not found or permission denied
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "403":
+          description: Session not found or connection failed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /sftp_dl/{session_id}:
+    get:
+      tags:
+        - SFTP
+      summary: Download files
+      description: |
+        Downloads one or more files from the remote host.
+
+        **Behavior:**
+        - Single regular file: Streams the file directly with original filename
+        - Multiple files or directory: Creates a ZIP archive on-the-fly
+
+        **ZIP naming:** `{directory_name}_{YYYYMMDD}_{HHMMSS}.zip`
+      operationId: sftpDownload
+      parameters:
+        - name: session_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: cwd
+          in: query
+          required: true
+          description: Current working directory
+          schema:
+            type: string
+        - name: files
+          in: query
+          required: true
+          description: JSON array of filenames to download
+          schema:
+            type: string
+            example: '["file1.txt", "folder1"]'
+      responses:
+        "200":
+          description: File download
+          headers:
+            Content-Disposition:
+              description: Attachment filename
+              schema:
+                type: string
+            Content-Length:
+              description: File size (only for single file downloads)
+              schema:
+                type: integer
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+            application/zip:
+              schema:
+                type: string
+                format: binary
+        "403":
+          description: Session not found or connection failed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /sftp_ul/{session_id}:
+    post:
+      tags:
+        - SFTP
+      summary: Upload a file
+      description: |
+        Uploads a file to the remote host.
+
+        **Features:**
+        - Supports streaming upload (chunked, 1MB chunks)
+        - Creates intermediate directories if needed
+        - Preserves relative path structure
+      operationId: sftpUpload
+      parameters:
+        - name: session_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: Cwd
+          in: header
+          required: true
+          description: Current working directory on remote
+          schema:
+            type: string
+        - name: Path
+          in: header
+          required: true
+          description: |
+            Relative path including filename.
+            Parent directories will be created automatically.
+          schema:
+            type: string
+            example: "subdir/myfile.txt"
+      requestBody:
+        required: true
+        content:
+          application/octet-stream:
+            schema:
+              type: string
+              format: binary
+      responses:
+        "200":
+          description: Upload successful
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: "success"
+        "403":
+          description: Session not found or connection failed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /sftp_rename/{session_id}:
+    patch:
+      tags:
+        - SFTP
+      summary: Rename a file or directory
+      operationId: sftpRename
+      parameters:
+        - name: session_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - cwd
+                - old
+                - new
+              properties:
+                cwd:
+                  type: string
+                  description: Current working directory
+                old:
+                  type: string
+                  description: Current filename
+                new:
+                  type: string
+                  description: New filename
+      responses:
+        "200":
+          description: Rename successful
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: "success"
+        "400":
+          description: Rename failed (e.g., file exists, permission denied)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "403":
+          description: Session not found or connection failed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /sftp_chmod/{session_id}:
+    patch:
+      tags:
+        - SFTP
+      summary: Change file permissions
+      description: |
+        Changes the permissions of a file or directory.
+        Uses `chmod` command on remote host.
+      operationId: sftpChmod
+      parameters:
+        - name: session_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - path
+                - mode
+                - recursive
+              properties:
+                path:
+                  type: string
+                  description: Full path to file/directory
+                mode:
+                  type: integer
+                  description: |
+                    Permission mode as integer (will be converted to octal).
+                    Example: 493 = 0o755
+                  example: 493
+                recursive:
+                  type: boolean
+                  description: Apply recursively to directories
+      responses:
+        "200":
+          description: Chmod successful
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: "success"
+        "400":
+          description: Some files failed due to permission issues
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "403":
+          description: Session not found or connection failed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /sftp_mkdir/{session_id}:
+    put:
+      tags:
+        - SFTP
+      summary: Create a directory
+      operationId: sftpMkdir
+      parameters:
+        - name: session_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - cwd
+                - name
+              properties:
+                cwd:
+                  type: string
+                  description: Parent directory
+                name:
+                  type: string
+                  description: New directory name
+      responses:
+        "200":
+          description: Directory created
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: "success"
+        "400":
+          description: Failed to create directory
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "403":
+          description: Session not found or connection failed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /sftp_rm/{session_id}:
+    post:
+      tags:
+        - SFTP
+      summary: Remove files or directories
+      description: |
+        Removes files or directories recursively.
+        Uses `rm -rf` command. Files are processed in batches of 50.
+      operationId: sftpRemove
+      parameters:
+        - name: session_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - cwd
+                - files
+              properties:
+                cwd:
+                  type: string
+                  description: Current working directory
+                files:
+                  type: array
+                  description: List of filenames to remove
+                  items:
+                    type: string
+      responses:
+        "200":
+          description: Removal successful
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: "success"
+        "400":
+          description: Some files not removed due to permission issues
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "403":
+          description: Session not found or connection failed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  # ============================================================================
+  # AUDIO ROUTES (routes/audio.py)
+  # ============================================================================
+
+  /audio:
+    post:
+      tags:
+        - Audio
+      summary: Start audio streaming session
+      description: |
+        Initiates an audio streaming session from the remote host.
+
+        **How it works:**
+        1. Creates SSH connection and requests remote port forwarding
+        2. Returns port and audio_id for WebSocket connection
+        3. Client connects to WebSocket
+        4. Server loads PulseAudio null-sink module on remote
+        5. Launches ffmpeg to capture audio and stream via TCP
+        6. Audio data is compressed with zlib and sent via WebSocket
+
+        **Audio format:**
+        - Channels: 2 (stereo)
+        - Codec: PCM signed 16-bit little-endian
+        - Sample rate: 44100 Hz
+
+        **Requirements on remote:**
+        - PulseAudio with `pactl`
+        - ffmpeg
+
+        After receiving the response, connect to the Audio WebSocket at:
+        `wss://127.0.0.1:{port}/{audio_id}`
+      operationId: startAudio
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - session_id
+              properties:
+                session_id:
+                  type: string
+                  format: uuid
+      responses:
+        "200":
+          description: Audio session info
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  port:
+                    type: integer
+                    description: WebSocket port to connect to
+                    example: 54321
+                  audio_id:
+                    type: string
+                    description: Audio session ID for WebSocket path
+                    example: "abc123def456..."
+        "403":
+          description: Session not found or audio launch failed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      description: |
+        Local authentication using LOCAL_AUTH_KEY.
+        Used in Desktop App mode.
+
+    SessionAuth:
+      type: apiKey
+      in: cookie
+      name: session
+      description: |
+        Flask session cookie authentication.
+        Used in Web App mode after login.
+
+  schemas:
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+          description: Error message or error code
+      example:
+        error: "Session not found"
+
+    ProfilesResponse:
+      type: object
+      properties:
+        version:
+          type: integer
+          description: Profile schema version (Local mode only)
+          example: 1
+        sessions:
+          type: object
+          additionalProperties:
+            $ref: "#/components/schemas/SessionInfo"
+
+    SessionInfo:
+      type: object
+      properties:
+        host:
+          type: string
+          description: Remote hostname
+          example: "ug251.eecg.utoronto.ca"
+        username:
+          type: string
+          description: SSH username
+          example: "student1"
+        nickname:
+          type: string
+          nullable: true
+          description: Optional session nickname
+          example: "EECG"
+
+    SFTPFile:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Filename
+          example: "document.txt"
+        mode:
+          type: integer
+          description: |
+            Unix file mode (permission bits).
+            Use bitwise operations to extract:
+            - File type: `mode & 0xF000`
+            - Permissions: `mode & 0x1FF`
+          example: 33188
+        size:
+          type: integer
+          description: File size in bytes
+          example: 1024
+        atime:
+          type: integer
+          description: Last access time (Unix timestamp)
+          example: 1699900000
+        mtime:
+          type: integer
+          description: Last modification time (Unix timestamp)
+          example: 1699800000
+
+# WebSocket Endpoints (not part of OpenAPI spec, documented here for reference)
+# ==============================================================================
+#
+# Terminal WebSocket
+# ------------------
+# URL: wss://127.0.0.1:{TERMINAL_PORT}/{term_id}
+# Protocol: Binary
+# Authentication: Bearer token in header (Local mode) or validated via headers
+#
+# Messages:
+# - Client -> Server: Raw terminal input bytes
+# - Server -> Client: Raw terminal output bytes
+#
+# Connection lifecycle:
+# 1. Client connects with term_id from /terminal response
+# 2. Server validates auth and term_id
+# 3. Server spawns thread to read from SSH channel and send to client
+# 4. Client sends input which is forwarded to SSH channel
+# 5. On disconnect, terminal connection is cleaned up
+#
+# VNC WebSocket
+# -------------
+# URL: wss://127.0.0.1:{ws_port}/
+# Protocol: WebSocket (noVNC compatible)
+# Authentication: Bearer token in header (Local mode)
+#
+# The server acts as a WebSocket-to-TCP proxy:
+# - Accepts WebSocket connections from noVNC client
+# - Forwards data to local VNC port via SSH tunnel
+# - Uses websockify library for protocol translation
+#
+# Audio WebSocket
+# ---------------
+# URL: wss://127.0.0.1:{AUDIO_PORT}/{audio_id}
+# Protocol: Binary
+# Authentication: Bearer token in header (Local mode)
+#
+# Messages:
+# - Server -> Client only: zlib-compressed PCM audio data
+#   - Compression level: 4
+#   - Buffer size: 20480 bytes before compression
+#   - Format: 2 channels, 16-bit signed LE, 44100 Hz
+#
+# Connection lifecycle:
+# 1. Client connects with audio_id from /audio response
+# 2. Server loads PulseAudio null-sink module
+# 3. Server launches ffmpeg to capture and stream audio
+# 4. Audio data is buffered, compressed, and sent to client
+# 5. On disconnect, PulseAudio module is unloaded
+
+security:
+  - BearerAuth: []
+  - SessionAuth: []

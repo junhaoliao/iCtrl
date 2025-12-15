@@ -28,7 +28,7 @@ from paramiko import Channel
 from werkzeug.serving import generate_adhoc_ssl_context
 
 from .Connection import Connection
-from .. import app
+from .. import app, APP_HOST
 from ..utils import find_free_port, local_auth, get_headers_dict_from_str
 
 TERM_CONNECTIONS = {}
@@ -119,16 +119,16 @@ if not app.debug or os.environ.get("WERKZEUG_RUN_MAIN") == "true":
     TERMINAL_PORT = find_free_port()
     print("TERMINAL_PORT =", TERMINAL_PORT)
 
-    if os.environ.get('SSL_CERT_PATH') is None:
+    if os.environ.get('ICTRL_SSL_CERT_PATH') is None:
         # no certificate provided, generate self-signing certificate
-        terminal_server = SimpleSSLWebSocketServer('127.0.0.1', TERMINAL_PORT, TermWebSocket,
+        terminal_server = SimpleSSLWebSocketServer(APP_HOST, TERMINAL_PORT, TermWebSocket,
                                                    ssl_context=generate_adhoc_ssl_context())
     else:
         import ssl
 
-        terminal_server = SimpleSSLWebSocketServer('0.0.0.0', TERMINAL_PORT, TermWebSocket,
-                                                   certfile=os.environ.get('SSL_CERT_PATH'),
-                                                   keyfile=os.environ.get('SSL_KEY_PATH'),
+        terminal_server = SimpleSSLWebSocketServer(APP_HOST, TERMINAL_PORT, TermWebSocket,
+                                                   certfile=os.environ.get('ICTRL_SSL_CERT_PATH'),
+                                                   keyfile=os.environ.get('ICTRL_SSL_KEY_PATH'),
                                                    version=ssl.PROTOCOL_TLS)
 
     threading.Thread(target=terminal_server.serveforever, daemon=True).start()

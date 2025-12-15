@@ -21,6 +21,7 @@
 import os
 import smtplib
 import socket
+import ssl
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
@@ -36,10 +37,10 @@ def find_free_port():
 
 
 def send_email(to_email, subject, body):
-    sender_server = os.environ['SENDER_SERVER']
-    sender_port = int(os.environ['SENDER_PORT'])
-    sender_email = os.environ['SENDER_EMAIL']
-    sender_password = os.environ['SENDER_PASSWD']
+    sender_server = os.environ['ICTRL_SENDER_SERVER']
+    sender_port = int(os.environ['ICTRL_SENDER_PORT'])
+    sender_email = os.environ['ICTRL_SENDER_EMAIL']
+    sender_password = os.environ['ICTRL_SENDER_PASSWD']
 
     msg = MIMEMultipart('alternative')
     msg['Subject'] = subject
@@ -48,7 +49,13 @@ def send_email(to_email, subject, body):
     html = MIMEText(body, 'html')
     msg.attach(html)
 
-    server_ssl = smtplib.SMTP_SSL(sender_server, sender_port)
+    # Create SSL context, optionally loading custom CA cert for self-signed certificates
+    context = ssl.create_default_context()
+    ca_cert_file = os.environ.get('ICTRL_SMTP_CA_CERT')
+    if ca_cert_file and os.path.exists(ca_cert_file):
+        context.load_verify_locations(ca_cert_file)
+
+    server_ssl = smtplib.SMTP_SSL(sender_server, sender_port, context=context)
     server_ssl.ehlo()
     server_ssl.login(sender_email, sender_password)
 
@@ -96,7 +103,7 @@ def get_headers_dict_from_str(headers_str):
 
 def local_auth(headers, abort_func):
     auth_passed = True
-    local_auth_key = os.getenv('LOCAL_AUTH_KEY')
+    local_auth_key = os.getenv('ICTRL_LOCAL_AUTH_KEY')
     if local_auth_key != '':
         try:
             auth_type, auth_key = headers.get('Authorization').split()

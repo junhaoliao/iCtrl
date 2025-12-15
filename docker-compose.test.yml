@@ -1,0 +1,178 @@
+# Docker Compose for iCtrl Integration Tests
+# All ports are offset by +20000 to avoid conflicts with host services
+
+services:
+  # =============================================================================
+  # SSH/VNC/Audio Test Target - Configurable distro and VNC server
+  # =============================================================================
+  # Build with different configurations:
+  #   BASE_IMAGE: ubuntu:22.04 (default), ubuntu:24.04, debian:12, debian:11, etc.
+  #   VNC_SERVER: tigervnc (default), tightvnc, x11vnc
+  #
+  # Example:
+  #   BASE_IMAGE=debian:12 VNC_SERVER=tigervnc docker-compose -f docker-compose.test.yml build ssh-target
+  # =============================================================================
+  ssh-target:
+    build:
+      context: ./tests/docker
+      dockerfile: Dockerfile.ssh-target
+      args:
+        BASE_IMAGE: ${BASE_IMAGE:-ubuntu:22.04}
+        VNC_SERVER: ${VNC_SERVER:-tigervnc}
+        TEST_USER: testuser
+        TEST_PASSWORD: TestPass123!
+    container_name: ictrl-test-ssh
+    hostname: test-server
+    ports:
+      - "20022:22"      # SSH
+      - "25901:5901"    # VNC display :1
+    environment:
+      - TEST_USER=testuser
+      - TEST_PASSWORD=TestPass123!
+      - VNC_SERVER_TYPE=${VNC_SERVER:-tigervnc}
+    volumes:
+      - ssh-target-home:/home/testuser
+    networks:
+      - ictrl-test-net
+    healthcheck:
+      test: ["CMD", "service", "ssh", "status"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  # =============================================================================
+  # PostgreSQL for Database Mode Tests
+  # =============================================================================
+  postgres:
+    image: postgres:15-alpine
+    container_name: ictrl-test-postgres
+    ports:
+      - "25432:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: testpassword
+      POSTGRES_DB: ictrl_test
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./tests/docker/init-db.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    networks:
+      - ictrl-test-net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  # =============================================================================
+  # Mailpit for Email Testing (DB Mode) - with SSL/TLS support
+  # =============================================================================
+  mailpit:
+    image: axllent/mailpit:latest
+    container_name: ictrl-test-mail
+    ports:
+      - "21465:465"     # SMTP with implicit TLS (SMTPS)
+      - "21080:8025"    # Web UI for viewing emails
+    environment:
+      MP_SMTP_BIND_ADDR: "0.0.0.0:465"
+      MP_SMTP_TLS_CERT: "/certs/cert.pem"
+      MP_SMTP_TLS_KEY: "/certs/key.pem"
+      MP_SMTP_REQUIRE_TLS: "true"
+      MP_SMTP_AUTH_ACCEPT_ANY: "true"
+    volumes:
+      - ./tests/docker/certs:/certs:ro
+    networks:
+      - ictrl-test-net
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:8025/"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  # =============================================================================
+  # iCtrl Server Under Test (Local Mode)
+  # =============================================================================
+  ictrl-local-be:
+    build:
+      context: .
+      dockerfile: ./tests/docker/Dockerfile.ictrl
+    container_name: ictrl-test-local-be
+    ports:
+      - "25000:5000"
+      # Map ephemeral port range for WebSocket connections (500 ports)
+      - "29000-29500:29000-29500"
+    environment:
+      # Bind to all interfaces so container is accessible from host
+      - ICTRL_HOST=0.0.0.0
+      - PYTHONUNBUFFERED=1
+      - COVERAGE_FILE=/coverage/.coverage.local
+      # Do NOT set ICTRL_SSL_CERT_PATH to cover the adhoc SSL context code path
+      # in Term.py and Audio.py (generate_adhoc_ssl_context())
+    sysctls:
+      # Restrict ephemeral port range to mapped range (500 ports for test stability)
+      - net.ipv4.ip_local_port_range=29000 29500
+      # Reduce TIME_WAIT duration to allow faster port reuse in tests (5 sec)
+      - net.ipv4.tcp_fin_timeout=5
+    volumes:
+      - ./application:/app/application:ro
+      - ./ictrl_be.py:/app/ictrl_be.py:ro
+      - ictrl-local-profile:/root/.ictrl
+      - ./coverage-data:/coverage
+    networks:
+      - ictrl-test-net
+    depends_on:
+      ssh-target:
+        condition: service_healthy
+    command: ["python", "run_with_coverage.py", "5000", "test-auth-key-12345"]
+
+  # =============================================================================
+  # iCtrl Server Under Test (Database Mode)
+  # =============================================================================
+  ictrl-server-be:
+    build:
+      context: .
+      dockerfile: ./tests/docker/Dockerfile.ictrl
+    container_name: ictrl-test-server-be
+    ports:
+      - "25001:5000"
+    environment:
+      - ICTRL_HOST=0.0.0.0
+      - ICTRL_DBADDR=postgres:5432
+      - ICTRL_DBPASSWD=testpassword
+      - ICTRL_SENDER_SERVER=mailpit
+      - ICTRL_SENDER_PORT=465
+      - ICTRL_SENDER_EMAIL=test@ictrl.test
+      - ICTRL_SENDER_PASSWD=testpassword
+      - ICTRL_SECRET_KEY=test-secret-key-for-sessions
+      - PYTHONUNBUFFERED=1
+      # Trust the self-signed certificate used by mailpit
+      - ICTRL_SMTP_CA_CERT=/certs/ca-cert.pem
+      # Set short cooldown for testing (default is 30 seconds)
+      - ICTRL_RESEND_COOLDOWN_SEC=2
+      - COVERAGE_FILE=/coverage/.coverage.server
+      # Use custom SSL certificates to cover the ICTRL_SSL_CERT_PATH code path
+      - ICTRL_SSL_CERT_PATH=/certs/cert.pem
+      - ICTRL_SSL_KEY_PATH=/certs/key.pem
+    volumes:
+      - ./application:/app/application:ro
+      - ./ictrl_be.py:/app/ictrl_be.py:ro
+      - ./tests/docker/certs:/certs:ro
+      - ./coverage-data:/coverage
+    networks:
+      - ictrl-test-net
+    depends_on:
+      postgres:
+        condition: service_healthy
+      mailpit:
+        condition: service_healthy
+      ssh-target:
+        condition: service_healthy
+    command: ["python", "run_with_coverage.py", "5000", ""]
+
+networks:
+  ictrl-test-net:
+    driver: bridge
+
+volumes:
+  ssh-target-home:
+  postgres-data:
+  ictrl-local-profile:
